@@ -3,7 +3,7 @@
         "Filtering": "Linear",
         "KeepData": false,
         "Mipmaps": true,
-        "PixelPerUnit": 5.0,
+        "PixelPerUnit": 10.0,
         "Wrapping": "Clamp"
     },
     "Spritesheet": {

@@ -105,5 +105,19 @@ namespace SandCastle
 		EntityId m_id = EntityId(0);
 		entt::registry* m_registry = nullptr;
 		bool m_valid = false;
+
+	public:
+
+		/// @brief Create an entity with Transform and SpriteRender component
+		///			at position 0, 0, 0
+		/// @return The entity created
+		static Entity CreateSprite(String defaultSprite = "square.png_0_0");
+		/// @brief Create an entity with Transform and SpriteRender 
+		/// and Animator component at position 0, 0, 0
+		/// @param defaultAnimaion the animation that will be played by default
+		/// @return 
+		static Entity CreateAnimatedSprite(String defaultAnimation = "anim_test.anim",
+			String defaultAnimStateName = "default");
+
 	};
 }

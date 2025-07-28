@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "SandCastle/Engine.h"
@@ -9,16 +10,9 @@
 
 using namespace SandCastle;
 
-void DrawSprite()
+void DrawAnimation()
 {
 	Engine::Init();
-
-	/*auto entity = Entity::Create();
-	auto render = entity.AddComponent<SpriteRender>();
-	auto transform = entity.AddComponent<Transform>();
-	auto sprite = Assets::Get<Sprite>("trollface.png_0_0").Ptr();
-	render->SetSprite(sprite);*/
-	Entity::CreateSprite();
+	Entity::CreateAnimatedSprite();
 	Engine::Launch();
 }
-

@@ -47,14 +47,10 @@ July
 -systems have its own default camera
 -systems init
 -have a camera by default in the init
+-entity create for easily created animated sprite or sprite
+-tested entity create
 
->build a couple test:
-
--renderer..
--inputs..
-
->simplify engine init 
->get rid of defines to add or remove part of th eengine
+>input test
 
 >find how to trigger an entt assertion and see if it properly logs and breaks
 >check Time operator*(const Time& l, const Time& r) warning problem by testing
@@ -62,19 +58,12 @@ July
 >test the difference between; SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED
 and SDL_EVENT_WINDOW_RESIZED, and determine how to use them in the proper way
 >mouse namespace
->gitignore and git
->clone dependencies repos
->config (include and linker)
->use the latest version of all the dependencies
->migrate to sdl3
 >migrate box2D 3
 >change namespace SandCastle for SandCastle
->make initialization more straightforward
-
 >include GUI stuff (translate UI position to game world and so forth)
 >multi pass rendering for layers instead of the current system (one component can be used as the layer struct Layer1 struct Layer2...)
->make new attempt at threaded rendering
 >materials
+>make new attempt at threaded rendering
 >text input (SDL_StartTextInput...)
 >Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony

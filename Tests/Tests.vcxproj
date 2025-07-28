@@ -38,6 +38,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\DrawAnimation.h" />
     <ClInclude Include="src\DrawSprite.h" />
     <ClInclude Include="src\Launch.h" />
   </ItemGroup>
