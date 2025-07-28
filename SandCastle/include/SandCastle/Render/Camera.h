@@ -13,9 +13,6 @@ namespace SandCastle
 		Camera();
 		~Camera();
 		void SetOrthographic(bool orthographic);
-		/// @brief Set the zoom only in orthographic mode
-		/// @param zoom 0.5 = zoom x2, 2 = zoom x0.5
-		void SetOrthographicZoom(float zoom);
 		void SetPosition(Vec3f position);
 		void SetRotation(Vec3f eulerAngles);
 		void SetTarget(Vec3f target);
@@ -74,9 +71,6 @@ namespace SandCastle
 		float m_aspectRatio;
 		float m_nearClippingPlane;
 		float m_farClippingPlane;
-		float m_orthographicZoom;
-
-	
 
 		mutable Mat4 m_projectionMatrix;
 		mutable Mat4 m_viewMatrix;

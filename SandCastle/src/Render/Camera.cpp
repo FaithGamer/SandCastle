@@ -15,8 +15,8 @@ namespace SandCastle
 		m_yaw(0), m_pitch(0), m_roll(0),
 		m_fieldOfView(45.f), m_aspectRatio(1), m_nearClippingPlane(-98), m_farClippingPlane(98),
 		m_needComputeProjectionMatrix(true), m_needComputeViewMatrix(true), m_projectionMatrix(1.f),
-		m_viewMatrix(1.f), m_orthographic(true), m_orthographicZoom(1),
-		worldToScreenRatio(0.01f), isMain(false)
+		m_viewMatrix(1.f), m_orthographic(true),
+		worldToScreenRatio(0.02f), isMain(false)
 	{
 	}
 
@@ -28,12 +28,6 @@ namespace SandCastle
 	void Camera::SetOrthographic(bool orthographic)
 	{
 		m_orthographic = orthographic;
-		m_needComputeProjectionMatrix = true;
-	}
-
-	void Camera::SetOrthographicZoom(float zoom)
-	{
-		m_orthographicZoom = zoom;
 		m_needComputeProjectionMatrix = true;
 	}
 
@@ -231,17 +225,14 @@ namespace SandCastle
 	{
 		if (m_orthographic)
 		{
-			float ratio = worldToScreenRatio;
-
-			ratio *= m_orthographicZoom;
 			Vec2f screenNorm =
-				Vec2f(-worldPosition.x / m_aspectRatio * ratio, worldPosition.y * ratio)
-				- Vec2f(-m_position.x / m_aspectRatio * ratio, m_position.y * ratio);
+				Vec2f(-worldPosition.x / m_aspectRatio * worldToScreenRatio, worldPosition.y * worldToScreenRatio)
+				- Vec2f(-m_position.x / m_aspectRatio * worldToScreenRatio, m_position.y * worldToScreenRatio);
 			return Vec2f((-screenNorm.x + 0.5f) * screenSize.x, (-screenNorm.y + 0.5f) * screenSize.y);
 		}
 		else
 		{
-			LOG_WARN("WorldToScreen not implemented for perspective camera");
+			LOG_ERROR("WorldToScreen not implemented for perspective camera");
 			return Vec2f(0, 0);
 		}
 
@@ -252,8 +243,8 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			Vec2f screenNorm = { screenPosition.x / screenSize.x - 0.5f, screenPosition.y / screenSize.y - 0.5f };
-			return{ screenNorm.x * m_aspectRatio / worldToScreenRatio / m_orthographicZoom + m_position.x,
-			-screenNorm.y / worldToScreenRatio / m_orthographicZoom + m_position.y, 0 };
+			return{ screenNorm.x * m_aspectRatio / worldToScreenRatio + m_position.x,
+			-screenNorm.y / worldToScreenRatio + m_position.y, 0 };
 		}
 		else
 		{
@@ -309,20 +300,12 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			m_projectionMatrix = glm::ortho(
-				m_aspectRatio * m_orthographicZoom,
-				-m_aspectRatio * m_orthographicZoom,
-				-m_orthographicZoom,
-				m_orthographicZoom,
+				m_aspectRatio,
+				-m_aspectRatio,
+				-1.f,
+				1.f,
 				m_nearClippingPlane,
 				m_farClippingPlane);
-
-			/*m_projectionMatrix = glm::ortho(
-				 -m_orthographicZoom,
-				m_orthographicZoom,
-				1.f/ -m_aspectRatio * m_orthographicZoom,
-				1.f / m_aspectRatio *m_orthographicZoom,
-				-100.f,
-				100.f);*/
 		}
 		else
 		{
