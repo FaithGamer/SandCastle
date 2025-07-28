@@ -15,8 +15,7 @@ namespace SandCastle
 {
 	Systems::Systems() :
 		m_pushCount(0),
-		m_maxFixedUpdate(3),
-		m_imGuiEnabled(true)
+		m_maxFixedUpdate(3)
 	{
 	}
 
@@ -77,12 +76,10 @@ namespace SandCastle
 		{
 			HandleWindowEvents(event);
 			bool imGuiEventHandled = false;
-#ifndef SandCastle_NO_WINDOW
-#ifdef SandCastle_IMGUI
-			if (m_imGuiEnabled)
-				ImGui_ImplSDL3_ProcessEvent(&event);
+#ifndef SANDCASTLE_DISTRIB
+			ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
-#endif
+
 			for (auto& eventSystem : m_eventSystems)
 			{
 				if (eventSystem.system->OnEvent(event))
@@ -160,17 +157,16 @@ namespace SandCastle
 		}
 		Renderer2D::Instance()->End();
 
-#ifdef SandCastle_IMGUI
-		if (m_imGuiEnabled)
+#ifndef SANDCASTLE_DISTRIB
+		BeginImGui();
+		for (auto& system : m_imGuiSystems)
 		{
-			BeginImGui();
-			for (auto& system : m_imGuiSystems)
-			{
-				system.system->OnImGui();
-			}
-			EndImGui(Window::GetSize());
+			system.system->OnImGui();
 		}
+		EndImGui(Window::GetSize());
+
 #endif
+
 		lateRenderSignal.SendSignal(0);
 		Window::RenderWindow();
 	}
@@ -319,16 +315,6 @@ namespace SandCastle
 			return true;
 
 		return false;
-	}
-
-	void Systems::EnableImGui(bool enabled)
-	{
-		Systems::Instance()->m_imGuiEnabled = enabled;
-	}
-
-	bool Systems::IsImGuiEnabled()
-	{
-		return Systems::Instance()->m_imGuiEnabled;
 	}
 
 	World* Systems::CreateWorld()

@@ -110,8 +110,8 @@ namespace SandCastle
 	{
 		if (!Valid())
 		{
-#ifndef SandCastle_DISTRIB
-			//LOG_WARN("Trying to destroy an invalid entity.");
+#ifndef SANDCASTLE_DISTRIB
+			LOG_WARN("Trying to destroy an invalid entity.");
 #endif
 			return;
 		}

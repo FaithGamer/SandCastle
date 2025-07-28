@@ -16,7 +16,6 @@ namespace SandCastle
 
 	void Audio::Init()
 	{
-#ifndef SandCastle_NO_AUDIO
 		//Initialize audio engine
 		m_engine = new ma_engine;
 		ma_result result = ma_engine_init(NULL, m_engine);
@@ -24,20 +23,16 @@ namespace SandCastle
 		{
 			LOG_ERROR("Can't initialize audio engine.");
 		}
-#endif
 	}
 
 	void Audio::LoadSound(String path)
 	{
-#ifndef SandCastle_NO_AUDIO
 		m_sounds.push_back(new ma_sound);
 		ma_sound_init_from_file(m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, m_sounds.back());
-#endif
 	}
 
 	Sound Audio::MakeSound(String soundPath, bool play)
 	{
-#ifndef SandCastle_NO_AUDIO
 		auto i = Instance();
 		ma_sound* masound = new ma_sound;
 		ma_sound_init_from_file(i->m_engine, soundPath.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, masound);
@@ -45,14 +40,10 @@ namespace SandCastle
 		if (play)
 			ma_sound_start(masound);
 		return Sound(masound);
-#else
-		return Sound();
-#endif
 	}
 
 	Sound Audio::MakeSound(String soundPath, unsigned int channel, bool play)
 	{
-#ifndef SandCastle_NO_AUDIO
 		auto i = Instance();
 		if (channel >= i->m_channels.size())
 		{
@@ -66,9 +57,6 @@ namespace SandCastle
 		if (play)
 			ma_sound_start(masound);
 		return Sound(masound);
-#else
-		return Sound();
-#endif
 	}
 
 	unsigned int Audio::AddChannel(String channel, String parent)
@@ -120,7 +108,6 @@ namespace SandCastle
 
 	Audio::~Audio()
 	{
-#ifndef SandCastle_NO_AUDIO
 		for (auto& sound : m_sounds)
 		{
 			ma_sound_uninit(sound);
@@ -131,7 +118,6 @@ namespace SandCastle
 			ma_sound_group_uninit(channel);
 			delete channel;
 		}
-#endif
 	}
 }
 

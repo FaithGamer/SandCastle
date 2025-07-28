@@ -43,50 +43,33 @@ namespace SandCastle
 			params = EngineParameters(paramsJson);
 		}
 
-#ifndef SandCastle_NO_WINDOW
+
 		LOG_INFO("Loading window...");
 		Window::Instance()->Init(params.appName, params.startupWindowResolution);
 		Window::SetFullScreen(params.fullscreen);
-#endif
-#ifndef SandCastle_NO_AUDIO
 		LOG_INFO("Loading audio...");
 		Audio::Instance()->Init();
-#endif
-#ifndef SandCastle_NO_ASSETS
 		LOG_INFO("Loading assets...");
 		Assets::Instance()->Init();
-#else
-		for (int i = 0; i < 100; i++)
-		{
-			LOG_INFO("Console test.");
-		}
-#endif
 		LOG_INFO("Loading renderer...");
-#ifndef SandCastle_NO_WINDOW
 		Renderer2D::Instance();
 		Renderer2D::AddLayer("DebugLayer");
-#endif
 		LOG_INFO("Loading Physics...");
 		Physics::Instance();
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
 		system->CreateWorld();
 		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
-		
-#ifndef SandCastle_NO_WINDOW
-#ifdef SandCastle_IMGUI
+#ifndef SANDCASTLE_DISTRIB
 		LoadImGui(Window::GetSDLWindow(), Window::GetSDL_GLContext());
-#endif
 #endif
 
 		//Default systems
 		Systems::Push<InputSystem>();
-#ifndef SandCastle_NO_WINDOW
 		Systems::Push<SpriteRenderSystem>();
 		Systems::Push<LineRendererSystem>();
 		Systems::Push<WireRenderSystem>();
 		Systems::Push<AnimationSystem>();
-#endif
 		Systems::Push<PhysicsSystem>();
 	}
 

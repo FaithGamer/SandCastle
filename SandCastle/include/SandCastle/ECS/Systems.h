@@ -106,9 +106,6 @@ namespace SandCastle
 			return Systems::Instance()->HasSystem(TypeId::GetId<SystemType>());
 		}
 
-		static void EnableImGui(bool enabled);
-		static bool IsImGuiEnabled();
-
 		/// @brief Create and store a World, usually you will have only one World
 		/// Default World name will be World_0, 1, 2, 3....
 		/// @return The World created
@@ -198,6 +195,5 @@ namespace SandCastle
 		std::vector<int32_t> m_pendingSystemOut;
 
 		int m_pushCount;
-		bool m_imGuiEnabled;
 	};
 }
