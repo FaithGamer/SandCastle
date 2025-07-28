@@ -1,0 +1,5 @@
+﻿  init_context.c
+  testlib.c
+  Generating code
+  Finished generating code
+  init_context.vcxproj -> C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Release\init_context.exe

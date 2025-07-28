@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\SandCastle\SandCastle\vendor\box2d-2.4.2\CMakeFiles\0aefbf0fea72434548dc4368d1381895\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{29554774-54EF-3A83-B209-13215396464D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

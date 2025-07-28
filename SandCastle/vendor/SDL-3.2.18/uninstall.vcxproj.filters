@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\SandCastle\SandCastle\vendor\SDL-3.2.18\CMakeFiles\e12f24cdaa355caa9625675ff63340d9\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\dev\SandCastle\SandCastle\vendor\SDL-3.2.18\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\SandCastle\SandCastle\vendor\SDL-3.2.18\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{73C8EEAE-CA54-324A-84AB-3EFEFD4BDB9A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

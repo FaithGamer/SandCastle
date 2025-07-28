@@ -1,0 +1,29 @@
+#version 330 core 
+
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 6) out;
+
+
+in vec4 vColor[];
+in vec2 vTexCoords[];
+in float vTexIndex[];
+
+out vec4 gColor;
+out vec2 gTexCoords;
+out float gTexIndex;
+
+void main()
+{
+	for(int i = 0; i < gl_in.length; i++)
+	{
+		gl_Position = gl_in[i].gl_Position;
+		gColor = vColor[i];
+		gTexCoords = vTexCoords[i];
+		gTexIndex = vTexIndex[i];
+		EmitVertex();
+	}
+	EndPrimitive();
+}
+
+
+

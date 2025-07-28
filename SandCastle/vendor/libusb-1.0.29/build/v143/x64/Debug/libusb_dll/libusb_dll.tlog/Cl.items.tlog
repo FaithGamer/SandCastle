@@ -1,0 +1,11 @@
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\core.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\core.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\descriptor.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\descriptor.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\os\events_windows.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\events_windows.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\hotplug.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\hotplug.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\io.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\io.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\strerror.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\strerror.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\sync.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\sync.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\os\threads_windows.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\threads_windows.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\os\windows_common.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\windows_common.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\os\windows_usbdk.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\windows_usbdk.obj
+C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\libusb\os\windows_winusb.c;C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Debug\libusb_dll\windows_winusb.obj

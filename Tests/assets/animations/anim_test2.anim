@@ -1,0 +1,18 @@
+{
+    "frame_per_second": 50,
+    "frames":
+    [
+        {
+            "sprite": "spritesheet.png_0_0"
+        },
+        {
+            "sprite": "spritesheet.png_0_1"
+        },
+        {
+            "sprite": "spritesheet.png_1_0"
+        },
+        {
+            "sprite": "spritesheet.png_1_1"
+        }
+    ]
+}

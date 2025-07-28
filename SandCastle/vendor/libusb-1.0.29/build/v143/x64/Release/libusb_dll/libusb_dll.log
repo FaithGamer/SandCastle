@@ -1,0 +1,15 @@
+﻿  core.c
+  descriptor.c
+  events_windows.c
+  hotplug.c
+  io.c
+  strerror.c
+  sync.c
+  threads_windows.c
+  windows_common.c
+  windows_usbdk.c
+  windows_winusb.c
+     Creating library C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Release\libusb_dll\..\dll\libusb-1.0.lib and object C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Release\libusb_dll\..\dll\libusb-1.0.exp
+  Generating code
+  Finished generating code
+  libusb_dll.vcxproj -> C:\dev\SandCastle\SandCastle\vendor\libusb-1.0.29\build\v143\x64\Release\dll\libusb-1.0.dll
