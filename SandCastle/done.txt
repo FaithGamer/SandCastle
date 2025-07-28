@@ -41,8 +41,13 @@ July
 -.gitignore
 -first commit/push!
 -draw sprite test success.
+-removed useless defines
+-imgui no longer available in distrib
+-camera default constructor updated to match comon use case
+-systems have its own default camera
+-systems init
+-have a camera by default in the init
 
->have a camera by default in the init
 >build a couple test:
 
 -renderer..

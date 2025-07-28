@@ -58,6 +58,7 @@ namespace SandCastle
 		Physics::Instance();
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
+		system->Init();
 		system->CreateWorld();
 		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
 #ifndef SANDCASTLE_DISTRIB

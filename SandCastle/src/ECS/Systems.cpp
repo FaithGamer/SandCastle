@@ -17,6 +17,14 @@ namespace SandCastle
 		m_pushCount(0),
 		m_maxFixedUpdate(3)
 	{
+
+	}
+
+	void Systems::Init()
+	{
+		SetMainCamera(&m_defaultCamera);
+		Window::GetResizeSignal()->AddListener(&Camera::SetAspectRatio, &m_defaultCamera);
+		m_defaultCamera.SetAspectRatio(Window::GetAspectRatio());
 	}
 
 	Systems::~Systems()

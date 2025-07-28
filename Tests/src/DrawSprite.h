@@ -13,13 +13,6 @@ void DrawSprite()
 {
 	Engine::Init();
 
-	Camera camera;
-	camera.SetPosition(0, 0, -1);
-	camera.SetNearClippingPlane(-98);
-	camera.SetFarClippingPlane(98);
-	camera.SetOrthographic(true);
-	camera.worldToScreenRatio = .0001f;
-	Systems::SetMainCamera(&camera);
 	auto entity = Entity::Create();
 	auto render = entity.AddComponent<SpriteRender>();
 	auto transform = entity.AddComponent<Transform>();

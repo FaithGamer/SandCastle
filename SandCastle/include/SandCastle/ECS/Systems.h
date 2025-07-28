@@ -8,6 +8,7 @@
 #include "SandCastle/Core/TypeId.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Signal.h"
+#include "SandCastle/Render/Camera.h"
 
 namespace SandCastle
 {
@@ -167,6 +168,7 @@ namespace SandCastle
 		};
 		friend Engine;
 		Systems();
+		void Init();
 
 		void Update();
 		void HandleWindowEvents(SDL_Event& event);
@@ -189,6 +191,7 @@ namespace SandCastle
 		std::vector<SystemIdPriority> m_imGuiSystems;
 		std::vector<SystemIdPriority> m_renderSystems;
 
+		Camera m_defaultCamera;
 		Camera* m_mainCamera = nullptr;
 
 		std::vector<SystemIdPriority> m_pendingSystemIn;
