@@ -38,9 +38,11 @@ July
 
 28
 
->.gitignore
->first commit/push!
+-.gitignore
+-first commit/push!
+-draw sprite test success.
 
+>have a camera by default in the init
 >build a couple test:
 
 -renderer..

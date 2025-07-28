@@ -1,6 +1,7 @@
+#pragma once
 #include "SandCastle/Engine.h"
 
-int main()
+void Launch()
 {
 	SandCastle::Engine::Init();
 	SandCastle::Engine::Launch();
