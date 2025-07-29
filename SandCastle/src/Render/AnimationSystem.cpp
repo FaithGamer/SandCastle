@@ -93,6 +93,10 @@ namespace SandCastle
 		}
 	}
 
+	/// @brief Add an animation to be played later at any time.
+	/// @param stateName The state name to reference this animation
+	/// @param animation the animation pointer
+	/// @param transition The state to transition to when the animation end, leave empty to loop.
 	void Animator::AddAnimation(String stateName, sptr<Animation> animation, String transition)
 	{
 		AnimationState state;
@@ -103,6 +107,10 @@ namespace SandCastle
 		animations.insert(std::make_pair(stateName, state));
 	}
 
+	/// @brief Add an animation to be played later at any time.
+	/// @param stateName The state name to reference this animation
+	/// @param animation The asset file name
+	/// @param transition The state to transition to when the animation end, leave empty to loop.
 	void Animator::AddAnimation(String stateName, String animation, String transition)
 	{
 		AddAnimation(stateName, Assets::Get<Animation>(animation).Ptr(), transition);
