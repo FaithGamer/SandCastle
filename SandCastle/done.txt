@@ -52,8 +52,11 @@ July
 
 29
 
+-removed pch.h in Files.h
 -renamed "Add..Input" to "Bind..Input"
->input test
+-input test
+-begginer friendly tests
+-renamed header
 
 >find how to trigger an entt assertion and see if it properly logs and breaks
 >check Time operator*(const Time& l, const Time& r) warning problem by testing

@@ -407,7 +407,7 @@
     <ClInclude Include="include\SandCastle\Render\VertexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\Window.h" />
     <ClInclude Include="include\SandCastle\Render\WireRender.h" />
-    <ClInclude Include="include\SandCastle\Sandbox.h" />
+    <ClInclude Include="include\SandCastle\SandCastle.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <ItemGroup>

@@ -18,7 +18,6 @@ namespace SandCastle
 		render->SetSprite(sprite);
 		return entity;
 	}
-
 	
 	Entity Entity::CreateAnimatedSprite(String defaultAnimation, String defaultAnimStateName)
 	{

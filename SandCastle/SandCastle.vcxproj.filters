@@ -479,7 +479,7 @@
     <ClInclude Include="include\SandCastle\Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Sandbox.h">
+    <ClInclude Include="include\SandCastle\SandCastle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

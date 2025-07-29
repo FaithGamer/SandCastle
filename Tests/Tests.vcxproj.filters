@@ -29,5 +29,8 @@
     <ClInclude Include="src\DrawAnimation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\MouseKeyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
