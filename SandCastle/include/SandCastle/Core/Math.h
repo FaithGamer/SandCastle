@@ -35,13 +35,14 @@ namespace SandCastle
 		/// @brief Return direction of degrees in vector
 		inline Vec2f AngleToVec(float degrees)
 		{
+			degrees -= 90;
 			return { cos(glm::radians(degrees)), sin(glm::radians(degrees)) };
 		}
 
 		/// @brief Return direction of vector in degrees
 		inline float VecToAngle(Vec2f vector)
 		{
-			return glm::degrees(atan2(vector.y, vector.x));
+			return glm::degrees(atan2(vector.y, vector.x)) + 90;
 		}
 
 		/// @brief Calculate intersection point between two line (even if line are too short)

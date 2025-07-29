@@ -57,10 +57,10 @@ namespace SandCastle
 	{
 	}
 
-	Transform::Transform(Vec3f translation, Vec3f scale, Vec3f angles)
+	Transform::Transform(Vec3f translation, Vec3f scale, Vec3f anglesDegrees)
 		: m_localPosition(translation),
 		m_localScale(scale),
-		m_localRotation(angles),
+		m_localRotation(anglesDegrees),
 		m_transformMatrix(1.f),
 		needCompute(true),
 		matrixUpdated(true),
@@ -117,11 +117,11 @@ namespace SandCastle
 		needCompute = true;
 	}
 
-	void Transform::SetRotation(Vec3f angles)
+	void Transform::SetRotation(Vec3f anglesDegrees)
 	{
-		if (m_localRotation == angles)
+		if (m_localRotation == anglesDegrees)
 			return;
-		m_localRotation = angles;
+		m_localRotation = anglesDegrees;
 		needCompute = true;
 	}
 
@@ -158,17 +158,17 @@ namespace SandCastle
 		needCompute = true;
 	}
 
-	void Transform::Rotate(Vec3f angles)
+	void Transform::Rotate(Vec3f anglesDegrees)
 	{
 		//TO DO: Quaternions
-		m_localRotation += angles;
+		m_localRotation += anglesDegrees;
 		needCompute = true;
 	}
 
-	void Transform::RotateZ(float angle)
+	void Transform::RotateZ(float angleDegrees)
 	{
 		//TO DO: Quaternions
-		m_localRotation.z += angle;
+		m_localRotation.z += angleDegrees;
 		needCompute = true;
 	}
 
