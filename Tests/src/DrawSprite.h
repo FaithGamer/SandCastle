@@ -1,11 +1,6 @@
 #pragma once
 
-#include "SandCastle/Engine.h"
-#include "SandCastle/Render/SpriteRender.h"
-#include "SandCastle/Render/Transform.h"
-#include "SandCastle/ECS/Entity.h"
-#include "SandCastle/Core/Assets.h"
-#include "SandCastle/ECS/Systems.h"
+#include <SandCastle/SandCastle.h>
 
 using namespace SandCastle;
 
@@ -13,12 +8,20 @@ void DrawSprite()
 {
 	Engine::Init();
 
-	/*auto entity = Entity::Create();
-	auto render = entity.AddComponent<SpriteRender>();
+	//Create an entity
+	auto entity = Entity::Create();
+	//Add a Transform component to exists in world space
 	auto transform = entity.AddComponent<Transform>();
+	//Add a SpriteRender component to draw a textured quad
+	auto render = entity.AddComponent<SpriteRender>();
+	
+	//Fetch a sprite in the assets, and apply it to the SpriteRender.
 	auto sprite = Assets::Get<Sprite>("trollface.png_0_0").Ptr();
-	render->SetSprite(sprite);*/
-	Entity::CreateSprite();
+	render->SetSprite(sprite);
+
+	//Can be simplified with this:
+	//Entity::CreateSprite("trollface.png_0_0");
+
 	Engine::Launch();
 }
 
