@@ -32,22 +32,22 @@ namespace SandCastle
 		virtual InputType GetType() const override;
 		virtual void RemoveAllBindings() override;
 
-		/// @brief Add binding to a stick
+		/// @brief Bind binding to a stick
 		/// @param stick The controller stick
-		void AddStick(ControllerStick stick);
-		/// @brief Add binding to buttons, for example W, A, S, D
+		void BindStick(ControllerStick stick);
+		/// @brief Bind binding to buttons, for example W, A, S, D
 		/// @param buttons Each value of the vector contains a button bound with a direction
 		/// When multiple buttons are being pressed at the same time, the final state is the sum of all the pressed buttons
 	    /// and sticks direction vectors, where each axis (x, y) is clamped from 0 ot 1.
-		void AddButtons(std::vector<DirectionalButton> buttons);
+		void BindButtons(std::vector<DirectionalButton> buttons);
 		/// @brief Mouse wheel will trigger Y axis 1 or -1
-		/// @param mouseWheel set true to listen to mouse wheel, set to fals by default.
+		/// @param mouseWheel set true to listen to mouse wheel, set to false by default.
 		void SetMouseWheel(bool mouseWheel);
 		/// @brief Set a specific binding's stick
 		/// @param version Binding version
 		void SetStick(ControllerStick stick, int version);
 		/// @brief Set a specific binding's buttons
-		/// @param version Binding version
+		/// @param version Is equivalent to the order of insertion (starting at 0)
 		void SetButtons(std::vector<DirectionalButton> buttons, int version);
 		/// @brief Remove a binding
 		/// @param version Binding version

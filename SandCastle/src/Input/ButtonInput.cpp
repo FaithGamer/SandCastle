@@ -34,11 +34,11 @@ namespace SandCastle
 		m_bindings.buttons.clear();
 	}
 
-	void ButtonInput::AddKey(KeyScancode keyButton)
+	void ButtonInput::BindKey(KeyScancode keyButton)
 	{
 		if (HaveBinding(keyButton))
 		{
-			LOG_WARN("ButtonInput::AddKey -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindKey -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();
@@ -47,11 +47,11 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::AddMouse(MouseButton mouseButton)
+	void ButtonInput::BindMouse(MouseButton mouseButton)
 	{
 		if (HaveBinding(mouseButton))
 		{
-			LOG_WARN("ButtonInput::AddMouse -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindMouse -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();
@@ -60,11 +60,11 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::AddControllerButton(ControllerButton controllerButton)
+	void ButtonInput::BindControllerButton(ControllerButton controllerButton)
 	{
 		if (HaveBinding(controllerButton))
 		{
-			LOG_WARN("ButtonInput::AddControllerButton -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindControllerButton -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();
@@ -73,11 +73,11 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::AddControllerTrigger(ControllerTrigger trigger)
+	void ButtonInput::BindControllerTrigger(ControllerTrigger trigger)
 	{
 		if (HaveBinding(trigger))
 		{
-			LOG_WARN("ButtonInput::AddControllerTrigger -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindControllerTrigger -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();

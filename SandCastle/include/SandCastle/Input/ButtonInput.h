@@ -41,17 +41,17 @@ namespace SandCastle
 
 		/// @brief Bind a Key from the keyboard
 		/// @param keyButton The scancode of the key
-		void AddKey(KeyScancode keyButton);
-		/// @brief Add a mouse button 
+		void BindKey(KeyScancode keyButton);
+		/// @brief Bind a mouse button 
 		/// @param mouseButton The mouse button
-		void AddMouse(MouseButton mouseButton);
-		/// @brief Add to a controller button
+		void BindMouse(MouseButton mouseButton);
+		/// @brief Bind to a controller button
 		/// @param controllerButton the controller button
-		void AddControllerButton(ControllerButton controllerButton);
-		/// @brief Add to a controller trigger.
+		void BindControllerButton(ControllerButton controllerButton);
+		/// @brief Bind to a controller trigger.
 		/// It will send signal every time the pressing amount changes.
 		/// @param trigger The controller trigger
-		void AddControllerTrigger(ControllerTrigger trigger);
+		void BindControllerTrigger(ControllerTrigger trigger);
 		/// @brief Set a specific binding key
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param keyButton The key to bind to

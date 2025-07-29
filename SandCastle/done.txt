@@ -50,6 +50,9 @@ July
 -entity create for easily created animated sprite or sprite
 -tested entity create
 
+29
+
+-renamed "Add..Input" to "Bind..Input"
 >input test
 
 >find how to trigger an entt assertion and see if it properly logs and breaks

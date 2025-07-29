@@ -30,22 +30,22 @@ namespace SandCastle
 		m_bindings.directions.clear();
 	}
 
-	void DirectionalInput::AddStick(ControllerStick stick)
+	void DirectionalInput::BindStick(ControllerStick stick)
 	{
 		if (HaveBinding(stick))
 		{
-			LOG_WARN("DirectionalInput::AddStick -> bindings already have the stick, no bindings added.");
+			LOG_WARN("DirectionalInput::BindStick -> bindings already have the stick, no bindings added.");
 			return;
 		}
 		m_bindings.directions.push_back(Direction(stick));
 		UpdateEventListened();
 	}
 
-	void DirectionalInput::AddButtons(std::vector<DirectionalButton> buttons)
+	void DirectionalInput::BindButtons(std::vector<DirectionalButton> buttons)
 	{
 		if (HaveBinding(buttons))
 		{
-			LOG_WARN("DirectionalInput::AddButtons -> bindings already have one or more of the buttons, no bindings added.");
+			LOG_WARN("DirectionalInput::BindButtons -> bindings already have one or more of the buttons, no bindings added.");
 			return;
 		}
 		m_bindings.directions.push_back(Direction(buttons));
