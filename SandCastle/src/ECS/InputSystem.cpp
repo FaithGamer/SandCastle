@@ -157,7 +157,7 @@ namespace SandCastle
 
 					if (version == -1)
 					{
-						buttonInput->AddMouse((MouseButton)e.button.button);
+						buttonInput->BindMouse((MouseButton)e.button.button);
 						EndRebind();
 						return true;
 					}
@@ -185,7 +185,7 @@ namespace SandCastle
 
 					if (version == -1)
 					{
-						buttonInput->AddKey((KeyScancode)e.key.scancode);
+						buttonInput->BindKey((KeyScancode)e.key.scancode);
 						EndRebind();
 						return true;
 					}
@@ -213,7 +213,7 @@ namespace SandCastle
 
 					if (version == -1)
 					{
-						buttonInput->AddControllerButton((ControllerButton)e.gbutton.button);
+						buttonInput->BindControllerButton((ControllerButton)e.gbutton.button);
 						EndRebind();
 						return true;
 					}
@@ -230,7 +230,7 @@ namespace SandCastle
 
 					if (version == -1)
 					{
-						buttonInput->AddControllerTrigger(ControllerTrigger::Left);
+						buttonInput->BindControllerTrigger(ControllerTrigger::Left);
 						EndRebind();
 						return true;
 					}
@@ -247,7 +247,7 @@ namespace SandCastle
 
 					if (version == -1)
 					{
-						buttonInput->AddControllerTrigger(ControllerTrigger::Right);
+						buttonInput->BindControllerTrigger(ControllerTrigger::Right);
 						EndRebind();
 						return true;
 					}
