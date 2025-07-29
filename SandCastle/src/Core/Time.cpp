@@ -67,18 +67,6 @@ namespace SandCastle
 	{
 		return l = Time(l.m_microseconds - r.m_microseconds);
 	}
-	Time& operator*=(Time& l, const Time& r)
-	{
-		return l = Time(l.m_microseconds * r.m_microseconds);
-	}
-	Time& operator/=(Time& l, const Time& r)
-	{
-		return l = Time((float)l.m_microseconds.count() / (float)r.m_microseconds.count());
-	}
-	Time& operator%=(Time& l, const Time& r)
-	{
-		return l = Time(l.m_microseconds % r.m_microseconds);
-	}
 
 	Time operator+(const Time& l, const Time& r)
 	{
@@ -87,18 +75,6 @@ namespace SandCastle
 	Time operator-(const Time& l, const Time& r)
 	{
 		return Time(l.m_microseconds - r.m_microseconds);
-	}
-	Time operator*(const Time& l, const Time& r)
-	{
-		return Time(l.m_microseconds * r.m_microseconds);
-	}
-	Time operator/(const Time& l, const Time& r)
-	{
-		return Time((float)l.m_microseconds.count() / (float)r.m_microseconds.count());
-	}
-	Time operator%(const Time& l, const Time& r)
-	{
-		return Time(l.m_microseconds % r.m_microseconds);
 	}
 
 	////////////////////////////

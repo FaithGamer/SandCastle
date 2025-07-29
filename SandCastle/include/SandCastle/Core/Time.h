@@ -40,28 +40,16 @@ namespace SandCastle
 
 		friend Time& operator+=(Time& l, const Time& r);
 		friend Time& operator-=(Time& l, const Time& r);
-		friend Time& operator*=(Time& l, const Time& r);
-		friend Time& operator/=(Time& l, const Time& r);
-		friend Time& operator%=(Time& l, const Time& r);
 
 		friend Time operator+(const Time& l, const Time& r);
 		friend Time operator-(const Time& l, const Time& r);
-		friend Time operator*(const Time& l, const Time& r);
-		friend Time operator/(const Time& l, const Time& r);
-		friend Time operator%(const Time& l, const Time& r);
 	};
 
 	Time& operator+=(Time& l, const Time& r);
 	Time& operator-=(Time& l, const Time& r);
-	Time& operator*=(Time& l, const Time& r);
-	Time& operator/=(Time& l, const Time& r);
-	Time& operator%=(Time& l, const Time& r);
 
 	Time operator+(const Time& l, const Time& r);
 	Time operator-(const Time& l, const Time& r);
-	Time operator*(const Time& l, const Time& r);
-	Time operator/(const Time& l, const Time& r);
-	Time operator%(const Time& l, const Time& r);
 
 	/// <summary>
 	/// Wrapper around a std::chrono::high_resolution_clock to measure time elapsing
