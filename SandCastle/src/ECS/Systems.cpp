@@ -65,9 +65,7 @@ namespace SandCastle
 
 
 	}
-#ifndef DISTRIB
-#define SandCastle_PROFILING
-#endif
+
 	void Systems::Update()
 	{
 		Time::delta = (float)m_updateClock.Restart();
@@ -107,7 +105,7 @@ namespace SandCastle
 			for (auto& system : m_fixedUpdateSystems)
 			{
 
-#ifdef SandCastle_PROFILING
+#ifndef SANDCASTLE_DISTRIB
 				Clock timer;
 				system.system->OnFixedUpdate(scaledFixedDelta);
 				auto seconds = (float)timer.GetElapsed();
@@ -137,7 +135,7 @@ namespace SandCastle
 			//If less than one microseconds elapse between two call
 			//the m_updateClock.Restart increment doesn't accurately describe time passing by.
 
-#ifdef SandCastle_PROFILING
+#ifndef SANDCASTLE_DISTRIB
 			Clock timer;
 			system.system->OnUpdate(deltaScaled);
 			auto seconds = (float)timer.GetElapsed();
@@ -150,7 +148,6 @@ namespace SandCastle
 			system.system->OnUpdate(deltaScaled);
 #endif
 		}
-#ifndef SandCastle_NO_WINDOW
 		if (m_mainCamera == nullptr)
 			return;
 		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
@@ -178,7 +175,6 @@ namespace SandCastle
 		lateRenderSignal.SendSignal(0);
 		Window::RenderWindow();
 	}
-#endif
 
 	void Systems::HandleWindowEvents(SDL_Event& event)
 	{
@@ -190,10 +186,10 @@ namespace SandCastle
 		switch (event.type)
 		{
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-			Window::SetSize((float)event.window.data1, (float)event.window.data2);
+			Window::Instance()->OnSDLPixelSizeChanged(event);
 			break;
 		case SDL_EVENT_WINDOW_RESIZED:
-			Window::SetSize((float)event.window.data1, (float)event.window.data2);
+			Window::Instance()->OnSDLWindowResized(event);
 			break;
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
 			Window::Instance()->FocusSignal.SendSignal(true);

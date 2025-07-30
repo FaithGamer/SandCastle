@@ -20,8 +20,6 @@ namespace SandCastle
 			LOG_ERROR("Couldn't initialize SDL, error: {0}", SDL_GetError());
 		}
 
-		m_size = size;
-
 		//Load default OpenGL library
 		SDL_GL_LoadLibrary(NULL);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -72,19 +70,27 @@ namespace SandCastle
 		m_clearColor = Vec4f(0.1, 0.1, 0.1, 1);
 
 		m_initialized = true;
+
+		m_pixelSize = GetSize();
 	}
 
-	void Window::SetWindowSize(Vec2u size)
+	void Window::SetSize(Vec2u size)
 	{
-		Window::Instance()->SetSize(size);
+		if (!SDL_SetWindowSize(Instance()->m_window, size.x, size.y))
+		{
+			LOG_ERROR("Window SetSize({0}, {1}) failed: {2}", size.x, size.y, SDL_GetError());
+		}
+		m_pixelSize = GetSize();
 	}
 
 	void Window::SetFullScreen(bool fullscreen)
 	{
 		SDL_Window* window = Instance()->m_window;
 		//Borderless by default
-		SDL_SetWindowFullscreen(window, fullscreen);
-
+		if(!SDL_SetWindowFullscreen(window, fullscreen))
+		{
+			LOG_ERROR("Window fullscreen({0}) failed: {1}",fullscreen, SDL_GetError());
+		}
 	}
 
 	void Window::SetVsync(bool vsync)
@@ -116,9 +122,9 @@ namespace SandCastle
 		SDL_GL_SwapWindow(Window::Instance()->m_window);
 	}
 
-	void Window::SetSize(float width, float height)
+	void Window::SetSize(unsigned int width, unsigned int height)
 	{
-		Window::Instance()->SetSize(Vec2u((unsigned int)width, (unsigned int)height));
+		Window::Instance()->SetSize(Vec2u(width, height));
 	}
 
 	void Window::SetClearColor(Vec4f color)
@@ -172,9 +178,21 @@ namespace SandCastle
 		return false;
 	}
 
-	Vec2u Window::GetSize()
+	Vec2i Window::GetSize()
 	{
-		return Window::Instance()->m_size;
+		int w = 0, h = 0;
+		SDL_GetWindowSizeInPixels(Instance()->m_window, &w, &h);
+		return Vec2i(w, h);
+	}
+	Vec2i Window::GetPointSize()
+	{
+		int w = 0, h = 0;
+		SDL_GetWindowSize(Instance()->m_window, &w, &h);
+		return Vec2i(w, h);
+	}
+	bool Window::PixelMatchPoint()
+	{
+		return GetPointSize() == GetSize();
 	}
 	Vec2i Window::GetScreenSize()
 	{
@@ -185,7 +203,7 @@ namespace SandCastle
 	float Window::GetAspectRatio()
 	{
 		auto window = Window::Instance();
-		return (float)window->m_size.x / (float)window->m_size.y;
+		return (float)window->m_pixelSize.x / (float)window->m_pixelSize.y;
 	}
 
 	SDL_GLContext Window::GetSDL_GLContext()
@@ -239,17 +257,27 @@ namespace SandCastle
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	void Window::SetSize(Vec2u size)
+	void Window::OnSDLPixelSizeChanged(SDL_Event& event)
 	{
-		SDL_SetWindowSize(m_window, size.x, size.y);
-		glViewport(0, 0, size.x, size.y);
-		m_size = size;
-		ResizeSignal.SendSignal(m_size);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, event.window.data1, event.window.data2);
+		m_pixelSize.x = (unsigned int)event.window.data1;
+		m_pixelSize.y = (unsigned int)event.window.data2;
+		ResizeSignal.SendSignal(m_pixelSize);
+		//LOG_INFO("pixelizes. [{0}, {1}]", m_pixelSize.x, m_pixelSize.y);
+	}
+
+	void Window::OnSDLWindowResized(SDL_Event& event)
+	{
+		//Nothing for now, we only care about pixel size as far as I am aware of.
+		int w, h;
+		SDL_GetWindowSize(Instance()->m_window, &w, &h);
+		//LOG_INFO("resized. [{0}, {1}]", w, h);
 	}
 
 	void Window::Bind()
 	{
-		glViewport(0, 0, m_size.x, m_size.y);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, m_pixelSize.x, m_pixelSize.y);
 	}
 }
