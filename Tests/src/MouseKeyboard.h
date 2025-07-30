@@ -59,7 +59,7 @@ void MouseKeyboard()
 	fire->signal.AddListener(&OnFire);
 	//Could also be listened by an object:
 	//fire->signal.AddListener(&Class::OnFire, &object);
-	
+
 	//Create other inputs
 	auto rightClick = map->CreateButtonInput("RightCLick");
 	rightClick->BindMouse(MouseButton::Right);
@@ -79,10 +79,10 @@ void MouseKeyboard()
 	std::vector<DirectionalButton> dirButtons;
 
 	//Scancode means W is the position of the key on US keyboard (will automatically translate to Z for FR)
-	dirButtons.emplace_back(DirectionalButton{ Button(KeyScancode::W), Vec2f(0, 1) });
-	dirButtons.emplace_back(DirectionalButton{ Button(KeyScancode::A), Vec2f(-1, 0) });
-	dirButtons.emplace_back(DirectionalButton{ Button(KeyScancode::S), Vec2f(0, -1) });
-	dirButtons.emplace_back(DirectionalButton{ Button(KeyScancode::D), Vec2f(1, 0) });
+	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::W), Vec2f(0, 1)));
+	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::A), Vec2f(-1, 0)));
+	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::S), Vec2f(0, -1)));
+	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::D), Vec2f(1, 0)));
 	directions->BindButtons(dirButtons);
 
 	//Bind a controller stick
