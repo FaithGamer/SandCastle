@@ -44,7 +44,7 @@ namespace SandCastle
 		void BindKey(KeyScancode keyButton);
 		/// @brief Bind a mouse button 
 		/// @param mouseButton The mouse button
-		void BindMouse(MouseButton mouseButton);
+		void BindMouse(Mouse::Button mouseButton);
 		/// @brief Bind to a controller button
 		/// @param controllerButton the controller button
 		void BindControllerButton(ControllerButton controllerButton);
@@ -59,7 +59,7 @@ namespace SandCastle
 		/// @brief Set a mouse button to a specific binding 
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param keyButton The key to bind to
-		void SetMouse(int version, MouseButton mouseButton);
+		void SetMouse(int version, Mouse::Button mouseButton);
 		/// @brief Set a controller button to a specific binding 
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param mouseButton the mouse button to bind to
@@ -93,7 +93,7 @@ namespace SandCastle
 		bool GetSendSignalOnRelease();
 
 		bool HaveBinding(KeyScancode key);
-		bool HaveBinding(MouseButton mouse);
+		bool HaveBinding(Mouse::Button mouse);
 		bool HaveBinding(ControllerButton button);
 		bool HaveBinding(ControllerTrigger trigger);
 

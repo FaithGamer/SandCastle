@@ -115,7 +115,7 @@ namespace SandCastle
 	{
 		m_forbiddenTriggers.push_back(trigger);
 	}
-	void InputSystem::AddForbiddenBinding(MouseButton mouse)
+	void InputSystem::AddForbiddenBinding(Mouse::Button mouse)
 	{
 		m_forbiddenMouses.push_back(mouse);
 	}
@@ -152,19 +152,19 @@ namespace SandCastle
 				switch (e.type)
 				{
 				case SDL_EVENT_MOUSE_BUTTON_DOWN:
-					if (Container::Contains(m_forbiddenMouses, (MouseButton)e.button.button))
+					if (Container::Contains(m_forbiddenMouses, (Mouse::Button)e.button.button))
 						return false;
 
 					if (version == -1)
 					{
-						buttonInput->BindMouse((MouseButton)e.button.button);
+						buttonInput->BindMouse((Mouse::Button)e.button.button);
 						EndRebind();
 						return true;
 					}
 					else
 					{
 						buttonInput->SetKey(version, KeyScancode::Unknown);
-						buttonInput->SetMouse(version, (MouseButton)e.button.button);
+						buttonInput->SetMouse(version, (Mouse::Button)e.button.button);
 						EndRebind();
 						return true;
 					}
@@ -191,7 +191,7 @@ namespace SandCastle
 					}
 					else
 					{
-						buttonInput->SetMouse(version, MouseButton::Invalid);
+						buttonInput->SetMouse(version, Mouse::Button::Invalid);
 						buttonInput->SetKey(version, (KeyScancode)e.key.scancode);
 						EndRebind();
 						return true;

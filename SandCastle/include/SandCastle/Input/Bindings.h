@@ -15,7 +15,7 @@ namespace SandCastle
 	{
 		Button() {}
 		Button(KeyScancode Key) : key(Key) {}
-		Button(MouseButton Mouse) : mouse(Mouse) {}
+		Button(Mouse::Button Mouse) : mouse(Mouse) {}
 		Button(ControllerButton Controller) : controller(Controller) {}
 		Button(ControllerTrigger Trigger) : trigger(Trigger) {}
 
@@ -23,7 +23,7 @@ namespace SandCastle
 		void Deserialize(Serialized& config) override;
 		Serialized Serialize() override;
 
-		MouseButton mouse = MouseButton::Invalid;
+		Mouse::Button mouse = Mouse::Button::Invalid;
 		KeyScancode key = KeyScancode::Unknown;// scancode is a physical position on the keyboard.
 		// to retreive it's Keycode on the current keyboard layout, use the macro SDL_SCANCODE_TO_KEYCODE
 		ControllerButton controller = ControllerButton::Invalid;

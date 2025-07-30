@@ -38,7 +38,7 @@ namespace SandCastle
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
 		void AddForbiddenBinding(ControllerTrigger trigger);
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
-		void AddForbiddenBinding(MouseButton mouse);
+		void AddForbiddenBinding(Mouse::Button mouse);
 		int GetUsedMethod();
 		bool IsRebinding();
 		sptr<Input> GetRebindingInput();
@@ -53,7 +53,7 @@ namespace SandCastle
 		std::vector<KeyScancode> m_forbiddenKeys;
 		std::vector<ControllerButton> m_forbiddenButtons;
 		std::vector<ControllerTrigger> m_forbiddenTriggers;
-		std::vector<MouseButton> m_forbiddenMouses;
+		std::vector<Mouse::Button> m_forbiddenMouses;
 
 	};
 }

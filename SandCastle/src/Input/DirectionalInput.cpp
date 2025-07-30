@@ -374,7 +374,7 @@ namespace SandCastle
 				if (button.button.key != KeyScancode::Unknown)
 					newEvents |= Input::KeyButtonFlag;
 
-				if (button.button.mouse != MouseButton::Invalid)
+				if (button.button.mouse != Mouse::Button::Invalid)
 					newEvents |= Input::MouseButtonFlag;
 
 				if (button.button.controller != ControllerButton::Invalid)

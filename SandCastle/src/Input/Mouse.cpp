@@ -4,45 +4,47 @@
 
 namespace SandCastle
 {
-
-	std::string MouseButtonName(MouseButton mouseButton)
+	namespace Mouse
 	{
-		switch (mouseButton)
+		std::string ButtonName(Button mouseButton)
 		{
-		case MouseButton::Left:			return "LeftClick";		break;
-		case MouseButton::Right:		return "RightClick";	break;
-		case MouseButton::Middle:		return "MiddleClick";	break;
-		case MouseButton::X1:			return "X1Click";		break;
-		case MouseButton::X2:			return "X2Click";		break;
-		default:
-			LOG_ERROR("Trying to get the name of an incorrect Mouse Button: " + std::to_string((int)mouseButton));
-			return "UnknownMouseButton";
-			break;
+			switch (mouseButton)
+			{
+			case Button::Left:			return "LeftClick";		break;
+			case Button::Right:		return "RightClick";	break;
+			case Button::Middle:		return "MiddleClick";	break;
+			case Button::X1:			return "X1Click";		break;
+			case Button::X2:			return "X2Click";		break;
+			default:
+				LOG_ERROR("Trying to get the name of an incorrect Mouse Button: " + std::to_string((int)mouseButton));
+				return "UnknownButton";
+				break;
+			}
 		}
-	}
 
-	MouseButton MouseButtonFromName(std::string name)
-	{
-		if (name == "LeftClick")
-			return MouseButton::Left;
-		if (name == "RightClick")
-			return MouseButton::Right;
-		if (name == "MiddleClick")
-			return MouseButton::Middle;
-		if (name == "X1Click")
-			return MouseButton::X1;
-		if (name == "X2Click")
-			return MouseButton::X2;
+		Button ButtonFromName(std::string name)
+		{
+			if (name == "LeftClick")
+				return Button::Left;
+			if (name == "RightClick")
+				return Button::Right;
+			if (name == "MiddleClick")
+				return Button::Middle;
+			if (name == "X1Click")
+				return Button::X1;
+			if (name == "X2Click")
+				return Button::X2;
 
-		LOG_ERROR("Unknown Mouse Button name: " + name);
-		return MouseButton::Invalid;
-	}
+			LOG_ERROR("Unknown Mouse Button name: " + name);
+			return Button::Invalid;
+		}
 
-	Vec2f GetMousePosition()
-	{
-		float x;
-		float y;
-		SDL_GetMouseState(&x, &y);
-		return Vec2f(x, y);
+		Vec2f GetPosition()
+		{
+			float x;
+			float y;
+			SDL_GetMouseState(&x, &y);
+			return Vec2f(x, y);
+		}
 	}
 }

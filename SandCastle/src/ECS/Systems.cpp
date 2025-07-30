@@ -400,7 +400,7 @@ namespace SandCastle
 			LOG_WARN("Systems::GetMouseWorldPos, no main camera, Vec2f(0, 0) returned");
 			return Vec2f(0, 0);
 		}
-		return camera->ScreenToWorld(GetMousePosition(), Window::GetSize());
+		return camera->ScreenToWorld(Mouse::GetPosition(), Window::GetSize());
 	}
 
 	//////////////

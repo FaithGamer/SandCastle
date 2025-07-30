@@ -12,5 +12,5 @@ int main()
 	//DrawAnimation();
 	//BasicInputs();
 	//Rotation();
-	WindowEvents();
+	//WindowEvents();
 }

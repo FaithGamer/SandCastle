@@ -47,7 +47,7 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::BindMouse(MouseButton mouseButton)
+	void ButtonInput::BindMouse(Mouse::Button mouseButton)
 	{
 		if (HaveBinding(mouseButton))
 		{
@@ -97,7 +97,7 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::SetMouse(int version, MouseButton mouseButton)
+	void ButtonInput::SetMouse(int version, Mouse::Button mouseButton)
 	{
 		if (version >= m_bindings.buttons.size())
 		{
@@ -186,7 +186,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::HaveBinding(MouseButton mouse)
+	bool ButtonInput::HaveBinding(Mouse::Button mouse)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -324,7 +324,7 @@ namespace SandCastle
 			if (button.key != KeyScancode::Unknown)
 				newEvents |= Input::KeyButtonFlag;
 
-			if (button.mouse != MouseButton::Invalid)
+			if (button.mouse != Mouse::Button::Invalid)
 				newEvents |= Input::MouseButtonFlag;
 
 			if (button.controller != ControllerButton::Invalid)

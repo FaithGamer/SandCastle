@@ -40,7 +40,7 @@ void OnMove(InputSignal* signal)
 	LOG_INFO("Direction: [{0}, {1}]", direction.x, direction.y);
 }
 
-void MouseKeyboard()
+void BasicInputs()
 {
 	Engine::Init();
 
@@ -51,7 +51,7 @@ void MouseKeyboard()
 	//Create a button input (the input is kept inside "map", "fire" is a shared pointer)
 	auto fire = map->CreateButtonInput("Fire");
 	//Bind a mouse button to it.
-	fire->BindMouse(MouseButton::Left);
+	fire->BindMouse(Mouse::Button::Left);
 	//Bind a keyboard scancode
 	//Scancode means W is the position of the key on US keyboard (will automatically translate to Z for FR)
 	fire->BindKey(KeyScancode::Space);
@@ -62,13 +62,13 @@ void MouseKeyboard()
 
 	//Create other inputs
 	auto rightClick = map->CreateButtonInput("RightCLick");
-	rightClick->BindMouse(MouseButton::Right);
+	rightClick->BindMouse(Mouse::Button::Right);
 	rightClick->signal.AddListener(&OnRightClickPressed);
 	//Also triggers the event when releasing the button
 	rightClick->SetSendSignalOnRelease(true);
 
 	auto middleClick = map->CreateButtonInput("MiddleCLick");
-	middleClick->BindMouse(MouseButton::Middle);
+	middleClick->BindMouse(Mouse::Button::Middle);
 	middleClick->signal.AddListener(&OnMiddleClickPressed);
 	middleClick->SetSendSignalOnRelease(true);
 
