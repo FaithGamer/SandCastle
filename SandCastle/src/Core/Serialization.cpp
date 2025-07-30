@@ -74,7 +74,7 @@ namespace SandCastle
 		auto file = std::ofstream(path);
 		if (!file.is_open())
 		{
-			LOG_ERROR("Cannot write config to path: " + path);
+			LOG_ERROR("Cannot write serialized to path: " + path);
 			return;
 		}
 		try {
