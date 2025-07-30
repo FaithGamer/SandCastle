@@ -57,19 +57,22 @@ July
 -input test
 -begginer friendly tests
 -renamed header
+-rotations and vector directions are now coherent
+-removed time operator % / * cause they make no sense for duration and * was making a recursive call
+-created Geometry namespace and moved the approriate funciton there
+
+30
+
+
 
 >find how to trigger an entt assertion and see if it properly logs and breaks
->check Time operator*(const Time& l, const Time& r) warning problem by testing
 >check if there's not an event infinite loop for window resize
 >test the difference between; SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED
 and SDL_EVENT_WINDOW_RESIZED, and determine how to use them in the proper way
 >mouse namespace
 >migrate box2D 3
->change namespace SandCastle for SandCastle
 >include GUI stuff (translate UI position to game world and so forth)
->multi pass rendering for layers instead of the current system (one component can be used as the layer struct Layer1 struct Layer2...)
->materials
->make new attempt at threaded rendering
+>improve redering (see redering section)
 >text input (SDL_StartTextInput...)
 >Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony
@@ -85,3 +88,16 @@ and SDL_EVENT_WINDOW_RESIZED, and determine how to use them in the proper way
 >m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
 >Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadGetError)
 >Serialized, Get error must propagate to all parents
+
+Redering:
+
+>multi pass rendering for layers instead of the current system (one component can be used as the layer struct Layer1 struct Layer2...)
+>materials
+>make new attempt at threaded rendering
+
+for multi threaded rendering, try copying all the components needed for rendering.
+
+Thoughts:
+
+>Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
+But I'm not happy with the additional processing required, so I'm letting the user do that if they want.

@@ -333,6 +333,7 @@
     <ClInclude Include="include\SandCastle\Core\Delegate.h" />
     <ClInclude Include="include\SandCastle\Core\Easing.h" />
     <ClInclude Include="include\SandCastle\Core\Files.h" />
+    <ClInclude Include="include\SandCastle\Core\Geometry.h" />
     <ClInclude Include="include\SandCastle\Core\Log.h" />
     <ClInclude Include="include\SandCastle\Core\Math.h" />
     <ClInclude Include="include\SandCastle\Core\Noise.h" />
