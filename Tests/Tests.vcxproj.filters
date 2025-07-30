@@ -29,7 +29,7 @@
     <ClInclude Include="src\DrawAnimation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MouseKeyboard.h">
+    <ClInclude Include="src\BasicInputs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Rotation.h">

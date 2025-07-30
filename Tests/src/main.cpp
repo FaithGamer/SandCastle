@@ -1,7 +1,7 @@
 #include "Launch.h"
 #include "DrawSprite.h"
 #include "DrawAnimation.h"
-#include "MouseKeyboard.h"
+#include "BasicInputs.h"
 #include "Rotation.h"
 
 int main()
@@ -9,7 +9,7 @@ int main()
 	//Launch();
 	//DrawSprite();
 	//DrawAnimation();
-	//MouseKeyboard();
+	//BasicInputs();
 	Rotation();
 
 }
