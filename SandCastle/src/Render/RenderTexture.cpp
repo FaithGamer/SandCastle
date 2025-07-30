@@ -44,8 +44,8 @@ namespace SandCastle
 
 	void RenderTexture::Bind()
 	{
-		glViewport(0, 0, m_size.x, m_size.y);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
+		glViewport(0, 0, m_size.x, m_size.y);
 	}
 
 	void RenderTexture::Clear()
