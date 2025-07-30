@@ -42,6 +42,7 @@
     <ClInclude Include="src\DrawSprite.h" />
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\MouseKeyboard.h" />
+    <ClInclude Include="src\Rotation.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
