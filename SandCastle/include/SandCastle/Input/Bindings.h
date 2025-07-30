@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SandCastle/Input/Keyboard.h"
-#include "SandCastle/Input/Controller.h"
+#include "SandCastle/Input/Gamepad.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Serialization.h"
@@ -14,20 +14,20 @@ namespace SandCastle
 	struct Button : Serializable
 	{
 		Button() {}
-		Button(KeyScancode Key) : key(Key) {}
+		Button(Key::Scancode Key) : key(Key) {}
 		Button(Mouse::Button Mouse) : mouse(Mouse) {}
-		Button(ControllerButton Controller) : controller(Controller) {}
-		Button(ControllerTrigger Trigger) : trigger(Trigger) {}
+		Button(Gamepad::Button Gamepad) : controller(Gamepad) {}
+		Button(Gamepad::Trigger Trigger) : trigger(Trigger) {}
 
 		//Serializable
 		void Deserialize(Serialized& config) override;
 		Serialized Serialize() override;
 
 		Mouse::Button mouse = Mouse::Button::Invalid;
-		KeyScancode key = KeyScancode::Unknown;// scancode is a physical position on the keyboard.
+		Key::Scancode key = Key::Scancode::Unknown;// scancode is a physical position on the keyboard.
 		// to retreive it's Keycode on the current keyboard layout, use the macro SDL_SCANCODE_TO_KEYCODE
-		ControllerButton controller = ControllerButton::Invalid;
-		ControllerTrigger trigger = ControllerTrigger::Undefined;
+		Gamepad::Button controller = Gamepad::Button::Invalid;
+		Gamepad::Trigger trigger = Gamepad::Trigger::Undefined;
 
 		bool operator==(const Button& obj) const
 		{
@@ -50,9 +50,9 @@ namespace SandCastle
 	struct DirectionalStick
 	{
 		DirectionalStick(){}
-		DirectionalStick(ControllerStick Stick) : stick(Stick) {}
+		DirectionalStick(Gamepad::Stick Stick) : stick(Stick) {}
 
-		ControllerStick stick;
+		Gamepad::Stick stick;
 		Vec2f currentDirection = Vec2f(0, 0);
 	};
 
@@ -60,7 +60,7 @@ namespace SandCastle
 	{
 		Direction() {}
 		Direction(std::vector<DirectionalButton> Buttons) : buttons(Buttons) {}
-		Direction(ControllerStick Stick) : stick(Stick) {}
+		Direction(Gamepad::Stick Stick) : stick(Stick) {}
 
 		std::vector<DirectionalButton> buttons;
 		DirectionalStick stick;

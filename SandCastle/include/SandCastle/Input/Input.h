@@ -61,9 +61,9 @@ namespace SandCastle
 			MouseButtonFlag = 4,
 			MouseWheelFlag = 8,
 			MouseMovementFlag = 16,
-			ControllerButtonFlag = 32,
-			ControllerStickFlag = 64,
-			ControllerTriggerFlag = 128
+			GamepadButtonFlag = 32,
+			GamepadStickFlag = 64,
+			GamepadTriggerFlag = 128
 		};
 	public:
 		virtual ~Input() {};
@@ -85,10 +85,10 @@ namespace SandCastle
 		virtual bool MouseButtonReleased(const SDL_Event& e) { return false; }
 		virtual bool MouseWheelMoved(const SDL_Event& e) { return false; }
 		virtual bool MouseMoved(const SDL_Event& e) { return false; }
-		virtual bool ControllerButtonPressed(const SDL_Event& e) { return false; }
-		virtual bool ControllerButtonReleased(const SDL_Event& e) { return false; }
-		virtual bool ControllerStickMoved(const SDL_Event& e) { return false; }
-		virtual bool ControllerTriggerMoved(const SDL_Event& e) { return false; }
+		virtual bool GamepadButtonPressed(const SDL_Event& e) { return false; }
+		virtual bool GamepadButtonReleased(const SDL_Event& e) { return false; }
+		virtual bool GamepadStickMoved(const SDL_Event& e) { return false; }
+		virtual bool GamepadTriggerMoved(const SDL_Event& e) { return false; }
 		virtual bool TextEntered(const SDL_Event& e) { return false; }
 
 		virtual void UpdateEventListened() = 0;

@@ -210,17 +210,17 @@ namespace SandCastle
 			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-			for (auto& input : m_byEvents[(int)EventType::ControllerBtn])
+			for (auto& input : m_byEvents[(int)EventType::GamepadBtn])
 			{
-				if (input->ControllerButtonPressed(e))
+				if (input->GamepadButtonPressed(e))
 					eventHandled = true;
 			}
 			Inputs::Instance()->controllerUsedLast = true;
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_UP:
-			for (auto& input : m_byEvents[(int)EventType::ControllerBtn])
+			for (auto& input : m_byEvents[(int)EventType::GamepadBtn])
 			{
-				if (input->ControllerButtonReleased(e))
+				if (input->GamepadButtonReleased(e))
 					eventHandled = true;
 			}
 			Inputs::Instance()->controllerUsedLast = true;
@@ -232,9 +232,9 @@ namespace SandCastle
 				|| e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTX
 				|| e.gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY)
 			{
-				for (auto& input : m_byEvents[(int)EventType::ControllerStick])
+				for (auto& input : m_byEvents[(int)EventType::GamepadStick])
 				{
-					if (input->ControllerStickMoved(e))
+					if (input->GamepadStickMoved(e))
 						eventHandled = true;
 				}
 				if (e.gaxis.value / 32767.f > 0.15f)
@@ -244,9 +244,9 @@ namespace SandCastle
 			}
 			else
 			{
-				for (auto& input : m_byEvents[(int)EventType::ControllerStick])
+				for (auto& input : m_byEvents[(int)EventType::GamepadStick])
 				{
-					if (input->ControllerTriggerMoved(e))
+					if (input->GamepadTriggerMoved(e))
 						eventHandled = true;
 				}
 				if (e.gaxis.value / 32767.f > 0.15f)
@@ -375,32 +375,32 @@ namespace SandCastle
 			{
 				Container::Remove(m_byEvents[(int)EventType::MouseWheel], input);
 			}
-			//Controller button
-			if ((events & Input::ControllerButtonFlag) == Input::ControllerButtonFlag && !Container::Contains(m_byEvents[(int)EventType::ControllerBtn], input))
+			//Gamepad button
+			if ((events & Input::GamepadButtonFlag) == Input::GamepadButtonFlag && !Container::Contains(m_byEvents[(int)EventType::GamepadBtn], input))
 			{
-				m_byEvents[(int)EventType::ControllerBtn].push_back(input);
+				m_byEvents[(int)EventType::GamepadBtn].push_back(input);
 			}
-			else if ((events & Input::ControllerButtonFlag) != Input::ControllerButtonFlag)
+			else if ((events & Input::GamepadButtonFlag) != Input::GamepadButtonFlag)
 			{
-				Container::Remove(m_byEvents[(int)EventType::ControllerBtn], input);
+				Container::Remove(m_byEvents[(int)EventType::GamepadBtn], input);
 			}
-			//Controller stick
-			if ((events & Input::ControllerStickFlag) == Input::ControllerStickFlag && !Container::Contains(m_byEvents[(int)EventType::ControllerStick], input))
+			//Gamepad stick
+			if ((events & Input::GamepadStickFlag) == Input::GamepadStickFlag && !Container::Contains(m_byEvents[(int)EventType::GamepadStick], input))
 			{
-				m_byEvents[(int)EventType::ControllerStick].push_back(input);
+				m_byEvents[(int)EventType::GamepadStick].push_back(input);
 			}
-			else if ((events & Input::ControllerStickFlag) != Input::ControllerStickFlag)
+			else if ((events & Input::GamepadStickFlag) != Input::GamepadStickFlag)
 			{
-				Container::Remove(m_byEvents[(int)EventType::ControllerStick], input);
+				Container::Remove(m_byEvents[(int)EventType::GamepadStick], input);
 			}
-			//Controller trigger
-			if ((events & Input::ControllerTriggerFlag) == Input::ControllerTriggerFlag && !Container::Contains(m_byEvents[(int)EventType::ControllerTrigger], input))
+			//Gamepad trigger
+			if ((events & Input::GamepadTriggerFlag) == Input::GamepadTriggerFlag && !Container::Contains(m_byEvents[(int)EventType::GamepadTrigger], input))
 			{
-				m_byEvents[(int)EventType::ControllerTrigger].push_back(input);
+				m_byEvents[(int)EventType::GamepadTrigger].push_back(input);
 			}
-			else if ((events & Input::ControllerTriggerFlag) != Input::ControllerTriggerFlag)
+			else if ((events & Input::GamepadTriggerFlag) != Input::GamepadTriggerFlag)
 			{
-				Container::Remove(m_byEvents[(int)EventType::ControllerTrigger], input);
+				Container::Remove(m_byEvents[(int)EventType::GamepadTrigger], input);
 			}
 		}
 		m_modified.clear();

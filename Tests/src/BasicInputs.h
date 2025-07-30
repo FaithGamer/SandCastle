@@ -54,7 +54,8 @@ void BasicInputs()
 	fire->BindMouse(Mouse::Button::Left);
 	//Bind a keyboard scancode
 	//Scancode means W is the position of the key on US keyboard (will automatically translate to Z for FR)
-	fire->BindKey(KeyScancode::Space);
+	fire->BindKey(Key::Scancode::Space);
+	fire->BindGamepadButton(Gamepad::Button::South);
 	//What function will be called when the input is triggered.
 	fire->signal.AddListener(&OnFire);
 	//Could also be listened by an object:
@@ -79,14 +80,14 @@ void BasicInputs()
 	std::vector<DirectionalButton> dirButtons;
 
 	//Scancode means W is the position of the key on US keyboard (will automatically translate to Z for FR)
-	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::W), Vec2f(0, 1)));
-	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::A), Vec2f(-1, 0)));
-	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::S), Vec2f(0, -1)));
-	dirButtons.emplace_back(DirectionalButton(Button(KeyScancode::D), Vec2f(1, 0)));
+	dirButtons.emplace_back(DirectionalButton(Button(Key::Scancode::W), Vec2f(0, 1)));
+	dirButtons.emplace_back(DirectionalButton(Button(Key::Scancode::A), Vec2f(-1, 0)));
+	dirButtons.emplace_back(DirectionalButton(Button(Key::Scancode::S), Vec2f(0, -1)));
+	dirButtons.emplace_back(DirectionalButton(Button(Key::Scancode::D), Vec2f(1, 0)));
 	directions->BindButtons(dirButtons);
 
 	//Bind a controller stick
-	directions->BindStick(ControllerStick::Left);
+	directions->BindStick(Gamepad::Stick::Left);
 	directions->signal.AddListener(&OnMove);
 
 	Engine::Launch();

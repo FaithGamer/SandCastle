@@ -30,7 +30,7 @@ namespace SandCastle
 		m_bindings.directions.clear();
 	}
 
-	void DirectionalInput::BindStick(ControllerStick stick)
+	void DirectionalInput::BindStick(Gamepad::Stick stick)
 	{
 		if (HaveBinding(stick))
 		{
@@ -58,7 +58,7 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void DirectionalInput::SetStick(ControllerStick stick, int version)
+	void DirectionalInput::SetStick(Gamepad::Stick stick, int version)
 	{
 		if (m_bindings.directions.size() <= version)
 		{
@@ -99,7 +99,7 @@ namespace SandCastle
 		m_triggerDeadzone = deadzone;
 	}
 
-	bool DirectionalInput::HaveBinding(ControllerStick stick)
+	bool DirectionalInput::HaveBinding(Gamepad::Stick stick)
 	{
 		for (auto& direction : m_bindings.directions)
 		{
@@ -243,7 +243,7 @@ namespace SandCastle
 		signal.SendSignal(&state);
 		return true;
 	}
-	bool DirectionalInput::ControllerButtonPressed(const SDL_Event& e)
+	bool DirectionalInput::GamepadButtonPressed(const SDL_Event& e)
 	{
 		bool mustComputeState = false;
 		for (auto& direction : m_bindings.directions)
@@ -264,7 +264,7 @@ namespace SandCastle
 		}
 		return false;
 	}
-	bool DirectionalInput::ControllerButtonReleased(const SDL_Event& e)
+	bool DirectionalInput::GamepadButtonReleased(const SDL_Event& e)
 	{
 		bool mustComputeState = false;
 		for (auto& direction : m_bindings.directions)
@@ -285,7 +285,7 @@ namespace SandCastle
 		}
 		return false;
 	}
-	bool DirectionalInput::ControllerTriggerMoved(const SDL_Event& e)
+	bool DirectionalInput::GamepadTriggerMoved(const SDL_Event& e)
 	{
 		bool mustComputeState = false;
 		for (auto& direction : m_bindings.directions)
@@ -315,7 +315,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool DirectionalInput::ControllerStickMoved(const SDL_Event& e)
+	bool DirectionalInput::GamepadStickMoved(const SDL_Event& e)
 	{
 		bool mustComputeState = false;
 		for (auto& direction : m_bindings.directions)
@@ -365,23 +365,23 @@ namespace SandCastle
 
 		for (auto& direction : m_bindings.directions)
 		{
-			if (direction.stick.stick != ControllerStick::None)
+			if (direction.stick.stick != Gamepad::Stick::None)
 			{
-				newEvents |= Input::ControllerStickFlag;
+				newEvents |= Input::GamepadStickFlag;
 			}
 			for (auto& button : direction.buttons)
 			{
-				if (button.button.key != KeyScancode::Unknown)
+				if (button.button.key != Key::Scancode::Unknown)
 					newEvents |= Input::KeyButtonFlag;
 
 				if (button.button.mouse != Mouse::Button::Invalid)
 					newEvents |= Input::MouseButtonFlag;
 
-				if (button.button.controller != ControllerButton::Invalid)
-					newEvents |= Input::ControllerButtonFlag;
+				if (button.button.controller != Gamepad::Button::Invalid)
+					newEvents |= Input::GamepadButtonFlag;
 
-				if (button.button.trigger != ControllerTrigger::Undefined)
-					newEvents |= Input::ControllerTriggerFlag;
+				if (button.button.trigger != Gamepad::Trigger::Undefined)
+					newEvents |= Input::GamepadTriggerFlag;
 			}
 		}
 		if (m_mouseWheel)
@@ -413,7 +413,7 @@ namespace SandCastle
 					sum += button.direction;
 				}
 			}
-			if (direction.stick.stick != ControllerStick::None)
+			if (direction.stick.stick != Gamepad::Stick::None)
 			{
 				sum += direction.stick.currentDirection;
 			}

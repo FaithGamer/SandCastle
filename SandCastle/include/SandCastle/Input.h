@@ -3,7 +3,7 @@
 #include "SandCastle/Input/Input.h"
 #include "SandCastle/Input/Bindings.h"
 #include "SandCastle/Input/ButtonInput.h"
-#include "SandCastle/Input/Controller.h"
+#include "SandCastle/Input/Gamepad.h"
 #include "SandCastle/Input/DirectionalInput.h"
 #include "SandCastle/Input/InputMap.h"
 #include "SandCastle/Input/Inputs.h"

@@ -6,9 +6,9 @@ namespace SandCastle
 	void Button::Deserialize(Serialized& config)
 	{
 		mouse = (Mouse::Button)config.GetInt("mouse");
-		key = (KeyScancode)config.GetInt("key");
-		controller = (ControllerButton)config.GetInt("controller");
-		trigger = (ControllerTrigger)config.GetInt("trigger");
+		key = (Key::Scancode)config.GetInt("key");
+		controller = (Gamepad::Button)config.GetInt("controller");
+		trigger = (Gamepad::Trigger)config.GetInt("trigger");
 	}
 
 	Serialized Button::Serialize()

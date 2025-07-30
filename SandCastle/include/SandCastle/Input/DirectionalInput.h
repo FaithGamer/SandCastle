@@ -34,7 +34,7 @@ namespace SandCastle
 
 		/// @brief Bind binding to a stick
 		/// @param stick The controller stick
-		void BindStick(ControllerStick stick);
+		void BindStick(Gamepad::Stick stick);
 		/// @brief Bind binding to buttons, for example W, A, S, D
 		/// @param buttons Each value of the vector contains a button bound with a direction
 		/// When multiple buttons are being pressed at the same time, the final state is the sum of all the pressed buttons
@@ -45,7 +45,7 @@ namespace SandCastle
 		void SetMouseWheel(bool mouseWheel);
 		/// @brief Set a specific binding's stick
 		/// @param version Binding version
-		void SetStick(ControllerStick stick, int version);
+		void SetStick(Gamepad::Stick stick, int version);
 		/// @brief Set a specific binding's buttons
 		/// @param version Is equivalent to the order of insertion (starting at 0)
 		void SetButtons(std::vector<DirectionalButton> buttons, int version);
@@ -61,7 +61,7 @@ namespace SandCastle
 
 		/// @brief Check if the stick is used in any of the bindings
 		/// @return true if yes
-		bool HaveBinding(ControllerStick stick);
+		bool HaveBinding(Gamepad::Stick stick);
 		/// @brief Check if any of the directional button in the vector matches any of the directional button in another binding
 		/// @return true if yes
 		bool HaveBinding(std::vector<DirectionalButton> buttons);
@@ -79,10 +79,10 @@ namespace SandCastle
 		virtual bool MouseButtonPressed(const SDL_Event& e) override;
 		virtual bool MouseButtonReleased(const SDL_Event& e) override;
 		virtual bool MouseWheelMoved(const SDL_Event& e) override;
-		virtual bool ControllerButtonPressed(const SDL_Event& e) override;
-		virtual bool ControllerButtonReleased(const SDL_Event& e) override;
-		virtual bool ControllerTriggerMoved(const SDL_Event& e) override;
-		virtual bool ControllerStickMoved(const SDL_Event& e) override;
+		virtual bool GamepadButtonPressed(const SDL_Event& e) override;
+		virtual bool GamepadButtonReleased(const SDL_Event& e) override;
+		virtual bool GamepadTriggerMoved(const SDL_Event& e) override;
+		virtual bool GamepadStickMoved(const SDL_Event& e) override;
 
 		virtual void UpdateEventListened() override;
 

@@ -73,8 +73,8 @@ void Rotation()
 	auto dir = map->CreateDirectionalInput("Dirs");
 
 	std::vector<DirectionalButton> buttons;
-	buttons.emplace_back(DirectionalButton(Button(KeyScancode::Left), Vec2f(-1.f, 0)));
-	buttons.emplace_back(DirectionalButton(Button(KeyScancode::Right), Vec2f(1.f, 0)));
+	buttons.emplace_back(DirectionalButton(Button(Key::Scancode::Left), Vec2f(-1.f, 0)));
+	buttons.emplace_back(DirectionalButton(Button(Key::Scancode::Right), Vec2f(1.f, 0)));
 	dir->BindButtons(buttons);
 
 	auto entity = Entity::CreateSprite("trollface.png_0_0");

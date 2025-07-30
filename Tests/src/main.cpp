@@ -10,7 +10,7 @@ int main()
 	//Launch();
 	//DrawSprite();
 	//DrawAnimation();
-	//BasicInputs();
+	BasicInputs();
 	//Rotation();
 	//WindowEvents();
 }

@@ -34,7 +34,7 @@ namespace SandCastle
 		m_bindings.buttons.clear();
 	}
 
-	void ButtonInput::BindKey(KeyScancode keyButton)
+	void ButtonInput::BindKey(Key::Scancode keyButton)
 	{
 		if (HaveBinding(keyButton))
 		{
@@ -60,11 +60,11 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::BindControllerButton(ControllerButton controllerButton)
+	void ButtonInput::BindGamepadButton(Gamepad::Button controllerButton)
 	{
 		if (HaveBinding(controllerButton))
 		{
-			LOG_WARN("ButtonInput::BindControllerButton -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindGamepadButton -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();
@@ -73,11 +73,11 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::BindControllerTrigger(ControllerTrigger trigger)
+	void ButtonInput::BindGamepadTrigger(Gamepad::Trigger trigger)
 	{
 		if (HaveBinding(trigger))
 		{
-			LOG_WARN("ButtonInput::BindControllerTrigger -> binding already exists, no binding added");
+			LOG_WARN("ButtonInput::BindGamepadTrigger -> binding already exists, no binding added");
 			return;
 		}
 		size_t version = m_bindings.buttons.size();
@@ -86,7 +86,7 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::SetKey(int version, KeyScancode keyButton)
+	void ButtonInput::SetKey(int version, Key::Scancode keyButton)
 	{
 		if (version >= m_bindings.buttons.size())
 		{
@@ -108,22 +108,22 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
-	void ButtonInput::SetControllerButton(int version, ControllerButton controllerButton)
+	void ButtonInput::SetGamepadButton(int version, Gamepad::Button controllerButton)
 	{
 		if (version >= m_bindings.buttons.size())
 		{
-			LOG_WARN("ButtonInput::SetControllerButton -> Button binding version does not exists.");
+			LOG_WARN("ButtonInput::SetGamepadButton -> Button binding version does not exists.");
 			return;
 		}
 		m_bindings.buttons[version].controller = controllerButton;
 		UpdateEventListened();
 	}
 
-	void ButtonInput::SetControllerTrigger(int version, ControllerTrigger controllerTrigger)
+	void ButtonInput::SetGamepadTrigger(int version, Gamepad::Trigger controllerTrigger)
 	{
 		if (version >= m_bindings.buttons.size())
 		{
-			LOG_WARN("ButtonInput::SetControllerTrigger -> Button binding version does not exists.");
+			LOG_WARN("ButtonInput::SetGamepadTrigger -> Button binding version does not exists.");
 			return;
 		}
 		m_bindings.buttons[version].trigger = controllerTrigger;
@@ -176,7 +176,7 @@ namespace SandCastle
 		return m_sendSignalOnRelease;
 	}
 
-	bool ButtonInput::HaveBinding(KeyScancode key)
+	bool ButtonInput::HaveBinding(Key::Scancode key)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -196,7 +196,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::HaveBinding(ControllerButton controllerButton)
+	bool ButtonInput::HaveBinding(Gamepad::Button controllerButton)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -206,7 +206,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::HaveBinding(ControllerTrigger trigger)
+	bool ButtonInput::HaveBinding(Gamepad::Trigger trigger)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -265,7 +265,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::ControllerButtonPressed(const SDL_Event& e)
+	bool ButtonInput::GamepadButtonPressed(const SDL_Event& e)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -277,7 +277,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::ControllerButtonReleased(const SDL_Event& e)
+	bool ButtonInput::GamepadButtonReleased(const SDL_Event& e)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -289,7 +289,7 @@ namespace SandCastle
 		return false;
 	}
 
-	bool ButtonInput::ControllerTriggerMoved(const SDL_Event& e)
+	bool ButtonInput::GamepadTriggerMoved(const SDL_Event& e)
 	{
 		for (auto& button : m_bindings.buttons)
 		{
@@ -321,17 +321,17 @@ namespace SandCastle
 
 		for (auto& button : m_bindings.buttons)
 		{
-			if (button.key != KeyScancode::Unknown)
+			if (button.key != Key::Scancode::Unknown)
 				newEvents |= Input::KeyButtonFlag;
 
 			if (button.mouse != Mouse::Button::Invalid)
 				newEvents |= Input::MouseButtonFlag;
 
-			if (button.controller != ControllerButton::Invalid)
-				newEvents |= Input::ControllerButtonFlag;
+			if (button.controller != Gamepad::Button::Invalid)
+				newEvents |= Input::GamepadButtonFlag;
 
-			if (button.trigger != ControllerTrigger::Undefined)
-				newEvents |= Input::ControllerTriggerFlag;
+			if (button.trigger != Gamepad::Trigger::Undefined)
+				newEvents |= Input::GamepadTriggerFlag;
 		}
 		if (m_eventsListened != newEvents)
 		{

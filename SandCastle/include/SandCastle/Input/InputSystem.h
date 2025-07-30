@@ -2,7 +2,7 @@
 
 #include "SandCastle/ECS/System.h"
 #include "SandCastle/Input/Input.h"
-#include "SandCastle/Input/Controller.h"
+#include "SandCastle/Input/Gamepad.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Input/Keyboard.h"
 namespace SandCastle
@@ -14,7 +14,7 @@ namespace SandCastle
 		{
 			Mouse = 1,
 			Keyboard = 2,
-			Controller = 4
+			Gamepad = 4
 		};
 	public:
 		InputSystem();
@@ -32,11 +32,11 @@ namespace SandCastle
 		void EndRebind();
 
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
-		void AddForbiddenBinding(KeyScancode key);
+		void AddForbiddenBinding(Key::Scancode key);
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
-		void AddForbiddenBinding(ControllerButton button);
+		void AddForbiddenBinding(Gamepad::Button button);
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
-		void AddForbiddenBinding(ControllerTrigger trigger);
+		void AddForbiddenBinding(Gamepad::Trigger trigger);
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
 		void AddForbiddenBinding(Mouse::Button mouse);
 		int GetUsedMethod();
@@ -44,15 +44,15 @@ namespace SandCastle
 		sptr<Input> GetRebindingInput();
 	private:
 		bool Rebind(SDL_Event& e);
-		void InitController(SDL_JoystickID id);
+		void InitGamepad(SDL_JoystickID id);
 	private:
 		//Rebinding
 		sptr<Input> m_rebind;
 		int m_rebindPeripherals = 0;
 		int m_rebindVersion = -1;
-		std::vector<KeyScancode> m_forbiddenKeys;
-		std::vector<ControllerButton> m_forbiddenButtons;
-		std::vector<ControllerTrigger> m_forbiddenTriggers;
+		std::vector<Key::Scancode> m_forbiddenKeys;
+		std::vector<Gamepad::Button> m_forbiddenButtons;
+		std::vector<Gamepad::Trigger> m_forbiddenTriggers;
 		std::vector<Mouse::Button> m_forbiddenMouses;
 
 	};

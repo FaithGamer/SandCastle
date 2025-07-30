@@ -17,9 +17,9 @@ namespace SandCastle
 		MouseBtn,
 		MouseMove,
 		MouseWheel,
-		ControllerBtn,
-		ControllerStick,
-		ControllerTrigger,
+		GamepadBtn,
+		GamepadStick,
+		GamepadTrigger,
 		EventTypeCount
 	};
 

@@ -21,7 +21,7 @@ namespace SandCastle
 		SDL_JoystickID* joystickArray = SDL_GetGamepads(&count);
 		for (int i = 0; i < count ; i++)
 		{
-			InitController(joystickArray[i]);
+			InitGamepad(joystickArray[i]);
 		}
 	}
 
@@ -54,7 +54,7 @@ namespace SandCastle
 			SDL_GetGamepads(&joystickCount);
 			if (joystickCount > 0)
 			{
-				InitController(event.gdevice.which);
+				InitGamepad(event.gdevice.which);
 			}
 			else
 			{
@@ -103,15 +103,15 @@ namespace SandCastle
 		m_rebindVersion = 0;
 		m_rebindPeripherals = 0;
 	}
-	void InputSystem::AddForbiddenBinding(KeyScancode key)
+	void InputSystem::AddForbiddenBinding(Key::Scancode key)
 	{
 		m_forbiddenKeys.push_back(key);
 	}
-	void InputSystem::AddForbiddenBinding(ControllerButton button)
+	void InputSystem::AddForbiddenBinding(Gamepad::Button button)
 	{
 		m_forbiddenButtons.push_back(button);
 	}
-	void InputSystem::AddForbiddenBinding(ControllerTrigger trigger)
+	void InputSystem::AddForbiddenBinding(Gamepad::Trigger trigger)
 	{
 		m_forbiddenTriggers.push_back(trigger);
 	}
@@ -163,7 +163,7 @@ namespace SandCastle
 					}
 					else
 					{
-						buttonInput->SetKey(version, KeyScancode::Unknown);
+						buttonInput->SetKey(version, Key::Scancode::Unknown);
 						buttonInput->SetMouse(version, (Mouse::Button)e.button.button);
 						EndRebind();
 						return true;
@@ -180,19 +180,19 @@ namespace SandCastle
 				switch (e.type)
 				{
 				case SDL_EVENT_KEY_DOWN:
-					if(Container::Contains(m_forbiddenKeys, (KeyScancode)e.key.scancode))
+					if(Container::Contains(m_forbiddenKeys, (Key::Scancode)e.key.scancode))
 						return false;
 
 					if (version == -1)
 					{
-						buttonInput->BindKey((KeyScancode)e.key.scancode);
+						buttonInput->BindKey((Key::Scancode)e.key.scancode);
 						EndRebind();
 						return true;
 					}
 					else
 					{
 						buttonInput->SetMouse(version, Mouse::Button::Invalid);
-						buttonInput->SetKey(version, (KeyScancode)e.key.scancode);
+						buttonInput->SetKey(version, (Key::Scancode)e.key.scancode);
 						EndRebind();
 						return true;
 					}
@@ -202,58 +202,58 @@ namespace SandCastle
 				}
 			}
 
-			if ((m_rebindPeripherals & PeripheralFlag::Controller) == PeripheralFlag::Controller)
+			if ((m_rebindPeripherals & PeripheralFlag::Gamepad) == PeripheralFlag::Gamepad)
 			{
-				//Controller
+				//Gamepad
 				switch (e.type)
 				{
 				case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
-					if (Container::Contains(m_forbiddenButtons, (ControllerButton)e.gbutton.button))
+					if (Container::Contains(m_forbiddenButtons, (Gamepad::Button)e.gbutton.button))
 						return false;
 
 					if (version == -1)
 					{
-						buttonInput->BindControllerButton((ControllerButton)e.gbutton.button);
+						buttonInput->BindGamepadButton((Gamepad::Button)e.gbutton.button);
 						EndRebind();
 						return true;
 					}
 					else
 					{
-						buttonInput->SetControllerButton(version, (ControllerButton)e.gbutton.button);
+						buttonInput->SetGamepadButton(version, (Gamepad::Button)e.gbutton.button);
 						EndRebind();
 						return true;
 					}
 					break;
 				case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
-					if (Container::Contains(m_forbiddenTriggers, ControllerTrigger::Left))
+					if (Container::Contains(m_forbiddenTriggers, Gamepad::Trigger::Left))
 						return false;
 
 					if (version == -1)
 					{
-						buttonInput->BindControllerTrigger(ControllerTrigger::Left);
+						buttonInput->BindGamepadTrigger(Gamepad::Trigger::Left);
 						EndRebind();
 						return true;
 					}
 					else
 					{
-						buttonInput->SetControllerTrigger(version, ControllerTrigger::Left);
+						buttonInput->SetGamepadTrigger(version, Gamepad::Trigger::Left);
 						EndRebind();
 						return true;
 					}
 					break;
 				case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
-					if (Container::Contains(m_forbiddenTriggers, ControllerTrigger::Right))
+					if (Container::Contains(m_forbiddenTriggers, Gamepad::Trigger::Right))
 						return false;
 
 					if (version == -1)
 					{
-						buttonInput->BindControllerTrigger(ControllerTrigger::Right);
+						buttonInput->BindGamepadTrigger(Gamepad::Trigger::Right);
 						EndRebind();
 						return true;
 					}
 					else
 					{
-						buttonInput->SetControllerTrigger(version, ControllerTrigger::Right);
+						buttonInput->SetGamepadTrigger(version, Gamepad::Trigger::Right);
 						EndRebind();
 						return true;
 					}
@@ -270,7 +270,7 @@ namespace SandCastle
 		}
 		return false;
 	}
-	void InputSystem::InitController(SDL_JoystickID id)
+	void InputSystem::InitGamepad(SDL_JoystickID id)
 	{
 		SDL_Gamepad* controller = SDL_OpenGamepad(id);
 		if (controller == NULL)

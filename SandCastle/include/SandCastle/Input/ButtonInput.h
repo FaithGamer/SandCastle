@@ -2,7 +2,7 @@
 
 #include "SandCastle/Input/Input.h"
 #include "SandCastle/Input/Keyboard.h"
-#include "SandCastle/Input/Controller.h"
+#include "SandCastle/Input/Gamepad.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Input/Bindings.h"
 #include "SandCastle/Core/Vec.h"
@@ -41,21 +41,21 @@ namespace SandCastle
 
 		/// @brief Bind a Key from the keyboard
 		/// @param keyButton The scancode of the key
-		void BindKey(KeyScancode keyButton);
+		void BindKey(Key::Scancode keyButton);
 		/// @brief Bind a mouse button 
 		/// @param mouseButton The mouse button
 		void BindMouse(Mouse::Button mouseButton);
 		/// @brief Bind to a controller button
 		/// @param controllerButton the controller button
-		void BindControllerButton(ControllerButton controllerButton);
+		void BindGamepadButton(Gamepad::Button controllerButton);
 		/// @brief Bind to a controller trigger.
 		/// It will send signal every time the pressing amount changes.
 		/// @param trigger The controller trigger
-		void BindControllerTrigger(ControllerTrigger trigger);
+		void BindGamepadTrigger(Gamepad::Trigger trigger);
 		/// @brief Set a specific binding key
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param keyButton The key to bind to
-		void SetKey(int version, KeyScancode keyButton);
+		void SetKey(int version, Key::Scancode keyButton);
 		/// @brief Set a mouse button to a specific binding 
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param keyButton The key to bind to
@@ -63,11 +63,11 @@ namespace SandCastle
 		/// @brief Set a controller button to a specific binding 
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param mouseButton the mouse button to bind to
-		void SetControllerButton(int version, ControllerButton controllerButton);
+		void SetGamepadButton(int version, Gamepad::Button controllerButton);
 		/// @brief Set a controller trigger to a specific binding 
 		/// @param version Wich binding version, you can get the count of versions with GetBindingsCount
 		/// @param controllerButton the controller button to binds to
-		void SetControllerTrigger(int version, ControllerTrigger controllerTrigger);
+		void SetGamepadTrigger(int version, Gamepad::Trigger controllerTrigger);
 		/// @brief Remove a binding
 		void RemoveBinding(int version);
 
@@ -92,10 +92,10 @@ namespace SandCastle
 		bool GetSendSignalOnPress();
 		bool GetSendSignalOnRelease();
 
-		bool HaveBinding(KeyScancode key);
+		bool HaveBinding(Key::Scancode key);
 		bool HaveBinding(Mouse::Button mouse);
-		bool HaveBinding(ControllerButton button);
-		bool HaveBinding(ControllerTrigger trigger);
+		bool HaveBinding(Gamepad::Button button);
+		bool HaveBinding(Gamepad::Trigger trigger);
 
 
 	protected:
@@ -104,9 +104,9 @@ namespace SandCastle
 		bool KeyReleased(const SDL_Event& e) override;
 		bool MouseButtonPressed(const SDL_Event& e) override;
 		bool MouseButtonReleased(const SDL_Event& e) override;
-		bool ControllerButtonPressed(const SDL_Event& e) override;
-		bool ControllerButtonReleased(const SDL_Event& e) override;
-		bool ControllerTriggerMoved(const SDL_Event& e) override;
+		bool GamepadButtonPressed(const SDL_Event& e) override;
+		bool GamepadButtonReleased(const SDL_Event& e) override;
+		bool GamepadTriggerMoved(const SDL_Event& e) override;
 		void UpdateEventListened() override;
 
 		bool ReleaseButton();

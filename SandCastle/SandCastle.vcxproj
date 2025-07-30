@@ -286,7 +286,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineParameters.cpp" />
     <ClCompile Include="src\Input\ButtonInput.cpp" />
-    <ClCompile Include="src\Input\Controller.cpp" />
+    <ClCompile Include="src\Input\Gamepad.cpp" />
     <ClCompile Include="src\Input\DirectionalInput.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Input\InputMap.cpp" />
@@ -366,7 +366,7 @@
     <ClInclude Include="include\SandCastle\Input.h" />
     <ClInclude Include="include\SandCastle\Input\Bindings.h" />
     <ClInclude Include="include\SandCastle\Input\ButtonInput.h" />
-    <ClInclude Include="include\SandCastle\Input\Controller.h" />
+    <ClInclude Include="include\SandCastle\Input\Gamepad.h" />
     <ClInclude Include="include\SandCastle\Input\DirectionalInput.h" />
     <ClInclude Include="include\SandCastle\Input\Input.h" />
     <ClInclude Include="include\SandCastle\Input\InputMap.h" />

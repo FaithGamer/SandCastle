@@ -73,9 +73,14 @@ July
 -couldn't figure what the point size could be used for
 -therefore using only the pixel size for everything.
 -window event test
+-Gamepad, mouse, key namespace
+
+>Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
+>Serialized: "ResetGetError()"
+>Serialized: bool TryGet
+>Serialized, Get error must propagate to all parents
 
 
->mouse namespace
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)
 >improve redering (see redering section)
@@ -90,10 +95,7 @@ July
 
 >add capacity of receiving an intelligible string from an input for it's binding, either controller or m&k, and what version (default 0)
 >m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
->Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
->Serialized: "ResetGetError()"
->Serialized: bool TryGet
->Serialized, Get error must propagate to all parents
+
 
 Redering:
 

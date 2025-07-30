@@ -111,7 +111,7 @@
     <ClCompile Include="src\Input\ButtonInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Input\Controller.cpp">
+    <ClCompile Include="src\Input\Gamepad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Input\DirectionalInput.cpp">
@@ -335,7 +335,7 @@
     <ClInclude Include="include\SandCastle\Input\ButtonInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Input\Controller.h">
+    <ClInclude Include="include\SandCastle\Input\Gamepad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Input\DirectionalInput.h">
