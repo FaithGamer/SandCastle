@@ -66,29 +66,33 @@ July
 -Entt assertion break and logging correctly
 -Test distrib build without console (this involved changing linker advanced settings to configure the entry point )
 -Improved serialized error message
+-moved input system
+-changed order of glBindFrameBuffer and glViewport bc apparently there was a mistake
+-find out pixel/point size is the same regardless of windows scaling factor (at least on my machine)
+-fire only one resize signal when pixel size change (not when only window size change, but they always trigger both)
+-couldn't figure what the point size could be used for
+-therefore using only the pixel size for everything.
+-window event test
 
->check if there's not an event infinite loop for window resize
 
->test the difference between; SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED
-and SDL_EVENT_WINDOW_RESIZED, and determine how to use them in the proper way
 >mouse namespace
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)
 >improve redering (see redering section)
 >text input (SDL_StartTextInput...)
 >Implement LoveAudio from idle colony as a default audio system
+>audio spacialization
 >Implement steamworks from idle colony
 >Implement a default GameSystem class inspired from the pattern in IdleColony
 >Complete UI system
 >Particle system
 >Transform animation system
 
->rotation Math::VecToAngle/VecToAngle should match with Transform rotation
->camera, make near and far plane customizable
->InputSystem.h should be in Input folder and part of Input.h
 >add capacity of receiving an intelligible string from an input for it's binding, either controller or m&k, and what version (default 0)
 >m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
->Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadGetError)
+>Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
+>Serialized: "ResetGetError()"
+>Serialized: bool TryGet
 >Serialized, Get error must propagate to all parents
 
 Redering:
@@ -103,3 +107,8 @@ Thoughts:
 
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
+
+UI:
+
+>start by managing fonts (create texture, or set of textures, for font in one size)
+>
