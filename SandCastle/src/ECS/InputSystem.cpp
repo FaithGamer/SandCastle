@@ -1,7 +1,7 @@
 #include "pch.h"
 
 #include "SandCastle/Input/Inputs.h"
-#include "SandCastle/ECS/InputSystem.h"
+#include "SandCastle/Input/InputSystem.h"
 #include "SandCastle/Input/ButtonInput.h"
 #include "SandCastle/Input/DirectionalInput.h"
 #include "SandCastle/Core/Log.h"

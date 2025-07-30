@@ -302,7 +302,7 @@
     <ClInclude Include="include\SandCastle\ECS\EntityId.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\InputSystem.h">
+    <ClInclude Include="include\SandCastle\Input\InputSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\ECS\LineRendererSystem.h">

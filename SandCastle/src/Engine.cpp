@@ -6,7 +6,7 @@
 #include "SandCastle/EngineParameters.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
-#include "SandCastle/ECS/InputSystem.h"
+#include "SandCastle/Input/InputSystem.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Core/Assets.h"
