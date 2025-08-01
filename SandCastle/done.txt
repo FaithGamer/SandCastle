@@ -75,11 +75,12 @@ July
 -window event test
 -Gamepad, mouse, key namespace
 
->Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
->Serialized: "ResetGetError()"
->Serialized: bool TryGet
->Serialized, Get error must propagate to all parents
+01
 
+-Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
+-Serialized: GetObjArray
+-Serialized: "ResetGetError()"
+-Serialized: bool TryGet
 
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)
@@ -107,6 +108,7 @@ for multi threaded rendering, try copying all the components needed for renderin
 
 Thoughts:
 
+>Serialized, Get error must propagate to all parents?
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
 

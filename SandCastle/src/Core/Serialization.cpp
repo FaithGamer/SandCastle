@@ -4,7 +4,7 @@
 
 namespace SandCastle
 {
-	Serialized::Serialized() : m_hadGetError(false), m_hadLoadError(false)
+	Serialized::Serialized()
 	{
 
 	}
@@ -12,6 +12,12 @@ namespace SandCastle
 	Serialized::Serialized(String path) : Serialized()
 	{
 		LoadFromDisk(path);
+	}
+
+	Serialized::Serialized(Json&& json, String rpath)
+	{
+		m_json = json;
+		m_rpath = rpath;
 	}
 
 	void Serialized::LoadFromDisk(String path)
@@ -32,7 +38,7 @@ namespace SandCastle
 		}
 		catch (Json::exception& exception)
 		{
-			m_hadLoadError = true;
+			m_hadParseError = true;
 			String errorMsg = "Serialized error when parsing: " + path + "\n";
 			errorMsg += "json exception: " + std::to_string(exception.id) + ", ";
 			errorMsg += *exception.what() + "\n";
@@ -90,6 +96,10 @@ namespace SandCastle
 			LOG_ERROR(errorMsg);
 		}
 		file.close();
+	}
+	void Serialized::ClearGetError()
+	{
+		m_hadGetError = false;
 	}
 	void Serialized::AddObj(String name, Serialized& serialized)
 	{
@@ -170,6 +180,31 @@ namespace SandCastle
 			return illFormed;
 		}
 	}
+	std::vector<Serialized> WrapVector(std::vector<Json>&& vec, const String&& rpath)
+	{
+		std::vector<Serialized> result;
+		result.reserve(vec.size());
+		for (Json& obj : vec)
+		{
+			result.emplace_back(std::move(obj), rpath);
+		}
+		return result;
+	}
+	std::vector<Serialized> Serialized::GetObjArray(String name)
+	{
+		try {
+			return WrapVector(m_json.at(name), m_rpath + "->" + name);
+		}
+		catch (Json::exception& exception)
+		{
+			String errorMsg = "Serialized error in file " + m_rpath + ", parameter: " + String(name) + "\n";
+			errorMsg += "json exception: " + std::to_string(exception.id) + ", ";
+			errorMsg += String(exception.what()) + "\n";
+			m_hadGetError = true;
+			LOG_ERROR(errorMsg);
+		}
+
+	}
 	bool Serialized::SafeGetObj(String name, Serialized& value)
 	{
 		{
@@ -209,5 +244,10 @@ namespace SandCastle
 	{
 		return m_hadLoadError;
 	}
-	
+
+	bool Serialized::HadParseError() const
+	{
+		return m_hadParseError;
+	}
+
 }

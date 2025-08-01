@@ -43,6 +43,7 @@
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\Rotation.h" />
+    <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\WindowEvents.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

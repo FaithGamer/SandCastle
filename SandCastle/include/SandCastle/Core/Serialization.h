@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <json/json.hpp>
 #include "SandCastle/Core/Log.h"
@@ -8,7 +8,7 @@ namespace SandCastle
 {
 	using Json = nlohmann::json;
 
-	
+
 	/// @brief Serialized version of an object.
 	/// Wrapper around json object and fstream functions
 	class Serialized
@@ -16,6 +16,7 @@ namespace SandCastle
 	public:
 		Serialized();
 		Serialized(String path);
+		Serialized(Json&& json, String rpath);
 
 		void LoadFromDisk(String path);
 		void SetJson(Json& json);
@@ -23,6 +24,10 @@ namespace SandCastle
 		void SetJson(Json&& json);
 		void SetJson(Json&& json, String rpath);
 		void WriteOnDisk(String path);
+		/// @brief Set the HadGetError flag to false
+		/// useful if you handled the error and want to check for 
+		/// other errors.
+		void ClearGetError();
 
 		/// @brief Write another serialized into this serialized
 		/// @param serialized 
@@ -36,8 +41,10 @@ namespace SandCastle
 		float GetFloat(String name);
 		int64_t GetInt(String name);
 		bool GetBool(String name);
+
 		String GetString(String name);
 		Serialized GetObj(String name);
+		std::vector<Serialized> GetObjArray(String name);
 		/// @brief Where this config has been loaded from disk
 		/// @return empty string if not loaded from disk
 		String GetReadPath() const;
@@ -45,13 +52,39 @@ namespace SandCastle
 		/// @return empty string if never written
 		String GetWritePath() const;
 
+		/// @brief Return true if it had error when loadinf the file from disk
+		bool HadLoadError() const;
+		/// @brief Return true if it had error when parsing the file to json
+		bool HadParseError() const;
 		/// @brief Return true if any of the Get method couldn't find a parameter.
 		bool HadGetError() const;
 
-		/// @brief Return true if it had error when loading from disk
-		bool HadLoadError() const;
+		template <class T>
+		bool TryGet(String name, T& value)
+		{
+			auto it = m_json.find(name);
+			if (it != m_json.end())
+			{
+				try {
+					value = it->get<T>();
+					return true;
+				}
+				catch (Json::exception& exception)
+				{
+					String errorMsg = "Serialized error in file " + m_rpath + ", parameter: " + String(name) + "\n";
+					errorMsg += "json exception: " + std::to_string(exception.id) + ", ";
+					errorMsg += String(exception.what()) + "\n";
+					m_hadGetError = true;
+					LOG_ERROR(errorMsg);
 
-
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
 		template <class T>
 		std::vector<T> GetArray(String name)
 		{
@@ -114,13 +147,15 @@ namespace SandCastle
 		}
 
 		bool SafeGetObj(String name, Serialized& value);
-		
 
-		String m_rpath;
-		String m_wpath;
-		Json m_json;
-		bool m_hadGetError;
-		bool m_hadLoadError;
+		String m_rpath = "";
+		String m_wpath = "";
+		Json m_json = nullptr;
+		bool m_hadGetError = false;
+		bool m_hadLoadError = false;
+		bool m_hadParseError = false;
+
+		friend void to_json(Json& j, const Serialized& s);
 	};
 
 	class Serializable
@@ -132,5 +167,10 @@ namespace SandCastle
 		/// @brief Should return true if the deserialization process hasn't been successful
 		virtual bool DeserializationError() { return false; }
 	};
+
+	inline void to_json(Json& j, const Serialized& s)
+	{
+		j = s.m_json;
+	}
 
 }

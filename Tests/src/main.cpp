@@ -4,13 +4,14 @@
 #include "BasicInputs.h"
 #include "Rotation.h"
 #include "WindowEvents.h"
-
+#include "Serialization.h"
 int main()
 {
 	//Launch();
 	//DrawSprite();
 	//DrawAnimation();
-	BasicInputs();
+	//BasicInputs();
 	//Rotation();
 	//WindowEvents();
+	Serialization();
 }
