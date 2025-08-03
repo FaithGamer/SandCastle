@@ -24,7 +24,7 @@ namespace SandCastle
 		}
 		m_animations.clear();
 	}
-	void Assets::GenerateSprites(String filename, Serialized& spritesheet, sptr<Texture> texture)
+	void Assets::GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture)
 	{
 		int w = (int)spritesheet.GetInt("Width");
 		int h = (int)spritesheet.GetInt("Height");
@@ -65,9 +65,8 @@ namespace SandCastle
 				texRect.width = (float)width;
 				texRect.height = (float)height;
 
-				sptr<Asset<Sprite>> sprite = MakeAsset<Sprite>(texture, texRect, origin);
 				String spriteName = filename + "_" + std::to_string(y) + "_" + std::to_string(x);
-				InsertAsset(spriteName, sprite);
+				InsertAsset(spriteName, MakeAsset<Sprite>(texture, texRect, origin));
 			}
 		}
 	}
@@ -78,17 +77,16 @@ namespace SandCastle
 		Serialized importSettings = m_defaultImportSettings.Serialize();
 		return importSettings;
 	}
-	Serialized Assets::CreateDefaultSpritesheet(sptr<Texture> texture)
+	Serialized Assets::CreateDefaultSpritesheet(const Texture* texture)
 	{
 		Serialized spritesheet;
 
 		spritesheet["Width"] = texture->GetSize().x;
 		spritesheet["Height"] = texture->GetSize().y;
-		spritesheet["Origin"] = { 0.f,0.f };
+		spritesheet["Origin"] = { 0.f, 0.f };
 		spritesheet["Padding"] = { 0.f, 0.f };
 
 		return spritesheet;
-
 	}
 	void Assets::AddAnimation(String filename, String path)
 	{
@@ -139,13 +137,12 @@ namespace SandCastle
 			//Reload the rexture
 			static_pointer_cast<Asset<Texture>>(m_assets[filename])->m_ptr->Reload(path, importSettings);
 			//Do not generate sprites
-			return; 
+			return;
 		}
 
 		//Create the texture with the import settings
 		auto texture = MakeAsset<Texture>(path, importSettings);
 		InsertAsset(filename, texture);
-
 
 		//Load sprite sheet from settings
 		auto spritesheet = settings.GetObj("Spritesheet");

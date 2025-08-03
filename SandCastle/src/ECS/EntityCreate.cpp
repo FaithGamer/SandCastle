@@ -14,7 +14,7 @@ namespace SandCastle
 		auto entity = Entity::Create();
 		auto render = entity.AddComponent<SpriteRender>();
 		auto transform = entity.AddComponent<Transform>();
-		auto sprite = Assets::Get<Sprite>(defaultSprite).Ptr();
+		auto sprite = Assets::Get<Sprite>(defaultSprite);
 		render->SetSprite(sprite);
 		return entity;
 	}

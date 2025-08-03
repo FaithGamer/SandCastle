@@ -8,10 +8,10 @@
 int main()
 {
 	//Launch();
-	//DrawSprite();
+	DrawSprite();
 	//DrawAnimation();
 	//BasicInputs();
 	//Rotation();
 	//WindowEvents();
-	Serialization();
+	//Serialization();
 }

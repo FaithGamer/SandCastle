@@ -16,7 +16,7 @@ void DrawSprite()
 	auto render = entity.AddComponent<SpriteRender>();
 	
 	//Fetch a sprite in the assets, and apply it to the SpriteRender.
-	auto sprite = Assets::Get<Sprite>("trollface.png_0_0").Ptr();
+	auto sprite = Assets::Get<Sprite>("trollface.png_0_0");
 	render->SetSprite(sprite);
 
 	//Can be simplified with this:

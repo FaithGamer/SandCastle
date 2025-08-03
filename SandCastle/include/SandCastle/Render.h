@@ -16,7 +16,4 @@
 #include "SandCastle/Render/Sprite.h"
 #include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/RenderTexture.h"
-#include "SandCastle/Render/Particle.h"
 #include "SandCastle/Render/AnimationSystem.h"
-
-

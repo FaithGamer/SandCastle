@@ -9,14 +9,14 @@ namespace SandCastle
 	{
 
 	}
-	SpriteRender::SpriteRender(sptr<Sprite> sprite, sptr<Shader> Shader = nullptr)
+	SpriteRender::SpriteRender(Sprite* sprite, Shader* Shader = nullptr)
 		: m_sprite(sprite), m_shader(Shader), m_layer(0), color(Vec4f(1, 1, 1, 1)),
 		needUpdateRenderBatch(true), renderBatch(0), spriteDimensionsChanged(true)
 	{
 
 	}
 
-	void SpriteRender::SetSprite(sptr<Sprite> sprite)
+	void SpriteRender::SetSprite(Sprite* sprite)
 	{
 		m_sprite = sprite;
 		needUpdateRenderBatch = true;
@@ -28,7 +28,7 @@ namespace SandCastle
 
 	}
 
-	void SpriteRender::SetShader(sptr<Shader> Shader)
+	void SpriteRender::SetShader(Shader* Shader)
 	{
 		m_shader = Shader;
 		needUpdateRenderBatch = true;

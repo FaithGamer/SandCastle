@@ -82,6 +82,76 @@ July
 -Serialized: "ResetGetError()"
 -Serialized: bool TryGet
 
+02
+
+-Progress on improving the renderer
+-checked if we can offload matrice computation to gpu
+(I think we cannot because of transform parenting)
+
+03
+
+-deleted copy constructor for Asset
+-raw pointer in asset
+-simplifed MakeAsset
+-Asset::Get now gives a raw pointer
+-replaced many shared ptr by raw pointer where better suited
+-improved const correctness
+-removed useless Draw method to simplify Renderer2D
+
+>Render THE PLAN:
+>only quads/textured quads
+>raw pointers asset in components
+>layer sorting
+>per layer z sorting (enabled/disabled)
+>double buffered drawing data
+>Material
+
+
+
+>the renderer need to properly sort layers and account for transparency
+(this means entities on layers behind must call draw before, because once the
+draw call of the quadArray is issued, the semi transparent fragments take a definitive color,
+depending on what was already drawn behind.)
+Now there's no choice but to sort entities by layers.
+Either having one component for each layer to gain time but that's not very practical.
+Having one render pass for each layer is actually a dumb idea cause it's not solving the issue.
+We also need to sort properly lines and wires with quads
+
+idea one:
+have all SpriteRender, LineRender, ... also come with on generic  Render2D component
+Render2D component have a field like type{line, wire, quad...}
+Render2DSystem mixing all types.
+OnRender: copy AND sort all the drawable components of entities into the Renderer (double buffer).
+after OnRender: Wait/Launch the RendererThread
+thread:
+process all the components, sort them (by layer always, Y optionally, 2 methods)
+exclude when outside of camera.
+>consider drawing ONLY quads (avoiding the switch and the oversized Drawable)
+>otherwise, have custom drawable type and call we can add to the renderer
+switch(type)
+{
+	SpriteRenderer:
+	drawSprite
+	...
+}
+Drawable m_drawables[double_buffer][MAX_ITEM_DRAW]
+struct Drawable
+{
+	int type
+	void* rawdata
+	size_t size
+}
+switch(type)
+{
+	convert_data_to_sprite(rawdata, size)
+}
+
+
+
+>I want to make new attemps at threaded rendering
+
+
+
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)
 >improve redering (see redering section)
@@ -93,8 +163,7 @@ July
 >Complete UI system
 >Particle system
 >Transform animation system
-
->add capacity of receiving an intelligible string from an input for it's binding, either controller or m&k, and what version (default 0)
+  
 >m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
 
 

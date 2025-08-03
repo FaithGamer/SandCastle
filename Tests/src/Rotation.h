@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <SandCastle/SandCastle.h>
@@ -26,6 +25,7 @@ struct Rotate
 {
 	int dummy;
 };
+
 class RotateSystem : public System
 {
 public:
@@ -51,7 +51,6 @@ public:
 					LOG_INFO("Vector: [{0}, {1}]", vec.x, vec.y);
 					LOG_INFO("Degrees: {0}", Math::VecToAngle(vec));
 				}
-
 			});
 	}
 	void OnDir(InputSignal* signal)

@@ -8,7 +8,7 @@
 
 namespace SandCastle
 {
-	
+
 	Texture::Texture() : m_id(0), m_pixels(nullptr), m_nbChannels(0), m_importSettings(TextureImportSettings()), m_size(1, 1)
 	{
 		m_importSettings.pixelPerUnit = 1.f / m_importSettings.pixelPerUnit;
@@ -50,7 +50,7 @@ namespace SandCastle
 		m_pixels = stbi_load(path.c_str(), &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load texture: " + path);
 	}
-	
+
 	inline void Texture::Generate(TextureImportSettings importSettings)
 	{
 		//Generate and bind an OpenGL texture
@@ -86,6 +86,7 @@ namespace SandCastle
 		//Unbind since we are done configuring this texture
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
 	void Texture::Create1x1White()
 	{
 		//generate 1x1 white texture
@@ -116,8 +117,6 @@ namespace SandCastle
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-
-
 	void Texture::Reload(std::string path, TextureImportSettings importSettings)
 	{
 		glDeleteTextures(1, &m_id);
@@ -129,8 +128,6 @@ namespace SandCastle
 		Generate(importSettings);
 	}
 
-
-
 	Texture::~Texture()
 	{
 		glDeleteTextures(1, &m_id);
@@ -140,7 +137,7 @@ namespace SandCastle
 		}
 	}
 
-	void Texture::Bind(uint32_t textureUnit)
+	void Texture::Bind(uint32_t textureUnit) const
 	{
 		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		glBindTexture(GL_TEXTURE_2D, m_id);
@@ -151,12 +148,12 @@ namespace SandCastle
 		m_importSettings.pixelPerUnit = 1.f / ppu;
 	}
 
-	GLuint Texture::GetId()
+	GLuint Texture::GetId() const
 	{
 		return m_id;
 	}
 
-	Vec2i Texture::GetSize()
+	Vec2i Texture::GetSize() const
 	{
 		return m_size;
 	}
@@ -210,12 +207,13 @@ namespace SandCastle
 		pixelPerUnit = parameters.GetFloat("PixelPerUnit");
 		useMipmaps = parameters.GetBool("Mipmaps");
 		keepData = parameters.GetBool("KeepData");
-		if(parameters.HaveField("LodMin"))
+		if (parameters.HaveField("LodMin"))
 			lodMin = (int)parameters.GetInt("LodMin");
-		if(parameters.HaveField("LodMax"))
+		if (parameters.HaveField("LodMax"))
 			lodMax = (int)parameters.GetInt("LodMax");
 		valid = parameters.HadGetError();
 	}
+
 	Serialized TextureImportSettings::Serialize()
 	{
 		Serialized settings;

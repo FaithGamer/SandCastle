@@ -13,7 +13,7 @@ namespace SandCastle
 	struct Keyframe
 	{
 		Keyframe();
-		sptr<Sprite> sprite;
+		Sprite* sprite;
 		float timeToNext;
 		bool sendSignal = false;
 	};
@@ -44,7 +44,7 @@ namespace SandCastle
 				return false;
 			signals[frame].AddListener(callback, priority);
 		}
-		sptr<Animation> animation = nullptr;
+		Animation* animation = nullptr;
 		bool looping = false;
 		String transition = "";
 		std::vector<SignalSender<KeyframeSignal>> signals;
@@ -52,7 +52,7 @@ namespace SandCastle
 	struct Animator
 	{
 		void SetAnimation(String animation);
-		void AddAnimation(String stateName, sptr<Animation> animation, String transition = "");
+		void AddAnimation(String stateName, Animation* animation, String transition = "");
 		void AddAnimation(String stateName, String animation, String transition = "");
 		std::map<String, AnimationState> animations;
 		AnimationState* currentState = nullptr;

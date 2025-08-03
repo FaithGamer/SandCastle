@@ -276,7 +276,6 @@
     <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\ECS\InputSystem.cpp" />
     <ClCompile Include="src\ECS\LineRendererSystem.cpp" />
-    <ClCompile Include="src\ECS\ParticleSystem.cpp" />
     <ClCompile Include="src\ECS\Scene.cpp" />
     <ClCompile Include="src\ECS\SpriteRenderSystem.cpp" />
     <ClCompile Include="src\ECS\System.cpp" />
@@ -307,7 +306,6 @@
     <ClCompile Include="src\Render\Camera.cpp" />
     <ClCompile Include="src\Render\IndexBuffer.cpp" />
     <ClCompile Include="src\Render\LineRenderer.cpp" />
-    <ClCompile Include="src\Render\Particle.cpp" />
     <ClCompile Include="src\Render\Rect.cpp" />
     <ClCompile Include="src\Render\Renderer2D.cpp" />
     <ClCompile Include="src\Render\RenderOptions.cpp" />
@@ -353,7 +351,6 @@
     <ClInclude Include="include\SandCastle\ECS\EntityId.h" />
     <ClInclude Include="include\SandCastle\Input\InputSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\LineRendererSystem.h" />
-    <ClInclude Include="include\SandCastle\ECS\ParticleSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\Scene.h" />
     <ClInclude Include="include\SandCastle\ECS\SpriteRenderSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\System.h" />
@@ -392,7 +389,6 @@
     <ClInclude Include="include\SandCastle\Render\Camera.h" />
     <ClInclude Include="include\SandCastle\Render\IndexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h" />
-    <ClInclude Include="include\SandCastle\Render\Particle.h" />
     <ClInclude Include="include\SandCastle\Render\Rect.h" />
     <ClInclude Include="include\SandCastle\Render\Renderer2D.h" />
     <ClInclude Include="include\SandCastle\Render\RenderOptions.h" />

@@ -13,7 +13,6 @@
 #include "SandCastle/ECS/SpriteRenderSystem.h"
 #include "SandCastle/ECS/LineRendererSystem.h"
 #include "SandCastle/ECS/WireRenderSystem.h"
-#include "SandCastle/ECS/ParticleSystem.h"
 #include "SandCastle/Physics/PhysicsSystem.h"
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"

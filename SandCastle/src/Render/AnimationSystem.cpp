@@ -38,17 +38,15 @@ namespace SandCastle
 		frequency = 1.f / config["frame_per_second"].get<float>();
 
 		int currentFrame = 0;
-		sptr<Sprite> lastSprite;
 		bool signal = false;
 		for (auto& frame : config["frames"])
 		{
-			sptr<Sprite> sprite;
-
+			Sprite* sprite = nullptr;
 			//Set sprite if any
 			auto sprite_it = frame.find("sprite");
 			if (sprite_it != frame.end())
 			{
-				sprite = Assets::Get<Sprite>(sprite_it->get<String>()).Ptr();
+				sprite = Assets::Get<Sprite>(sprite_it->get<String>());
 			}
 
 			float timeToNext = 1.f * frequency;
@@ -97,7 +95,7 @@ namespace SandCastle
 	/// @param stateName The state name to reference this animation
 	/// @param animation the animation pointer
 	/// @param transition The state to transition to when the animation end, leave empty to loop.
-	void Animator::AddAnimation(String stateName, sptr<Animation> animation, String transition)
+	void Animator::AddAnimation(String stateName, Animation* animation, String transition)
 	{
 		AnimationState state;
 		state.animation = animation;
@@ -113,7 +111,7 @@ namespace SandCastle
 	/// @param transition The state to transition to when the animation end, leave empty to loop.
 	void Animator::AddAnimation(String stateName, String animation, String transition)
 	{
-		AddAnimation(stateName, Assets::Get<Animation>(animation).Ptr(), transition);
+		AddAnimation(stateName, Assets::Get<Animation>(animation), transition);
 	}
 
 	//Animation System

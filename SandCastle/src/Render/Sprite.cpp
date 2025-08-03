@@ -3,12 +3,8 @@
 
 namespace SandCastle
 {
-	Sprite::Sprite() : m_origin(0)
-	{
 
-	}
-
-	Sprite::Sprite(sptr<Texture> texture) : m_texture(texture), m_origin(0)
+	Sprite::Sprite(const Texture* texture) : m_texture(texture), m_origin(0)
 	{
 		m_textureCoords[0] = Vec2f(0, 0);
 		m_textureCoords[1] = Vec2f(0, 1);
@@ -17,43 +13,19 @@ namespace SandCastle
 		ComputeDimensions();
 	}
 
-	Sprite::Sprite(sptr<Texture> texture, Rect textureRect) : m_texture(texture), m_origin(0)
+	Sprite::Sprite(const Texture* texture, Rect textureRect) : m_texture(texture), m_origin(0)
 	{
 		SetTextureRect(textureRect);
 	}
 
-	Sprite::Sprite(sptr<Texture> texture, Rect textureRect, Vec2f origin) : m_texture(texture), m_origin(origin)
+	Sprite::Sprite(const Texture* texture, Rect textureRect, Vec2f origin) : m_texture(texture), m_origin(origin)
 	{
 		SetTextureRect(textureRect);
-	}
-
-	Sprite::Sprite(sptr<Texture> texture, Vec2f* textureCoords) : m_origin(0)
-	{
-		m_textureCoords[0] = textureCoords[0];
-		m_textureCoords[1] = textureCoords[1];
-		m_textureCoords[2] = textureCoords[2];
-		m_textureCoords[3] = textureCoords[3];
-		ComputeDimensions();
-	}
-
-	Sprite::Sprite(sptr<Texture> texture, Vec2f* textureCoords, Vec2f origin) : m_origin(origin)
-	{
-		m_textureCoords[0] = textureCoords[0];
-		m_textureCoords[1] = textureCoords[1];
-		m_textureCoords[2] = textureCoords[2];
-		m_textureCoords[3] = textureCoords[3];
-		ComputeDimensions();
 	}
 
 	void Sprite::SetTextureRect(Rect textureRect, float resolutionFactor)
 	{
 		TextureCoordsRelative(m_textureCoords, textureRect, resolutionFactor);
-		ComputeDimensions();
-	}
-
-	void Sprite::SetTexture(sptr<Texture> Texture)
-	{
-		m_texture = Texture;
 		ComputeDimensions();
 	}
 

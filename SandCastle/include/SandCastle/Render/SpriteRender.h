@@ -15,23 +15,23 @@ namespace SandCastle
 	{
 	public:
 		SpriteRender();
-		SpriteRender(sptr<Sprite> sprite, sptr<Shader> Shader);
+		SpriteRender(Sprite* sprite, Shader* Shader);
 
-		void SetSprite(sptr<Sprite> sprite);
-		void SetShader(sptr<Shader> Shader);
+		void SetSprite(Sprite* sprite);
+		void SetShader(Shader* Shader);
 		void SetLayer(uint32_t Layer);
 
-		inline sptr<Sprite> GetSprite() const
+		inline Sprite* GetSprite() const
 		{
 			return m_sprite;
 		}
 
-		inline sptr<Texture> GetTexture() const
+		inline const Texture* GetTexture() const
 		{
 			return m_sprite->GetTexture();
 		}
 
-		inline sptr<Shader> GetShader() const
+		inline Shader* GetShader() const
 		{
 			return m_shader;
 		}
@@ -45,12 +45,11 @@ namespace SandCastle
 		Vec4f color;
 		bool needUpdateRenderBatch;
 		uint32_t renderBatch;
-		SandCastle::Vec3f preComputedPosition[4];
 		bool spriteDimensionsChanged;
 	
 	protected:
-		sptr<Shader> m_shader;
-		sptr<Sprite> m_sprite;
+		Shader* m_shader;
+		Sprite* m_sprite;
 		uint32_t m_layer;
 
 	};

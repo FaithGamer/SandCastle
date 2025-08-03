@@ -81,9 +81,6 @@
     <ClCompile Include="src\ECS\LineRendererSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ECS\ParticleSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ECS\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -172,9 +169,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\LineRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Render\Particle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\Rect.cpp">
@@ -308,9 +302,6 @@
     <ClInclude Include="include\SandCastle\ECS\LineRendererSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\ParticleSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\SandCastle\ECS\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -405,9 +396,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\Particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Render\Rect.h">

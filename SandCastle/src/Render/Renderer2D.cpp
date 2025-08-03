@@ -12,9 +12,7 @@
 #include "SandCastle/ECS/SpriteRenderSystem.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Core/Container.h"
-#ifndef SandCastle_NO_ASSETS
 #include "SandCastle/Core/Assets.h"
-#endif
 #include "SandCastle/Core/Print.h"
 #include "SandCastle/ECS/LineRendererSystem.h"
 
@@ -32,9 +30,7 @@ namespace SandCastle
 		m_maxQuads = 100000;
 		m_maxVertices = m_maxQuads * 4;
 		m_maxIndices = m_maxQuads * 6;
-		m_maxTextureSlots = 16;
 		m_maxOffscreenLayers = 15;
-
 
 		//IndexBuffer (quads)
 		uint32_t* quadIndices = new uint32_t[m_maxIndices];
@@ -58,29 +54,17 @@ namespace SandCastle
 		//Camera uniform buffer
 		m_cameraUniformBuffer = makesptr<UniformBuffer>(sizeof(CameraBufferData), 0);
 
-		m_whiteTexture = makesptr<Texture>();
-
+		m_whiteTexture = new Texture();
 
 		m_defaultRenderOptions = makesptr<RenderOptions>();
 		m_defaultRenderOptionsLayer = makesptr<RenderOptions>();
 		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
-		//m_camera = Mat4(1);
-
-#ifndef SandCastle_NO_ASSETS
-		m_batchShader = Assets::Get<Shader>("batch_renderer.shader").Ptr();
-		m_defaultLayerShader = Assets::Get<Shader>("default_layer.shader").Ptr();
-		m_defaultLineShader = Assets::Get<Shader>("line.shader").Ptr();
-		m_defaultWireShader = Assets::Get<Shader>("wire.shader").Ptr();
-#else
-#define LSSFF(...) Shader::LoadShaderSourceFromFile(__VA_ARGS__)
-
-		m_batchShader = makesptr<Shader>(LSSFF("assets/shaders/batch_renderer.vert"), LSSFF("assets/shaders/batch_renderer.frag"));
-		m_defaultLayerShader = makesptr<Shader>(LSSFF("assets/shaders/default_layer.vert"), LSSFF("assets/shaders/default_layer.frag"));
-		m_defaultLineShader = makesptr<Shader>(LSSFF("assets/shaders/line.vert"), LSSFF("assets/shaders/line.geom"), LSSFF("assets/shaders/line.frag"));
-		m_defaultWireShader = makesptr<Shader>(LSSFF("assets/shaders/wire.vert"), LSSFF("assets/shaders/wire.frag"));
-#endif
+		m_batchShader = Assets::Get<Shader>("batch_renderer.shader");
+		m_defaultLayerShader = Assets::Get<Shader>("default_layer.shader");
+		m_defaultLineShader = Assets::Get<Shader>("line.shader");
+		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
 
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		sptr<VertexArray> defaultLayerVertexArray = GenerateLayerVertexArray(screenSpace);
@@ -102,10 +86,10 @@ namespace SandCastle
 	Renderer2D::~Renderer2D()
 	{
 		//To do
-
+		delete m_whiteTexture;
 	}
 
-	void Renderer2D::SetShaderUniformSampler(sptr<Shader> shader, uint32_t count)
+	void Renderer2D::SetShaderUniformSampler(Shader* shader, uint32_t count)
 	{
 		std::vector<int> sampler;
 		for (uint32_t i = 0; i < count; i++)
@@ -127,7 +111,7 @@ namespace SandCastle
 		m_target = target;
 	}
 
-	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, sptr<Shader> shader, sptr<RenderOptions> renderOptions)
+	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, Shader* shader, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
 		if (shader == nullptr)
@@ -156,7 +140,7 @@ namespace SandCastle
 		return (uint32_t)ins->m_layers.size() - 1;
 	}
 
-	uint32_t Renderer2D::AddLayer(std::string name, sptr<Shader> shader, sptr<RenderOptions> renderOptions)
+	uint32_t Renderer2D::AddLayer(std::string name, Shader* shader, sptr<RenderOptions> renderOptions)
 	{
 		return AddLayer(name, 0, shader, renderOptions);
 	}
@@ -228,7 +212,7 @@ namespace SandCastle
 		return layers;
 	}
 
-	uint32_t Renderer2D::GetBatchId(uint32_t layerIndex, sptr<Shader> shader, sptr<RenderOptions> renderOptions)
+	uint32_t Renderer2D::GetBatchId(uint32_t layerIndex, Shader* shader, sptr<RenderOptions> renderOptions)
 	{
 		//To do: bake the batchs based on assets
 		auto ins = Instance();
@@ -267,7 +251,7 @@ namespace SandCastle
 		}
 	}
 
-	void Renderer2D::SetLayerShader(uint32_t layer, sptr<Shader> shader)
+	void Renderer2D::SetLayerShader(uint32_t layer, Shader* shader)
 	{
 		auto ins = Instance();
 		ins->SetShaderUniformSampler(shader, ins->m_maxOffscreenLayers + 1);
@@ -298,7 +282,7 @@ namespace SandCastle
 		}
 	}
 
-	void Renderer2D::CreateQuadBatch(RenderLayer& layer, sptr<Shader> shader, sptr<RenderOptions> renderOptions)
+	void Renderer2D::CreateQuadBatch(RenderLayer& layer, Shader* shader, sptr<RenderOptions> renderOptions)
 	{
 		size_t index = 0;
 		if (!m_freeQuadBatchs.empty())
@@ -316,10 +300,9 @@ namespace SandCastle
 		}
 
 		SetupQuadBatch(m_quadBatchs[index], layer, shader, renderOptions);
-
 	}
 
-	void Renderer2D::SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, sptr<Shader> shader, sptr<RenderOptions> renderOptions)
+	void Renderer2D::SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Shader* shader, sptr<RenderOptions> renderOptions)
 	{
 		if (shader == nullptr)
 			shader = m_batchShader;
@@ -332,7 +315,7 @@ namespace SandCastle
 
 		//Assign relevant texture unit to the sampler2D[] uniform uTextures
 		std::vector<int> sampler;
-		for (uint32_t i = 0; i < m_maxTextureSlots; i++)
+		for (uint32_t i = 0; i < MAX_TEXTURE_INDEX; i++)
 		{
 			sampler.emplace_back(i);
 		}
@@ -360,9 +343,6 @@ namespace SandCastle
 
 		//Vertex data on CPU
 		batch.quadVertexBase = new QuadVertex[m_maxVertices];
-
-		//Initialize texture slots size
-		batch.textureSlots.resize(m_maxTextureSlots);
 
 		//White texture in slot 0
 		batch.textureSlots[0] = m_whiteTexture;
@@ -489,14 +469,6 @@ namespace SandCastle
 		}
 	}
 
-	void Renderer2D::DrawQuad(const Vec3f& position, const Vec2f& scale, const Vec4f& color, uint32_t batchIndex)
-	{
-		Transform transform;
-		transform.SetPosition(position);
-		transform.Scale({ scale.x, scale.y, 1.0f });
-		DrawQuad(transform, color, batchIndex);
-	}
-
 	void Renderer2D::DrawQuad(const Transform& transform, const Vec4f& color, uint32_t batchIndex)
 	{
 		constexpr size_t quadVertexCount = 4;
@@ -506,90 +478,12 @@ namespace SandCastle
 		if (batch.quadIndexCount >= m_maxIndices)
 			NextBatch(batchIndex);
 
-
 		//Input the vertex data to CPU within the quad vertex array
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
 			batch.quadVertexPtr->position = (Vec3f)(transform.GetTransformMatrix() * batch.quadVertexPosition[i]);
 			batch.quadVertexPtr->texCoords = texCoords[i];
 			batch.quadVertexPtr->texIndex = 0;
-			batch.quadVertexPtr->color = color;
-
-			//Incrementing the pointed value of the quad vertex array
-			batch.quadVertexPtr++;
-		}
-
-		batch.quadIndexCount += 6;
-		m_stats.quadCount++;
-	}
-
-	void Renderer2D::DrawTexturedQuad(
-		const Vec3f& position,
-		const Vec2f& scale,
-		sptr<Texture>& texture,
-		const std::vector<Vec2f>& texCoords,
-		const Vec4f& color,
-		uint32_t batchIndex)
-	{
-		Transform transform;
-		transform.SetPosition(position);
-		transform.Scale({ scale.x, scale.y, 1.0f });
-		DrawTexturedQuad(transform, texture, texCoords, color, 0);
-	}
-
-	void Renderer2D::DrawTexturedQuad(
-		const Transform& transform,
-		sptr<Texture>& texture,
-		const std::vector<Vec2f>& texCoords,
-		const Vec4f& color,
-		uint32_t batchIndex)
-	{
-		constexpr size_t quadVertexCount = 4;
-		ASSERT_LOG_ERROR(bool(texCoords.size() >= 4), "texCoords size is too low.");
-
-		auto& batch = m_quadBatchs[batchIndex];
-
-		//Check if we still have space in the batch for more indices
-		if (batch.quadIndexCount >= m_maxIndices)
-			NextBatch(batchIndex);
-
-		float textureIndex = 0.0f;
-
-		//Find if the texture has been used in the current batch
-		for (uint32_t i = 1; i < batch.textureSlotIndex; i++)
-		{
-			if (batch.textureSlots[i] == texture)
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-
-		if (textureIndex == 0.0f)
-		{
-			//Check if there is still space for a texture
-			if (batch.textureSlotIndex >= m_maxTextureSlots)
-				NextBatch(batchIndex);
-
-			//Set the current texture index
-			textureIndex = (float)batch.textureSlotIndex;
-			//Add the texture in the appropriate slot
-			batch.textureSlots[batch.textureSlotIndex] = texture;
-			//Increment the current index
-			batch.textureSlotIndex++;
-		}
-
-		float texWidth = std::fabs(texCoords[1].x - texCoords[2].x);
-		float texHeight = std::fabs(texCoords[0].y - texCoords[1].y);
-		float ppu = texture->GetPixelPerUnit();
-		Vec2f texDim = texture->GetSize();
-
-		//Input the vertex data to CPU within the quad vertex array
-		for (size_t i = 0; i < quadVertexCount; i++)
-		{
-			batch.quadVertexPtr->position = VertexPosition(batch.quadVertexPosition[i], transform, texDim, ppu, texWidth, texHeight);
-			batch.quadVertexPtr->texCoords = texCoords[i];
-			batch.quadVertexPtr->texIndex = textureIndex;
 			batch.quadVertexPtr->color = color;
 
 			//Incrementing the pointed value of the quad vertex array
@@ -616,7 +510,7 @@ namespace SandCastle
 			NextBatch(batchIndex);
 
 		float textureIndex = 0.0f;
-		sptr<Texture> texture = spriteRender.GetTexture();
+		const Texture* texture = spriteRender.GetTexture();
 		//Find if the texture has been used in the current batch
 		for (uint32_t i = 1; i < batch.textureSlotIndex; i++)
 		{
@@ -630,7 +524,7 @@ namespace SandCastle
 		if (textureIndex == 0.0f)
 		{
 			//Check if there is still space for a texture
-			if (batch.textureSlotIndex >= m_maxTextureSlots)
+			if (batch.textureSlotIndex >= MAX_TEXTURE_INDEX)
 				NextBatch(batchIndex);
 
 			//Set the current texture index
@@ -641,22 +535,16 @@ namespace SandCastle
 			batch.textureSlotIndex++;
 		}
 
-		sptr<Sprite> sprite = spriteRender.GetSprite();
+		Sprite* sprite = spriteRender.GetSprite();
 		//bool reComputePosition = transform.matrixUpdated || transform.needCompute || spriteRender.spriteDimensionsChanged;
 
 		//Input the vertex data to CPU within the quad vertex array
 		for (int i = 0; i < quadVertexCount; i++)
 		{
-			/*if (reComputePosition)
-			{*/
-			batch.quadVertexPtr->position = VertexPosition(batch.quadVertexPosition[i] - sprite->GetOrigin(), transform, *sprite);
-			spriteRender.preComputedPosition[i] = batch.quadVertexPtr->position;
-			/*}
-			else
-			{
-				batch.quadVertexPtr->position = spriteRender.preComputedPosition[i];
-			}*/
-
+			batch.quadVertexPtr->position = VertexPosition(
+				batch.quadVertexPosition[i] - sprite->GetOrigin(), 
+				transform,
+				sprite);
 			batch.quadVertexPtr->texCoords = sprite->GetTextureCoords(i);
 			batch.quadVertexPtr->texIndex = textureIndex;
 			batch.quadVertexPtr->color = spriteRender.color;
@@ -707,15 +595,15 @@ namespace SandCastle
 		glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)wire.GetPointCount());
 	}
 
-	void Renderer2D::SetBatchRenderShader(sptr<Shader> shader)
+	void Renderer2D::SetBatchRenderShader(Shader* shader)
 	{
 		Instance()->m_batchShader = shader;
 	}
 
-	Vec3f Renderer2D::VertexPosition(Vec4f pos, const Transform& transform, const Sprite& sprite)
+	Vec3f Renderer2D::VertexPosition(Vec4f pos, const Transform& transform, const Sprite* sprite)
 	{
-		pos.x *= sprite.GetDimensions().x;
-		pos.y *= sprite.GetDimensions().y;
+		pos.x *= sprite->GetDimensions().x;
+		pos.y *= sprite->GetDimensions().y;
 
 		return (Vec3f)(transform.GetTransformMatrix() * pos);
 	}
@@ -760,9 +648,13 @@ namespace SandCastle
 				continue;
 
 			if (layer.height == 0)
+			{
+				//The layer fit the window size
 				layer.target->SetSize(size);
+			}
 			else
 			{
+				//The layer has it's own size, but fit the window's aspect ratio
 				auto windowSize = Window::GetSize();
 				unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)layer.height);
 				layer.target->SetSize({ width, layer.height });

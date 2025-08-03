@@ -23,28 +23,31 @@ namespace SandCastle
 	class Asset : public OpaqueAsset
 	{
 	public:
-		Asset() = default;
-
-		Asset(const Asset<T>& asset) : m_ptr(asset.m_ptr)
+		Asset(T* ptr) : m_ptr(ptr)
 		{
 
 		}
-		sptr<T> Ptr()
+		~Asset()
+		{
+			delete m_ptr;
+		}
+
+		Asset(const Asset<T>& asset) = delete;
+		Asset(const Asset<T>&& asset) = delete;
+		inline T* Ptr()
 		{
 			return m_ptr;
 		}
-		int32_t GetType()
+		inline int32_t GetType()
 		{
 			return TypeId::GetId<T>();
 		}
 	private:
 
 		friend Assets;
-		sptr<T> m_ptr;
+		T* m_ptr;
 
 	};
-
-
 
 	class Assets : public Singleton<Assets>
 	{
@@ -54,10 +57,10 @@ namespace SandCastle
 		void Init();
 
 		void HotReload();
-		void GenerateSprites(String filename, Serialized& spritesheet, sptr<Texture> texture);
+	
 
 		template <class T>
-		static Asset<T> Get(String name)
+		static T* Get(String name)
 		{
 			return Instance()->GetPrivate<T>(name);
 		}
@@ -69,11 +72,12 @@ namespace SandCastle
 		template<class T, class... Args>
 		static sptr<Asset<T>> MakeAsset(Args&&... args)
 		{
-			auto asset = makesptr<Asset<T>>();
-			asset->m_ptr = makesptr<T>(args...);
-			return asset;
+			return makesptr<Asset<T>>(new T(args...));
+			//asset->m_ptr = new T(args...);
+			//return asset;
 		}
 
+		void GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture);
 		void LoadAssets();
 		void InitAddAssetFunctions();
 		void AddAsset(String path);
@@ -92,7 +96,7 @@ namespace SandCastle
 		}
 		void CreateAnimations();
 		Serialized CreateDefaultTextureImportSettings();
-		Serialized CreateDefaultSpritesheet(sptr<Texture> texture);
+		Serialized CreateDefaultSpritesheet(const Texture* texture);
 		void AddAnimation(String filename, String path);
 		void AddTexture(String filename, String path);
 		void AddConfig(String filename, String path);
@@ -102,15 +106,14 @@ namespace SandCastle
 		void AddAudio(String filename, String path);
 
 		template <class T>
-		Asset<T> GetPrivate(String name)
+		T* GetPrivate(String name)
 		{
 			auto find_it = m_assets.find(name);
 
 			ASSERT_LOG_ERROR((bool)(find_it != m_assets.end()), "Cannot find asset, " + name);
 			ASSERT_LOG_ERROR((bool)(find_it->second->GetType() == TypeId::GetId<T>()), "Getting wrong asset type, " + name);
 
-			return *static_pointer_cast<Asset<T>>(find_it->second);
-
+			return static_pointer_cast<Asset<T>>(find_it->second)->Ptr();
 		} 
 
 		struct ShaderSources

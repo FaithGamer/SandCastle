@@ -55,11 +55,11 @@ namespace SandCastle
 		void Reload(std::string path, TextureImportSettings importSettings = TextureImportSettings());
 		~Texture();
 
-		void Bind(uint32_t textureUnit = 0);
+		void Bind(uint32_t textureUnit = 0) const;
 		void SetPixelPerUnit(float ppu);
 
-		GLuint GetId();
-		Vec2i GetSize();
+		GLuint GetId() const;
+		Vec2i GetSize() const;
 
 		/// @brief The scale of the texture.
 		/// @return The amount of world unit for one pixel of the texture ( 1.0f / pixelPerUnit ) 
