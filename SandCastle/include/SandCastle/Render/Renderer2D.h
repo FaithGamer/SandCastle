@@ -13,6 +13,7 @@
 #include "SandCastle/Internal/Singleton.h"
 #include "SandCastle/Render/LineRenderer.h"
 #include "SandCastle/Render/WireRender.h"
+#include "SandCastle/Render/QuadRenderData.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 
@@ -24,14 +25,16 @@ namespace SandCastle
 	class Shader;
 	class RenderOptions;
 
-	struct QuadVertex
+	struct InstanceData
 	{
-		Vec3f position = { 0, 0, 0 };
-		Vec4f color = { 0, 0, 0, 0 };
-		Vec2f texCoords = { 0, 0 };
-		float texIndex = 0;
+		float type;
+		Vec3f pos;
+		Vec4f uvOrColor;
+		Vec2f size;
+		float rotation;
+		float texIndex;
+		float alpha;
 	};
-
 	struct RenderLayer
 	{
 		std::string name = "RenderLayerDefault";
@@ -57,30 +60,19 @@ namespace SandCastle
 		uint32_t index = 0;
 		uint32_t userCount = 0;
 
-		sptr<VertexArray> quadVertexArray;
-		sptr<VertexBuffer> quadVertexBuffer;
+		sptr<VertexArray> vertexArray;
+		sptr<VertexBuffer> instanceBuffer;
 
+		uint32_t instanceCount = 0;
+		uint32_t indexCount = 0;
+		InstanceData* instanceBase = nullptr;
+		InstanceData* instancePtr = nullptr;
 
-		uint32_t quadIndexCount = 0;
-		QuadVertex* quadVertexBase = nullptr;
-		QuadVertex* quadVertexPtr = nullptr;
-
-		const Texture* textureSlots[MAX_TEXTURE_INDEX];
+		GLuint textureSlots[MAX_TEXTURE_INDEX];
 		uint32_t textureSlotIndex = 1;
 
-		//it's a Vec4 so it can be transformed with a 4x4 matrix
-		Vec4f quadVertexPosition[4]
-		{
-			{-0.5f, -0.5f, 0.0f, 1.0f},
-			{0.5f, -0.5f, 0.0f, 1.0f},
-			{0.5f, 0.5f, 0.0f, 1.0f},
-			{-0.5f, 0.5f, 0.0f, 1.0f}
-		};
-
 		RenderLayer layer;
-		sptr<RenderOptions> renderOptions;
-		Shader* shader;
-
+		GLuint materialShaderID;
 	};
 
 	class Renderer2D : public Singleton<Renderer2D>
@@ -102,8 +94,8 @@ namespace SandCastle
 		void End();
 		void Flush(uint32_t batchIndex);
 
-		void DrawQuad(const Transform& transform, const Vec4f& color = Vec4f(1), uint32_t batchIndex = 0);
-		void DrawSprite(Transform& transform, SpriteRender& sprite, uint32_t batchIndex);
+		void DrawQuad(const QuadRenderData& quad);
+
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
 		void DrawLine(LineRenderer& line, Transform& transform, uint32_t layer);
@@ -157,7 +149,7 @@ namespace SandCastle
 		static std::vector<uint32_t> GetLayers();
 		/// @brief Get a batch based on what layer/shader/render options is used. nullptr = default shader/render options
 		/// @return BatchId
-		static uint32_t GetBatchId(uint32_t layerIndex, Shader* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static uint32_t GetBatchId(uint32_t layerIndex, Shader* shader = nullptr);
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
 
@@ -170,14 +162,12 @@ namespace SandCastle
 		void StartBatch(uint32_t batchIndex);
 		void NextBatch(uint32_t batchIndex);
 
-		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Shader* shader, sptr<RenderOptions> renderOptions);
+		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Shader* shaders);
 		void AllocateQuadBatch(QuadBatch& batch);
-		void CreateQuadBatch(RenderLayer& layer, Shader* shader, sptr<RenderOptions> renderOptions);
-		uint64_t GenerateBatchId(uint64_t a, uint64_t b, uint64_t c);
+		void CreateQuadBatch(RenderLayer& layer, Shader* shader);
+		uint64_t GenerateBatchId(uint64_t a, uint64_t b);
 		void RenderLayers();
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
-		Vec3f VertexPosition(Vec4f pos, const Transform& transform, Vec2f texDim, float ppu, float width, float height);
-		Vec3f VertexPosition(Vec4f pos, const Transform& transform, const Sprite* sprite);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace);
 	private:
 
@@ -187,7 +177,7 @@ namespace SandCastle
 		std::vector<QuadBatch> m_quadBatchs;
 		std::vector<size_t> m_freeQuadBatchs;
 
-		uint32_t m_maxQuads;
+		uint32_t m_maxInstances;
 		uint32_t m_maxVertices;
 		uint32_t m_maxIndices;
 		uint32_t m_maxOffscreenLayers;
@@ -196,8 +186,10 @@ namespace SandCastle
 		sptr<RenderOptions> m_defaultRenderOptions;
 		sptr<RenderOptions> m_defaultRenderOptionsLayer;
 		Texture* m_whiteTexture;
+		GLuint m_whiteTextureID;
 		sptr<UniformBuffer> m_cameraUniformBuffer;
 		sptr<IndexBuffer> m_quadIndexBuffer;
+		sptr<VertexBuffer> m_quadVertexBuffer;
 
 		struct CameraBufferData
 		{
@@ -225,7 +217,6 @@ namespace SandCastle
 
 		bool m_rendering;
 		Statistics m_stats;
-		float m_worldToScreenRatio;
 		float m_aspectRatio;
 	};
 }

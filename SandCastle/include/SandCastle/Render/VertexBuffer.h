@@ -20,14 +20,15 @@ namespace SandCastle
 	/// @brief Basically a uniform with it's type, size, and offset within a Vertex Array
 	struct AttributeElement
 	{
-		std::string name;
 		ShaderDataType type;
-		GLsizei size;
-		uint32_t offset;
+		std::string name;
 		GLboolean normalized;
+		GLsizei size;
+		uint32_t offset = 0;
+		GLuint divisor = 0;
 
-		AttributeElement(ShaderDataType Type, const std::string& Name, GLboolean Normalized = GL_FALSE)
-			: name(Name), type(Type), size(ShaderDataTypeSize(Type)), offset(0), normalized(Normalized)
+		AttributeElement(ShaderDataType Type, const std::string& Name, GLuint Divisor = 0, GLboolean Normalized = GL_FALSE)
+			: name(Name), type(Type), size(ShaderDataTypeSize(Type)), offset(0), divisor(Divisor), normalized(Normalized)
 		{
 
 		}
@@ -66,7 +67,7 @@ namespace SandCastle
 		VertexBuffer() : m_id(0), m_verticesCount(0) {}
 		/// @brief Manually set vertices and the according Attribute Layout
 		/// This will make the buffer GL_STATIC_DRAW
-		VertexBuffer(float* vertices, GLsizeiptr size, const AttributeLayout& layout = AttributeLayout());
+		VertexBuffer(const void* data, GLsizeiptr size, const AttributeLayout& layout = AttributeLayout());
 		/// @brief This will make the buffer GL_DYNAMIC_DRAW
 		VertexBuffer(GLsizeiptr size, const AttributeLayout& layout);
 		/// @brief This will make the buffer GL_DYNAMIC_DRAW

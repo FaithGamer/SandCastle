@@ -406,6 +406,7 @@
     <ClInclude Include="include\SandCastle\Render\WireRender.h" />
     <ClInclude Include="include\SandCastle\SandCastle.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="include\SandCastle\Render\QuadRenderData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Container.tpp" />

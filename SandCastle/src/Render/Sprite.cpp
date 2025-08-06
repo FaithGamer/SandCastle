@@ -43,17 +43,19 @@ namespace SandCastle
 		coords[0].x = rect.left / texSize.x;
 		coords[0].y = rect.top / texSize.y;
 
-
 		coords[1].x = coords[0].x;
 		coords[1].y = rect.top / texSize.y + rect.height / texSize.y;
-
 
 		coords[2].x = rect.left / texSize.x + rect.width / texSize.x;
 		coords[2].y = coords[1].y;
 
-
 		coords[3].x = coords[2].x;
 		coords[3].y = coords[0].y;
+
+		m_uvs.x = coords[0].x;
+		m_uvs.y = coords[0].y;
+		m_uvs.z = coords[2].x;
+		m_uvs.w = coords[2].y;
 	}
 
 	void Sprite::ComputeDimensions()

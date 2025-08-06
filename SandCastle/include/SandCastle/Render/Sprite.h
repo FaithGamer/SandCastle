@@ -40,15 +40,25 @@ namespace SandCastle
 		{
 			return m_dimensions;
 		}
+		/// @brief Each individual vertex texture UV from vertex 0 to 3
+		/// @param index 
+		/// @return 
 		inline Vec2f GetTextureCoords(int index) const
 		{
 			return m_textureCoords[index];
+		}
+		/// @brief Only top left/ bottom right corner UV
+		/// @return 
+		inline Vec4f GetUVs() const
+		{
+			return m_uvs;
 		}
 
 	private:
 		Vec2f m_textureCoords[4];
 		Vec2f m_dimensions;
 		Vec2f m_origin;
+		Vec4f m_uvs; //texture coord top left, and bottom right corners
 		const Texture* m_texture;
 
 	};

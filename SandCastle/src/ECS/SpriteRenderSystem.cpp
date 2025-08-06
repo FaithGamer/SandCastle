@@ -46,11 +46,12 @@ namespace SandCastle
 				{
 					if (sprite.needUpdateRenderBatch)
 					{
-						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetShader(), nullptr);
+						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetShader());
 						sprite.needUpdateRenderBatch = false;
 					}
-					renderer->DrawSprite(transform, sprite, sprite.renderBatch);
-				}); 
+					auto data = MakeQuadRenderDataFromSpriteRender(&sprite, &transform);
+					renderer->DrawQuad(data);
+				});
 		}
 		else
 		{
@@ -68,12 +69,33 @@ namespace SandCastle
 			{
 				if (sprite.sprite->needUpdateRenderBatch)
 				{
-					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetShader(), nullptr);
+					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetShader());
 					sprite.sprite->needUpdateRenderBatch = false;
 				}
-				renderer->DrawSprite(*sprite.transform, *sprite.sprite, sprite.sprite->renderBatch);
+				auto data = MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform);
+				renderer->DrawQuad(data);
 			}
 		}
+	}
+
+	QuadRenderData SpriteRenderSystem::MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform)
+	{
+		auto sprite = render->GetSprite();
+		auto texture = sprite->GetTexture();
+		auto uvs = render->GetSprite()->GetUVs();
+
+		return QuadRenderData(
+			1,
+			transform->GetPosition(),
+			uvs,
+			sprite->GetDimensions() * (Vec2f)transform->GetScale(),
+			transform->GetRotation().z,
+			texture->GetId(),
+			texture->GetPixelPerUnit(),
+			render->GetLayer(),
+			render->renderBatch,
+			render->color.a
+		);
 	}
 
 	int SpriteRenderSystem::GetUsedMethod()

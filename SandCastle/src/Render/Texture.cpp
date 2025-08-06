@@ -41,12 +41,14 @@ namespace SandCastle
 
 	inline void Texture::LoadFromMemory(unsigned char* buffer, int size)
 	{
+		stbi_set_flip_vertically_on_load(true);
 		m_pixels = stbi_load_from_memory(buffer, size, &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load a texture from memory.");
 	}
 
 	inline void Texture::LoadFromFile(std::string path)
 	{
+		stbi_set_flip_vertically_on_load(true);
 		m_pixels = stbi_load(path.c_str(), &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load texture: " + path);
 	}

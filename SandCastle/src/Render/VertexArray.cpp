@@ -31,26 +31,24 @@ namespace SandCastle
 
 		ASSERT_LOG_ERROR(buffer->GetLayout().GetElements().size(), "VertexBuffer layout is empty");
 		//We need to tell OpenGL how to interpret the data in the Vertex Array Buffer
-		GLuint layoutIndex = 0;
 		const auto& layout = buffer->GetLayout();
 		for (const auto& element : layout)
 		{
-			glVertexAttribPointer(layoutIndex,
+			glVertexAttribPointer(m_layoutIndex,
 				ShaderDataTypeCount(element.type),
 				ShaderDataTypeGLType(element.type),
 				element.normalized,
 				layout.GetStride(),
 				(const void*)element.offset);
-			glEnableVertexAttribArray(layoutIndex);
-
-			layoutIndex++;
+			glEnableVertexAttribArray(m_layoutIndex);
+			if (element.divisor > 0)
+				glVertexAttribDivisor(m_layoutIndex, element.divisor);
+			m_layoutIndex++;
 		}
 
 		m_vertexBuffer.push_back(buffer);
 		glBindVertexArray(0);
 	}
-
-	
 
 	void VertexArray::SetIndexBuffer(const sptr<IndexBuffer>& buffer)
 	{

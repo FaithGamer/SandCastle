@@ -126,7 +126,7 @@ namespace SandCastle
 	/////////////////////////
 
 
-	VertexBuffer::VertexBuffer(float* vertices, GLsizeiptr size, const AttributeLayout& layout)
+	VertexBuffer::VertexBuffer(const void* data, GLsizeiptr size, const AttributeLayout& layout)
 	{
 		m_verticesCount = (uint32_t)(size / sizeof(float));
 		//Create one buffer
@@ -134,7 +134,7 @@ namespace SandCastle
 		//Bind an array buffer to operate on in
 		glBindBuffer(GL_ARRAY_BUFFER, m_id);
 		//Send the data in the buffer
-		glBufferData(GL_ARRAY_BUFFER, size, (const void*)vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 
 		m_layout = layout;
 	}

@@ -473,6 +473,9 @@
     <ClInclude Include="include\SandCastle\Core\Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\QuadRenderData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Signal.tpp" />

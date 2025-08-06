@@ -1,6 +1,9 @@
 #pragma once
 
 #include "SandCastle/ECS/System.h"
+#include "SandCastle/Render/QuadRenderData.h"
+#include "SandCastle/Render/SpriteRender.h"
+#include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
@@ -16,6 +19,7 @@ namespace SandCastle
 		void OnRender() override;
 		void OnClearBatches();
 		int GetUsedMethod() override;
+		static QuadRenderData MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform);
 	private:
 		bool m_zSort;
 	};

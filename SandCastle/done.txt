@@ -98,14 +98,40 @@ July
 -improved const correctness
 -removed useless Draw method to simplify Renderer2D
 
+04
+
+-decided we don't touch line and wires but we ackowledge that
+they should not be used because of sorting issue
+-making QuadRenderData (that's the objects of the double buffer)
+
+05
+
+>integrade QuadRenderData
+>texture as ID
+>removed render options for individual quad/sprite
+>instancing
+>benchmark against sandbox
+
+
+instanced rendering (to upload the data of the sprite not every vertice)
+>materials
+>benchmark to compare thread and no thread
+>benchmark with and without colors
+>consider get rid of sprite origin
 >Render THE PLAN:
 >only quads/textured quads
->raw pointers asset in components
 >layer sorting
 >per layer z sorting (enabled/disabled)
 >double buffered drawing data
 >Material
 
+
+render plan:
+
+>copy all into double buffer (OnRender)
+>wait launch render thread
+>sort by layer (optionally Z sort)
+>draw and that's it motherfucker
 
 
 >the renderer need to properly sort layers and account for transparency
@@ -118,10 +144,8 @@ Having one render pass for each layer is actually a dumb idea cause it's not sol
 We also need to sort properly lines and wires with quads
 
 idea one:
-have all SpriteRender, LineRender, ... also come with on generic  Render2D component
-Render2D component have a field like type{line, wire, quad...}
-Render2DSystem mixing all types.
-OnRender: copy AND sort all the drawable components of entities into the Renderer (double buffer).
+
+OnRender: copy all the drawable components of entities into the Renderer (double buffer).
 after OnRender: Wait/Launch the RendererThread
 thread:
 process all the components, sort them (by layer always, Y optionally, 2 methods)

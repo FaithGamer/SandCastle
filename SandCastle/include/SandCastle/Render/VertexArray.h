@@ -18,6 +18,7 @@ namespace SandCastle
 		const sptr<IndexBuffer>& GetIndexBuffer() const;
 
 	private:
+		GLuint m_layoutIndex = 0;
 		std::vector<sptr<VertexBuffer>> m_vertexBuffer;
 		sptr<IndexBuffer> m_indexBuffer;
 		GLuint m_id;
