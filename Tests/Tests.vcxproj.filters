@@ -41,5 +41,8 @@
     <ClInclude Include="src\Serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\BenchmarkLotOfSprites.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

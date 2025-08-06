@@ -16,7 +16,7 @@ namespace SandCastle
 		}
 	};
 
-	SpriteRenderSystem::SpriteRenderSystem() : m_zSort(true)
+	SpriteRenderSystem::SpriteRenderSystem() : m_zSort(false)
 	{
 		SetPriority(9999);
 	}
@@ -49,8 +49,7 @@ namespace SandCastle
 						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetShader());
 						sprite.needUpdateRenderBatch = false;
 					}
-					auto data = MakeQuadRenderDataFromSpriteRender(&sprite, &transform);
-					renderer->DrawQuad(data);
+					renderer->DrawQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &transform));
 				});
 		}
 		else
@@ -72,8 +71,7 @@ namespace SandCastle
 					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetShader());
 					sprite.sprite->needUpdateRenderBatch = false;
 				}
-				auto data = MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform);
-				renderer->DrawQuad(data);
+				renderer->DrawQuad(MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform));
 			}
 		}
 	}

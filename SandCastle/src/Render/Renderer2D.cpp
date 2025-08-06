@@ -19,6 +19,7 @@
 
 namespace SandCastle
 {
+	float Renderer2D::gpuTime = 0;
 	Renderer2D::Renderer2D()
 	{
 		ASSERT_LOG_ERROR(Window::IsInitialized(), "Cannot create Renderer2D before Window is initialized.");
@@ -53,20 +54,14 @@ namespace SandCastle
 		m_cameraUniformBuffer = makesptr<UniformBuffer>(sizeof(CameraBufferData), 0);
 
 		//Static quad vertex buffer, same for every instance
-		Vec2f quadVertexPosition[4]
-		{
-			{-0.5f, -0.5f},
-			{0.5f, -0.5f},
-			{0.5f, 0.5f},
-			{-0.5f, 0.5f}
-		};
-		AttributeLayout layout({
-			{ ShaderDataType::Vec2f, "iVertexPos" } 
+		
+		/*AttributeLayout layout({
+			{ ShaderDataType::Vec2f, "iVertexPos" }
 			});
 		m_quadVertexBuffer = makesptr<VertexBuffer>(
-			(const void*)quadVertexPosition, 
-			sizeof(quadVertexPosition), 
-			layout);
+			(const void*)quadVertexPosition,
+			sizeof(quadVertexPosition),
+			layout);*/
 
 		m_whiteTexture = new Texture();
 		m_whiteTextureID = m_whiteTexture->GetId();
@@ -337,27 +332,28 @@ namespace SandCastle
 	void Renderer2D::AllocateQuadBatch(QuadBatch& batch)
 	{
 		//Instance vertex buffer
-		batch.instanceBuffer = makesptr<VertexBuffer>(m_maxInstances * sizeof(InstanceData));
+		batch.instanceBuffer = makesptr<VertexBuffer>(m_maxVertices * sizeof(InstanceData));
 		batch.instanceBuffer->SetLayout({
-			{ShaderDataType::Float, "iType", 1},
-			{ShaderDataType::Vec3f, "iPos", 1},
-			{ShaderDataType::Vec4f, "iUvOrColor", 1},
-			{ShaderDataType::Vec2f, "iSize", 1},
-			{ShaderDataType::Float, "iRotation", 1},
-			{ShaderDataType::Float, "iTexIndex", 1},
-			{ShaderDataType::Float, "iAlpha", 1}
+			{ShaderDataType::Vec2f, "iVertexPos"},
+			{ShaderDataType::Float, "iType"},
+			{ShaderDataType::Vec3f, "iPos"},
+			{ShaderDataType::Vec4f, "iUvOrColor"},
+			{ShaderDataType::Vec2f, "iSize"},
+			{ShaderDataType::Float, "iRotation"},
+			{ShaderDataType::Float, "iTexIndex"},
+			{ShaderDataType::Float, "iAlpha"}
 			});
 
 		//Vertex Array
 		batch.vertexArray = makesptr<VertexArray>();
 		//Quad buffer, same for all instances
-		batch.vertexArray->AddVertexBuffer(m_quadVertexBuffer);
+	//	batch.vertexArray->AddVertexBuffer(m_quadVertexBuffer);
 		//Instance buffer
 		batch.vertexArray->AddVertexBuffer(batch.instanceBuffer);
 		batch.vertexArray->SetIndexBuffer(m_quadIndexBuffer);
 
 		//Vertex data on CPU
-		batch.instanceBase = new InstanceData[m_maxInstances];
+		batch.instanceBase = new InstanceData[m_maxVertices];
 
 		//White texture in slot 0
 		batch.textureSlots[0] = m_whiteTextureID;
@@ -377,9 +373,9 @@ namespace SandCastle
 		//to do, make this a signal
 		Systems::Get<SpriteRenderSystem>()->OnClearBatches();
 	}
-
 	void Renderer2D::Begin(const Camera& camera)
 	{
+		gpuTime = 0;
 		m_rendering = true;
 
 		for (auto& layer : m_layers)
@@ -391,9 +387,9 @@ namespace SandCastle
 		m_cameraUniform.projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 		m_cameraUniform.worldToScreenRatio = camera.worldToScreenRatio * 2;
 		m_cameraUniformBuffer->SetData(&m_cameraUniform, sizeof(CameraBufferData), 0);
-		m_defaultLineShader->SetUniform("uAspectRatio", camera.GetAspectRatio());
+		//	m_defaultLineShader->SetUniform("uAspectRatio", camera.GetAspectRatio());
 
-		//Clear layers
+			//Clear layers
 		for (auto& layer : m_layers)
 		{
 			if (layer.index == 0)
@@ -450,33 +446,38 @@ namespace SandCastle
 
 	void Renderer2D::Flush(uint32_t batchIndex)
 	{
+		Clock clock;
 		QuadBatch& batch = m_quadBatchs[(size_t)batchIndex];
-		if (batch.indexCount)
+		if (batch.indexCount == 0)
+			return;
+
+		//Send the vertex data from CPU to GPU
+		uint32_t dataSize = (uint32_t)((uint8_t*)batch.instancePtr - (uint8_t*)batch.instanceBase);
+		batch.instanceBuffer->SetData(batch.instanceBase, dataSize);
+
+		for (uint32_t i = 0; i < batch.textureSlotIndex; i++)
 		{
-			//Send the vertex data from CPU to GPU
-			uint32_t dataSize = (uint32_t)((uint8_t*)batch.instancePtr - (uint8_t*)batch.instanceBase);
-			batch.instanceBuffer->SetData(batch.instanceBase, dataSize);
-
-			for (uint32_t i = 0; i < batch.textureSlotIndex; i++)
-			{
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, batch.textureSlots[i]);
-			}
-
-			//Issue the draw call after binding adequat context
-			batch.layer.target->Bind();
-			batch.vertexArray->Bind();
-			glUseProgram(batch.materialShaderID);
-			glDrawElementsInstanced(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0, batch.instanceCount);
-
-			m_stats.drawCalls++;
-			m_layers[batch.layer.index].active = true;
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, batch.textureSlots[i]);
 		}
+
+		//Issue the draw call after binding adequat context
+		batch.layer.target->Bind();
+		batch.vertexArray->Bind();
+		glUseProgram(batch.materialShaderID);
+
+		glDrawElements(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0);
+		//glDrawElementsInstanced(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0, batch.instanceCount);
+
+
+		m_stats.drawCalls++;
+		m_layers[batch.layer.index].active = true;
+
+		gpuTime += clock.GetElapsed();
 	}
 
-	void Renderer2D::DrawQuad(const QuadRenderData& quad)
+	void Renderer2D::DrawQuad(const QuadRenderData&& quad)
 	{
-		constexpr size_t quadVertexCount = 4;
 		auto& batch = m_quadBatchs[quad.batchID];
 		float textureIndex = -1.0f;
 
@@ -511,8 +512,16 @@ namespace SandCastle
 		//bool reComputePosition = transform.matrixUpdated || transform.needCompute || spriteRender.spriteDimensionsChanged;
 
 		//Input the vertex data to CPU within the quad vertex array
-		for (int i = 0; i < quadVertexCount; i++)
+		static Vec2f quadVertexPosition[4]
 		{
+			{-0.5f, -0.5f},
+			{0.5f, -0.5f},
+			{0.5f, 0.5f},
+			{-0.5f, 0.5f}
+		};
+		for (int i = 0; i < 4; i++)
+		{
+			batch.instancePtr->vertexPos = quadVertexPosition[i];
 			batch.instancePtr->type = (float)quad.type;
 			batch.instancePtr->pos = quad.pos;
 			batch.instancePtr->uvOrColor = quad.uvOrColor;
@@ -524,6 +533,7 @@ namespace SandCastle
 			//Incrementing the pointed value of the quad vertex array
 			batch.instancePtr++;
 		}
+
 		batch.indexCount += 6;
 		batch.instanceCount++;
 		m_stats.quadCount++;

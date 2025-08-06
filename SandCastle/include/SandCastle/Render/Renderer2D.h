@@ -27,6 +27,7 @@ namespace SandCastle
 
 	struct InstanceData
 	{
+		Vec2f vertexPos;
 		float type;
 		Vec3f pos;
 		Vec4f uvOrColor;
@@ -78,6 +79,7 @@ namespace SandCastle
 	class Renderer2D : public Singleton<Renderer2D>
 	{
 	public:
+		static float gpuTime;
 		struct Statistics
 		{
 			uint32_t drawCalls = 0;
@@ -94,7 +96,7 @@ namespace SandCastle
 		void End();
 		void Flush(uint32_t batchIndex);
 
-		void DrawQuad(const QuadRenderData& quad);
+		void DrawQuad(const QuadRenderData&& quad);
 
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.

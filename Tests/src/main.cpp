@@ -5,13 +5,15 @@
 #include "Rotation.h"
 #include "WindowEvents.h"
 #include "Serialization.h"
+#include "BenchmarkLotOfSprites.h"
 int main()
 {
 	//Launch();
-	DrawSprite();
+	//DrawSprite();
 	//DrawAnimation();
 	//BasicInputs();
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
+	BenchmarkLotOfSprites();
 }

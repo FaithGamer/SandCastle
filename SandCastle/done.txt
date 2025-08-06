@@ -106,76 +106,39 @@ they should not be used because of sorting issue
 
 05
 
->integrade QuadRenderData
->texture as ID
->removed render options for individual quad/sprite
->instancing
->benchmark against sandbox
+-progress on instanced rendering
 
+06
 
-instanced rendering (to upload the data of the sprite not every vertice)
+-instanced rendering
+-refacto of the renderer.
+non exhaustive list:
+(-QuadRenderData
+-texture as ID
+-removed render options for individual quad/sprite)
+-gave up on instancing, it's actually shit.
+-benchmark against sandbox: same fps, shifted load on GPU which is great (at least on my config)
+120fps= 0.008s total, gpu time (buffer data + draw call)= 0.0016s vs 0.0012s on sandbox
+
 >materials
+>layer sorting
+>thread
+
 >benchmark to compare thread and no thread
 >benchmark with and without colors
 >consider get rid of sprite origin
->Render THE PLAN:
->only quads/textured quads
 >layer sorting
 >per layer z sorting (enabled/disabled)
 >double buffered drawing data
 >Material
 
-
-render plan:
+thread:
 
 >copy all into double buffer (OnRender)
 >wait launch render thread
->sort by layer (optionally Z sort)
 >draw and that's it motherfucker
 
-
->the renderer need to properly sort layers and account for transparency
-(this means entities on layers behind must call draw before, because once the
-draw call of the quadArray is issued, the semi transparent fragments take a definitive color,
-depending on what was already drawn behind.)
-Now there's no choice but to sort entities by layers.
-Either having one component for each layer to gain time but that's not very practical.
-Having one render pass for each layer is actually a dumb idea cause it's not solving the issue.
-We also need to sort properly lines and wires with quads
-
-idea one:
-
-OnRender: copy all the drawable components of entities into the Renderer (double buffer).
-after OnRender: Wait/Launch the RendererThread
-thread:
-process all the components, sort them (by layer always, Y optionally, 2 methods)
-exclude when outside of camera.
->consider drawing ONLY quads (avoiding the switch and the oversized Drawable)
->otherwise, have custom drawable type and call we can add to the renderer
-switch(type)
-{
-	SpriteRenderer:
-	drawSprite
-	...
-}
-Drawable m_drawables[double_buffer][MAX_ITEM_DRAW]
-struct Drawable
-{
-	int type
-	void* rawdata
-	size_t size
-}
-switch(type)
-{
-	convert_data_to_sprite(rawdata, size)
-}
-
-
-
->I want to make new attemps at threaded rendering
-
-
-
+>unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)
 >improve redering (see redering section)
