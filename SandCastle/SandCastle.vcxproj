@@ -249,6 +249,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
     <ClCompile Include="src\Core\Assets.cpp" />
     <ClCompile Include="src\Core\Delegate.cpp" />
@@ -389,6 +390,7 @@
     <ClInclude Include="include\SandCastle\Render\Camera.h" />
     <ClInclude Include="include\SandCastle\Render\IndexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h" />
+    <ClInclude Include="include\SandCastle\Render\Material.h" />
     <ClInclude Include="include\SandCastle\Render\Rect.h" />
     <ClInclude Include="include\SandCastle\Render\Renderer2D.h" />
     <ClInclude Include="include\SandCastle\Render\RenderOptions.h" />

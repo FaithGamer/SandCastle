@@ -45,4 +45,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\batch_renderer.frag" />
+    <None Include="assets\shaders\batch_renderer.vert" />
+    <None Include="assets\shaders\default_layer.frag" />
+    <None Include="assets\shaders\default_layer.vert" />
+    <None Include="assets\shaders\line.frag" />
+    <None Include="assets\shaders\line.geom" />
+    <None Include="assets\shaders\line.vert" />
+    <None Include="assets\shaders\wire.frag" />
+    <None Include="assets\shaders\wire.vert" />
+  </ItemGroup>
 </Project>

@@ -8,22 +8,16 @@
 #include "SandCastle/Render/Shader.h"
 
 
-#define SET_UNIFORM(c) GLint location = glGetUniformLocation(m_glid, (const GLchar*)name.c_str());\
-if (location == -1)\
-{\
-	LOG_ERROR("The following uniform cannot be found: " + name);\
-}\
-else\
-{\
-	glUseProgram(m_glid);\
-	c;\
-}\
+#define SET_UNIFORM(c) \
+glUseProgram(m_glid);\
+c;\
+
 
 namespace SandCastle
 {
 	uint32_t Shader::m_currentId = 0;
 
-	
+
 
 	void shaderCompilationError(uint32_t shader)
 	{
@@ -93,6 +87,7 @@ namespace SandCastle
 
 	Shader::Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource)
 	{
+		m_name = 
 		m_id = m_currentId++;
 		//Load shader source files
 		const GLchar* vertexSrc = (const GLchar*)vertexSource.c_str();
@@ -137,62 +132,47 @@ namespace SandCastle
 		glUseProgram(m_glid);
 	}
 
-	void Shader::SetUniform(std::string name, const GLfloat& uniform)
+	void Shader::SetUniform(GLint location, const GLfloat& uniform)
 	{
 		SET_UNIFORM(glUniform1f(location, uniform));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::vec2& uniform)
+	void Shader::SetUniform(GLint location, const Vec2f& uniform)
 	{
 		SET_UNIFORM(glUniform2f(location, (GLfloat)uniform.x, (GLfloat)uniform.y));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::vec3& uniform)
+	void Shader::SetUniform(GLint location, const Vec3f& uniform)
 	{
 		SET_UNIFORM(glUniform3f(location, (GLfloat)uniform.x, (GLfloat)uniform.y, (GLfloat)uniform.z));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::vec4& uniform)
+	void Shader::SetUniform(GLint location, const Vec4f& uniform)
 	{
 		SET_UNIFORM(glUniform4f(location, (GLfloat)uniform.x, (GLfloat)uniform.y, (GLfloat)uniform.z, (GLfloat)uniform.w));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::mat3& uniform)
+	void Shader::SetUniform(GLint location, const Mat3& uniform)
 	{
 		SET_UNIFORM(glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(uniform)));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::mat4& uniform)
+	void Shader::SetUniform(GLint location, const Mat4& uniform)
 	{
 		SET_UNIFORM(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(uniform)));
 	}
 
-	void Shader::SetUniform(std::string name, const GLint& uniform)
+	void Shader::SetUniform(GLint location, const int& uniform)
 	{
-		SET_UNIFORM(glUniform1i(location, uniform));
+		SET_UNIFORM(glUniform1i(location, (GLint)uniform));
 	}
 
-	void Shader::SetUniform(std::string name, const glm::i32vec2& uniform)
-	{
-		SET_UNIFORM(glUniform2i(location, (GLint)uniform.x, (GLint)uniform.y));
-	}
-
-	void Shader::SetUniform(std::string name, const glm::i32vec3& uniform)
-	{
-		SET_UNIFORM(glUniform3i(location, (GLint)uniform.x, (GLint)uniform.y, (GLint)uniform.z));
-	}
-
-	void Shader::SetUniform(std::string name, const glm::i32vec4& uniform)
-	{
-		SET_UNIFORM(glUniform4i(location, (GLint)uniform.x, (GLint)uniform.y, (GLint)uniform.z, (GLint)uniform.w));
-	}
-
-	void Shader::SetUniformArray(std::string name, const int* uniform, GLsizei count)
+	void Shader::SetUniformArray(GLint location, const int* uniform, GLsizei count)
 	{
 		SET_UNIFORM(glUniform1iv(location, count, uniform));
 	}
 
-	void Shader::SetUniformArray(std::string name, const float* uniform, GLsizei count)
+	void Shader::SetUniformArray(GLint location, const float* uniform, GLsizei count)
 	{
 		SET_UNIFORM(glUniform1fv(location, count, uniform));
 	}
@@ -234,5 +214,9 @@ namespace SandCastle
 			LOG_ERROR("Unable to open the shader: " + path);
 		}
 		return Files::IfstreamToString(shaderFile);
+	}
+	String Shader::GetName()
+	{
+		return m_name;
 	}
 }

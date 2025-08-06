@@ -2,9 +2,13 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include "SandCastle/Core/Vec.h"
+
+
 
 namespace SandCastle
 {
+	class Assets;
 	class Shader
 	{
 	public:
@@ -14,31 +18,16 @@ namespace SandCastle
 
 		void Bind() const;
 
-		//To do: convert glm vec to sanbox vec
-		void SetUniform(std::string name, const GLfloat& uniform);
-		void SetUniform(std::string name, const glm::vec2& uniform);
-		void SetUniform(std::string name, const glm::vec3& uniform);
-		void SetUniform(std::string name, const glm::vec4& uniform);
-		void SetUniform(std::string name, const glm::mat3& uniform);
-		void SetUniform(std::string name, const glm::mat4& uniform);
-		void SetUniform(std::string name, const GLint& uniform);
-		void SetUniform(std::string name, const glm::i32vec2& uniform);
-		void SetUniform(std::string name, const glm::i32vec3& uniform);
-		void SetUniform(std::string name, const glm::i32vec4& uniform);
-
 		void SetUniform(GLint location, const GLfloat& uniform);
-		void SetUniform(GLint location, const glm::vec2& uniform);
-		void SetUniform(GLint location, const glm::vec3& uniform);
-		void SetUniform(GLint location, const glm::vec4& uniform);
-		void SetUniform(GLint location, const glm::mat3& uniform);
-		void SetUniform(GLint location, const glm::mat4& uniform);
-		void SetUniform(GLint location, const GLint& uniform);
-		void SetUniform(GLint location, const glm::i32vec2& uniform);
-		void SetUniform(GLint location, const glm::i32vec3& uniform);
-		void SetUniform(GLint location, const glm::i32vec4& uniform);
+		void SetUniform(GLint location, const Vec2f& uniform);
+		void SetUniform(GLint location, const Vec3f& uniform);
+		void SetUniform(GLint location, const Vec4f& uniform);
+		void SetUniform(GLint location, const Mat3& uniform);
+		void SetUniform(GLint location, const Mat4& uniform);
+		void SetUniform(GLint location, const int& uniform);
 
-		void SetUniformArray(std::string name, const int* uniform, GLsizei count);
-		void SetUniformArray(std::string name, const float* uniform, GLsizei count);
+		void SetUniformArray(GLint location, const int* uniform, GLsizei count);
+		void SetUniformArray(GLint location, const float* uniform, GLsizei count);
 
 		GLint GetUniformLocation(std::string name);
 		void BindUniformBlock(std::string uniformName, GLint bindingPoint);
@@ -46,9 +35,12 @@ namespace SandCastle
 		GLuint GetGLID();
 		uint32_t GetID();
 		static std::string LoadShaderSourceFromFile(std::string path);
+		String GetName();
 	private:
+		friend Assets;
 		static uint32_t m_currentId;
 		GLuint m_glid;
 		uint32_t m_id;
+		String m_name;
 	};
 }

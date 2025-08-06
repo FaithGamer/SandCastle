@@ -26,7 +26,7 @@ namespace SandCastle
 		if(logfile)
 			sinks.push_back(makesptr<spdlog::sinks::rotating_file_sink_mt>("logfile.txt", 5000000, 0));
 #endif
-		m_logger = makesptr<spdlog::logger>("SandCastle", begin(sinks), end(sinks));
+		m_logger = makesptr<spdlog::logger>("SANDCASTLE", begin(sinks), end(sinks));
 		m_logger->set_level(spdlog::level::trace);
 #endif
 	}

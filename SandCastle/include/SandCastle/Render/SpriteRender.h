@@ -4,7 +4,7 @@
 #include "SandCastle/Core/std_macros.h"
 #include "SandCastle/Render/Rect.h"
 #include "SandCastle/Render/Texture.h"
-#include "SandCastle/Render/Shader.h"
+#include "SandCastle/Render/Material.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/Sprite.h"
 
@@ -15,10 +15,10 @@ namespace SandCastle
 	{
 	public:
 		SpriteRender();
-		SpriteRender(Sprite* sprite, Shader* Shader);
+		SpriteRender(Sprite* sprite, Material* material);
 
 		void SetSprite(Sprite* sprite);
-		void SetShader(Shader* Shader);
+		void SetMaterial(Material* Material);
 		void SetLayer(uint32_t Layer);
 
 		inline Sprite* GetSprite() const
@@ -31,9 +31,9 @@ namespace SandCastle
 			return m_sprite->GetTexture();
 		}
 
-		inline Shader* GetShader() const
+		inline Material* GetMaterial() const
 		{
-			return m_shader;
+			return m_material;
 		}
 
 		inline uint32_t GetLayer() const
@@ -48,7 +48,7 @@ namespace SandCastle
 		bool spriteDimensionsChanged;
 	
 	protected:
-		Shader* m_shader;
+		Material* m_material;
 		Sprite* m_sprite;
 		uint32_t m_layer;
 

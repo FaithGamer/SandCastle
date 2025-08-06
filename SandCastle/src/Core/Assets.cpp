@@ -207,12 +207,10 @@ namespace SandCastle
 	void Assets::Init()
 	{
 		//Can't be done in constructor because of recursion
-#ifndef SandCastle_NO_ASSETS
 		InitAddAssetFunctions();
 		LoadAssets();
 		CompileShaders();
 		CreateAnimations();
-#endif
 	}
 	void Assets::HotReload()
 	{
@@ -295,6 +293,7 @@ namespace SandCastle
 			size_t j = path.find_last_of(".");
 			size_t s = path.size();
 			String assetName = path.substr(i + 1, (s - i) - (s - j)) + "shader";
+			shaderAsset->Ptr()->m_name = assetName;
 			InsertAsset(assetName, shaderAsset);
 		}
 	}

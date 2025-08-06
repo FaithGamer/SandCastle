@@ -14,6 +14,7 @@
 #include "SandCastle/Render/LineRenderer.h"
 #include "SandCastle/Render/WireRender.h"
 #include "SandCastle/Render/QuadRenderData.h"
+#include "SandCastle/Render/Material.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 
@@ -41,12 +42,18 @@ namespace SandCastle
 		std::string name = "RenderLayerDefault";
 		uint32_t index = 0;
 		sptr<RenderTarget> target = nullptr;
-		Shader* shader = nullptr;
+		Material* material = nullptr;
 		sptr<RenderOptions> renderOptions = nullptr;
 		sptr<VertexArray> vertexArray;
 		unsigned int height = 0;
 		bool active = false;
 		bool offscreen = false;
+	};
+	
+	struct RenderingThread
+	{
+		std::atomic<size_t> current;
+		QuadRenderData sorted[2][16][100000];
 	};
 
 	struct OffscreenRenderLayer
@@ -62,18 +69,18 @@ namespace SandCastle
 		uint32_t userCount = 0;
 
 		sptr<VertexArray> vertexArray;
-		sptr<VertexBuffer> instanceBuffer;
+		sptr<VertexBuffer> quadBuffer;
 
-		uint32_t instanceCount = 0;
+		uint32_t quadCount = 0;
 		uint32_t indexCount = 0;
-		InstanceData* instanceBase = nullptr;
-		InstanceData* instancePtr = nullptr;
+		InstanceData* quadBase = nullptr;
+		InstanceData* quadPtr = nullptr;
 
 		GLuint textureSlots[MAX_TEXTURE_INDEX];
 		uint32_t textureSlotIndex = 1;
 
 		RenderLayer layer;
-		GLuint materialShaderID;
+		Material* material;
 	};
 
 	class Renderer2D : public Singleton<Renderer2D>
@@ -96,7 +103,9 @@ namespace SandCastle
 		void End();
 		void Flush(uint32_t batchIndex);
 
-		void DrawQuad(const QuadRenderData&& quad);
+		Material* CreateMaterial(Shader* shader);
+
+		void PushQuad(const QuadRenderData&& quad);
 
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
@@ -107,17 +116,17 @@ namespace SandCastle
 
 		/// @brief Set the default shader used when rendering quads/sprites
 		/// @param shader 
-		static void SetBatchRenderShader(Shader* shader);
+		static void SetDefaultBatchMaterial(Material* material);
 
 		/// @brief Add a layer on the bottom of the render queue.
 		/// The order cannot be changed ever again, and the layers cannot be removed.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static uint32_t AddLayer(std::string name, Shader* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static uint32_t AddLayer(std::string name, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
 		/// @brief Add a layer on the bottom of the render queue with a fixed height, it will keep the aspect ratio of the window.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static uint32_t AddLayer(std::string name, unsigned int height, Shader* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static uint32_t AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
 		/// @brief Add a layer that won't display but can be used in the shader of other layers.
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
@@ -128,7 +137,7 @@ namespace SandCastle
 		/// @param screenSpace  normalized screen space (vector must be of size 4)
 		static void SetLayerScreenSpace(uint32_t layer, const std::vector<Vec2f>& screenSpace);
 		/// @brief Set the shader used to render a layer.
-		static void SetLayerShader(uint32_t layer, Shader* shader);
+		static void SetLayerMaterial(uint32_t layer, Material* shader);
 		/// @brief Set the RenderOptions used when rendering a layer
 		static void SetLayerRenderOptions(uint32_t layer, sptr<RenderOptions> renderOptions);
 		/// @brief Set the layer height (width will be calculated to fit the aspect ratio of the window)
@@ -151,7 +160,7 @@ namespace SandCastle
 		static std::vector<uint32_t> GetLayers();
 		/// @brief Get a batch based on what layer/shader/render options is used. nullptr = default shader/render options
 		/// @return BatchId
-		static uint32_t GetBatchId(uint32_t layerIndex, Shader* shader = nullptr);
+		static uint32_t GetBatchId(uint32_t layerIndex, Material* material);
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
 
@@ -163,10 +172,11 @@ namespace SandCastle
 
 		void StartBatch(uint32_t batchIndex);
 		void NextBatch(uint32_t batchIndex);
+		void DrawQuad(const QuadRenderData& quad);
 
-		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Shader* shaders);
+		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Material* material);
 		void AllocateQuadBatch(QuadBatch& batch);
-		void CreateQuadBatch(RenderLayer& layer, Shader* shader);
+		void CreateQuadBatch(RenderLayer& layer, Material* shader);
 		uint64_t GenerateBatchId(uint64_t a, uint64_t b);
 		void RenderLayers();
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
@@ -179,17 +189,18 @@ namespace SandCastle
 		std::vector<QuadBatch> m_quadBatchs;
 		std::vector<size_t> m_freeQuadBatchs;
 
-		uint32_t m_maxInstances;
+		uint32_t m_maxQuads;
 		uint32_t m_maxVertices;
 		uint32_t m_maxIndices;
 		uint32_t m_maxOffscreenLayers;
 
-		Shader* m_batchShader;
+		Material* m_defaultBatchMaterial;
 		sptr<RenderOptions> m_defaultRenderOptions;
 		sptr<RenderOptions> m_defaultRenderOptionsLayer;
 		Texture* m_whiteTexture;
 		GLuint m_whiteTextureID;
 		sptr<UniformBuffer> m_cameraUniformBuffer;
+		GLuint m_cameraUniformBufferBinding = 0;
 		sptr<IndexBuffer> m_quadIndexBuffer;
 		sptr<VertexBuffer> m_quadVertexBuffer;
 
@@ -207,7 +218,10 @@ namespace SandCastle
 		std::vector<RenderLayer> m_layers;
 		std::vector<OffscreenRenderLayer> m_offscreenLayers;
 		std::vector<RenderLayer*> m_renderLayers;
-		Shader* m_defaultLayerShader;
+		Material* m_defaultLayerMaterial;
+
+		//Materials
+		std::vector<Material*> m_materials;
 
 		//Line
 		Shader* m_defaultLineShader;

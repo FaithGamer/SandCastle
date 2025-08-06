@@ -119,8 +119,8 @@ non exhaustive list:
 -gave up on instancing, it's actually shit.
 -benchmark against sandbox: same fps, shifted load on GPU which is great (at least on my config)
 120fps= 0.008s total, gpu time (buffer data + draw call)= 0.0016s vs 0.0012s on sandbox
+-materials!
 
->materials
 >layer sorting
 >thread
 

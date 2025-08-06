@@ -46,10 +46,10 @@ namespace SandCastle
 				{
 					if (sprite.needUpdateRenderBatch)
 					{
-						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetShader());
+						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetMaterial());
 						sprite.needUpdateRenderBatch = false;
 					}
-					renderer->DrawQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &transform));
+					renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &transform));
 				});
 		}
 		else
@@ -68,10 +68,10 @@ namespace SandCastle
 			{
 				if (sprite.sprite->needUpdateRenderBatch)
 				{
-					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetShader());
+					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetMaterial());
 					sprite.sprite->needUpdateRenderBatch = false;
 				}
-				renderer->DrawQuad(MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform));
+				renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform));
 			}
 		}
 	}
