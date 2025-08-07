@@ -59,6 +59,14 @@ namespace SandCastle
 		return m_queue[0].size() + m_queue[1].size();
 	}
 
+	void WorkerThread::Wait()
+	{
+		std::unique_lock lock(m_doneMutex);
+		m_doneCondition.wait(lock, [this]() {
+			return !m_haveTask;
+			});
+	}
+
 	void WorkerThread::Thread()
 	{
 		while (m_threadRunning)
@@ -79,6 +87,12 @@ namespace SandCastle
 
 			m_queue[m_currentQueue].clear();
 			m_haveTask = !(m_queue[0].empty() && m_queue[1].empty());
+
+			if (!m_haveTask)
+			{
+				std::unique_lock doneLock(m_doneMutex);
+				m_doneCondition.notify_all();
+			}
 		}
 	}
 }
