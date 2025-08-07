@@ -177,7 +177,7 @@ namespace SandCastle
 
 	
 		void InitThread();
-		void Thread();
+		void RenderThread();
 		void Begin();
 		void End();
 		void Flush(uint32_t batchIndex);

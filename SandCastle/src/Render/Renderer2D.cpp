@@ -437,7 +437,7 @@ namespace SandCastle
 		//to do, make this a signal
 		Systems::Get<SpriteRenderSystem>()->OnClearBatches();
 	}
-	void Renderer2D::Thread()
+	void Renderer2D::RenderThread()
 	{
 		Begin();
 		for (int i = 0; i < m_thread.queue[m_thread.current].size(); i++)
@@ -452,8 +452,10 @@ namespace SandCastle
 			}
 		}*/
 		End();
+		Window::RenderWindow();
 		m_thread.queue[m_thread.current].clear();
-		m_thread.current = m_thread.current == 1 ? 0 : 1;
+		
+
 	}
 	void Renderer2D::Begin()
 	{
@@ -496,7 +498,6 @@ namespace SandCastle
 		Systems::Get<LineRendererSystem>()->Render();
 		RenderLayers();
 		m_rendering = false;
-		Window::RenderWindow();
 	}
 
 	void Renderer2D::RenderLayers()
@@ -729,7 +730,8 @@ namespace SandCastle
 	void Renderer2D::Process()
 	{
 		Wait();
-		auto del = Delegate<void>(&Renderer2D::Thread, this);
+		m_thread.current = m_thread.current == 1 ? 0 : 1;
+		auto del = Delegate<void>(&Renderer2D::RenderThread, this);
 		sptr<Task<void>> task = makesptr<Task<void>>(del);
 		m_thread.thread.QueueTask(task);
 	}
