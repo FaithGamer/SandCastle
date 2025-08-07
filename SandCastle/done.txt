@@ -121,8 +121,18 @@ non exhaustive list:
 120fps= 0.008s total, gpu time (buffer data + draw call)= 0.0016s vs 0.0012s on sandbox
 -materials!
 
+07
+
+-I managed to draw from the thread!
+-Worker thread improvement: Wait method
+
+>blinking at low frame rame: the same buffer getting filled twice if cpu cycle is faster than
 >layer sorting
->thread
+>thread wait without infinite loop
+>try a simple thread to join and launch every frame ?
+>try matrice computation cpu side
+>clean code
+>imgui inside the render thread
 
 >benchmark to compare thread and no thread
 >benchmark with and without colors
@@ -136,8 +146,12 @@ thread:
 
 >copy all into double buffer (OnRender)
 >wait launch render thread
+>getbatchid must buffer the quad batch creation
+>check for other concurrency problem
 >draw and that's it motherfucker
 
+>simplify creation of task (void return only ?)
+>add render option to material
 >unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
 >migrate box2D 3
 >include GUI stuff (translate UI position to game world and so forth)

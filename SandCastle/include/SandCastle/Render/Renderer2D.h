@@ -15,8 +15,10 @@
 #include "SandCastle/Render/WireRender.h"
 #include "SandCastle/Render/QuadRenderData.h"
 #include "SandCastle/Render/Material.h"
+#include "SandCastle/Core/Worker.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
+#define MAX_LAYERS 32
 
 namespace SandCastle
 {
@@ -53,7 +55,10 @@ namespace SandCastle
 	struct RenderingThread
 	{
 		std::atomic<size_t> current;
-		QuadRenderData sorted[2][16][100000];
+		int layerMax[2];
+		std::vector<QuadRenderData> sorted[2][MAX_LAYERS];
+		std::vector<QuadRenderData> queue[2];
+		WorkerThread thread;
 	};
 
 	struct OffscreenRenderLayer
@@ -92,16 +97,11 @@ namespace SandCastle
 			uint32_t drawCalls = 0;
 			uint32_t quadCount = 0;
 		};
-
+		
+		void Init();
+		
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
-
-		/// @brief To be called before attempting to use any of the Draw method
-		/// @param camera 
-		void Begin(const Camera& camera);
-		/// @brief To be called when you are done Drawing. Will Render everything on the RenderTarget (default screen)
-		void End();
-		void Flush(uint32_t batchIndex);
 
 		Material* CreateMaterial(Shader* shader);
 
@@ -165,10 +165,22 @@ namespace SandCastle
 		static Statistics GetStats();
 
 		void OnWindowResize(Vec2u size);
+		//System:
+
+		void Wait();
+
+		void Process();
 	private:
 		friend Engine;
 		friend Singleton<Renderer2D>;
 		Renderer2D();
+
+	
+		void InitThread();
+		void Thread();
+		void Begin();
+		void End();
+		void Flush(uint32_t batchIndex);
 
 		void StartBatch(uint32_t batchIndex);
 		void NextBatch(uint32_t batchIndex);
@@ -182,7 +194,7 @@ namespace SandCastle
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace);
 	private:
-
+		RenderingThread m_thread;
 		// Batched Quads
 
 		std::unordered_map<uint64_t, uint32_t> m_quadBatchFinder;
@@ -234,5 +246,6 @@ namespace SandCastle
 		bool m_rendering;
 		Statistics m_stats;
 		float m_aspectRatio;
+		bool m_init = false;
 	};
 }

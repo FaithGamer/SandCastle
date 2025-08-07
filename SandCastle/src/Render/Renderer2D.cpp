@@ -22,6 +22,61 @@ namespace SandCastle
 	float Renderer2D::gpuTime = 0;
 	Renderer2D::Renderer2D()
 	{
+		
+	}
+
+	void Renderer2D::Init()
+	{
+		m_thread.thread.StartThread();
+		if (m_init)
+		{
+			LOG_ERROR("Trying to init the renderer twice.");
+			return;
+		}
+
+		auto del = Delegate<void>(&Renderer2D::InitThread, this);
+		sptr<Task<void>> task = makesptr<Task<void>>(del);
+		m_thread.thread.QueueTask(task);
+	}
+
+	void Renderer2D::InitThread()
+	{
+		if (SDL_GL_MakeCurrent(Window::GetSDLWindow(), Window::GetRenderContext()) != 0)
+		{
+			LOG_ERROR(LogSDLError("Cannot set the context."));
+		}
+		//Loading OpenGL Functions addresses
+		bool loadGlad = (bool)gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+		ASSERT_LOG_ERROR(loadGlad, "Couldn't initialize GLAD");
+
+		//Logging additional information
+		auto c = glGetString(GL_VENDOR);
+		LOG_INFO("OpenGL Loaded.");
+		LOG_INFO("Version: " + std::string((const char*)glGetString(GL_VERSION)));
+		LOG_INFO("Renderer: " + std::string((const char*)glGetString(GL_RENDERER)));
+		LOG_INFO("Vendor: " + std::string((const char*)glGetString(GL_VENDOR)));
+
+		int maxVertAttrib = 0;
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertAttrib);
+
+		LOG_INFO("Max. Vertex attributes: " + std::to_string(maxVertAttrib));
+
+		//Viewport size and clear color
+		auto size = Window::GetSize();
+		glViewport(0, 0, size.x, size.y);
+
+		//Enabling blending
+		glEnable(GL_BLEND);
+
+		//Enabling depth test
+		glEnable(GL_DEPTH_TEST);
+
+		//Standard blending parameters for most case uses
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+
+		SDL_GL_SetSwapInterval(0);
+	
+
 		ASSERT_LOG_ERROR(Window::IsInitialized(), "Cannot create Renderer2D before Window is initialized.");
 
 		m_rendering = false;
@@ -61,17 +116,25 @@ namespace SandCastle
 		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
-		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
+	/*m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
 		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
-		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
+		m_defaultWireShader = Assets::Get<Shader>("wire.shader");*/
+
+#define LSSFF(...) Shader::LoadShaderSourceFromFile(__VA_ARGS__)
+
+		m_defaultBatchMaterial = CreateMaterial(new Shader(LSSFF("assets/shaders/batch_renderer.vert"), LSSFF("assets/shaders/batch_renderer.frag")));
+		m_defaultLayerMaterial = CreateMaterial(new Shader(LSSFF("assets/shaders/default_layer.vert"), LSSFF("assets/shaders/default_layer.frag")));
+		m_defaultLineShader = new Shader(LSSFF("assets/shaders/line.vert"), LSSFF("assets/shaders/line.geom"), LSSFF("assets/shaders/line.frag"));
+		m_defaultWireShader = new Shader(LSSFF("assets/shaders/wire.vert"), LSSFF("assets/shaders/wire.frag"));
+
 
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		sptr<VertexArray> defaultLayerVertexArray = GenerateLayerVertexArray(screenSpace);
 
 		//Screen layer
 		m_layers.push_back(RenderLayer("Window", 0, window, m_defaultLayerMaterial, m_defaultRenderOptionsLayer, defaultLayerVertexArray));
-		//CreateQuadBatch(m_layers[0], nullptr, nullptr);
+		//CreateQuadBatch(m_layers[0], nullptr);
 
 		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), m_maxOffscreenLayers + 1);
 
@@ -81,10 +144,14 @@ namespace SandCastle
 
 		//Set render target to be the window by default
 		SetRenderTarget(window);
+
+		m_init = true;
 	}
 
 	Renderer2D::~Renderer2D()
 	{
+		m_thread.thread.StopThread();
+		Wait();
 		//To do
 		delete m_whiteTexture;
 		for (int i = 0; i < m_materials.size(); i++)
@@ -119,6 +186,10 @@ namespace SandCastle
 	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
+		ins->Wait();
+
+		ASSERT_LOG_ERROR((ins->m_layers.size() < (MAX_LAYERS / 2)), "Max render layer ({0}) reached.", MAX_LAYERS / 2);
+
 		if (material == nullptr)
 			material = ins->m_defaultLayerMaterial;
 		if (renderOptions == nullptr)
@@ -153,6 +224,7 @@ namespace SandCastle
 	uint32_t Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex)
 	{
 		auto ins = Instance();
+		ins->Wait();
 		ASSERT_LOG_ERROR(bool(sampler2DIndex > 0 && sampler2DIndex < 16), "sampler2DIndex must be comprised between 1 and 15");
 		ASSERT_LOG_ERROR(bool(ins->m_offscreenLayers.size() < 15), "Number of Offscreen layers exceeded (max 15)");
 
@@ -228,12 +300,16 @@ namespace SandCastle
 
 		uint64_t id = ins->GenerateBatchId(layerIndex, materialId);
 
+
 		auto batch = ins->m_quadBatchFinder.find(id);
 		if (batch == ins->m_quadBatchFinder.end())
 		{
 			//Create batch if doesn't exists
-			ins->CreateQuadBatch(ins->m_layers[layerIndex], material);
-
+			auto del = Delegate(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
+			auto task = makesptr<Task<void, RenderLayer&, Material*>>(del);
+			ins->m_thread.thread.QueueTask(task);
+			ins->Wait();
+			//ins->CreateQuadBatch(ins->m_layers[layerIndex], material);
 			uint32_t index = (uint32_t)ins->m_quadBatchs.size() - 1;
 			ins->m_quadBatchs.back().index = index;
 
@@ -361,29 +437,47 @@ namespace SandCastle
 		//to do, make this a signal
 		Systems::Get<SpriteRenderSystem>()->OnClearBatches();
 	}
-	void Renderer2D::Begin(const Camera& camera)
+	void Renderer2D::Thread()
 	{
+		Begin();
+		for (int i = 0; i < m_thread.queue[m_thread.current].size(); i++)
+		{
+			DrawQuad(m_thread.queue[m_thread.current][i]);
+		}
+		/*for (int i = m_thread.layerMax[m_thread.current]; i >= 0; i--)
+		{
+			for (int j = 0; j < m_thread.sorted[m_thread.current][i].size(); j++)
+			{
+				DrawQuad(m_thread.sorted[m_thread.current][i][j]);
+			}
+		}*/
+		End();
+		m_thread.queue[m_thread.current].clear();
+		m_thread.current = m_thread.current == 1 ? 0 : 1;
+	}
+	void Renderer2D::Begin()
+	{
+		if (SDL_GL_GetCurrentContext() != Window::GetRenderContext())
+		{
+			LOG_ERROR("wrong context");
+		}
+		//Window::ClearWindow();
+		auto camera = Systems::GetMainCamera();
 		gpuTime = 0;
 		m_rendering = true;
 
 		for (auto& layer : m_layers)
 		{
+			layer.target->Clear();
 			layer.active = false;
 		}
 
+		SetRenderTarget(Window::Instance());
 		//Set the camera matrices into the uniform buffer
-		m_cameraUniform.projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
-		m_cameraUniform.worldToScreenRatio = camera.worldToScreenRatio * 2;
+		m_cameraUniform.projectionView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
+		m_cameraUniform.worldToScreenRatio = camera->worldToScreenRatio * 2;
 		m_cameraUniformBuffer->SetData(&m_cameraUniform, sizeof(CameraBufferData), 0);
 		//	m_defaultLineShader->SetUniform("uAspectRatio", camera.GetAspectRatio());
-
-			//Clear layers
-		for (auto& layer : m_layers)
-		{
-			if (layer.index == 0)
-				continue;
-			layer.target->Clear();
-		}
 
 		//ResetStats
 		m_stats.drawCalls = 0;
@@ -402,6 +496,7 @@ namespace SandCastle
 		Systems::Get<LineRendererSystem>()->Render();
 		RenderLayers();
 		m_rendering = false;
+		Window::RenderWindow();
 	}
 
 	void Renderer2D::RenderLayers()
@@ -471,7 +566,10 @@ namespace SandCastle
 	}
 	void Renderer2D::PushQuad(const QuadRenderData&& quad)
 	{
-		DrawQuad(quad);
+		int current = m_thread.current == 1 ? 0 : 1;
+		//m_thread.sorted[current][quad.layerID].emplace_back(quad);
+		//m_thread.layerMax[current] = quad.layerID > m_thread.layerMax[current] ? quad.layerID : m_thread.layerMax[current];
+		m_thread.queue[current].emplace_back(quad);
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
 	{
@@ -621,6 +719,19 @@ namespace SandCastle
 				layer.target->SetSize({ width, layer.height });
 			}
 		}
+	}
+
+	void Renderer2D::Wait()
+	{
+		m_thread.thread.Wait();
+	}
+
+	void Renderer2D::Process()
+	{
+		Wait();
+		auto del = Delegate<void>(&Renderer2D::Thread, this);
+		sptr<Task<void>> task = makesptr<Task<void>>(del);
+		m_thread.thread.QueueTask(task);
 	}
 
 	sptr<VertexArray> Renderer2D::GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace)

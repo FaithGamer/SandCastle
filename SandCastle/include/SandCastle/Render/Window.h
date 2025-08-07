@@ -49,7 +49,8 @@ namespace SandCastle
 		/// @return Screen resolution
 		static Vec2i GetScreenSize();
 		static float GetAspectRatio();
-		static SDL_GLContext GetSDL_GLContext();
+		static SDL_GLContext GetInitContext();
+		static SDL_GLContext GetRenderContext();
 		static SDL_Window* GetSDLWindow();
 		static bool GetRenderWhenMinimized();
 		static bool GetMinimized();
@@ -82,7 +83,8 @@ namespace SandCastle
 		bool m_initialized = false;
 		bool m_renderWhenMiminized = false;
 		SDL_Window* m_window = nullptr;
-		SDL_GLContext m_glContext = nullptr;
+		SDL_GLContext m_initContext = nullptr;
+		SDL_GLContext m_renderContext = nullptr;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
 	};

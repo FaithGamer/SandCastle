@@ -153,27 +153,28 @@ namespace SandCastle
 		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
 			return;
 
-		Window::ClearWindow();
-		Renderer2D::Instance()->SetRenderTarget(Window::Instance());
-		Renderer2D::Instance()->Begin(*m_mainCamera);
+		if (SDL_GL_GetCurrentContext() != Window::GetInitContext())
+		{
+			LOG_ERROR("not init context, wrong context");
+		}
 		for (auto& system : m_renderSystems)
 		{
 			system.system->OnRender();
 		}
-		Renderer2D::Instance()->End();
+		Renderer2D::Instance()->Process();
 
 #ifndef SANDCASTLE_DISTRIB
-		BeginImGui();
+		/*BeginImGui();
 		for (auto& system : m_imGuiSystems)
 		{
 			system.system->OnImGui();
 		}
-		EndImGui(Window::GetSize());
+		EndImGui(Window::GetSize());*/
 
 #endif
 
 		lateRenderSignal.SendSignal(0);
-		Window::RenderWindow();
+		
 	}
 
 	void Systems::HandleWindowEvents(SDL_Event& event)

@@ -46,13 +46,14 @@ namespace SandCastle
 		LOG_INFO("Loading window...");
 		Window::Instance()->Init(params.appName, params.startupWindowResolution);
 		Window::SetFullScreen(params.fullscreen);
+		Renderer2D::Instance()->Init();
+		Renderer2D::Instance()->Wait();
+		Renderer2D::AddLayer("DebugLayer");
 		LOG_INFO("Loading audio...");
 		Audio::Instance()->Init();
 		LOG_INFO("Loading assets...");
 		Assets::Instance()->Init();
 		LOG_INFO("Loading renderer...");
-		Renderer2D::Instance();
-		Renderer2D::AddLayer("DebugLayer");
 		LOG_INFO("Loading Physics...");
 		Physics::Instance();
 		LOG_INFO("Creating world...");
@@ -61,7 +62,7 @@ namespace SandCastle
 		system->CreateWorld();
 		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
 #ifndef SANDCASTLE_DISTRIB
-		LoadImGui(Window::GetSDLWindow(), Window::GetSDL_GLContext());
+		LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());
 #endif
 
 		//Default systems

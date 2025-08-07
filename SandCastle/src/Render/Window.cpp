@@ -8,7 +8,8 @@ namespace SandCastle
 {
 	Window::~Window()
 	{
-		SDL_GL_DestroyContext(m_glContext);
+		SDL_GL_DestroyContext(m_initContext);
+		SDL_GL_DestroyContext(m_renderContext);
 		SDL_DestroyWindow(m_window);
 		SDL_Quit();
 	}
@@ -32,45 +33,15 @@ namespace SandCastle
 			SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 		ASSERT_LOG_ERROR(m_window, LogSDLError("Cannot create SDL window"));
 
-
 		//Creating OpenGL Context with SDL
-		m_glContext = SDL_GL_CreateContext(m_window);
-		ASSERT_LOG_ERROR(m_glContext, LogSDLError("Cannot create OpenGL Context"));
+		m_renderContext = SDL_GL_CreateContext(m_window);
+		m_initContext = SDL_GL_CreateContext(m_window);
+		//SDL_GL_MakeCurrent(m_window, nullptr);
+		ASSERT_LOG_ERROR(m_renderContext, LogSDLError("Cannot create render OpenGL Context"));
+		ASSERT_LOG_ERROR(m_initContext, LogSDLError("Cannot create init OpenGL Context"));
 
-		//Loading OpenGL Functions addresses
-		bool loadGlad = (bool)gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
-		ASSERT_LOG_ERROR(loadGlad, "Couldn't initialize GLAD");
-
-		//Logging additional information
-		auto c = glGetString(GL_VENDOR);
-		LOG_INFO("OpenGL Loaded.");
-		LOG_INFO("Version: " + std::string((const char*)glGetString(GL_VERSION)));
-		LOG_INFO("Renderer: " + std::string((const char*)glGetString(GL_RENDERER)));
-		LOG_INFO("Vendor: " + std::string((const char*)glGetString(GL_VENDOR)));
-
-		int maxVertAttrib = 0;
-		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertAttrib);
-
-		LOG_INFO("Max. Vertex attributes: " + std::to_string(maxVertAttrib));
-
-		//Viewport size and clear color
-		glViewport(0, 0, size.x, size.y);
-
-		//Enabling blending
-		glEnable(GL_BLEND);
-
-		//Enabling depth test
-		glEnable(GL_DEPTH_TEST);
-
-		//Standard blending parameters for most case uses
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-
-		SDL_GL_SetSwapInterval(0);
-
-		m_clearColor = Vec4f(0.1, 0.1, 0.1, 1);
-
+		m_clearColor = Vec4f(1.1, 0.1, 0.1, 1);
 		m_initialized = true;
-
 		m_pixelSize = GetSize();
 	}
 
@@ -206,9 +177,14 @@ namespace SandCastle
 		return (float)window->m_pixelSize.x / (float)window->m_pixelSize.y;
 	}
 
-	SDL_GLContext Window::GetSDL_GLContext()
+	SDL_GLContext Window::GetInitContext()
 	{
-		return Window::Instance()->m_glContext;
+		return Window::Instance()->m_initContext;
+	}
+
+	SDL_GLContext Window::GetRenderContext()
+	{
+		return Window::Instance()->m_renderContext;
 	}
 
 	SDL_Window* Window::GetSDLWindow()
@@ -259,11 +235,11 @@ namespace SandCastle
 
 	void Window::OnSDLPixelSizeChanged(SDL_Event& event)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	/*	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, event.window.data1, event.window.data2);
 		m_pixelSize.x = (unsigned int)event.window.data1;
 		m_pixelSize.y = (unsigned int)event.window.data2;
-		ResizeSignal.SendSignal(m_pixelSize);
+		ResizeSignal.SendSignal(m_pixelSize);*/
 		//LOG_INFO("pixelizes. [{0}, {1}]", m_pixelSize.x, m_pixelSize.y);
 	}
 
