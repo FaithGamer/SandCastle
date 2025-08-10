@@ -7,75 +7,80 @@
 #include "Serialization.h"
 #include "BenchmarkLotOfSprites.h"
 #include "Delegates.h"
-
+#include <iostream>
 #include "SandCastle/Core/std_macros.h"
 
 namespace SandCastle
 {
-
-	//to do: boolean instead of type erasure  
-
-	/// @brief Holds function pointer to either free function of member function
-	/// do not support function with pointer or reference as argument yet
-	class Dummy
+	class NonMethodDelegate
 	{
 
 	};
-	template<typename Ret, typename Obj = Dummy, typename... Args>
+	/// @brief Flexible delegate template.
+	/// Holds a pointer to a method or function.
+	/// Can be pre-bound or not, independently with arguments or object.
+	/// Can't pre-bind reference argument.
+	/// Warning: any pointer or reference you pre-bind is at user discretion to ensure lifetime.
+	template<typename Ret, typename Obj = NonMethodDelegate, typename... Args>
 	class Del
 	{
 		//To do: fynd a way to support reference/pointer as arguments ( the tuple default constructor is the problem here)
 	public:
-		/// @brief Free function, arguments provided when calling
+		/// @brief Free function 
+		/// arguments provided when calling 
+		/// use Call(...args)
 		Del(Ret(*function)(Args...)) :
 			m_function(function)
 		{
 
 		}
-		/// @brief Free functions, arguments pre-provided
+		/// @brief Free functions pre-bound arguments
+		/// nothing to provide when calling
+		/// use Call()
 		template <typename... Ts>
-		Del(Ret(*function)(Args...), Ts&&... args)
-			: m_args(std::forward<Ts>(args)...),
+		Del(Ret(*function)(Args...), Ts&&... args) :
 			m_function(function)
 		{
-
+			m_args.emplace(std::forward<Ts>(args)...);
 		}
-		/// @brief Method, object and arguments provided when calling
+		/// @brief Method
+		/// object and arguments provided when calling 
+		/// use CallOn(object_ptr, ...args)
 		Del(Ret(Obj::* method)(Args...)) :
 			m_method(method)
 		{
 
 		}
-		/// @brief Method, arguments provided when calling
+		/// @brief Method, pre-bound object
+		/// arguments provided when calling 
+		/// use Call(...args)
 		Del(Ret(Obj::* method)(Args...), Obj* object) :
 			m_method(method),
 			m_obj(object)
 		{
 		}
-		/// @brief Method, object provided when calling
+		/// @brief Method, pre-bound arguments
+		/// object provided when calling 
+		/// use CallOn(object_ptr)
 		template<typename... Ts>
-		Del(Ret(Obj::* method)(Args...), Ts&&... args)
-			: m_args(std::forward<Ts>(args)...),
+		Del(Ret(Obj::* method)(Args...), Ts&&... args) :
 			m_method(method)
 		{
-
+			m_args.emplace(std::forward<Ts>(args)...);
 		}
-		/// @brief Method, nothing to provide when calling
+		/// @brief Method, pre-bound object and arguments
+		/// nothing to provide when calling
+		/// use Call()
 		template<typename... Ts>
-		Del(Ret(Obj::* method)(Args...), Obj* object, Ts&&... args)
-			: m_args(std::forward<Ts>(args)...),
+		Del(Ret(Obj::* method)(Args...), Obj* object, Ts&&... args) :
 			m_method(method),
 			m_obj(object)
 		{
-
+			m_args.emplace(std::forward<Ts>(args)...);
 		}
-
-
-
-		/// @brief Call the function with arguments provided in the delegate's constructor.
-		/// If the delegate function is a member function, the function will be called upon the object provided in constructor
-		/// The behaviour is undefined if no arguments were provided in the delegate's constructor
-		/// @return return of the function
+		/// @brief Call the function or method.
+		/// If the delegate holds a method, it will be called on the object provided in constructor.
+		/// @return return of the method/function
 		Ret Call()
 		{
 			if (m_method != nullptr)
@@ -84,7 +89,7 @@ namespace SandCastle
 				return[this] <std::size_t... I>
 					(std::index_sequence<I...>)
 				{
-					return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Args>(std::get<I>(m_args))...);
+					return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
 				}
 				(std::make_index_sequence<sizeof...(Args)>());
 			}
@@ -93,29 +98,23 @@ namespace SandCastle
 				return[this] <std::size_t... I>
 					(std::index_sequence<I...>)
 				{
-					return m_function(std::forward<Args>(std::get<I>(m_args))...);
+					return m_function(std::forward<Args>(std::get<I>(*m_args))...);
 				}
 				(std::make_index_sequence<sizeof...(Args)>());
 			}
-			
-		}
 
-		/// @brief Call the function with arguments.
-		/// If the delegate function is a member function, the function will be called upon the object provided in constructor
-		/// @param ...args arguments
-		/// @return return of the function
+		}
+		/// @brief Call the function or method.
+		/// If the delegate holds a method, it will be called on the object provided in constructor.
+		/// Probably crash if the delegate holds a method but no object instance.
+		/// @param ...args arguments for the method/function
+		/// @return return of the method/function
 		template<typename... Ts>
 		Ret Call(Ts&&... args)
 		{
 			if (m_method != nullptr)
 			{
 				ASSERT_LOG_ERROR((int)(m_obj != nullptr), "Calling a method delegate without object.");
-				/*return[this, args...] <std::size_t... I>
-					(std::index_sequence<I...>)
-				{
-					return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Args>(std::get<I>(args))...);
-				}
-				(std::make_index_sequence<sizeof...(Args)>());*/
 				return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Ts>(args)...);
 			}
 			else
@@ -123,16 +122,17 @@ namespace SandCastle
 				return m_function(std::forward<Ts>(args)...);
 			}
 		}
-
-
+		/// @brief Call the method.
+		/// @param object instance to call the member function on.
+		/// @param ...args the arguments for the method.
+		/// @return return of the method.
 		template<typename... Ts>
 		Ret CallOn(void* const object, Ts&&... args)
 		{
 			return (static_cast<Obj*>(object)->*m_method)(std::forward<Ts>(args)...);
 		}
-
-		/// @brief Call the member function on object with arguments provided in the delegate's constructor.
-		/// The behaviour is undefined if no arguments were provided in the delegate's constructor
+		/// @brief Call the the method with arguments provided in the delegate's constructor.
+		/// The behaviour is undefined if no arguments were provided in the delegate's constructor.
 		/// @param object object to call the member function upon
 		/// @return return of the function
 		Ret CallOn(void* const object)
@@ -140,90 +140,15 @@ namespace SandCastle
 			return[this, object] <std::size_t... I>
 				(std::index_sequence<I...>)
 			{
-				return (static_cast<Obj*>(object)->*m_method)(std::forward<Args>(std::get<I>(m_args))...);
+				return (static_cast<Obj*>(object)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
 			}
 			(std::make_index_sequence<sizeof...(Args)>());
 		}
-
 	private:
-		//sptr<Callable> m_callable;
 		Ret(*m_function)(Args...) = nullptr;
 		Ret(Obj::* m_method)(Args...) = nullptr;
 		Obj* m_obj = nullptr;
-		std::tuple<Args...> m_args;
-		/*	struct Callable
-			{
-				virtual ~Callable() {};
-				template<typename... Ts>
-				Ret Call(Ts&& args)
-				{
-					if(member)
-				}
-				virtual Ret CallWithObject(void* const object, Args... args) = 0;
-				virtual Ret Call(Args... args) = 0;
-				bool member = false;
-				sptr<Callable> that;
-			};
-
-			template <typename Obj>
-			struct MemberFunction
-			{
-				MemberFunction(Ret(Obj::* method)(Args...), Obj* object)
-					: m_function(method), m_obj(object)
-				{
-
-				}
-				MemberFunction(Ret(Obj::* method)(Args...))
-					: m_function(method), m_obj(nullptr)
-				{
-
-				}
-
-				Ret CallWithObject(void* const object, Args... args) override
-				{
-					return (static_cast<Obj*>(object)->*m_function)(std::forward<Args>(args)...);
-				}
-				Ret Call(Args... args) override
-				{
-					return (m_obj->*m_function)(std::forward<Args>(args)...);
-				}
-
-
-				Ret(Obj::* m_function)(Args...);
-				Obj* m_obj;
-			};
-
-			struct FreeFunction
-			{
-				FreeFunction(Ret(*function)(Args...))
-					: m_function(function)
-				{
-
-				}
-				FreeFunction(Ret(*function))
-					: m_function(function)
-				{
-
-				}
-				template <typename... Ts>
-				Ret Call(Ts&&... args) override
-				{
-					return (*m_function)(std::forward<Args>(args)...);
-				}
-				template <typename... Ts>
-				Ret CallWithObject(void* const object, Ts&&... args) override
-				{
-					//no object of free function
-					return (*m_function)(std::forward<Args>(args)...);
-				}
-				bool IsSameFunction(Ret(*function)(Args...)) const override
-				{
-					return m_function == function;
-				}
-
-				Ret(*m_function)(Args...);
-			};*/
-
+		std::optional<std::tuple<Args...>> m_args;
 	};
 }
 
@@ -231,74 +156,120 @@ using namespace SandCastle;
 struct Arg
 {
 	Arg() = default;
+	Arg(String str) : s(str)
+	{
+	}
 	Arg(const Arg& copy)
 	{
-		LOG_INFO("copied");
-		i = copy.i;
+		s = copy.s + "_Copy";
 	}
 
-	int i = 15;
+	String s = "Default_Constructed_Arg";
 };
 class Foo
 {
 public:
-	void Method(Arg prout, float pouet)
+	int Method(Arg arg, float f)
 	{
-		LOG_INFO("prout = {0}, pouet = {1}, ez = {2}", prout.i, pouet, ez);
+		LOG_INFO("arg = {0}, f = {1}, obj.value = {2}", arg.s, f, value);
+		return (int)b + value;
 	}
-	int Meth()
-	{
-		LOG_INFO("meth");
-		return 12;
-	}
-	int ez = 42;
+	int value = 42;
 };
 
-int fun(Foo a, Foo b)
+String Function(String str, Arg arg)
 {
-	LOG_INFO("a = {0}, b = {1}", a.ez, b.ez);
-	return a.ez + b.ez;
+	return str + " " + arg.s;
 }
-void funfun()
+
+void FunctionWithRef(Arg& arg)
 {
-	LOG_INFO("free function no argument");
+	LOG_INFO("arg = {0}", arg.s);
 }
+
 void Delegates()
 {
 	Engine::Init();
-	Foo foo;
-	foo.ez = 66;
-	Arg az;
 
-	Del free(&funfun);
-	free.Call();
+	//rvalue and lvalue can be mixed indenpendendtly
 
-	Del freeFun(&fun);
-	freeFun.Call(foo, foo);
+	//--Free function with no argument bound--
+	{
+		LOG_INFO("--Free function--");
+		Arg lvalue("lvalue");
+		Del delegate(&Function);
+		auto r = delegate.Call("rvalue", lvalue);
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-	//Del freeFunctionArg(&fun, Foo(), foo);
-	//int r = freeFunctionArg.Call();
-	//LOG_INFO("free function return r = {0}", r);
+	//--Free function with arguments bound--
+	{
+		LOG_INFO("--Free function, arg bound--");
+		String lvalue = "lvalue";
+		Del delegate(&Function, lvalue, Arg());
+		auto r = delegate.Call();
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-	Del method(&Foo::Method);
-	method.CallOn(&foo, az, 423.f);
+	//--Method with no bounding--
+	{
+		LOG_INFO("--Method--");
+		Del delegate(&Foo::Method);
+		Foo obj;
+		obj.value = 1;
+		float lvalue = 2.1f;
+		auto r = delegate.CallOn(&obj, Arg(), lvalue); //Notice when object is provided, method is called CallOn
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-	//Del methodArg(&Foo::Method, az, 32.f);
-	//methodArg.CallOn(&foo);
+	//--Method with object bound--
+	{
+		LOG_INFO("--Method obj bound--");
+		Foo obj;
+		obj.value = 2;
+		Del delegate(&Foo::Method, &obj);
+		Arg lvalue("lvalue");
+		auto r = delegate.Call(lvalue, 3.1f);
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-	Del methodObj(&Foo::Method, &foo);
-	methodObj.Call(az, 32.f);
+	//--Method with arg bound--
+	{
+		LOG_INFO("--Method arg bound--");
+		Arg lvalue("lvalue");
+		Del delegate(&Foo::Method, lvalue, 4.1f);
+		Foo obj;
+		obj.value = 3;
+		auto r = delegate.CallOn(&obj);
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-	//Del methodArgObj(&Foo::Method, &foo, az, 32.f);
-	//methodArgObj.Call();
+	//--Method with arg bound--
+	{
+		LOG_INFO("--Method arg & obj bound--");
+		float lvalue = 5.1f;
+		Foo obj;
+		obj.value = 4;
+		Del delegate(&Foo::Method, &obj, Arg(), lvalue);
+		auto r = delegate.Call();
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
-
-	/*Arg fo;
-	fo.i = 999;
-	del.CallOn(&foo, Arg(), 2);
-	int deux = 2;
-	del.CallOn(&foo, fo, deux);*/
-
+	// WARNING, if ref is destructed, del holds a dangling reference
+	// Delegate can holds reference or pointer, but it's up to you to 
+	// ensure their lifetime.
+	{
+		LOG_INFO("--Function, ref argument--");
+		Arg ref;
+		Del del(&FunctionWithRef, ref);
+		del.Call();
+	}
 }
 
 
