@@ -11,18 +11,18 @@ namespace SandCastle
 		virtual void Perform() = 0;
 	};
 
-	template<typename Ret, typename... Args>
+	template<typename Obj = FunctionDelegate, typename... Args>
 	class Task : public OpaqueTask
 	{
 	public:
 
-		Task(Delegate<Ret, Args...>& delegate)
+		Task(Delegate<void, Obj, Args...>& delegate)
 			: m_delegate(delegate)
 		{
 
 		}
-		Task(Delegate<Ret, Args...>&& delegate)
-			: m_delegate(std::forward<Delegate<Ret, Args...>>(delegate))
+		Task(Delegate<void, Obj, Args...>&& delegate)
+			: m_delegate(std::forward<Delegate<void, Obj, Args...>>(delegate))
 		{
 
 		}
@@ -32,6 +32,6 @@ namespace SandCastle
 			m_delegate.Call();
 		}
 	private:
-		Delegate<Ret, Args...> m_delegate;
+		Delegate<void, Obj, Args...> m_delegate;
 	};
 }

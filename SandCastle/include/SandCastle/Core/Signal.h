@@ -18,47 +18,109 @@ namespace SandCastle
 		low
 	};
 
-	template<typename SignalType>
+	template<typename T>
 	struct SignalCallback
 	{
-		SignalCallback(Delegate<void, SignalType>& Delegate, void* const Listener, SignalPriority Priority)
+		SignalCallback(Delegate<void, T>& Delegate, void* const Listener, SignalPriority Priority)
 			: delegate(Delegate), listener(Listener), priority(Priority)
 		{
 
 		}
 		void* const listener;
-		Delegate<void, SignalType> delegate;
+		Delegate<void, T> delegate;
+		SignalPriority priority;
+	};
+
+	template<typename T>
+	struct OpaqueCallback
+	{
+		virtual void Call(const T& data) = 0;
+		virtual void Call(const T&& data) = 0;
+		//virtual int Type() = 0;
+		//virtual bool Equals(sptr<OpaqueCallback>& other) = 0;
+	};
+
+	template<typename T, typename Obj>
+	struct MethodCallback : public OpaqueCallback<T>
+	{
+		MethodCallback(Obj* obj, void(Obj::* method)(T), SignalPriority Priority)
+			: priority(Priority),
+			delegate(method, obj)
+		{
+
+		}
+		void Call(const T& data) override
+		{
+			delegate.Call(data);
+		}
+		void Call(const T&& data) override
+		{
+			delegate.Call(data);
+		}
+		/*int Type() override
+		{
+			return 0;
+		}
+		bool Equals(sptr<OpaqueCallback>& other) override
+		{
+			if (Type() != other->Type())
+				return false;
+			if
+		}*/
+
+		Delegate<void, Obj, T> delegate;
+		SignalPriority priority;
+	};
+
+	template<typename T>
+	struct FunctionCallback : public OpaqueCallback<T>
+	{
+		FunctionCallback(void(*function)(T), SignalPriority Priority)
+			: priority(Priority),
+			delegate(function)
+		{
+
+		}
+		void Call(const T& data) override
+		{
+			delegate.Call(data);
+		}
+		void Call(const T&& data) override
+		{
+			delegate.Call(data);
+		}
+		Delegate<void, FunctionDelegate, T> delegate;
 		SignalPriority priority;
 	};
 
 	/// @brief Send signals to a collection of listeners using Delegate.
 	/// This is an implementation of the observer pattern
-	template<typename SignalType>
+	template<typename T>
 	class SignalSender
 	{
 	public:
 
-		template <typename ListenerType>
-		void AddListener(void (ListenerType::* callback)(SignalType), ListenerType* const listener, SignalPriority priority = SignalPriority::medium);
-		void AddListener(void (*callback)(SignalType), SignalPriority priority = SignalPriority::medium);
+		template <typename Obj>
+		void AddListener(void (Obj::* callback)(T), Obj* const listener, SignalPriority priority = SignalPriority::medium);
+		void AddListener(void (*callback)(T), SignalPriority priority = SignalPriority::medium);
 
 
-		void RemoveListener(void (*callback)(SignalType));
+		void RemoveListener(void (*callback)(T));
 		void RemoveListener(void* const listener);
 		//to do add removeListener for object specific function
 
-		void SendSignal(SignalType& signalData);
-		void SendSignal(SignalType&& signalData);
+		void SendSignal(T& signalData);
+		void SendSignal(T&& signalData);
 	private:
-		template<typename SignalType>
+		/*template<typename T>
 		struct CompareCallback
 		{
-			bool operator()(const SignalCallback<SignalType>& l, const SignalCallback<SignalType>& r) const
+			bool operator()(const sptr<OpaqueCallback<T>>& l, const sptr<OpaqueCallback<T>>& r) const
 			{
 				return l.priority < r.priority;
 			}
-		};
-		std::multiset<SignalCallback<SignalType>, CompareCallback<SignalType>> m_listeners;
+		};*/
+		std::multiset<sptr<OpaqueCallback<T>>> m_listeners;
 
 	};
 }

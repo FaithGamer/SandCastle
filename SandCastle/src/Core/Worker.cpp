@@ -33,7 +33,7 @@ namespace SandCastle
 			m_thread.join();
 	}
 
-	void WorkerThread::QueueTask(sptr<OpaqueTask> task)
+	void WorkerThread::Queue(sptr<OpaqueTask> task)
 	{
 		std::unique_lock queueLock(m_queueMutex[!m_currentQueue]);
 		std::unique_lock waiterLock(m_waiterMutex);

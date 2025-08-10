@@ -34,9 +34,10 @@ namespace SandCastle
 			return;
 		}
 
-		auto del = Delegate<void>(&Renderer2D::InitThread, this);
-		sptr<Task<void>> task = makesptr<Task<void>>(del);
-		m_thread.thread.QueueTask(task);
+		auto del = Delegate<void, Renderer2D>(&Renderer2D::InitThread, this);
+		sptr<Task<Renderer2D>> task = makesptr<Task<Renderer2D>>(del);
+		//m_thread.thread.Queue(&Renderer2D::InitThread, this);
+		m_thread.thread.Queue(task);
 	}
 
 	void Renderer2D::InitThread()
@@ -306,8 +307,9 @@ namespace SandCastle
 		{
 			//Create batch if doesn't exists
 			auto del = Delegate(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
-			auto task = makesptr<Task<void, RenderLayer&, Material*>>(del);
-			ins->m_thread.thread.QueueTask(task);
+			auto task = makesptr<Task<Renderer2D, RenderLayer&, Material*>>(del);
+			ins->m_thread.thread.Queue(task);
+			//ins->m_thread.thread.Queue(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
 			ins->Wait();
 			//ins->CreateQuadBatch(ins->m_layers[layerIndex], material);
 			uint32_t index = (uint32_t)ins->m_quadBatchs.size() - 1;
@@ -731,9 +733,9 @@ namespace SandCastle
 	{
 		Wait();
 		m_thread.current = m_thread.current == 1 ? 0 : 1;
-		auto del = Delegate<void>(&Renderer2D::RenderThread, this);
-		sptr<Task<void>> task = makesptr<Task<void>>(del);
-		m_thread.thread.QueueTask(task);
+		auto del = Delegate<void, Renderer2D>(&Renderer2D::RenderThread, this);
+		sptr<Task<Renderer2D>> task = makesptr<Task<Renderer2D>>(del);
+		m_thread.thread.Queue(task);
 	}
 
 	sptr<VertexArray> Renderer2D::GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace)

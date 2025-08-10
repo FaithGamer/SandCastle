@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BenchmarkLotOfSprites.h" />
+    <ClInclude Include="src\Delegates.h" />
     <ClInclude Include="src\DrawAnimation.h" />
     <ClInclude Include="src\DrawSprite.h" />
     <ClInclude Include="src\Launch.h" />

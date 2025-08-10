@@ -18,7 +18,14 @@ namespace SandCastle
 
 		void StartThread();
 		void StopThread();
-		void QueueTask(sptr<OpaqueTask> taskdata);
+		void Queue(sptr<OpaqueTask> task);
+
+		/*template<typename Obj, typename... Args, typename... Ts>
+		void Queue(void(Obj::* function)(Args...), Obj* object, Ts&... args)
+		{
+			Delegate del = Delegate(function, object, args...);
+			Queue(makesptr<Task<void, Obj, Ts...>>(del));
+		}*/
 		bool HaveTask();
 		size_t TaskCount();
 		///@bief Block until there's no more task to process
@@ -39,4 +46,5 @@ namespace SandCastle
 		std::atomic<bool> m_haveTask;
 		std::atomic<bool> m_threadRunning;
 	};
+
 }

@@ -125,17 +125,20 @@ non exhaustive list:
 
 -I managed to draw from the thread!
 -Worker thread improvement: Wait method
+-fixed blinking at low frame rame: the same buffer getting filled twice if cpu cycle is faster than
 
->blinking at low frame rame: the same buffer getting filled twice if cpu cycle is faster than
+>Signal compare callback must check for duplicate( check method and check listener)
+>signal should be non copyable ?
+>rename signalsender signal
+>Send signal iteration is not ref
+>Send signal: signal should be const
+>profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
+>imgui within the render thread (I guess)
+add a bool for each container: "filled", if yes, skip it.
 >layer sorting
->thread wait without infinite loop
->try a simple thread to join and launch every frame ?
 >try matrice computation cpu side
 >clean code
 >imgui inside the render thread
-
->benchmark to compare thread and no thread
->benchmark with and without colors
 >consider get rid of sprite origin
 >layer sorting
 >per layer z sorting (enabled/disabled)
@@ -150,7 +153,9 @@ thread:
 >check for other concurrency problem
 >draw and that's it motherfucker
 
->simplify creation of task (void return only ?)
+>Worker.Wait called just after queuing a task can just.. not wait really!
+>simplify creation of task (void return only. )
+>localization system built in the asset
 >add render option to material
 >unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
 >migrate box2D 3

@@ -126,7 +126,7 @@ namespace SandCastle
 	private:
 		bool m_reloading = false;
 		std::unordered_map<String, sptr<OpaqueAsset>> m_assets;
-		std::unordered_map<String, Delegate<void, String, String>> m_addAssetFunctions;
+		std::unordered_map<String, Delegate<void, Assets, String, String>> m_addAssetFunctions;
 		std::unordered_map<String, ShaderSources> m_shadersPath;
 		TextureImportSettings m_defaultImportSettings;
 		std::vector<std::pair<String, Serialized>> m_animations;
