@@ -48,7 +48,7 @@ namespace SandCastle
 				m_onAddComponent.insert(std::make_pair((int32_t)typeId, SignalSink(this)));
 				registry.on_construct<ComponentType>().connect<&SignalSink::Send>(m_onAddComponent[typeId]);
 			}
-			m_onAddComponent[typeId].sender.AddListener(callback, listener, priority);
+			m_onAddComponent[typeId].sender.Listen(listener, callback, priority);
 		}
 
 		/// @brief Bind a callback for when a component is removed from an entity
@@ -67,7 +67,7 @@ namespace SandCastle
 				m_onRemoveComponent.insert(std::make_pair(typeId, SignalSink(this)));
 				registry.on_construct<ComponentType>().connect<&SignalSink::Send>(m_onRemoveComponent[typeId]);
 			}
-			m_onRemoveComponent[typeId].sender.AddListener<ListenerType>(callback, listener, priority);
+			m_onRemoveComponent[typeId].sender.Listen<ListenerType>(callback, listener, priority);
 		}
 
 		template <typename ComponentType, typename ListenerType>
@@ -81,7 +81,7 @@ namespace SandCastle
 				m_onAddComponent.insert(std::make_pair((int32_t)typeId, SignalSink(this)));
 				registry.on_construct<ComponentType>().connect<&SignalSink::Send>(m_onAddComponent[typeId]);
 			}
-			m_onAddComponent[typeId].sender.RemoveListener(listener);
+			m_onAddComponent[typeId].sender.StopListen(listener);
 		}
 
 		template <typename ComponentType, typename ListenerType>
@@ -95,7 +95,7 @@ namespace SandCastle
 				m_onRemoveComponent.insert(std::make_pair(typeId, SignalSink(this)));
 				registry.on_construct<ComponentType>().connect<&SignalSink::Send>(m_onRemoveComponent[typeId]);
 			}
-			m_onRemoveComponent[typeId].sender.RemoveListener(listener);
+			m_onRemoveComponent[typeId].sender.StopListen(listener);
 		}
 
 		entt::registry registry;
@@ -112,7 +112,7 @@ namespace SandCastle
 			SignalSink(World* w) : world(w)
 			{}
 			World* world;
-			SignalSender<ComponentSignal> sender;
+			Signal<ComponentSignal> sender;
 			void Send(entt::registry& registry, entt::entity enttId);
 		};
 

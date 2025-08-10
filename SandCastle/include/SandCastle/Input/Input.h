@@ -71,7 +71,7 @@ namespace SandCastle
 		virtual InputType GetType() const = 0;
 		virtual void RemoveAllBindings() = 0;
 
-		SignalSender<InputSignal*> signal;
+		Signal<InputSignal*> signal;
 
 		//To do, add enable mouse and keyboard/controller
 

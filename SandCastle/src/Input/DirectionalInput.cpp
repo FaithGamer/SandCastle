@@ -240,7 +240,7 @@ namespace SandCastle
 		{
 			state.direction = Vec2f(0, -1);
 		}
-		signal.SendSignal(&state);
+		signal.Send(&state);
 		return true;
 	}
 	bool DirectionalInput::GamepadButtonPressed(const SDL_Event& e)
@@ -422,7 +422,7 @@ namespace SandCastle
 		if (m_state.direction != sum)
 		{
 			m_state.direction = sum;
-			signal.SendSignal(&m_state);
+			signal.Send(&m_state);
 		}
 	}
 

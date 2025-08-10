@@ -14,7 +14,7 @@ void BenchmarkLotOfSprites()
 	auto map = Inputs::CreateInputMap();
 	auto btn = map->CreateButtonInput("click");
 	btn->BindMouse(Mouse::Button::Left);
-	btn->signal.AddListener(&OnClick);
+	btn->signal.Listen(&OnClick);
 
 	int spriteCount = 50000;
 	Vec2f space(16.f / 9.f * 50.f, 50);

@@ -8,6 +8,7 @@
 
 #include "SandCastle/Core/std_macros.h"
 #include "SandCastle/Core/Delegate.h"
+#include "SandCastle/Core/TypeId.h"
 
 namespace SandCastle
 {
@@ -18,110 +19,103 @@ namespace SandCastle
 		low
 	};
 
+	/// @brief Wrapper around a Delegate of return void and argument T
+	/// The Signal can be listened by method or function.
+	///	Use Send to trigger all the bound callbacks.
+	/// Ensure no double listener.
 	template<typename T>
-	struct SignalCallback
-	{
-		SignalCallback(Delegate<void, T>& Delegate, void* const Listener, SignalPriority Priority)
-			: delegate(Delegate), listener(Listener), priority(Priority)
-		{
-
-		}
-		void* const listener;
-		Delegate<void, T> delegate;
-		SignalPriority priority;
-	};
-
-	template<typename T>
-	struct OpaqueCallback
-	{
-		virtual void Call(const T& data) = 0;
-		virtual void Call(const T&& data) = 0;
-		//virtual int Type() = 0;
-		//virtual bool Equals(sptr<OpaqueCallback>& other) = 0;
-	};
-
-	template<typename T, typename Obj>
-	struct MethodCallback : public OpaqueCallback<T>
-	{
-		MethodCallback(Obj* obj, void(Obj::* method)(T), SignalPriority Priority)
-			: priority(Priority),
-			delegate(method, obj)
-		{
-
-		}
-		void Call(const T& data) override
-		{
-			delegate.Call(data);
-		}
-		void Call(const T&& data) override
-		{
-			delegate.Call(data);
-		}
-		/*int Type() override
-		{
-			return 0;
-		}
-		bool Equals(sptr<OpaqueCallback>& other) override
-		{
-			if (Type() != other->Type())
-				return false;
-			if
-		}*/
-
-		Delegate<void, Obj, T> delegate;
-		SignalPriority priority;
-	};
-
-	template<typename T>
-	struct FunctionCallback : public OpaqueCallback<T>
-	{
-		FunctionCallback(void(*function)(T), SignalPriority Priority)
-			: priority(Priority),
-			delegate(function)
-		{
-
-		}
-		void Call(const T& data) override
-		{
-			delegate.Call(data);
-		}
-		void Call(const T&& data) override
-		{
-			delegate.Call(data);
-		}
-		Delegate<void, FunctionDelegate, T> delegate;
-		SignalPriority priority;
-	};
-
-	/// @brief Send signals to a collection of listeners using Delegate.
-	/// This is an implementation of the observer pattern
-	template<typename T>
-	class SignalSender
+	class Signal
 	{
 	public:
 
 		template <typename Obj>
-		void AddListener(void (Obj::* callback)(T), Obj* const listener, SignalPriority priority = SignalPriority::medium);
-		void AddListener(void (*callback)(T), SignalPriority priority = SignalPriority::medium);
+		void Listen(Obj* const listener, void (Obj::* method)(T), SignalPriority priority = SignalPriority::medium);
+		void Listen(void (*callback)(T), SignalPriority priority = SignalPriority::medium);
 
-
-		void RemoveListener(void (*callback)(T));
-		void RemoveListener(void* const listener);
+		template <typename Obj>
+		void StopListen(Obj* const listener);
+		void StopListen(void (*callback)(T));
 		//to do add removeListener for object specific function
 
-		void SendSignal(T& signalData);
-		void SendSignal(T&& signalData);
+		void Send(T& signalData);
+		void Send(T&& signalData);
 	private:
-		/*template<typename T>
+		struct OpaqueCallback
+		{
+			OpaqueCallback(SignalPriority prio, const void* Listener = nullptr) : priority(prio), listener(Listener)
+			{
+
+			}
+			virtual void Call(const T& data) = 0;
+			virtual void Call(const T&& data) = 0;
+			virtual int32_t Type() const = 0;
+			bool Equals(const sptr<OpaqueCallback>& other) const
+			{
+				return Type() == other->Type() && listener == other->listener;
+			}
+			SignalPriority priority;
+			const void* listener = nullptr;
+		};
+
+		template<typename Obj>
+		struct MethodCallback : public OpaqueCallback
+		{
+			MethodCallback(Obj* obj, void(Obj::* method)(T), SignalPriority Priority)
+				: OpaqueCallback(Priority, obj),
+				delegate(method, obj)
+			{
+
+			}
+			void Call(const T& data) override
+			{
+				delegate.Call(data);
+			}
+			void Call(const T&& data) override
+			{
+				delegate.Call(data);
+			}
+			int32_t Type() const override
+			{
+				return std::abs(TypeId::GetId<Obj>());
+			}
+			Delegate<void, Obj, T> delegate;
+
+		};
+
+		struct FunctionCallback : public OpaqueCallback
+		{
+			FunctionCallback(void(*function)(T), SignalPriority Priority)
+				: OpaqueCallback(Priority),
+				delegate(function)
+			{
+
+			}
+			void Call(const T& data) override
+			{
+				delegate.Call(data);
+			}
+			void Call(const T&& data) override
+			{
+				delegate.Call(data);
+			}
+			int32_t Type() const override
+			{
+				return -1;
+			}
+			Delegate<void, FunctionDelegate, T> delegate;
+		};
+	private:
+		template<typename T>
 		struct CompareCallback
 		{
-			bool operator()(const sptr<OpaqueCallback<T>>& l, const sptr<OpaqueCallback<T>>& r) const
+			bool operator()(const sptr<OpaqueCallback>& l, const sptr<OpaqueCallback>& r) const
 			{
-				return l.priority < r.priority;
+				if (l->Equals(r))
+					return false;
+				return l->priority < r->priority;
 			}
-		};*/
-		std::multiset<sptr<OpaqueCallback<T>>> m_listeners;
-
+		};
+		std::set<sptr<OpaqueCallback>> m_listeners;
 	};
 }
 #include "Signal.tpp"

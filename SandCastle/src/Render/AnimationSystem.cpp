@@ -147,7 +147,7 @@ namespace SandCastle
 					}
 					if (anim->frames[*frame].sendSignal)
 					{
-						animator.currentState->signals[*frame].SendSignal(KeyframeSignal(animator.currentStateName, *frame));
+						animator.currentState->signals[*frame].Send(KeyframeSignal(animator.currentStateName, *frame));
 					}
 					//Reset frame timer
 					animator.accumulator = std::max(animator.accumulator - frameTime, 0.f);

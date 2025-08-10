@@ -192,7 +192,7 @@ namespace SandCastle
 		return Window::Instance()->m_window;
 	}
 
-	SignalSender<Vec2u>* Window::GetResizeSignal()
+	Signal<Vec2u>* Window::GetResizeSignal()
 	{
 		return &Window::Instance()->ResizeSignal;
 	}
@@ -216,12 +216,12 @@ namespace SandCastle
 		return (flags & SDL_WINDOW_MOUSE_FOCUS) == SDL_WINDOW_MOUSE_FOCUS;
 
 	}
-	SignalSender<bool>* Window::GetFocusSignal()
+	Signal<bool>* Window::GetFocusSignal()
 	{
 		return &Window::Instance()->FocusSignal;
 	}
 
-	SignalSender<bool>* Window::GetMinimizedSignal()
+	Signal<bool>* Window::GetMinimizedSignal()
 	{
 		return &Window::Instance()->MinimizedSignal;
 	}
@@ -239,7 +239,7 @@ namespace SandCastle
 		glViewport(0, 0, event.window.data1, event.window.data2);
 		m_pixelSize.x = (unsigned int)event.window.data1;
 		m_pixelSize.y = (unsigned int)event.window.data2;
-		ResizeSignal.SendSignal(m_pixelSize);*/
+		ResizeSignal.Send(m_pixelSize);*/
 		//LOG_INFO("pixelizes. [{0}, {1}]", m_pixelSize.x, m_pixelSize.y);
 	}
 

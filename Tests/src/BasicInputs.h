@@ -57,21 +57,21 @@ void BasicInputs()
 	fire->BindKey(Key::Scancode::Space);
 	fire->BindGamepadButton(Gamepad::Button::South);
 	//What function will be called when the input is triggered.
-	fire->signal.AddListener(&OnFire);
+	fire->signal.Listen(&OnFire);
 	//Could also be listened by an object:
-	//fire->signal.AddListener(&Class::OnFire, &object);
+	//fire->signal.Listen(&Class::OnFire, &object);
 
 	//Create other inputs
 	auto rightClick = map->CreateButtonInput("RightCLick");
 	rightClick->BindMouse(Mouse::Button::Right);
-	rightClick->signal.AddListener(&OnRightClickPressed);
+	rightClick->signal.Listen(&OnRightClickPressed);
 	//Also triggers the event when releasing the button
-	rightClick->SetSendSignalOnRelease(true);
+	rightClick->SetSignalOnRelease(true);
 
 	auto middleClick = map->CreateButtonInput("MiddleCLick");
 	middleClick->BindMouse(Mouse::Button::Middle);
-	middleClick->signal.AddListener(&OnMiddleClickPressed);
-	middleClick->SetSendSignalOnRelease(true);
+	middleClick->signal.Listen(&OnMiddleClickPressed);
+	middleClick->SetSignalOnRelease(true);
 
 	//Create a directional input (it's signal will send a Vec2f direction)
 	auto directions = map->CreateDirectionalInput("Directions");
@@ -88,7 +88,7 @@ void BasicInputs()
 
 	//Bind a controller stick
 	directions->BindStick(Gamepad::Stick::Left);
-	directions->signal.AddListener(&OnMove);
+	directions->signal.Listen(&OnMove);
 
 	Engine::Launch();
 }

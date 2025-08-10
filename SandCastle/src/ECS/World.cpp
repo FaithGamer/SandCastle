@@ -28,6 +28,6 @@ namespace SandCastle
 
 	void World::SignalSink::Send(entt::registry& registry, entt::entity enttId)
 	{
-		sender.SendSignal(ComponentSignal(enttId));
+		sender.Send(ComponentSignal(enttId));
 	}
 }

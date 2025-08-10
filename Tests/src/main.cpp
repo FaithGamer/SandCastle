@@ -7,8 +7,7 @@
 #include "Serialization.h"
 #include "BenchmarkLotOfSprites.h"
 #include "Delegates.h"
-#include <iostream>
-#include "SandCastle/Core/std_macros.h"
+#include "Signals.h"
 
 
 using namespace SandCastle;
@@ -23,5 +22,6 @@ int main()
 	//WindowEvents();
 	//Serialization();
 	//BenchmarkLotOfSprites();
-	Delegates();
+	//Delegates();
+	Signals();
 }

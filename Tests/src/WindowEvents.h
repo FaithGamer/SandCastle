@@ -20,9 +20,9 @@ void WindowEvents()
 {
 	Engine::Init();
 	
-	Window::GetResizeSignal()->AddListener(&OnResize);
-	Window::GetMinimizedSignal()->AddListener(&OnMinimize);
-	Window::GetFocusSignal()->AddListener(&OnFocus);
+	Window::GetResizeSignal()->Listen(&OnResize);
+	Window::GetMinimizedSignal()->Listen(&OnMinimize);
+	Window::GetFocusSignal()->Listen(&OnFocus);
 
 	Engine::Launch();
 }

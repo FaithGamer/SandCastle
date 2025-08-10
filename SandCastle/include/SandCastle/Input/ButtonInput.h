@@ -74,11 +74,11 @@ namespace SandCastle
 		/// @brief Set wether or not the signal is broadcasted when the button is pressed
 		/// By default yes
 		/// @param signalOnPress true = yes, false = no
-		void SetSendSignalOnPress(bool signalOnPress);
+		void SetSignalOnPress(bool signalOnPress);
 		/// @brief Set wether or not the signal is broadcasted when the button is released
 		/// By default no
 		/// @param signalOnRelease true = yes, false = no
-		void SetSendSignalOnRelease(bool signalOnRelease);
+		void SetSignalOnRelease(bool signalOnRelease);
 		/// @brief Set how much a trigger must be pressed to switch the pressed state
 		/// @param deadzone ranging from 0.0 to 1.0. 1.0 = 100% deadzone
 		/// @param controllerTrigger the controller trigger to binds to
@@ -89,8 +89,8 @@ namespace SandCastle
 		/// @brief Get the bindings
 		ButtonBindings& GetBindings();
 
-		bool GetSendSignalOnPress();
-		bool GetSendSignalOnRelease();
+		bool GetSendOnPress();
+		bool GetSendOnRelease();
 
 		bool HaveBinding(Key::Scancode key);
 		bool HaveBinding(Mouse::Button mouse);

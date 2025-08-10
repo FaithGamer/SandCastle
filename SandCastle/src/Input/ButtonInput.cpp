@@ -140,12 +140,12 @@ namespace SandCastle
 		Container::RemoveAt(m_bindings.buttons, version);
 	}
 
-	void ButtonInput::SetSendSignalOnPress(bool signalOnPress)
+	void ButtonInput::SetSignalOnPress(bool signalOnPress)
 	{
 		m_sendSignalOnPress = signalOnPress;
 	}
 
-	void ButtonInput::SetSendSignalOnRelease(bool signalOnRelease)
+	void ButtonInput::SetSignalOnRelease(bool signalOnRelease)
 	{
 		m_sendSignalOnRelease = signalOnRelease;
 	}
@@ -166,12 +166,12 @@ namespace SandCastle
 		return m_bindings;
 	}
 
-	bool ButtonInput::GetSendSignalOnPress()
+	bool ButtonInput::GetSendOnPress()
 	{
 		return m_sendSignalOnPress;
 	}
 
-	bool ButtonInput::GetSendSignalOnRelease()
+	bool ButtonInput::GetSendOnRelease()
 	{
 		return m_sendSignalOnRelease;
 	}
@@ -347,7 +347,7 @@ namespace SandCastle
 			m_state.pressed = true;
 			if (m_sendSignalOnPress)
 			{
-				signal.SendSignal(&m_state);
+				signal.Send(&m_state);
 				return true;
 			}
 		}
@@ -361,7 +361,7 @@ namespace SandCastle
 			m_state.pressed = false;
 			if (m_sendSignalOnRelease)
 			{
-				signal.SendSignal(&m_state);
+				signal.Send(&m_state);
 				return true;
 			}
 		}
@@ -374,7 +374,7 @@ namespace SandCastle
 			return false;
 
 		m_state.pressedAmount = amount;
-		signal.SendSignal(&m_state);
+		signal.Send(&m_state);
 
 		return true;
 	}

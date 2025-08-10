@@ -127,11 +127,18 @@ non exhaustive list:
 -Worker thread improvement: Wait method
 -fixed blinking at low frame rame: the same buffer getting filled twice if cpu cycle is faster than
 
->Signal compare callback must check for duplicate( check method and check listener)
->signal should be non copyable ?
->rename signalsender signal
->Send signal iteration is not ref
->Send signal: signal should be const
+9
+
+-progress on new delegate
+
+10
+
+-new delegates more efficient (no type erasure, more flexible)
+-moved the type erasure to signal
+-signal adjusted to new delegates
+
+>unit test signal more
+>thread queue task: easier implementation 
 >profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
 >imgui within the render thread (I guess)
 add a bool for each container: "filled", if yes, skip it.

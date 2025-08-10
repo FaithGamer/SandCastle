@@ -61,10 +61,10 @@ namespace SandCastle
 		/// this shouldn't be a situation that you should worry about.
 		/// I don't even know if point size is useful at any point from the gamedev stand point.
 		/// @return 
-		static SignalSender<Vec2u>* GetResizeSignal();
+		static Signal<Vec2u>* GetResizeSignal();
 		/// @brief Send true when focus over window is gained, false when lost
-		static SignalSender<bool>* GetFocusSignal();
-		static SignalSender<bool>* GetMinimizedSignal();
+		static Signal<bool>* GetFocusSignal();
+		static Signal<bool>* GetMinimizedSignal();
 
 		void SetSize(Vec2u size) override;
 		void Bind() override;
@@ -72,9 +72,9 @@ namespace SandCastle
 		void OnSDLPixelSizeChanged(SDL_Event& event);
 		void OnSDLWindowResized(SDL_Event& event);
 		
-		SignalSender<Vec2u> ResizeSignal;
-		SignalSender<bool> FocusSignal;
-		SignalSender<bool> MinimizedSignal;
+		Signal<Vec2u> ResizeSignal;
+		Signal<bool> FocusSignal;
+		Signal<bool> MinimizedSignal;
 	private:
 		friend Engine;
 		friend Singleton<Window>;

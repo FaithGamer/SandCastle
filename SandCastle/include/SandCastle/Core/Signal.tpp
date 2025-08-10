@@ -5,62 +5,80 @@ namespace SandCastle
 {
 	template <typename T>
 	template <typename Obj>
-	void SignalSender<T>::AddListener(void (Obj::* callback)(T), Obj* const listener, SignalPriority priority)
+	void Signal<T>::Listen(Obj* const listener, void (Obj::* method)(T), SignalPriority priority)
 	{
-		m_listeners.insert(makesptr<MethodCallback<T, Obj>>(listener, callback, priority));
+		m_listeners.insert(makesptr<MethodCallback<Obj>>(listener, method, priority));
 	}
 
 	template <typename T>
-	void SignalSender<T>::AddListener(void (*callback)(T), SignalPriority priority)
+	void Signal<T>::Listen(void (*callback)(T), SignalPriority priority)
 	{
-		m_listeners.insert(makesptr<FunctionCallback<T>>(callback, priority));
+		m_listeners.insert(makesptr<FunctionCallback>(callback, priority));
 	}
 
 	template <typename T>
-	void SignalSender<T>::RemoveListener(void* const listener)
+	template <typename Obj>
+	void Signal<T>::StopListen(Obj* const listener)
 	{
-		/*for (auto callback = m_listeners.begin(); callback != m_listeners.end();)
+		for (auto callback_it = m_listeners.begin(); callback_it != m_listeners.end();)
 		{
-			if (callback->listener == listener)
+			auto& callback = (*callback_it);
+			if (callback->Type() != TypeId::GetId<Obj>())
 			{
-				m_listeners.erase(callback++);
+				callback_it++;
+			}
+			else
+			{
+				auto methodCb = static_pointer_cast<MethodCallback<Obj>>(callback);
+				if (methodCb->delegate.GetObj() == listener)
+				{
+					m_listeners.erase(callback_it);
+					break;
+				}
+				else
+				{
+					callback_it++;
+				}
+			}
+		}
+	}
+
+	template <typename T>
+	void Signal<T>::StopListen(void (*function)(T))
+	{
+		for (auto callback_it = m_listeners.begin(); callback_it != m_listeners.end();)
+		{
+			auto& callback = (*callback_it);
+			if (callback->Type() != -1) //not a function callback
+			{
+				callback_it++;
+			}
+			auto functionCb = static_pointer_cast<FunctionCallback>(callback);
+			if (functionCb->delegate.GetFunction() == function)
+			{
+				m_listeners.erase(callback_it);
+				break;
 			}
 			else
 			{
 				callback++;
 			}
-		}*/
-	}
-
-	template <typename T>
-	void SignalSender<T>::RemoveListener(void (*function)(T))
-	{
-		/*for (auto callback = m_listeners.begin(); callback != m_listeners.end();)
-		{
-			if (callback->delegate.IsSameFunction(function))
-			{
-				m_listeners.erase(callback++);
-			}
-			else
-			{
-				callback++;
-			}
-		}*/
+		}
 
 	}
 
 	template<typename T>
-	void SignalSender<T>::SendSignal(T& signal)
+	void Signal<T>::Send(T& signal)
 	{
-		for (const sptr<OpaqueCallback<T>>& listener : m_listeners)
+		for (const sptr<OpaqueCallback>& listener : m_listeners)
 		{
 			listener->Call(signal);
 		}
 	}
 	template<typename T>
-	void SignalSender<T>::SendSignal(T&& signal)
+	void Signal<T>::Send(T&& signal)
 	{
-		for (const sptr<OpaqueCallback<T>>& listener : m_listeners)
+		for (const sptr<OpaqueCallback>& listener : m_listeners)
 		{
 			listener->Call(std::forward<T>(signal));
 		}

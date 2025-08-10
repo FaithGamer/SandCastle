@@ -46,6 +46,7 @@
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\Rotation.h" />
     <ClInclude Include="src\Serialization.h" />
+    <ClInclude Include="src\Signals.h" />
     <ClInclude Include="src\WindowEvents.h" />
   </ItemGroup>
   <ItemGroup>

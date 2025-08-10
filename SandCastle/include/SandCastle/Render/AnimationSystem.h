@@ -24,7 +24,7 @@ namespace SandCastle
 		float GetTime();
 		Serialized Serialize() override;
 		void Deserialize(Serialized& config);
-		std::vector<SignalSender<KeyframeSignal>> signalsTemplate;
+		std::vector<Signal<KeyframeSignal>> signalsTemplate;
 		std::vector<Keyframe> frames;
 		float frequency; // 1/fps
 	};
@@ -35,19 +35,19 @@ namespace SandCastle
 		{
 			if (signals.size() <= frame)
 				return false;
-			signals[frame].AddListener(callback, listener, priority);
+			signals[frame].Listen(listener, callback,priority);
 		}
 		template <typename SignalType>
-		bool AddListener(int frame, void (*callback)(SignalType), SignalPriority priority = SignalPriority::medium)
+		bool Listen(int frame, void (*callback)(SignalType), SignalPriority priority = SignalPriority::medium)
 		{
 			if (signals.size() <= frame)
 				return false;
-			signals[frame].AddListener(callback, priority);
+			signals[frame].Listen(callback, priority);
 		}
 		Animation* animation = nullptr;
 		bool looping = false;
 		String transition = "";
-		std::vector<SignalSender<KeyframeSignal>> signals;
+		std::vector<Signal<KeyframeSignal>> signals;
 	};
 	struct Animator
 	{

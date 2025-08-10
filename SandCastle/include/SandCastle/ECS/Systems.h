@@ -154,7 +154,7 @@ namespace SandCastle
 		/// @return mouse position
 		static Vec2f GetMouseWorldPos();
 	public:
-		SignalSender<int> lateRenderSignal;
+		Signal<int> lateRenderSignal;
 	private:
 
 		struct Worlds

@@ -141,7 +141,7 @@ namespace SandCastle
 
 		//Listen to window resize signal
 
-		Window::GetResizeSignal()->AddListener(&Renderer2D::OnWindowResize, this);
+		Window::GetResizeSignal()->Listen(this, &Renderer2D::OnWindowResize);
 
 		//Set render target to be the window by default
 		SetRenderTarget(window);

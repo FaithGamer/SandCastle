@@ -136,6 +136,18 @@ namespace SandCastle
 			}
 			(std::make_index_sequence<sizeof...(Args)>());
 		}
+		Obj* GetObj()
+		{
+			return m_obj;
+		}
+		Ret(Obj::* GetMethod())(Args...)
+		{
+			return m_method;
+		}
+		Ret(*GetFunction())(Args...)
+		{
+			return m_function;
+		}
 	private:
 		Ret(*m_function)(Args...) = nullptr;
 		Ret(Obj::* m_method)(Args...) = nullptr;

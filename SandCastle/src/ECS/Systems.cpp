@@ -23,7 +23,7 @@ namespace SandCastle
 	void Systems::Init()
 	{
 		SetMainCamera(&m_defaultCamera);
-		Window::GetResizeSignal()->AddListener(&Camera::SetAspectRatio, &m_defaultCamera);
+		Window::GetResizeSignal()->Listen(&m_defaultCamera, &Camera::SetAspectRatio);
 		m_defaultCamera.SetAspectRatio(Window::GetAspectRatio());
 	}
 
@@ -173,7 +173,7 @@ namespace SandCastle
 
 #endif
 
-		lateRenderSignal.SendSignal(0);
+		lateRenderSignal.Send(0);
 		
 	}
 
@@ -193,16 +193,16 @@ namespace SandCastle
 			Window::Instance()->OnSDLWindowResized(event);
 			break;
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
-			Window::Instance()->FocusSignal.SendSignal(true);
+			Window::Instance()->FocusSignal.Send(true);
 			break;
 		case SDL_EVENT_WINDOW_FOCUS_LOST:
-			Window::Instance()->FocusSignal.SendSignal(false);
+			Window::Instance()->FocusSignal.Send(false);
 			break;
 		case SDL_EVENT_WINDOW_MINIMIZED:
-			Window::Instance()->MinimizedSignal.SendSignal(true);
+			Window::Instance()->MinimizedSignal.Send(true);
 			break;
 		case SDL_EVENT_WINDOW_RESTORED:
-			Window::Instance()->MinimizedSignal.SendSignal(false);
+			Window::Instance()->MinimizedSignal.Send(false);
 			break;
 		default:
 			break;

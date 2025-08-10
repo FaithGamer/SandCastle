@@ -88,8 +88,8 @@ namespace SandCastle
 				//Add a button input, it's bindings and parameters
 				auto buttonInput = static_pointer_cast<ButtonInput>(input);
 				cInput["name"] = name;
-				cInput["send_signal_on_press"] = buttonInput->GetSendSignalOnPress();
-				cInput["send_signal_on_release"] = buttonInput->GetSendSignalOnRelease();
+				cInput["send_signal_on_press"] = buttonInput->GetSendOnPress();
+				cInput["send_signal_on_release"] = buttonInput->GetSendOnRelease();
 				cInput.AddObj("bindings", buttonInput->GetBindings().Serialize());
 				jbuttonInputs.push_back(cInput);
 			}
