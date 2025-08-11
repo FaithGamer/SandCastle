@@ -5,7 +5,7 @@ namespace SandCastle
 {
 	template <typename T>
 	template <typename Obj>
-	void Signal<T>::Listen(Obj* const listener, void (Obj::* method)(T), SignalPriority priority)
+	void Signal<T>::Listen(void (Obj::* method)(T), Obj* const listener, SignalPriority priority)
 	{
 		m_listeners.insert(makesptr<MethodCallback<Obj>>(listener, method, priority));
 	}
@@ -61,7 +61,7 @@ namespace SandCastle
 			}
 			else
 			{
-				callback++;
+				callback_it++;
 			}
 		}
 

@@ -136,6 +136,7 @@ non exhaustive list:
 -new delegates more efficient (no type erasure, more flexible)
 -moved the type erasure to signal
 -signal adjusted to new delegates
+-signal static method fixed
 
 >unit test signal more
 >thread queue task: easier implementation 

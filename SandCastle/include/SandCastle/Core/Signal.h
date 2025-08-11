@@ -29,7 +29,7 @@ namespace SandCastle
 	public:
 
 		template <typename Obj>
-		void Listen(Obj* const listener, void (Obj::* method)(T), SignalPriority priority = SignalPriority::medium);
+		void Listen(void (Obj::* method)(T), Obj* const listener = nullptr, SignalPriority priority = SignalPriority::medium);
 		void Listen(void (*callback)(T), SignalPriority priority = SignalPriority::medium);
 
 		template <typename Obj>

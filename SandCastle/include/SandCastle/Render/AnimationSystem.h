@@ -35,7 +35,7 @@ namespace SandCastle
 		{
 			if (signals.size() <= frame)
 				return false;
-			signals[frame].Listen(listener, callback,priority);
+			signals[frame].Listen(callback, listener, priority);
 		}
 		template <typename SignalType>
 		bool Listen(int frame, void (*callback)(SignalType), SignalPriority priority = SignalPriority::medium)

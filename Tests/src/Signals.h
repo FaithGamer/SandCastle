@@ -22,6 +22,11 @@ public:
 	{
 		LOG_INFO("Method receive signal: {0}, {1}", data->data1, data->data2);
 	}
+	static void StaticMethod(SignalData* data)
+	{
+		LOG_INFO("Static Method receive signal: {0}, {1}", data->data1, data->data2);
+
+	}
 };
 
 void Signals()
@@ -32,7 +37,8 @@ void Signals()
 
 	Signal<SignalData*> signal;
 
-	signal.Listen(&obj, &Bar::MethodListener);
+	signal.Listen(&Bar::MethodListener, &obj);
+	signal.Listen(&Bar::StaticMethod);
 	signal.Listen(&FunctionListener);
 	auto data = SignalData(42, "value");
 	signal.Send(&data);

@@ -48,7 +48,7 @@ namespace SandCastle
 				m_onAddComponent.insert(std::make_pair((int32_t)typeId, SignalSink(this)));
 				registry.on_construct<ComponentType>().connect<&SignalSink::Send>(m_onAddComponent[typeId]);
 			}
-			m_onAddComponent[typeId].sender.Listen(listener, callback, priority);
+			m_onAddComponent[typeId].sender.Listen(callback, listener, priority);
 		}
 
 		/// @brief Bind a callback for when a component is removed from an entity

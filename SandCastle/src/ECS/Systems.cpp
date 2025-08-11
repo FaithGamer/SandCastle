@@ -23,7 +23,7 @@ namespace SandCastle
 	void Systems::Init()
 	{
 		SetMainCamera(&m_defaultCamera);
-		Window::GetResizeSignal()->Listen(&m_defaultCamera, &Camera::SetAspectRatio);
+		Window::GetResizeSignal()->Listen(&Camera::SetAspectRatio, &m_defaultCamera);
 		m_defaultCamera.SetAspectRatio(Window::GetAspectRatio());
 	}
 

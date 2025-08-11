@@ -32,7 +32,7 @@ public:
 	void OnStart() override
 	{
 		auto dirs = Inputs::GetInputMap("map")->GetInput("Dirs");
-		dirs->signal.Listen(this, &RotateSystem::OnDir);
+		dirs->signal.Listen(&RotateSystem::OnDir, this);
 	}
 	void OnUpdate(Time time) override
 	{
