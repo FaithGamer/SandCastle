@@ -49,10 +49,7 @@ namespace SandCastle
 			virtual void Call(const T& data) = 0;
 			virtual void Call(const T&& data) = 0;
 			virtual int32_t Type() const = 0;
-			bool Equals(const sptr<OpaqueCallback>& other) const
-			{
-				return Type() == other->Type() && listener == other->listener;
-			}
+			virtual bool Equals(const sptr<OpaqueCallback>& other) const = 0;
 			SignalPriority priority;
 			const void* listener = nullptr;
 		};
@@ -73,6 +70,10 @@ namespace SandCastle
 			void Call(const T&& data) override
 			{
 				delegate.Call(data);
+			}
+			bool Equals(const sptr<OpaqueCallback>& other) const override
+			{
+				return Type() == other->Type() && static_pointer_cast<MethodCallback<Obj>>(other)->delegate.Equals(delegate);
 			}
 			int32_t Type() const override
 			{
@@ -98,6 +99,10 @@ namespace SandCastle
 			{
 				delegate.Call(data);
 			}
+			bool Equals(const sptr<OpaqueCallback>& other) const override
+			{
+				return Type() == other->Type() && static_pointer_cast<FunctionCallback>(other)->delegate.Equals(delegate);
+			}
 			int32_t Type() const override
 			{
 				return -1;
@@ -105,17 +110,18 @@ namespace SandCastle
 			Delegate<void, FunctionDelegate, T> delegate;
 		};
 	private:
-		template<typename T>
 		struct CompareCallback
 		{
 			bool operator()(const sptr<OpaqueCallback>& l, const sptr<OpaqueCallback>& r) const
 			{
 				if (l->Equals(r))
 					return false;
-				return l->priority < r->priority;
+				if (l->priority != r->priority)
+					return l->priority < r->priority;
+				return std::less<const OpaqueCallback*>()(l.get(), r.get());
 			}
 		};
-		std::set<sptr<OpaqueCallback>> m_listeners;
+		std::set<sptr<OpaqueCallback>, CompareCallback> m_listeners;
 	};
 }
 #include "Signal.tpp"

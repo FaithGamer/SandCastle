@@ -38,11 +38,29 @@ void Signals()
 	Signal<SignalData*> signal;
 
 	signal.Listen(&Bar::MethodListener, &obj);
+	signal.Listen(&Bar::MethodListener, &obj); //Double will be ignored
 	signal.Listen(&Bar::StaticMethod);
+	signal.Listen(&Bar::StaticMethod);//Double will be ignored
 	signal.Listen(&FunctionListener);
+	signal.Listen(&FunctionListener);//Double will be ignored
 	auto data = SignalData(42, "value");
+	LOG_INFO("Send");
 	signal.Send(&data);
-	signal.StopListen(&obj);
+	LOG_INFO("");
+
+	signal.StopListen(&obj);//Only need the object to stop listening
+							//There's no reason the same object would listen
+							//to the same signal on two different methods.
+	LOG_INFO("Send");
 	signal.Send(&data);
+	LOG_INFO("");
+
+	signal.StopListen(&Bar::StaticMethod);
+	LOG_INFO("Send");
+	signal.Send(&data);
+	LOG_INFO("");
+
 	signal.StopListen(&FunctionListener);
+	LOG_INFO("Send");
+	signal.Send(&data);
 }

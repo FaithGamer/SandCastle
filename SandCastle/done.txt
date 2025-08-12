@@ -138,7 +138,10 @@ non exhaustive list:
 -signal adjusted to new delegates
 -signal static method fixed
 
->unit test signal more
+12
+
+-fixed signal for real now
+
 >thread queue task: easier implementation 
 >profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
 >imgui within the render thread (I guess)
@@ -161,6 +164,7 @@ thread:
 >check for other concurrency problem
 >draw and that's it motherfucker
 
+>unit test signal more?
 >Worker.Wait called just after queuing a task can just.. not wait really!
 >simplify creation of task (void return only. )
 >localization system built in the asset

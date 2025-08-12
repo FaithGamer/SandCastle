@@ -148,6 +148,12 @@ namespace SandCastle
 		{
 			return m_function;
 		}
+		bool Equals(const Delegate<Ret, Obj, Args...>& other)
+		{
+			return m_function == other.m_function
+				&& m_method == other.m_method
+				&& m_obj == other.m_obj;
+		}
 	private:
 		Ret(*m_function)(Args...) = nullptr;
 		Ret(Obj::* m_method)(Args...) = nullptr;

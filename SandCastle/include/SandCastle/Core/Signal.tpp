@@ -53,15 +53,18 @@ namespace SandCastle
 			{
 				callback_it++;
 			}
-			auto functionCb = static_pointer_cast<FunctionCallback>(callback);
-			if (functionCb->delegate.GetFunction() == function)
-			{
-				m_listeners.erase(callback_it);
-				break;
-			}
 			else
 			{
-				callback_it++;
+				auto functionCb = static_pointer_cast<FunctionCallback>(callback);
+				if (functionCb->delegate.GetFunction() == function)
+				{
+					m_listeners.erase(callback_it++);
+					break;
+				}
+				else
+				{
+					callback_it++;
+				}
 			}
 		}
 
