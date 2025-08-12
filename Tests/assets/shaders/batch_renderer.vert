@@ -11,7 +11,8 @@ out vec2 vTexCoords;
 out vec4 vColor;
 out float vTexIndex;
 
-layout(std140) uniform camera {
+layout(std140) uniform camera 
+{
     mat4 uViewProjection;
     float uWorldScreenRatio;
 };

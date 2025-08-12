@@ -550,8 +550,6 @@ namespace SandCastle
 	void Renderer2D::PushQuad(const QuadRenderData&& quad)
 	{
 		int current = m_thread.current == 1 ? 0 : 1;
-		//m_thread.sorted[current][quad.layerID].emplace_back(quad);
-		//m_thread.layerMax[current] = quad.layerID > m_thread.layerMax[current] ? quad.layerID : m_thread.layerMax[current];
 		m_thread.queue[current].emplace_back(quad);
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
@@ -587,8 +585,6 @@ namespace SandCastle
 			batch.textureSlotIndex++;
 		}
 
-		//bool reComputePosition = transform.matrixUpdated || transform.needCompute || spriteRender.spriteDimensionsChanged;
-
 		//Input the vertex data to CPU within the quad vertex array
 		static Vec2f quadVertexPosition[4]
 		{
@@ -602,13 +598,7 @@ namespace SandCastle
 			batch.quadPtr->vertexPos = VertexPos(quadVertexPosition[i], quad.pos, quad.size, quad.rotation);
 			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvOrColor);
 			batch.quadPtr->color = quad.type == 0 ? quad.uvOrColor : Vec4f(1);
-		//	batch.quadPtr->type = (float)quad.type;
-			//batch.quadPtr->pos = quad.pos;
-		//	batch.quadPtr->uvOrColor = quad.uvOrColor;
-			//batch.quadPtr->size = quad.size;
-			//batch.quadPtr->rotation = quad.rotation;
 			batch.quadPtr->texIndex = textureIndex;
-			//batch.quadPtr->alpha = quad.alpha;
 
 			//Incrementing the pointed value of the quad vertex array
 			batch.quadPtr++;
@@ -692,14 +682,12 @@ namespace SandCastle
 		m_defaultLineShader->SetUniform("uIndexCount", (float)line.GetPointCount());
 		m_defaultLineShader->SetUniform("uEndCapVertices", line.GetEndCapVertices());
 		m_defaultLineShader->SetUniformArray("uWidth", line.GetWidthArray(), (int)line.GetPointCount());
-		m_defaultLineShader->SetUniform("uColor", line.GetColor());
-		m_defaultLineShader->BindUniformBlock("camera", 0);*/
+		m_defaultLineShader->SetUniform("uColor", line.GetColor());*/
+		m_defaultLineShader->BindUniformBlock("camera", 0);
 		m_defaultLineShader->Bind();
 
 		line.Bind();
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_LINE_STRIP_ADJACENCY, (GLsizei)line.GetPointCount() + 2, GL_UNSIGNED_INT, 0);
-		//glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, line.GetPointCount()*2);
 	}
 
 	void Renderer2D::DrawWire(WireRender& wire, Transform& transform, uint32_t layer)
@@ -708,7 +696,7 @@ namespace SandCastle
 			return;
 		m_layers[layer].target->Bind();
 		m_layers[layer].active = true;
-		/*m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
+	/*	m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
 		m_defaultWireShader->SetUniform("uColor", wire.GetColor());
 		m_defaultWireShader->BindUniformBlock("camera", 0);*/
 		m_defaultWireShader->Bind();
