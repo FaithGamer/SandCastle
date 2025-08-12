@@ -144,8 +144,8 @@ non exhaustive list:
 -improved worker, easier to push tasks
 -basic profiling
 -moved vertex and uv computation to CPU: gained 100fps :ooo
+-fixed crash on exit program
 
->profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
 
 >imgui within the render thread (I guess)
 add a bool for each container: "filled", if yes, skip it.
@@ -167,6 +167,7 @@ thread:
 >check for other concurrency problem
 >draw and that's it motherfucker
 
+>reintegrate wire and lines
 >unit test signal more?
 >Worker.Wait called just after queuing a task can just.. not wait really!
 >simplify creation of task (void return only. )
@@ -174,6 +175,7 @@ thread:
 >add render option to material
 >unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
 >migrate box2D 3
+>quad culling
 >include GUI stuff (translate UI position to game world and so forth)
 >improve redering (see redering section)
 >text input (SDL_StartTextInput...)

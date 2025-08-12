@@ -42,10 +42,10 @@ namespace SandCastle
 			params = EngineParameters(paramsJson);
 		}
 
-
 		LOG_INFO("Loading window...");
 		Window::Instance()->Init(params.appName, params.startupWindowResolution);
 		Window::SetFullScreen(params.fullscreen);
+		LOG_INFO("Loading renderer...");
 		Renderer2D::Instance()->Init();
 		Renderer2D::Instance()->Wait();
 		Renderer2D::AddLayer("DebugLayer");
@@ -53,7 +53,6 @@ namespace SandCastle
 		Audio::Instance()->Init();
 		LOG_INFO("Loading assets...");
 		Assets::Instance()->Init();
-		LOG_INFO("Loading renderer...");
 		LOG_INFO("Loading Physics...");
 		Physics::Instance();
 		LOG_INFO("Creating world...");
@@ -61,7 +60,7 @@ namespace SandCastle
 		system->Init();
 		system->CreateWorld();
 		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
-#ifndef SANDCASTLE_DISTRIB
+#ifdef SC_IMGUI
 		LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());
 #endif
 
@@ -76,16 +75,17 @@ namespace SandCastle
 
 	void Engine::Launch()
 	{
-		//Main loop
 		play = true;
 		while (play)
 		{
 			Systems::Instance()->Update();
 		}
 
-		//Deallocation
+		Renderer2D::Instance()->Wait();
+
 		Inputs::Kill();
 		Systems::Kill();
+		Renderer2D::Kill();
 		Window::Kill();
 	}
 
