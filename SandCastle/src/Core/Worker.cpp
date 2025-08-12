@@ -82,6 +82,8 @@ namespace SandCastle
 			
 			for (auto& task : m_queue[(size_t)m_currentQueue])
 			{
+				if (!m_threadRunning)
+					break;
 				task->Perform();
 			}
 
@@ -94,6 +96,12 @@ namespace SandCastle
 				m_doneCondition.notify_all();
 			}
 		}
+		std::unique_lock queueLock1(m_queueMutex[(size_t)m_currentQueue]);
+		m_queue[m_currentQueue].clear();
+		queueLock1.unlock();
+		std::unique_lock queueLock2(m_queueMutex[(size_t)!m_currentQueue]);
+		m_queue[!m_currentQueue].clear();
+		queueLock2.unlock();
 	}
 }
 

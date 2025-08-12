@@ -21,7 +21,7 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	//BenchmarkLotOfSprites();
+	BenchmarkLotOfSprites();
 	//Delegates();
-	Signals();
+	//Signals();
 }
