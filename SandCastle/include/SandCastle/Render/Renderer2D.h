@@ -91,7 +91,6 @@ namespace SandCastle
 	class Renderer2D : public Singleton<Renderer2D>
 	{
 	public:
-		static float gpuTime;
 		struct Statistics
 		{
 			uint32_t drawCalls = 0;

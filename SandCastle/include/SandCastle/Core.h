@@ -18,5 +18,6 @@
 #include "SandCastle/Core/TypeId.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Worker.h"
+#include "SandCastle/Core/Profiling.h"
 
 

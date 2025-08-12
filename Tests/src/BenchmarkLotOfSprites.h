@@ -4,7 +4,7 @@
 using namespace SandCastle;
 void OnClick(InputSignal* signal)
 {
-	LOG_INFO("gpu time: {0}", Renderer2D::gpuTime);
+	Profiling::LogAllClocks();
 }
 void BenchmarkLotOfSprites()
 {

@@ -141,9 +141,10 @@ non exhaustive list:
 12
 
 -fixed signal for real now
+-improved worker, easier to push tasks
 
->thread queue task: easier implementation 
 >profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
+
 >imgui within the render thread (I guess)
 add a bool for each container: "filled", if yes, skip it.
 >layer sorting

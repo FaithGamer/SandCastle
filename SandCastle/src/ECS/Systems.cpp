@@ -10,6 +10,7 @@
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/Camera.h"
 #include "SandCastle/Input/Mouse.h"
+#include "SandCastle/Core/Profiling.h"
 
 namespace SandCastle
 {
@@ -68,6 +69,8 @@ namespace SandCastle
 
 	void Systems::Update()
 	{
+		START_PROFILING("cpu_main");
+		START_PROFILING("frame_time");
 		Time::delta = (float)m_updateClock.Restart();
 		float deltaScaled = (float)Time::delta * Time::timeScale;
 
@@ -104,19 +107,7 @@ namespace SandCastle
 			m_fixedUpdateAccumulator -= Time::fixedDelta;
 			for (auto& system : m_fixedUpdateSystems)
 			{
-
-#ifndef SANDCASTLE_DISTRIB
-				Clock timer;
 				system.system->OnFixedUpdate(scaledFixedDelta);
-				auto seconds = (float)timer.GetElapsed();
-				if (seconds > 0.032)
-				{
-					LOG_INFO("FixedUpdate exceeding 0.032 seconds, system n°{0}, {1}", j, system.system->DebugName());
-				}
-				j++;
-#else
-				system.system->OnFixedUpdate(scaledFixedDelta);
-#endif
 			}
 			if (++i > m_maxFixedUpdate)
 			{
@@ -134,19 +125,8 @@ namespace SandCastle
 		{
 			//If less than one microseconds elapse between two call
 			//the m_updateClock.Restart increment doesn't accurately describe time passing by.
+			system.system->OnUpdate(deltaScaled);
 
-#ifndef SANDCASTLE_DISTRIB
-			Clock timer;
-			system.system->OnUpdate(deltaScaled);
-			auto seconds = (float)timer.GetElapsed();
-			if (seconds > 0.032)
-			{
-				LOG_INFO("Update exceeding 0.032 seconds, system n°{0}, {1}", i, system.system->DebugName());
-			}
-			i++;
-#else
-			system.system->OnUpdate(deltaScaled);
-#endif
 		}
 		if (m_mainCamera == nullptr)
 			return;
@@ -161,6 +141,8 @@ namespace SandCastle
 		{
 			system.system->OnRender();
 		}
+		//End CPU Time
+		STOP_PROFILING("cpu_main");
 		Renderer2D::Instance()->Process();
 
 #ifndef SANDCASTLE_DISTRIB
@@ -172,8 +154,7 @@ namespace SandCastle
 		EndImGui(Window::GetSize());*/
 
 #endif
-
-		lateRenderSignal.Send(0);
+		STOP_PROFILING("frame_time");
 		
 	}
 

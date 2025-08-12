@@ -153,8 +153,6 @@ namespace SandCastle
 		/// @brief Return the mouse position in wolrd unit relative to the main camera
 		/// @return mouse position
 		static Vec2f GetMouseWorldPos();
-	public:
-		Signal<int> lateRenderSignal;
 	private:
 
 		struct Worlds

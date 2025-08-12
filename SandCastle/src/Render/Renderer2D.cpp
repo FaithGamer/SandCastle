@@ -15,14 +15,13 @@
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Core/Print.h"
 #include "SandCastle/ECS/LineRendererSystem.h"
-
+#include "SandCastle/Core/Profiling.h"
 
 namespace SandCastle
 {
-	float Renderer2D::gpuTime = 0;
 	Renderer2D::Renderer2D()
 	{
-		
+
 	}
 
 	void Renderer2D::Init()
@@ -73,7 +72,7 @@ namespace SandCastle
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 		SDL_GL_SetSwapInterval(0);
-	
+
 
 		ASSERT_LOG_ERROR(Window::IsInitialized(), "Cannot create Renderer2D before Window is initialized.");
 
@@ -114,10 +113,10 @@ namespace SandCastle
 		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
-	/*m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
-		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
-		m_defaultLineShader = Assets::Get<Shader>("line.shader");
-		m_defaultWireShader = Assets::Get<Shader>("wire.shader");*/
+		/*m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
+			m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
+			m_defaultLineShader = Assets::Get<Shader>("line.shader");
+			m_defaultWireShader = Assets::Get<Shader>("wire.shader");*/
 
 #define LSSFF(...) Shader::LoadShaderSourceFromFile(__VA_ARGS__)
 
@@ -435,6 +434,7 @@ namespace SandCastle
 	}
 	void Renderer2D::RenderThread()
 	{
+		START_PROFILING("cpu_render");
 		Begin();
 		for (int i = 0; i < m_thread.queue[m_thread.current].size(); i++)
 		{
@@ -450,18 +450,11 @@ namespace SandCastle
 		End();
 		Window::RenderWindow();
 		m_thread.queue[m_thread.current].clear();
-		
-
+		STOP_PROFILING("cpu_render");
 	}
 	void Renderer2D::Begin()
 	{
-		if (SDL_GL_GetCurrentContext() != Window::GetRenderContext())
-		{
-			LOG_ERROR("wrong context");
-		}
-		//Window::ClearWindow();
 		auto camera = Systems::GetMainCamera();
-		gpuTime = 0;
 		m_rendering = true;
 
 		for (auto& layer : m_layers)
@@ -547,13 +540,9 @@ namespace SandCastle
 		batch.material->Bind();
 
 		glDrawElements(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0);
-		//glDrawElementsInstanced(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0, batch.quadCount);
-
 
 		m_stats.drawCalls++;
 		m_layers[batch.layer.index].active = true;
-
-		gpuTime += clock.GetElapsed();
 	}
 
 	Material* Renderer2D::CreateMaterial(Shader* shader)
