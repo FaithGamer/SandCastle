@@ -30,14 +30,13 @@ namespace SandCastle
 
 	struct InstanceData
 	{
-		Vec2f vertexPos;
-		float type;
-		Vec3f pos;
-		Vec4f uvOrColor;
-		Vec2f size;
-		float rotation;
+		Vec3f vertexPos;
+		Vec2f uv;
+		//Vec3f pos;
+		Vec4f color;
+		//Vec2f size;
+		//float rotation;
 		float texIndex;
-		float alpha;
 	};
 	struct RenderLayer
 	{
@@ -51,7 +50,7 @@ namespace SandCastle
 		bool active = false;
 		bool offscreen = false;
 	};
-	
+
 	struct RenderingThread
 	{
 		std::atomic<size_t> current;
@@ -96,9 +95,9 @@ namespace SandCastle
 			uint32_t drawCalls = 0;
 			uint32_t quadCount = 0;
 		};
-		
+
 		void Init();
-		
+
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
 
@@ -174,7 +173,7 @@ namespace SandCastle
 		friend Singleton<Renderer2D>;
 		Renderer2D();
 
-	
+
 		void InitThread();
 		void RenderThread();
 		void Begin();
@@ -185,6 +184,8 @@ namespace SandCastle
 		void NextBatch(uint32_t batchIndex);
 		void DrawQuad(const QuadRenderData& quad);
 
+		Vec3f VertexPos(const Vec2f& vert, const Vec3f& pos, const Vec2f& size, float rot) const;
+		Vec2f Uv(const Vec2f& vert, int type, const Vec4f& uvOrColor) const;
 		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Material* material);
 		void AllocateQuadBatch(QuadBatch& batch);
 		void CreateQuadBatch(RenderLayer& layer, Material* shader);

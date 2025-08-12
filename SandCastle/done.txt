@@ -142,6 +142,8 @@ non exhaustive list:
 
 -fixed signal for real now
 -improved worker, easier to push tasks
+-basic profiling
+-moved vertex and uv computation to CPU: gained 100fps :ooo
 
 >profile: cpu time render thread, cpu time main thread, gpu time, render time(gpu time + cpu render)
 

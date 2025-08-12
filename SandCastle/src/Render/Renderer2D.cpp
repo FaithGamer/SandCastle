@@ -16,6 +16,7 @@
 #include "SandCastle/Core/Print.h"
 #include "SandCastle/ECS/LineRendererSystem.h"
 #include "SandCastle/Core/Profiling.h"
+#include "SandCastle/Core/Math.h"
 
 namespace SandCastle
 {
@@ -396,14 +397,10 @@ namespace SandCastle
 		//Vertex buffer
 		batch.quadBuffer = makesptr<VertexBuffer>(m_maxVertices * sizeof(InstanceData));
 		batch.quadBuffer->SetLayout({
-			{ShaderDataType::Vec2f, "iVertexPos"},
-			{ShaderDataType::Float, "iType"},
-			{ShaderDataType::Vec3f, "iPos"},
-			{ShaderDataType::Vec4f, "iUvOrColor"},
-			{ShaderDataType::Vec2f, "iSize"},
-			{ShaderDataType::Float, "iRotation"},
-			{ShaderDataType::Float, "iTexIndex"},
-			{ShaderDataType::Float, "iAlpha"}
+			{ShaderDataType::Vec3f, "iVertexPos"},
+			{ShaderDataType::Vec2f, "iUv"},
+			{ShaderDataType::Vec4f, "iColor"},
+			{ShaderDataType::Float, "iTexIndex"}
 			});
 
 		//Vertex Array
@@ -602,14 +599,16 @@ namespace SandCastle
 		};
 		for (int i = 0; i < 4; i++)
 		{
-			batch.quadPtr->vertexPos = quadVertexPosition[i];
-			batch.quadPtr->type = (float)quad.type;
-			batch.quadPtr->pos = quad.pos;
-			batch.quadPtr->uvOrColor = quad.uvOrColor;
-			batch.quadPtr->size = quad.size;
-			batch.quadPtr->rotation = quad.rotation;
+			batch.quadPtr->vertexPos = VertexPos(quadVertexPosition[i], quad.pos, quad.size, quad.rotation);
+			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvOrColor);
+			batch.quadPtr->color = quad.type == 0 ? quad.uvOrColor : Vec4f(1);
+		//	batch.quadPtr->type = (float)quad.type;
+			//batch.quadPtr->pos = quad.pos;
+		//	batch.quadPtr->uvOrColor = quad.uvOrColor;
+			//batch.quadPtr->size = quad.size;
+			//batch.quadPtr->rotation = quad.rotation;
 			batch.quadPtr->texIndex = textureIndex;
-			batch.quadPtr->alpha = quad.alpha;
+			//batch.quadPtr->alpha = quad.alpha;
 
 			//Incrementing the pointed value of the quad vertex array
 			batch.quadPtr++;
@@ -618,6 +617,69 @@ namespace SandCastle
 		batch.indexCount += 6;
 		batch.quadCount++;
 		m_stats.quadCount++;
+	}
+	inline Vec2f Lerp2f(const Vec2f& a, const Vec2f& b, const Vec2f& t)
+	{
+		return {
+			a.x + (b.x - a.x) * t.x,
+			a.y + (b.y - a.y) * t.y
+		};
+	}
+	Vec2f Renderer2D::Uv(const Vec2f& vert, int type, const Vec4f& uvOrColor) const
+	{
+		// localUV = iVertexPos.xy + 0.5
+		Vec2f localUV = { vert.x + 0.5f, vert.y + 0.5f };
+
+		if (type == 0)
+		{
+			// Untextured quad: use localUV directly
+			return localUV;
+		}
+		else
+		{
+			// Sprite: interpolate between uvMin and uvMax
+			Vec2f uvMin = { uvOrColor.x, uvOrColor.y };
+			Vec2f uvMax = { uvOrColor.z, uvOrColor.w };
+			return Lerp2f(uvMin, uvMax, localUV);
+		}
+	}
+
+	Vec3f Renderer2D::VertexPos(const Vec2f& vert, const Vec3f& pos, const Vec2f& size, float rot) const
+	{
+		// Scale from unit quad to sprite size
+		Vec3f scaled{
+			vert.x * size.x,
+			vert.y * size.y,
+			0.0f
+		};
+
+		// Convert degrees to radians (GLSL's radians(iRotation))
+		const float rad = rot * (3.14159265358979323846f / 180.0f);
+		const float s = std::sin(rad);
+		const float c = std::cos(rad);
+
+		// 2D rotation around Z
+		Vec3f rotated{
+			c * scaled.x - s * scaled.y,
+			s * scaled.x + c * scaled.y,
+			0.0f
+		};
+
+		// World position
+		Vec3f worldPos{
+			rotated.x + pos.x,
+			rotated.y + pos.y,
+			rotated.z + pos.z
+		};
+
+		// Apply world-to-screen ratio
+		Vec3f finalPos{
+			worldPos.x * m_cameraUniform.worldToScreenRatio,
+			worldPos.y * m_cameraUniform.worldToScreenRatio,
+			worldPos.z * m_cameraUniform.worldToScreenRatio
+		};
+
+		return finalPos;
 	}
 
 	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, uint32_t layer)
