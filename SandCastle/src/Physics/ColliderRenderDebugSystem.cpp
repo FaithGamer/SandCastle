@@ -63,7 +63,7 @@ namespace SandCastle
 		UpdateQueue();
 	}
 
-	void ColliderRenderDebugSystem::OnRender()
+	void ColliderRenderDebugSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		ForeachEntities<ColliderRender, Transform>([&](Entity entity, ColliderRender& collider, Transform& transform)

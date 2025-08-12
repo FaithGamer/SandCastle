@@ -16,7 +16,7 @@ namespace SandCastle
 		/// @param sort true by default
 		void SetZSort(bool sort);
 		bool GetZSort();
-		void OnRender() override;
+		void OnLateUpdate() override;
 		void OnClearBatches();
 		int GetUsedMethod() override;
 		static QuadRenderData MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform);

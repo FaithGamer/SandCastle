@@ -40,7 +40,7 @@ namespace SandCastle
 		ASSERT_LOG_ERROR(m_renderContext, LogSDLError("Cannot create render OpenGL Context"));
 		ASSERT_LOG_ERROR(m_initContext, LogSDLError("Cannot create init OpenGL Context"));
 
-		m_clearColor = Vec4f(1.1, 0.1, 0.1, 1);
+		m_clearColor = Vec4f(0.1, 0.1, 0.1, 1);
 		m_initialized = true;
 		m_pixelSize = GetSize();
 	}

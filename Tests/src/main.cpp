@@ -12,6 +12,7 @@
 
 using namespace SandCastle;
 
+
 int main()
 {
 	//Launch();
@@ -24,4 +25,5 @@ int main()
 	BenchmarkLotOfSprites();
 	//Delegates();
 	//Signals();
+
 }

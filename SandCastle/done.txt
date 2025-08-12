@@ -145,9 +145,9 @@ non exhaustive list:
 -basic profiling
 -moved vertex and uv computation to CPU: gained 100fps :ooo
 -fixed crash on exit program
+-renamed OnRender (no longer accurate) to OnLateUpdate
+-imgui within the render thread (I guess)
 
-
->imgui within the render thread (I guess)
 add a bool for each container: "filled", if yes, skip it.
 >layer sorting
 >try matrice computation cpu side
@@ -158,15 +158,6 @@ add a bool for each container: "filled", if yes, skip it.
 >per layer z sorting (enabled/disabled)
 >double buffered drawing data
 >Material
-
-thread:
-
->copy all into double buffer (OnRender)
->wait launch render thread
->getbatchid must buffer the quad batch creation
->check for other concurrency problem
->draw and that's it motherfucker
-
 >reintegrate wire and lines
 >unit test signal more?
 >Worker.Wait called just after queuing a task can just.. not wait really!
@@ -188,15 +179,6 @@ thread:
 >Transform animation system
   
 >m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
-
-
-Redering:
-
->multi pass rendering for layers instead of the current system (one component can be used as the layer struct Layer1 struct Layer2...)
->materials
->make new attempt at threaded rendering
-
-for multi threaded rendering, try copying all the components needed for rendering.
 
 Thoughts:
 

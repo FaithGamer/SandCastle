@@ -17,6 +17,7 @@
 #include "SandCastle/ECS/LineRendererSystem.h"
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/Core/Math.h"
+#include "SandCastle/Internal/ImGuiLoader.h"
 
 namespace SandCastle
 {
@@ -445,6 +446,14 @@ namespace SandCastle
 			}
 		}*/
 		End();
+
+#ifdef SC_IMGUI
+		BeginImGui();
+		Systems::Instance()->ImGuiUpdates();
+		EndImGui(Window::GetSize());
+
+#endif
+
 		Window::RenderWindow();
 		m_thread.queue[m_thread.current].clear();
 		STOP_PROFILING("cpu_render");
@@ -696,9 +705,9 @@ namespace SandCastle
 			return;
 		m_layers[layer].target->Bind();
 		m_layers[layer].active = true;
-	/*	m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
-		m_defaultWireShader->SetUniform("uColor", wire.GetColor());
-		m_defaultWireShader->BindUniformBlock("camera", 0);*/
+		/*	m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
+			m_defaultWireShader->SetUniform("uColor", wire.GetColor());
+			m_defaultWireShader->BindUniformBlock("camera", 0);*/
 		m_defaultWireShader->Bind();
 
 		wire.Bind();
@@ -764,6 +773,10 @@ namespace SandCastle
 
 	void Renderer2D::Process()
 	{
+		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
+			return;
+		if (Systems::GetMainCamera() == nullptr)
+			return;
 		Wait();
 		m_thread.current = m_thread.current == 1 ? 0 : 1;
 		m_thread.thread.Queue(&Renderer2D::RenderThread, this);

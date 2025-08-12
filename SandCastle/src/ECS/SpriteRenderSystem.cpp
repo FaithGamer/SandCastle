@@ -36,7 +36,7 @@ namespace SandCastle
 				sprite.needUpdateRenderBatch = true;
 			});
 	}
-	void SpriteRenderSystem::OnRender()
+	void SpriteRenderSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 

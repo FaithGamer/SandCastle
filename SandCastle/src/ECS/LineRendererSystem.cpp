@@ -10,7 +10,7 @@ namespace SandCastle
 		SetPriority(9998);
 	}
 
-	void LineRendererSystem::OnRender()
+	void LineRendererSystem::OnLateUpdate()
 	{
 
 

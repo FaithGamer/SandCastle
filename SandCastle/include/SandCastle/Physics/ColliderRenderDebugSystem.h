@@ -10,7 +10,7 @@ namespace SandCastle
 		ColliderRenderDebugSystem();
 		void OnStart() override;
 		void OnUpdate(Time delta) override;
-		void OnRender() override;
+		void OnLateUpdate() override;
 		int GetUsedMethod() override;
 		void OnRemove() override;
 

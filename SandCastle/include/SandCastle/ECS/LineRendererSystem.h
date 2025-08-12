@@ -8,7 +8,7 @@ namespace SandCastle
 	{
 	public:
 		LineRendererSystem();
-		void OnRender() override;
+		void OnLateUpdate() override;
 		void Render();
 		int GetUsedMethod() override;
 	};

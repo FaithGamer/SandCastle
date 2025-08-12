@@ -59,7 +59,7 @@ namespace SandCastle
 
 		/// @brief Add a system to the game logic.
 		/// If the system priority is 0 (default), the system's push order will
-		/// be their order in the queue for calling OnUpdate/OnFixedUpdate/OnRender/OnEvent
+		/// be their order in the queue for calling OnUpdate/OnFixedUpdate/OnLateUpdate/OnEvent
 		/// with their priority set to 1+(Nb of System pushed with a priority of 0)
 		/// @tparam SystemType 
 		/// @tparam ...Args 
@@ -107,6 +107,8 @@ namespace SandCastle
 			return Systems::Instance()->HasSystem(TypeId::GetId<SystemType>());
 		}
 
+		/// @brief For internal use only.
+		void ImGuiUpdates();
 		/// @brief Create and store a World, usually you will have only one World
 		/// Default World name will be World_0, 1, 2, 3....
 		/// @return The World created
@@ -187,7 +189,7 @@ namespace SandCastle
 		std::vector<SystemIdPriority> m_fixedUpdateSystems;
 		std::vector<SystemIdPriority> m_updateSystems;
 		std::vector<SystemIdPriority> m_imGuiSystems;
-		std::vector<SystemIdPriority> m_renderSystems;
+		std::vector<SystemIdPriority> m_lateUpdateSystems;
 
 		Camera m_defaultCamera;
 		Camera* m_mainCamera = nullptr;

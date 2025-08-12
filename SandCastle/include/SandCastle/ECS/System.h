@@ -33,10 +33,13 @@ namespace SandCastle
 		/// @brief Called on a fixed timestep.
 		virtual void OnFixedUpdate(Time fixedDeltaTime) {}
 
-		/// @brief Make all your rendering here. Called in between Window::Clear and Window::Render
-		virtual void OnRender() {}
+		/// @brief Called after every other OnUpdate/OnFixedUpdate
+		virtual void OnLateUpdate() {}
 
 		/// @brief This is where you can create ImGui elements
+		/// Warning! Contrarlily to all the other virtual method (including OnLateUpdate)
+		/// This is called from the rendering thread.
+		/// 
 		virtual void OnImGui() {}
 
 		/// @brief Called every time an SDL_Event is received, if no other system has processed the event.

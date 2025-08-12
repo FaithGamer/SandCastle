@@ -52,7 +52,7 @@ namespace SandCastle
 		{
 			toDelete.insert(system);
 		}
-		for (auto& system : m_renderSystems)
+		for (auto& system : m_lateUpdateSystems)
 		{
 			toDelete.insert(system);
 		}
@@ -71,24 +71,22 @@ namespace SandCastle
 	{
 		START_PROFILING("cpu_main");
 		START_PROFILING("frame_time");
+		//If less than one microseconds elapse between two call
+		//the m_updateClock.Restart increment doesn't accurately describe time passing by.
 		Time::delta = (float)m_updateClock.Restart();
 		float deltaScaled = (float)Time::delta * Time::timeScale;
 
-		if (!m_pendingSystemIn.empty())
-			IntegratePending();
-		if (!m_pendingSystemOut.empty())
-			RemovePending();
+		IntegratePending();
+		RemovePending();
 
 		SDL_Event event;
-
 		while (SDL_PollEvent(&event) != 0)
 		{
 			HandleWindowEvents(event);
 			bool imGuiEventHandled = false;
-#ifndef SANDCASTLE_DISTRIB
+#ifdef SC_IMGUI
 			ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
-
 			for (auto& eventSystem : m_eventSystems)
 			{
 				if (eventSystem.system->OnEvent(event))
@@ -100,7 +98,6 @@ namespace SandCastle
 
 		m_fixedUpdateAccumulator += m_fixedUpdateClock.Restart();
 		int i = 0;
-		int j = 0;
 		while (m_fixedUpdateAccumulator >= Time::fixedDelta)
 		{
 			Time scaledFixedDelta = (float)Time::fixedDelta * Time::timeScale;
@@ -111,51 +108,23 @@ namespace SandCastle
 			}
 			if (++i > m_maxFixedUpdate)
 			{
-				//To do: decide behaviour
-				//breaking here would not make the simulation perfeclty reproductible.
-				//Not breaking could lead to crash the application in case of overload
 				m_fixedUpdateAccumulator = 0;
-				break;
+				break; //Simulation no longer accurate
 			}
 		}
 
-		i = 0;
-
 		for (auto& system : m_updateSystems)
 		{
-			//If less than one microseconds elapse between two call
-			//the m_updateClock.Restart increment doesn't accurately describe time passing by.
 			system.system->OnUpdate(deltaScaled);
-
 		}
-		if (m_mainCamera == nullptr)
-			return;
-		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
-			return;
-
-		if (SDL_GL_GetCurrentContext() != Window::GetInitContext())
+		for (auto& system : m_lateUpdateSystems)
 		{
-			LOG_ERROR("not init context, wrong context");
-		}
-		for (auto& system : m_renderSystems)
-		{
-			system.system->OnRender();
+			system.system->OnLateUpdate();
 		}
 		//End CPU Time
 		STOP_PROFILING("cpu_main");
 		Renderer2D::Instance()->Process();
-
-#ifndef SANDCASTLE_DISTRIB
-		/*BeginImGui();
-		for (auto& system : m_imGuiSystems)
-		{
-			system.system->OnImGui();
-		}
-		EndImGui(Window::GetSize());*/
-
-#endif
 		STOP_PROFILING("frame_time");
-		
 	}
 
 	void Systems::HandleWindowEvents(SDL_Event& event)
@@ -192,6 +161,8 @@ namespace SandCastle
 
 	void Systems::IntegratePending()
 	{
+		if (m_pendingSystemIn.empty())
+			return;
 		std::multiset<SystemIdPriority, CompareSystemPriority> mustCallOnStart;
 
 		for (auto& system : m_pendingSystemIn)
@@ -221,8 +192,8 @@ namespace SandCastle
 				}
 				if (usedMethodBitmask & System::Method::Render)
 				{
-					m_renderSystems.push_back(system);
-					std::sort(m_renderSystems.begin(), m_renderSystems.end(), CompareSystemPriority());
+					m_lateUpdateSystems.push_back(system);
+					std::sort(m_lateUpdateSystems.begin(), m_lateUpdateSystems.end(), CompareSystemPriority());
 				}
 				m_allSystems.insert(std::make_pair(system.typeId, system.system));
 				mustCallOnStart.insert(system);
@@ -256,6 +227,8 @@ namespace SandCastle
 
 	void Systems::RemovePending()
 	{
+		if (m_pendingSystemOut.empty())
+			return;
 		std::set<SystemIdPriority, CompareSystemId> toDelete;
 
 		for (auto typeId : m_pendingSystemOut)
@@ -266,7 +239,7 @@ namespace SandCastle
 				RemovePending(m_fixedUpdateSystems, typeId, toDelete);
 				RemovePending(m_eventSystems, typeId, toDelete);
 				RemovePending(m_imGuiSystems, typeId, toDelete);
-				RemovePending(m_renderSystems, typeId, toDelete);
+				RemovePending(m_lateUpdateSystems, typeId, toDelete);
 				m_allSystems.erase(typeId);
 			}
 			else
@@ -297,10 +270,18 @@ namespace SandCastle
 			Container::Contains(m_fixedUpdateSystems, typeId) ||
 			Container::Contains(m_eventSystems, typeId) ||
 			Container::Contains(m_imGuiSystems, typeId) ||
-			Container::Contains(m_renderSystems, typeId))
+			Container::Contains(m_lateUpdateSystems, typeId))
 			return true;
 
 		return false;
+	}
+
+	void Systems::ImGuiUpdates()
+	{
+		for (auto& system : m_imGuiSystems)
+		{
+			system.system->OnImGui();
+		}
 	}
 
 	World* Systems::CreateWorld()

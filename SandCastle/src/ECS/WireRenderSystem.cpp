@@ -10,7 +10,7 @@ namespace SandCastle
 		SetPriority(-9999);
 	}
 
-	void WireRenderSystem::OnRender()
+	void WireRenderSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 
