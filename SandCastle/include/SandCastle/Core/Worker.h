@@ -31,6 +31,19 @@ namespace SandCastle
 		/// @param method method to call
 		/// @param object instance to call the method on
 		/// @param ...args arguments for the method
+		template<typename Obj>
+		void Queue(void(Obj::* method)(void), Obj* object)
+		{
+			auto del = Delegate<void, Obj>(method, object);
+			Queue(makesptr<Task<Obj>>(del));
+		}
+
+		void Queue(void(*function)(void))
+		{
+			auto del = Delegate<void, FunctionDelegate>(function);
+			Queue(makesptr<Task<FunctionDelegate>>(del));
+		}
+
 		template<typename Obj, typename... Args, typename... Ts>
 		void Queue(void(Obj::* method)(Args...), Obj* object, Ts&&... args)
 		{

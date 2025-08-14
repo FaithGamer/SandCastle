@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandCastle/Core/std_macros.h"
+#include <SandCastle/Core/Log.h>
 
 namespace SandCastle
 {
@@ -78,23 +79,36 @@ namespace SandCastle
 			if (m_method != nullptr)
 			{
 				ASSERT_LOG_ERROR((int)(m_obj != nullptr), "Calling a method delegate without object.");
-				return[this] <std::size_t... I>
-					(std::index_sequence<I...>)
+				if constexpr (sizeof...(Args) != 0)
 				{
-					return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
+					return[this] <std::size_t... I>
+						(std::index_sequence<I...>)
+					{
+						return (static_cast<Obj*>(m_obj)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
+					}
+					(std::make_index_sequence<sizeof...(Args)>());
 				}
-				(std::make_index_sequence<sizeof...(Args)>());
+				else
+				{
+					return (static_cast<Obj*>(m_obj)->*m_method)();
+				}
 			}
 			else
 			{
-				return[this] <std::size_t... I>
-					(std::index_sequence<I...>)
+				if constexpr (sizeof...(Args) != 0)
 				{
-					return m_function(std::forward<Args>(std::get<I>(*m_args))...);
+					return[this] <std::size_t... I>
+						(std::index_sequence<I...>)
+					{
+						return m_function(std::forward<Args>(std::get<I>(*m_args))...);
+					}
+					(std::make_index_sequence<sizeof...(Args)>());
 				}
-				(std::make_index_sequence<sizeof...(Args)>());
+				else
+				{
+					return (*m_function)();
+				}
 			}
-
 		}
 		/// @brief Call the function or method.
 		/// If the delegate holds a method, it will be called on the object provided in constructor.
@@ -129,12 +143,19 @@ namespace SandCastle
 		/// @return return of the function
 		Ret CallOn(void* const object)
 		{
-			return[this, object] <std::size_t... I>
-				(std::index_sequence<I...>)
+			if constexpr (sizeof...(Args) != 0)
 			{
-				return (static_cast<Obj*>(object)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
+				return[this, object] <std::size_t... I>
+					(std::index_sequence<I...>)
+				{
+					return (static_cast<Obj*>(object)->*m_method)(std::forward<Args>(std::get<I>(*m_args))...);
+				}
+				(std::make_index_sequence<sizeof...(Args)>());
 			}
-			(std::make_index_sequence<sizeof...(Args)>());
+			else
+			{
+				return (static_cast<Obj*>(object)->*m_method)();
+			}
 		}
 		Obj* GetObj()
 		{

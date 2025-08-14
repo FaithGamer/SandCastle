@@ -23,6 +23,10 @@ public:
 		LOG_INFO("arg = {0}, f = {1}, obj.value = {2}", arg.s, f, value);
 		return (int)f + value;
 	}
+	int NoArg()
+	{
+		return 43;
+	}
 	int value = 42;
 };
 
@@ -36,11 +40,36 @@ void FunctionWithRef(Arg& arg)
 	LOG_INFO("arg = {0}", arg.s);
 }
 
+int NoArg()
+{
+	return 33;
+}
+
 void Delegates()
 {
 	Engine::Init();
 
 	//rvalue and lvalue can be mixed indenpendendtly
+
+	//--Free function with no argument at all--
+	{
+		LOG_INFO("--Free function no arg--");
+		Arg lvalue("lvalue");
+		Delegate delegate(&NoArg);
+		auto r = delegate.Call();
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
+
+	//--Method with no argument at all--
+	{
+		LOG_INFO("--Method no arg--");
+		Foo obj;
+		Delegate delegate(&Foo::NoArg, &obj);
+		auto r = delegate.Call();
+		LOG_INFO({ "return: = {0}" }, r);
+		std::cout << std::endl;
+	}
 
 	//--Free function with no argument bound--
 	{
