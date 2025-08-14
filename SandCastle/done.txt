@@ -148,14 +148,18 @@ non exhaustive list:
 -renamed OnRender (no longer accurate) to OnLateUpdate
 -imgui within the render thread (I guess)
 
-add a bool for each container: "filled", if yes, skip it.
->layer sorting
->try matrice computation cpu side
->clean code
->imgui inside the render thread
->consider get rid of sprite origin
+14
+
+-delegate/task with no argument work properly
+-figured out viewport was'nt actualizing
+-add layer thread safe
+-on window size signal fixed
+-on window size thread safe
+
+>check renderer thread safety
 >layer sorting
 >per layer z sorting (enabled/disabled)
+>consider get rid of sprite origin
 >double buffered drawing data
 >Material
 >reintegrate wire and lines

@@ -235,20 +235,15 @@ namespace SandCastle
 
 	void Window::OnSDLPixelSizeChanged(SDL_Event& event)
 	{
-	/*	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, event.window.data1, event.window.data2);
 		m_pixelSize.x = (unsigned int)event.window.data1;
 		m_pixelSize.y = (unsigned int)event.window.data2;
-		ResizeSignal.Send(m_pixelSize);*/
+		ResizeSignal.Send(m_pixelSize);
 		//LOG_INFO("pixelizes. [{0}, {1}]", m_pixelSize.x, m_pixelSize.y);
 	}
 
 	void Window::OnSDLWindowResized(SDL_Event& event)
 	{
 		//Nothing for now, we only care about pixel size as far as I am aware of.
-		int w, h;
-		SDL_GetWindowSize(Instance()->m_window, &w, &h);
-		//LOG_INFO("resized. [{0}, {1}]", w, h);
 	}
 
 	void Window::Bind()
