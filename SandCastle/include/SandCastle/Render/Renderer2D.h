@@ -32,10 +32,7 @@ namespace SandCastle
 	{
 		Vec3f vertexPos;
 		Vec2f uv;
-		//Vec3f pos;
 		Vec4f color;
-		//Vec2f size;
-		//float rotation;
 		float texIndex;
 	};
 	struct RenderLayer
@@ -50,7 +47,6 @@ namespace SandCastle
 		bool active = false;
 		bool offscreen = false;
 	};
-
 	struct RenderingThread
 	{
 		std::atomic<size_t> current;
@@ -59,14 +55,12 @@ namespace SandCastle
 		std::vector<QuadRenderData> queue[2];
 		WorkerThread thread;
 	};
-
 	struct OffscreenRenderLayer
 	{
 		sptr<RenderTexture> target = nullptr;
 		uint32_t textureUnit = 1;
 		uint32_t index = 1;
 	};
-
 	struct QuadBatch
 	{
 		uint32_t index = 0;
@@ -86,7 +80,6 @@ namespace SandCastle
 		RenderLayer layer;
 		Material* material;
 	};
-
 	class Renderer2D : public Singleton<Renderer2D>
 	{
 	public:
@@ -100,7 +93,6 @@ namespace SandCastle
 
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
-
 		Material* CreateMaterial(Shader* shader);
 
 		void PushQuad(const QuadRenderData&& quad);
@@ -125,6 +117,7 @@ namespace SandCastle
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
 		static uint32_t AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		
 		/// @brief Add a layer that won't display but can be used in the shader of other layers.
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
@@ -176,6 +169,8 @@ namespace SandCastle
 
 		void InitThread();
 		void RenderThread();
+		void OnWindowResizeThread();
+		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr, sptr<RenderOptions> renderOptions = nullptr);
 		void Begin();
 		void End();
 		void Flush(uint32_t batchIndex);
@@ -188,7 +183,7 @@ namespace SandCastle
 		Vec2f Uv(const Vec2f& vert, int type, const Vec4f& uvOrColor) const;
 		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Material* material);
 		void AllocateQuadBatch(QuadBatch& batch);
-		void CreateQuadBatch(RenderLayer& layer, Material* shader);
+		void CreateQuadBatch(RenderLayer& layer, Material* material);
 		uint64_t GenerateBatchId(uint64_t a, uint64_t b);
 		void RenderLayers();
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
@@ -242,7 +237,7 @@ namespace SandCastle
 		Shader* m_defaultWireShader;
 
 		//Others
-
+		uint32_t m_lastLayerAdded = 0;
 		bool m_rendering;
 		Statistics m_stats;
 		float m_aspectRatio;

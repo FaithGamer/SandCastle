@@ -185,34 +185,10 @@ namespace SandCastle
 	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
+		ins->m_thread.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
 		ins->Wait();
+		return ins->m_lastLayerAdded;
 
-		ASSERT_LOG_ERROR((ins->m_layers.size() < (MAX_LAYERS / 2)), "Max render layer ({0}) reached.", MAX_LAYERS / 2);
-
-		if (material == nullptr)
-			material = ins->m_defaultLayerMaterial;
-		if (renderOptions == nullptr)
-			renderOptions = ins->m_defaultRenderOptionsLayer;
-
-		ins->SetShaderUniformSampler(material->GetShader(), ins->m_maxOffscreenLayers + 1);
-
-		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		sptr<VertexArray> layerVertexArray = ins->GenerateLayerVertexArray(screenSpace);
-		auto windowSize = Window::GetSize();
-		sptr<RenderTexture> layer;
-		if (height == 0)
-		{
-			layer = makesptr<RenderTexture>(windowSize);
-		}
-		else
-		{
-			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
-			layer = makesptr<RenderTexture>(Vec2u(width, height));
-		}
-		ins->m_layers.push_back(RenderLayer(name, (uint32_t)ins->m_layers.size(), layer, material, renderOptions, layerVertexArray, height, false, false));
-		ins->m_renderLayers.push_back(&ins->m_layers.back());
-
-		return (uint32_t)ins->m_layers.size() - 1;
 	}
 
 	uint32_t Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
@@ -458,6 +434,57 @@ namespace SandCastle
 		m_thread.queue[m_thread.current].clear();
 		STOP_PROFILING("cpu_render");
 	}
+	void Renderer2D::OnWindowResizeThread()
+	{
+		auto windowSize = Window::GetSize();
+		for (auto& layer : m_layers)
+		{
+			if (layer.index == 0)
+				continue;
+
+			if (layer.height == 0)
+			{
+				//The layer fit the window size
+				layer.target->SetSize((Vec2u)windowSize);
+			}
+			else
+			{
+				//The layer has it's own size, but fit the window's aspect ratio
+
+				unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)layer.height);
+				layer.target->SetSize({ width, layer.height });
+			}
+		}
+	}
+	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
+	{
+		ASSERT_LOG_ERROR((m_layers.size() < (MAX_LAYERS / 2)), "Max render layer ({0}) reached.", MAX_LAYERS / 2);
+
+		if (material == nullptr)
+			material = m_defaultLayerMaterial;
+		if (renderOptions == nullptr)
+			renderOptions = m_defaultRenderOptionsLayer;
+
+		SetShaderUniformSampler(material->GetShader(), m_maxOffscreenLayers + 1);
+
+		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
+		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace);
+		auto windowSize = Window::GetSize();
+		sptr<RenderTexture> layer;
+		if (height == 0)
+		{
+			layer = makesptr<RenderTexture>(windowSize);
+		}
+		else
+		{
+			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
+			layer = makesptr<RenderTexture>(Vec2u(width, height));
+		}
+		m_layers.push_back(RenderLayer(name, (uint32_t)m_layers.size(), layer, material, renderOptions, layerVertexArray, height, false, false));
+		m_renderLayers.push_back(&m_layers.back());
+
+		m_lastLayerAdded = (uint32_t)m_layers.size() - 1;
+	}
 	void Renderer2D::Begin()
 	{
 		auto camera = Systems::GetMainCamera();
@@ -652,8 +679,8 @@ namespace SandCastle
 			0.0f
 		};
 
-		// Convert degrees to radians (GLSL's radians(iRotation))
-		const float rad = rot * (3.14159265358979323846f / 180.0f);
+		// Convert degrees to radians 
+		const float rad = rot * 0.01745329252f;
 		const float s = std::sin(rad);
 		const float c = std::cos(rad);
 
@@ -670,6 +697,14 @@ namespace SandCastle
 			rotated.y + pos.y,
 			rotated.z + pos.z
 		};
+
+		/*Transform trans;
+		trans.SetScale(size);
+		trans.SetPosition(pos);
+
+		Vec4f worldPos(vert.x, vert.y, 0, 1);
+		worldPos = trans.GetTransformMatrix() * worldPos;*/
+
 
 		// Apply world-to-screen ratio
 		Vec3f finalPos{
@@ -746,24 +781,8 @@ namespace SandCastle
 
 	void Renderer2D::OnWindowResize(Vec2u size)
 	{
-		for (auto& layer : m_layers)
-		{
-			if (layer.index == 0)
-				continue;
-
-			if (layer.height == 0)
-			{
-				//The layer fit the window size
-				layer.target->SetSize(size);
-			}
-			else
-			{
-				//The layer has it's own size, but fit the window's aspect ratio
-				auto windowSize = Window::GetSize();
-				unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)layer.height);
-				layer.target->SetSize({ width, layer.height });
-			}
-		}
+		Wait();
+		m_thread.thread.Queue(&Renderer2D::OnWindowResizeThread, this);
 	}
 
 	void Renderer2D::Wait()
