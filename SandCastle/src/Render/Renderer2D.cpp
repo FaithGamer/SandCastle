@@ -120,7 +120,7 @@ namespace SandCastle
 		delete[] quadIndices;
 
 		//Camera uniform buffer
-		m_cameraUniformBuffer = makesptr<UniformBuffer>(sizeof(CameraBufferData), m_cameraUniformBufferBinding);
+		m_sceneUniformBuffer = makesptr<UniformBuffer>(sizeof(SceneBufferData), m_sceneUniformBinding);
 
 		m_whiteTexture = new Texture();
 		m_whiteTextureID = m_whiteTexture->GetId();
@@ -371,14 +371,14 @@ namespace SandCastle
 		auto shader = material->GetShader();
 		SetShaderUniformSampler(shader, MAX_TEXTURE_INDEX);
 
-		//Bind shader to the camera uniform buffer
-		shader->BindUniformBlock("camera", m_cameraUniformBufferBinding);
+		//Bind shader to the scene uniform buffer
+		shader->BindUniformBlock("scene", m_sceneUniformBinding);
 	}
 
 	void Renderer2D::AllocateQuadBatch(QuadBatch& batch)
 	{
 		//Vertex buffer
-		batch.quadBuffer = makesptr<VertexBuffer>(m_maxVertices * sizeof(InstanceData));
+		batch.quadBuffer = makesptr<VertexBuffer>(m_maxVertices * sizeof(QuadData));
 		batch.quadBuffer->SetLayout({
 			{ShaderDataType::Vec3f, "iVertexPos"},
 			{ShaderDataType::Vec2f, "iUv"},
@@ -392,7 +392,7 @@ namespace SandCastle
 		batch.vertexArray->SetIndexBuffer(m_quadIndexBuffer);
 
 		//Vertex data on CPU
-		batch.quadBase = new InstanceData[m_maxVertices];
+		batch.quadBase = new QuadData[m_maxVertices];
 
 		//White texture in slot 0
 		batch.textureSlots[0] = m_whiteTextureID;
@@ -504,10 +504,11 @@ namespace SandCastle
 
 		SetRenderTarget(Window::Instance());
 		//Set the camera matrices into the uniform buffer
-		m_cameraUniform.projectionView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-		m_cameraUniform.worldToScreenRatio = camera->worldToScreenRatio * 2;
-		m_cameraUniformBuffer->SetData(&m_cameraUniform, sizeof(CameraBufferData), 0);
-		//	m_defaultLineShader->SetUniform("uAspectRatio", camera.GetAspectRatio());
+		m_sceneUniform.camProj = camera->GetProjectionMatrix() * camera->GetViewMatrix();
+		m_sceneUniform.camZoom = camera->worldToScreenRatio * 2;
+		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
+		m_sceneUniform.winHeight = (float)Window::GetSize().y;
+		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);
 
 		//ResetStats
 		m_stats.drawCalls = 0;
@@ -704,22 +705,7 @@ namespace SandCastle
 			rotated.z + pos.z
 		};
 
-		/*Transform trans;
-		trans.SetScale(size);
-		trans.SetPosition(pos);
-
-		Vec4f worldPos(vert.x, vert.y, 0, 1);
-		worldPos = trans.GetTransformMatrix() * worldPos;*/
-
-
-		// Apply world-to-screen ratio
-		Vec3f finalPos{
-			worldPos.x * m_cameraUniform.worldToScreenRatio,
-			worldPos.y * m_cameraUniform.worldToScreenRatio,
-			worldPos.z * m_cameraUniform.worldToScreenRatio
-		};
-
-		return finalPos;
+		return worldPos;
 	}
 
 	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, uint32_t layer)

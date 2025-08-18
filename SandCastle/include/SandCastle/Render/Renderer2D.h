@@ -28,12 +28,12 @@ namespace SandCastle
 	class Shader;
 	class RenderOptions;
 
-	struct InstanceData
+	struct QuadData
 	{
-		Vec3f vertexPos;
-		Vec2f uv;
-		Vec4f color;
-		float texIndex;
+		Vec3f vertexPos = { 0, 0, 0 };
+		Vec2f uv = { 0, 0 };
+		Vec4f color = { 1, 1, 1, 1 };
+		float texIndex = 0;
 	};
 	struct RenderLayer
 	{
@@ -50,7 +50,7 @@ namespace SandCastle
 	struct RenderingThread
 	{
 		std::atomic<size_t> current;
-		int layerMax[2];
+		int layerMax[2]{ 0, 0 };
 		std::vector<QuadRenderData> sorted[2][MAX_LAYERS];
 		std::vector<QuadRenderData> queue[2];
 		WorkerThread thread;
@@ -71,8 +71,8 @@ namespace SandCastle
 
 		uint32_t quadCount = 0;
 		uint32_t indexCount = 0;
-		InstanceData* quadBase = nullptr;
-		InstanceData* quadPtr = nullptr;
+		QuadData* quadBase = nullptr;
+		QuadData* quadPtr = nullptr;
 
 		GLuint textureSlots[MAX_TEXTURE_INDEX];
 		uint32_t textureSlotIndex = 1;
@@ -118,7 +118,7 @@ namespace SandCastle
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
 		static uint32_t AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
-		
+
 		/// @brief Add a layer that won't display but can be used in the shader of other layers.
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
@@ -208,18 +208,20 @@ namespace SandCastle
 		sptr<RenderOptions> m_defaultRenderOptionsLayer;
 		Texture* m_whiteTexture;
 		GLuint m_whiteTextureID;
-		sptr<UniformBuffer> m_cameraUniformBuffer;
-		GLuint m_cameraUniformBufferBinding = 0;
 		sptr<IndexBuffer> m_quadIndexBuffer;
 		sptr<VertexBuffer> m_quadVertexBuffer;
 
-		struct CameraBufferData
+		struct SceneBufferData
 		{
-			Mat4 projectionView;
-			float worldToScreenRatio;
+			Mat4 camProj;
+			float camZoom;
+			float camAspectRatio;
+			float winHeight;
 		};
 
-		CameraBufferData m_cameraUniform;
+		GLuint m_sceneUniformBinding = 0;
+		sptr<UniformBuffer> m_sceneUniformBuffer;
+		SceneBufferData m_sceneUniform;
 
 
 		//Layers

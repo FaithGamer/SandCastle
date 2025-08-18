@@ -163,11 +163,13 @@ non exhaustive list:
 -various minor fixes
 -removed useless files
 -Test do not depend on SDL3
+-shaders now include aspect ratio and window height as part of a uniform block called "scene"
 
+>shaders should include aspect ratio and ppu as one of the camera uniform block parameters
+>SpriteRender bool to decide if it is sorted Z or not
 >integrate the font system from idle colony
 >create font with a material
 >create ui text with point size, not px size
->shaders should include aspect ratio as one of the camera uniform block parameters
 
 
 >math inverselerp
