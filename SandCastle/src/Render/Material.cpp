@@ -125,7 +125,7 @@ namespace SandCastle
 		}
 		break;
 		default:
-			LOG_ERROR("Unsupported uniform type in shader {0} type GLenum: {1}", m_shader->GetName(), type);
+			LOG_ERROR("Unsupported uniform type in shader {0} type GLenum: {1}, name: {2}", m_shader->GetName(), type, name);
 			break;
 		}
 	}
