@@ -158,12 +158,18 @@ non exhaustive list:
 
 18
 
+-no more SolutionDir used to reference dependencies or build binaries
+-ignoring assets files with no extension
+-various minor fixes
+-removed useless files
+-Test do not depend on SDL3
+
 >integrate the font system from idle colony
 >create font with a material
 >create ui text with point size, not px size
 >shaders should include aspect ratio as one of the camera uniform block parameters
 
->dont use SolutionDir in project properties bc it fucks everythings up if the project is included in another solution
+
 >math inverselerp
 >check renderer thread safety
 >layer sorting

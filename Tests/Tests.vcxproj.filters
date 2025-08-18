@@ -61,5 +61,6 @@
     <None Include="assets\shaders\line.vert" />
     <None Include="assets\shaders\wire.frag" />
     <None Include="assets\shaders\wire.vert" />
+    <None Include="assets\shaders\batch_renderer_pixel_art" />
   </ItemGroup>
 </Project>

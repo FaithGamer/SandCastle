@@ -33,9 +33,6 @@
     <ProjectReference Include="..\SandCastle\SandCastle.vcxproj">
       <Project>{dfe64d30-3b0f-4900-ab9d-5dc225fb97d6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\SandCastle\vendor\SDL-3.2.18\VisualC\SDL\SDL.vcxproj">
-      <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BenchmarkLotOfSprites.h" />
@@ -52,6 +49,7 @@
   <ItemGroup>
     <None Include="assets\shaders\batch_renderer.frag" />
     <None Include="assets\shaders\batch_renderer.vert" />
+    <None Include="assets\shaders\batch_renderer_pixel_art" />
     <None Include="assets\shaders\default_layer.frag" />
     <None Include="assets\shaders\default_layer.vert" />
     <None Include="assets\shaders\line.frag" />
