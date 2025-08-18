@@ -111,16 +111,16 @@
     <IntDir>$(SolutionDir)bin\int\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Platform)-$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\int\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\bin\int\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Platform)-$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\int\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\bin\int\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
-    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Platform)-$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)bin\int\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>$(ProjectDir)\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\bin\int\$(Platform)-$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -188,7 +188,7 @@
       <AdditionalDependencies>imgui.lib;box2d.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\imgui\x64-Debug;$(SolutionDir)bin\box2d\x64-Debug;$(SolutionDir)bin\SDL3\x64-Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Lib>
@@ -215,7 +215,7 @@
       <AdditionalDependencies>imgui.lib;box2d.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\imgui\x64-Release;$(SolutionDir)bin\box2d\x64-Release;$(SolutionDir)bin\SDL3\x64-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
@@ -241,7 +241,7 @@
       <AdditionalDependencies>imgui.lib;box2d.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\imgui\x64-Distrib;$(SolutionDir)bin\box2d\x64-Distrib;$(SolutionDir)bin\SDL3\x64-Distrib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
