@@ -156,12 +156,21 @@ non exhaustive list:
 -on window size signal fixed
 -on window size thread safe
 
+18
+
+>integrate the font system from idle colony
+>create font with a material
+>create ui text with point size, not px size
+>shaders should include aspect ratio as one of the camera uniform block parameters
+
+>dont use SolutionDir in project properties bc it fucks everythings up if the project is included in another solution
+>math inverselerp
 >check renderer thread safety
 >layer sorting
 >per layer z sorting (enabled/disabled)
 >consider get rid of sprite origin
->double buffered drawing data
->Material
+>check gpu max texture size.
+>custom path for assets, fonts, and so on... maybe in the same class as Roaming ?
 >reintegrate wire and lines
 >unit test signal more?
 >Worker.Wait called just after queuing a task can just.. not wait really!

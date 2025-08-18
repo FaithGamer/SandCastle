@@ -55,10 +55,11 @@ public:
 			auto entt = Entity::CreateSprite("trollface.png_0_0");
 			entt.GetComponent<Transform>()->SetScale(0.1f);
 			entt.AddComponent<Trollface>()->timer = Random::Range(0.1f, time * 2.f);
+			//entt.GetComponent<SpriteRender>()->SetLayer(Renderer2D::GetLayerId("layer"));
 			Vec3f pos = { Random::Range(-space.x, space.x),
 				Random::Range(-space.y, space.y),
 				0.f };
-			entt.GetComponent<Transform>()->SetPosition(pos);
+			entt.GetComponent<Transform>()->SetPosition(pos); //crash sometimes here
 		}
 	}
 public:
@@ -84,8 +85,10 @@ void BenchmarkLotOfSprites()
 {
 	Engine::Init();
 	Systems::Push<SysIm>();
-	Systems::Push<Benchmark0>();
+	//Systems::Push<Benchmark0>();
 	Systems::Push<Benchmark1>();
+
+	Renderer2D::AddLayer("layer");
 
 	auto map = Inputs::CreateInputMap();
 	auto btn = map->CreateButtonInput("click");
