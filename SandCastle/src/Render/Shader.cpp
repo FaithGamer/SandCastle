@@ -87,7 +87,6 @@ namespace SandCastle
 
 	Shader::Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource)
 	{
-		m_name = 
 		m_id = m_currentId++;
 		//Load shader source files
 		const GLchar* vertexSrc = (const GLchar*)vertexSource.c_str();
