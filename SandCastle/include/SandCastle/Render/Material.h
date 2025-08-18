@@ -49,8 +49,8 @@ namespace SandCastle
 		void ListUniforms();
 		void AddProperty(GLenum type, String name, GLint location);
 		void AddPropertyArray(GLenum type, String name, GLint location, GLsizei);
-		std::unordered_map<String, MaterialProperty>::iterator FindProperty(const String& name, bool& found);
-		std::unordered_map<String, MaterialPropertyArray>::iterator FindPropertyArray(const String& name, bool& found);
+		std::unordered_map<String, MaterialProperty>::iterator FindProperty(const String& name);
+		std::unordered_map<String, MaterialPropertyArray>::iterator FindPropertyArray(const String& name);
 		//to do, add render options
 		std::unordered_map<String, MaterialProperty> m_properties;
 		std::unordered_map<String, MaterialPropertyArray> m_arrayProperties;

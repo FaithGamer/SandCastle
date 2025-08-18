@@ -36,10 +36,10 @@ namespace SandCastle
 			switch (prop_kvp.second.type)
 			{
 			case GL_INT:
-				m_shader->SetUniformArray(prop_kvp.second.location, &prop_kvp.second.i[0], prop_kvp.second.i.size());
+				m_shader->SetUniformArray(prop_kvp.second.location, &prop_kvp.second.i[0], (GLsizei)prop_kvp.second.i.size());
 				break;
 			case GL_FLOAT_VEC3:
-				m_shader->SetUniformArray(prop_kvp.second.location, &prop_kvp.second.f[0], prop_kvp.second.f.size());
+				m_shader->SetUniformArray(prop_kvp.second.location, &prop_kvp.second.f[0], (GLsizei)prop_kvp.second.f.size());
 				break;
 			}
 		}
@@ -161,39 +161,29 @@ namespace SandCastle
 		}
 
 	}
-	std::unordered_map<String, MaterialProperty>::iterator Material::FindProperty(const String& name, bool& found)
+	std::unordered_map<String, MaterialProperty>::iterator Material::FindProperty(const String& name)
 	{
 		auto it_prop = m_properties.find(name);
 		if (it_prop == m_properties.end())
 		{
 			LOG_ERROR("The property {0}, doesn't exists for the shader {1}", name, m_shader->GetName());
-			found = false;
 		}
-		else
-		{
-			found = true;
-			return it_prop;
-		}
+		return it_prop;
 	}
-	std::unordered_map<String, MaterialPropertyArray>::iterator Material::FindPropertyArray(const String& name, bool& found)
+	std::unordered_map<String, MaterialPropertyArray>::iterator Material::FindPropertyArray(const String& name)
 	{
 		auto it_prop = m_arrayProperties.find(name);
 		if (it_prop == m_arrayProperties.end())
 		{
 			LOG_ERROR("The property array {0}, doesn't exists for the shader {1}", name, m_shader->GetName());
-			found = false;
 		}
-		else
-		{
-			found = true;
-			return it_prop;
-		}
+		return it_prop;
+		
 	}
 	bool Material::SetFloat(String name, float value)
 	{
-		bool r = true;
-		auto it_prop = FindProperty(name, r);
-		if (!r)
+		auto it_prop = FindProperty(name);
+		if (it_prop == m_properties.end())
 			return false;
 		if (it_prop->second.type != GL_FLOAT)
 		{
@@ -205,9 +195,8 @@ namespace SandCastle
 	}
 	bool Material::SetInt(String name, int value)
 	{
-		bool r = true;
-		auto it_prop = FindProperty(name, r);
-		if (!r)
+		auto it_prop = FindProperty(name);
+		if (it_prop == m_properties.end())
 			return false;
 		if (it_prop->second.type != GL_INT)
 		{
@@ -219,9 +208,8 @@ namespace SandCastle
 	}
 	bool Material::SetVec2f(String name, Vec2f value)
 	{
-		bool r = true;
-		auto it_prop = FindProperty(name, r);
-		if (!r)
+		auto it_prop = FindProperty(name);
+		if (it_prop == m_properties.end())
 			return false;
 		if (it_prop->second.type != GL_FLOAT_VEC2)
 		{
@@ -233,9 +221,8 @@ namespace SandCastle
 	}
 	bool Material::SetVec3f(String name, Vec3f value)
 	{
-		bool r = true;
-		auto it_prop = FindProperty(name, r);
-		if (!r)
+		auto it_prop = FindProperty(name);
+		if (it_prop == m_properties.end())
 			return false;
 		if (it_prop->second.type != GL_FLOAT_VEC3)
 		{
@@ -247,9 +234,8 @@ namespace SandCastle
 	}
 	bool Material::SetVec4f(String name, Vec4f value)
 	{
-		bool r = true;
-		auto it_prop = FindProperty(name, r);
-		if (!r)
+		auto it_prop = FindProperty(name);
+		if (it_prop == m_properties.end())
 			return false;
 		if (it_prop->second.type != GL_FLOAT_VEC4)
 		{
@@ -262,9 +248,8 @@ namespace SandCastle
 
 	bool Material::SetFloatArray(String name, const std::vector<float>& value)
 	{
-		bool r = true;
-		auto it_prop = FindPropertyArray(name, r);
-		if (!r)
+		auto it_prop = FindPropertyArray(name);
+		if (it_prop == m_arrayProperties.end())
 			return false;
 		if (it_prop->second.type != GL_FLOAT)
 		{
@@ -276,9 +261,8 @@ namespace SandCastle
 	}
 	bool Material::SetIntArray(String name, const std::vector<int>& value)
 	{
-		bool r = true;
-		auto it_prop = FindPropertyArray(name, r);
-		if (!r)
+		auto it_prop = FindPropertyArray(name);
+		if (it_prop == m_arrayProperties.end())
 			return false;
 		if (it_prop->second.type != GL_INT)
 		{

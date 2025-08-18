@@ -203,7 +203,7 @@ namespace SandCastle
 			m_hadGetError = true;
 			LOG_ERROR(errorMsg);
 		}
-
+		return std::vector<Serialized>();
 	}
 	bool Serialized::SafeGetObj(String name, Serialized& value)
 	{
