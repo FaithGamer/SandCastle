@@ -90,6 +90,7 @@ namespace SandCastle
 		};
 
 		void Init();
+		void PostAssetInit();
 
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
@@ -168,6 +169,7 @@ namespace SandCastle
 
 
 		void InitThread();
+		void PostAssetInitThread();
 		void RenderThread();
 		void OnWindowResizeThread();
 		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr, sptr<RenderOptions> renderOptions = nullptr);

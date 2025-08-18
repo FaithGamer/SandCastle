@@ -42,18 +42,19 @@ namespace SandCastle
 			params = EngineParameters(paramsJson);
 		}
 
-		LOG_INFO("Loading window...");
+		LOG_INFO("Creating window...");
 		Window::Instance()->Init(params.appName, params.startupWindowResolution);
 		Window::SetFullScreen(params.fullscreen);
-		LOG_INFO("Loading renderer...");
+		LOG_INFO("Initializing context...");
 		Renderer2D::Instance()->Init();
-		Renderer2D::Instance()->Wait();
-		Renderer2D::AddLayer("DebugLayer");
-		LOG_INFO("Loading audio...");
-		Audio::Instance()->Init();
 		LOG_INFO("Loading assets...");
 		Assets::Instance()->Init();
-		LOG_INFO("Loading Physics...");
+		LOG_INFO("Initializing audio...");
+		Audio::Instance()->Init();
+		LOG_INFO("Initializing renderer...");
+		Renderer2D::Instance()->PostAssetInit();
+		Renderer2D::AddLayer("DebugLayer");
+		LOG_INFO("Initializing Physics...");
 		Physics::Instance();
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();

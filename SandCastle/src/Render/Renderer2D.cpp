@@ -34,13 +34,26 @@ namespace SandCastle
 			LOG_ERROR("Trying to init the renderer twice.");
 			return;
 		}
-
 		m_thread.thread.Queue(&Renderer2D::InitThread, this);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10)); //stupid safety to make sure the wait wall just after actually work
+		Wait();
+	}
+
+	void Renderer2D::PostAssetInit()
+	{
+		if (m_init)
+		{
+			LOG_ERROR("Trying to init the renderer twice.");
+			return;
+		}
+		m_thread.thread.Queue(&Renderer2D::PostAssetInitThread, this);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		Wait();
 	}
 
 	void Renderer2D::InitThread()
 	{
-		if (SDL_GL_MakeCurrent(Window::GetSDLWindow(), Window::GetRenderContext()) != 0)
+		if (!SDL_GL_MakeCurrent(Window::GetSDLWindow(), Window::GetRenderContext()))
 		{
 			LOG_ERROR(LogSDLError("Cannot set the context."));
 		}
@@ -74,8 +87,10 @@ namespace SandCastle
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 		SDL_GL_SetSwapInterval(0);
+	}
 
-
+	void Renderer2D::PostAssetInitThread()
+	{
 		ASSERT_LOG_ERROR(Window::IsInitialized(), "Cannot create Renderer2D before Window is initialized.");
 
 		m_rendering = false;
@@ -115,25 +130,16 @@ namespace SandCastle
 		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
-		/*m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
-			m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
-			m_defaultLineShader = Assets::Get<Shader>("line.shader");
-			m_defaultWireShader = Assets::Get<Shader>("wire.shader");*/
-
-#define LSSFF(...) Shader::LoadShaderSourceFromFile(__VA_ARGS__)
-
-		m_defaultBatchMaterial = CreateMaterial(new Shader(LSSFF("assets/shaders/batch_renderer.vert"), LSSFF("assets/shaders/batch_renderer.frag")));
-		m_defaultLayerMaterial = CreateMaterial(new Shader(LSSFF("assets/shaders/default_layer.vert"), LSSFF("assets/shaders/default_layer.frag")));
-		m_defaultLineShader = new Shader(LSSFF("assets/shaders/line.vert"), LSSFF("assets/shaders/line.geom"), LSSFF("assets/shaders/line.frag"));
-		m_defaultWireShader = new Shader(LSSFF("assets/shaders/wire.vert"), LSSFF("assets/shaders/wire.frag"));
-
+		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
+		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
+		m_defaultLineShader = Assets::Get<Shader>("line.shader");
+		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
 
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		sptr<VertexArray> defaultLayerVertexArray = GenerateLayerVertexArray(screenSpace);
 
 		//Screen layer
 		m_layers.push_back(RenderLayer("Window", 0, window, m_defaultLayerMaterial, m_defaultRenderOptionsLayer, defaultLayerVertexArray));
-		//CreateQuadBatch(m_layers[0], nullptr);
 
 		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), m_maxOffscreenLayers + 1);
 
