@@ -301,6 +301,8 @@ namespace SandCastle
 	void Assets::AddAsset(String path)
 	{
 		size_t i = path.find_last_of(".");
+		if (i >= path.size())
+			return;
 		String extension = path.substr(i, path.size() - i);
 
 		//Atm reloading affect only textures
