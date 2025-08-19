@@ -41,13 +41,19 @@
     <ClInclude Include="src\Serialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BenchmarkLotOfSprites.h">
+    <ClInclude Include="src\Benchmark1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Delegates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Signals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Benchmark2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FontTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

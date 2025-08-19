@@ -35,10 +35,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BenchmarkLotOfSprites.h" />
+    <ClInclude Include="src\Benchmark2.h" />
+    <ClInclude Include="src\Benchmark1.h" />
     <ClInclude Include="src\Delegates.h" />
     <ClInclude Include="src\DrawAnimation.h" />
     <ClInclude Include="src\DrawSprite.h" />
+    <ClInclude Include="src\FontTest.h" />
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\Rotation.h" />
