@@ -94,7 +94,7 @@ namespace SandCastle
 
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
-		Material* CreateMaterial(Shader* shader);
+		static Material* CreateMaterial(Shader* shader);
 
 		void PushQuad(const QuadRenderData&& quad);
 

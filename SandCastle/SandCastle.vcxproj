@@ -180,7 +180,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)src;$(ProjectDir)include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions> /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -189,8 +189,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;box2d.lib;imgui.lib;SDL3.lib;glad.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -205,7 +204,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)src;$(ProjectDir)include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions> /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -216,6 +215,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freetype.lib;box2d.lib;imgui.lib;SDL3.lib;glad.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
@@ -231,7 +231,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)src;$(ProjectDir)include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions> /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -242,6 +242,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor\bin\x64-Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freetype.lib;box2d.lib;imgui.lib;SDL3.lib;glad.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -250,6 +251,7 @@
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
+    <ClCompile Include="src\Render\FontSystem.cpp" />
     <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
     <ClCompile Include="src\Core\Assets.cpp" />
@@ -390,6 +392,7 @@
     <ClInclude Include="include\SandCastle\Render\AnimationSystem.h" />
     <ClInclude Include="include\SandCastle\Render\Buffer.h" />
     <ClInclude Include="include\SandCastle\Render\Camera.h" />
+    <ClInclude Include="include\SandCastle\Render\FontSystem.h" />
     <ClInclude Include="include\SandCastle\Render\IndexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h" />
     <ClInclude Include="include\SandCastle\Render\Material.h" />
@@ -420,6 +423,9 @@
   <ItemGroup>
     <ProjectReference Include="vendor\box2d-2.4.2\src\box2d.vcxproj">
       <Project>{d806b2b9-8bef-3370-8310-a4acd0895af9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\freetype-2.13.3\freetype\freetype.vcxproj">
+      <Project>{ff004f71-d6bf-3db4-a6ce-ca00bd590b11}</Project>
     </ProjectReference>
     <ProjectReference Include="vendor\glad\glad.vcxproj">
       <Project>{3a4323e7-9de1-4f77-a00a-826acb74f7c6}</Project>

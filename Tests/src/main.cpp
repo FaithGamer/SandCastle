@@ -66,7 +66,7 @@ public:
 				Random::Range(-space.y, space.y),
 				0.f };
 			entt.GetComponent<Transform>()->SetPosition(pos);
-			
+
 		}
 		accumulator -= (int)accumulator;
 	}
@@ -88,6 +88,21 @@ private:
 	float accumulator = 0;
 };
 
+class FontTest : public System
+{
+public:
+	void OnStart() override
+	{
+		LOG_INFO("erf");
+		auto font = Systems::Get<FontSystem>();
+		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50);
+		font->UseFont(fontId);
+		auto s = font->Write("gmiolioliol");
+		Entity::CreateSprite();
+	}
+
+
+};
 int main()
 {
 	//Launch();
@@ -102,6 +117,6 @@ int main()
 	//Signals();
 
 	Engine::Init();
-	Systems::Push<TrollSys>();
+	Systems::Push<FontTest>();
 	Engine::Launch();
 }

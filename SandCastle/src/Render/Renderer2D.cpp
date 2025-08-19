@@ -524,7 +524,6 @@ namespace SandCastle
 	{
 		for (auto& batch : m_quadBatchs)
 			Flush(batch.index);
-		Systems::Get<LineRendererSystem>()->Render();
 		RenderLayers();
 		m_rendering = false;
 	}
@@ -587,8 +586,9 @@ namespace SandCastle
 
 	Material* Renderer2D::CreateMaterial(Shader* shader)
 	{
-		m_materials.emplace_back(new Material(shader, (MaterialID)m_materials.size()));
-		return m_materials.back();
+		auto ins = Instance();
+		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size()));
+		return ins->m_materials.back();
 	}
 	void Renderer2D::PushQuad(const QuadRenderData&& quad)
 	{

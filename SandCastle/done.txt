@@ -165,7 +165,13 @@ non exhaustive list:
 -Test do not depend on SDL3
 -shaders now include aspect ratio and window height as part of a uniform block called "scene"
 
->shaders should include aspect ratio and ppu as one of the camera uniform block parameters
+19
+
+>text parenting crash:
+-does not come from freetype.lib
+-does not come from FontSystem.cpp/h
+-learned that view should never be created concurrently
+
 >SpriteRender bool to decide if it is sorted Z or not
 >integrate the font system from idle colony
 >create font with a material

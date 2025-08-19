@@ -21,7 +21,7 @@ namespace SandCastle
 		int GetUsedMethod() override;
 		static QuadRenderData MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform);
 	private:
-		bool m_zSort;
+		bool m_zSort = false;
 	};
 }
 
