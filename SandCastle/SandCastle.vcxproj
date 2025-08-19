@@ -327,6 +327,7 @@
     <ClCompile Include="src\stb_impl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\ft2build.h" />
     <ClInclude Include="include\SandCastle\Audio\Audio.h" />
     <ClInclude Include="include\SandCastle\Audio\Sound.h" />
     <ClInclude Include="include\SandCastle\Core.h" />
