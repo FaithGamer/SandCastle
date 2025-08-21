@@ -167,11 +167,20 @@ non exhaustive list:
 
 19
 
->text parenting crash:
--does not come from freetype.lib
--does not come from FontSystem.cpp/h
 -learned that view should never be created concurrently
 
+20
+
+-finally fixed the character not showing issue. The trouble came from thread rendering:
+Allocating gpu memory (texture atlases) without syncing with the render thread.
+-Texture now sync between update and bind
+>do the fancy macros <3
+
+>get rid of world, let's have only one static registry, like Entity::registry
+System ForEach, GetView
+>some character of text randomly not show (does not happen in idlecolony)
+
+>theres an empty quad for the text space, do we really want to keep this entity ?
 >SpriteRender bool to decide if it is sorted Z or not
 >integrate the font system from idle colony
 >create font with a material

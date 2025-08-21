@@ -11,12 +11,7 @@
 #include "Signals.h"
 #include "FontTest.h"
 
-
 using namespace SandCastle;
-
-
-
-
 
 int main()
 {
