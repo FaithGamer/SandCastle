@@ -40,7 +40,7 @@ public:
 		}
 
 		auto font = Systems::Get<FontSystem>();
-		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50);
+		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50, 3.f, Vec4f(1, 0, 0, 1));
 		font->UseFont(fontId);
 		auto s = font->Write((const char*)u8"mon de");
 
@@ -54,32 +54,43 @@ public:
 	}
 	void OnUpdate(Time delta) override
 	{
-		
-		auto ranChar = [&]() -> char  {
+
+		auto ranChar = [&]() -> char {
 			std::string charset =
 				"abcdefghijklmnopqrstuvwxyz"
 				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"0123456789";
-			auto c = Random::Range(0, (int)charset.size()-1);
+			auto c = Random::Range(0, (int)charset.size() - 1);
 			return charset[c];
-		};
+			};
 
 		static float timer = 0.f;
 
 		timer += delta;
 		if (timer < 1.f)
 			return;
+		timer = 0.f;
+		ForeachEntities<Dummy>([&](Entity e, Dummy& d)
+			{
+				e.Destroy();
+			});
+		std::string str;
+		for (int i = 0; i < 14; i++)
+		{
+			str += ranChar();
+		}
 
-		for(int i = 0; i<)
+		auto e = sys(FontSystem)->Write(str);
+		e.root.AddComponent<Dummy>();
+		e.root.gtr()->Move(-e.width * 0.5f, 0, 0);
 
-		
 	}
 };
 
 void FontTest()
 {
 	Engine::Init();
-	Systems::GetMainCamera()->worldToScreenRatio = .1f;
+	Systems::GetMainCamera()->worldToScreenRatio = .04f;
 	Systems::Push<FontTestSys>();
 	Engine::Launch();
 }
