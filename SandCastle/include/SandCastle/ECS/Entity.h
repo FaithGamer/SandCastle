@@ -6,6 +6,7 @@
 namespace SandCastle
 {
 	class World;
+	class Transform;
 
 	/// @brief For internal use, makes the entity a parent
 	struct Children
@@ -70,6 +71,7 @@ namespace SandCastle
 		{
 			return m_registry->try_get<ComponentType>(m_id);
 		}
+		
 		/// @brief Access an entity component if it exists
 		/// @return Component reference, nullptr if doesn't exists.
 		template <typename ComponentType>
@@ -81,16 +83,28 @@ namespace SandCastle
 		/// The EntityId will remain the same during the entity lifetime.
 		/// It can be used to retreive the entity from it's World with no overhead.
 		/// @return The EntityId
-		inline EntityId GetId() const
+		EntityId GetId() const
 		{
 			return m_id;
 		}
+		template <typename T>
+		constexpr T* gc()
+		{
+			return GetComponent<T>();
+		}
+		Transform* gtr();
+		template <typename T>
+		constexpr T* adc()
+		{
+			return AddComponent<T>();
+		}
+
 		/// @brief Destroy the entity and it's components, and does the same for every children
 		/// Trying to access or add components after using this method
 		/// will result in undefined behaviour
 		void Destroy();
 
-		bool operator==(const Entity& rhs) const
+		inline bool operator==(const Entity& rhs) const
 		{
 			return m_id == rhs.m_id && m_registry == rhs.m_registry;
 		}

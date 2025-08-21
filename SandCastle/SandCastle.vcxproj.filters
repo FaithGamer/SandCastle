@@ -497,6 +497,9 @@
     <ClInclude Include="include\ft2build.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\Core\Fancy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Signal.tpp" />

@@ -106,6 +106,11 @@ namespace SandCastle
 		return m_valid && m_registry->valid(m_id);
 	}
 
+	Transform* Entity::gtr()
+	{
+		return GetComponent<Transform>();
+	}
+
 	void Entity::Destroy()
 	{
 		if (!Valid())
