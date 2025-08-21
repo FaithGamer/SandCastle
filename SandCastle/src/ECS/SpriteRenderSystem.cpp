@@ -80,7 +80,7 @@ namespace SandCastle
 	{
 		auto sprite = render->GetSprite();
 		auto texture = sprite->GetTexture();
-		auto uvs = render->GetSprite()->GetUVs();
+		auto uvs = sprite->GetUVs();
 
 		return QuadRenderData(
 			1,
