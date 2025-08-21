@@ -22,7 +22,7 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	//BenchmarkLotOfSprites();
+	//Benchmark2();
 	//Delegates();
 	//Signals();
 	FontTest();

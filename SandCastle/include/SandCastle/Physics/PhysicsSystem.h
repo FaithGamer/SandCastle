@@ -11,8 +11,8 @@ namespace SandCastle
 		void OnStart() override;
 		void OnUpdate(Time deltaTime) override;
 		int GetUsedMethod() override;
-		void OnAddKinematicBody(ComponentSignal signal);
-		void OnAddStaticBody(ComponentSignal signal);
+		//void OnAddKinematicBody(ComponentSignal signal);
+	//	void OnAddStaticBody(ComponentSignal signal);
 
 	};
 }

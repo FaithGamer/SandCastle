@@ -285,7 +285,6 @@
     <ClCompile Include="src\ECS\System.cpp" />
     <ClCompile Include="src\ECS\Systems.cpp" />
     <ClCompile Include="src\ECS\WireRenderSystem.cpp" />
-    <ClCompile Include="src\ECS\World.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EngineParameters.cpp" />
     <ClCompile Include="src\Input\ButtonInput.cpp" />
@@ -363,7 +362,6 @@
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
     <ClInclude Include="include\SandCastle\ECS\WireRenderSystem.h" />
-    <ClInclude Include="include\SandCastle\ECS\World.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />
     <ClInclude Include="include\SandCastle\EngineParameters.h" />
     <ClInclude Include="include\SandCastle\Entt.h" />

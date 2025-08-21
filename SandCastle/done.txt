@@ -171,13 +171,21 @@ non exhaustive list:
 
 20
 
+-investigated fix for font issue
+
+21
+
 -finally fixed the character not showing issue. The trouble came from thread rendering:
 Allocating gpu memory (texture atlases) without syncing with the render thread.
 -Texture now sync between update and bind
->do the fancy macros <3
+-do the fancy macros <3
+-font test done.
+
+>physics must listen to add component somewhat (re integrate listen component methods ?)
+System ForEach, GetView
 
 >get rid of world, let's have only one static registry, like Entity::registry
-System ForEach, GetView
+>have a DestroyAll<> method
 >some character of text randomly not show (does not happen in idlecolony)
 
 >theres an empty quad for the text space, do we really want to keep this entity ?

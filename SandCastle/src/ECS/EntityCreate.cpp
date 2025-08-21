@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SandCastle/ECS/Entity.h"
-#include "SandCastle/ECS/World.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/SpriteRender.h"

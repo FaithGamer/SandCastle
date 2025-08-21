@@ -109,24 +109,11 @@ namespace SandCastle
 
 		/// @brief For internal use only.
 		void ImGuiUpdates();
-		/// @brief Create and store a World, usually you will have only one World
-		/// Default World name will be World_0, 1, 2, 3....
-		/// @return The World created
-		static World* CreateWorld();
-		/// @brief Create and store a World, usually you will have only one World
-		/// @param name, Give the game world a name.
-		/// @return The World created
-		static World* CreateWorld(std::string name);
-		static void DestroyWorld(std::string name);
 
 		/// @brief Set the camera used for rendering into the window by the SandCastle rendering Systems (like the SpriteRenderSystem)
 		/// Note that the entities rendered by the SandCastle Systems will be those within the same world as the camera.
 		/// @param camera Pointer to the camera, the Camera component is a PointableComponenent
 		static void SetMainCamera(Camera* camera);
-
-		/// @brief Label a world as being main. This will be the world you get from GetMainWorld.
-		/// @param world 
-		static void SetMainWorld(World* world);
 
 		/// @brief Set the interval between two FixedUpdate call
 		/// @param seconds Interval in seconds
@@ -134,19 +121,6 @@ namespace SandCastle
 
 		/// @brief Set a multiplier to the deltaTime and fixedDeltaTime
 		static void SetTimeScale(float scale);
-
-		/// @brief The world wich is set as main, by default it is the first created world
-		/// @return World pointer.
-		static World* GetMainWorld();
-
-		/// @brief Get a World from it's name.
-		/// @param World's name 
-		/// @return The game world, nullptr if doesn't exists.
-		static World* GetWorld(std::string name);
-
-		/// @brief Access all the game worlds
-		/// @return Reference to the Worlds vector.
-		static std::vector<World*>& GetWorlds();
 
 		/// @brief Return camera used for window rendering
 		/// @return main camera
@@ -157,15 +131,6 @@ namespace SandCastle
 		static Vec2f GetMouseWorldPos();
 	private:
 
-		struct Worlds
-		{
-			void Push(World* world);
-			void Destroy(std::string name);
-			World* Get(std::string name);
-			std::vector<World*> pointers;
-			std::vector<std::string> names;
-			World* mainWorld = nullptr;
-		};
 		friend Engine;
 		Systems();
 		void Init();
@@ -182,7 +147,6 @@ namespace SandCastle
 		Time m_fixedUpdateAccumulator;
 		int m_maxFixedUpdate;
 
-		Worlds m_worlds;
 		std::unordered_map<int32_t, System*> m_allSystems;
 
 		std::vector<SystemIdPriority> m_eventSystems;

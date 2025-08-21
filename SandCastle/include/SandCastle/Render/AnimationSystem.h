@@ -2,6 +2,7 @@
 #include "SandCastle/ECS/System.h"
 #include "SandCastle/Core/Serialization.h"
 #include "SandCastle/Render/Sprite.h"
+#include "SandCastle/Core/Signal.h"
 
 namespace SandCastle
 {

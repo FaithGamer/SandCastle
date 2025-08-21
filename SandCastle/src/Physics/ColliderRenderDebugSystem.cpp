@@ -12,8 +12,8 @@ namespace SandCastle
 		SetPriority(-9999);
 
 		//Will add a collider render for each new body
-		ListenAddComponent<KinematicBody>(&ColliderRenderDebugSystem::OnAddKinematicBody);
-		ListenAddComponent<StaticBody>(&ColliderRenderDebugSystem::OnAddStaticBody);
+		//ListenAddComponent<KinematicBody>(&ColliderRenderDebugSystem::OnAddKinematicBody);
+		//ListenAddComponent<StaticBody>(&ColliderRenderDebugSystem::OnAddStaticBody);
 	}
 
 	void AddColliderRender(Entity bodyEntt, KinematicBody* body)
@@ -63,7 +63,7 @@ namespace SandCastle
 		UpdateQueue();
 	}
 
-	void ColliderRenderDebugSystem::OnLateUpdate()
+	/*void ColliderRenderDebugSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		ForeachEntities<ColliderRender, Transform>([&](Entity entity, ColliderRender& collider, Transform& transform)
@@ -84,11 +84,11 @@ namespace SandCastle
 			{
 				entity.Destroy();
 			});
-	}
+	}*/
 
 	void ColliderRenderDebugSystem::UpdateQueue()
 	{
-		for (auto it = m_newKinematicBodies.begin(); it != m_newKinematicBodies.end(); it++)
+		/*for (auto it = m_newKinematicBodies.begin(); it != m_newKinematicBodies.end(); it++)
 		{
 			Entity entity(*it);
 			if (entity.Valid())
@@ -101,7 +101,7 @@ namespace SandCastle
 				AddColliderRender(entity, entity.GetComponentNoCheck<StaticBody>());
 		}
 		m_newKinematicBodies.clear();
-		m_newStaticBodies.clear();
+		m_newStaticBodies.clear();*/
 	}
 
 	void ColliderRenderDebugSystem::UpdateQueueAuto(bool updateQueueAuto)
@@ -109,12 +109,12 @@ namespace SandCastle
 		m_updateQueueAuto = updateQueueAuto;
 	}
 
-	void ColliderRenderDebugSystem::OnAddKinematicBody(ComponentSignal signal)
+	/*void ColliderRenderDebugSystem::OnAddKinematicBody(ComponentSignal signal)
 	{
 		m_newKinematicBodies.insert(signal.entity);
 	}
 	void ColliderRenderDebugSystem::OnAddStaticBody(ComponentSignal signal)
 	{
 		m_newStaticBodies.insert(signal.entity);
-	}
+	}*/
 }

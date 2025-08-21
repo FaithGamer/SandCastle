@@ -60,7 +60,6 @@ namespace SandCastle
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
 		system->Init();
-		system->CreateWorld();
 		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
 #ifdef SC_IMGUI
 		LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());

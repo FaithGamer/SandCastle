@@ -8,13 +8,13 @@ namespace SandCastle
 	PhysicsSystem::PhysicsSystem()
 	{
 		SetPriority(99999);
-		ListenAddComponent<KinematicBody>(&PhysicsSystem::OnAddKinematicBody);
-		ListenAddComponent<StaticBody>(&PhysicsSystem::OnAddStaticBody);
+		//ListenAddComponent<KinematicBody>(&PhysicsSystem::OnAddKinematicBody);
+		//ListenAddComponent<StaticBody>(&PhysicsSystem::OnAddStaticBody);
 	}
 	void PhysicsSystem::OnStart()
 	{
 	}
-	void PhysicsSystem::OnAddKinematicBody(ComponentSignal signal)
+	/*void PhysicsSystem::OnAddKinematicBody(ComponentSignal signal)
 	{
 		//Bind the body with it's entity id
 		Entity(signal.entity).GetComponent<KinematicBody>()->userData = Collider::UserData(signal.entity);
@@ -26,7 +26,7 @@ namespace SandCastle
 		auto body = entity.GetComponent<StaticBody>();
 		body->userData = Collider::UserData(signal.entity);
 
-	}
+	}*/
 	void PhysicsSystem::OnUpdate(Time deltaTime)
 	{
 		ForeachComponents<KinematicBody, Transform>([](KinematicBody& body, Transform& transform)

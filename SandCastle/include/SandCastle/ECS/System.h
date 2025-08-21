@@ -2,7 +2,6 @@
 #include "SandCastle/Core/std_macros.h"
 #include "SandCastle/Core/Time.h"
 #include <SDL3/SDL.h>
-#include "SandCastle/ECS/World.h"
 
 namespace SandCastle
 {
@@ -69,97 +68,7 @@ namespace SandCastle
 		virtual std::string DebugName() { return "System"; }
 
 	protected:
-		std::vector<World*>& GetWorlds();
 
-		/// @brief Set a callback for every time a component of type ComponentType is created on an entity of any world
-		/// Use this method in system's constructor for it to work even for component created before Engine::Launch
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType, typename SystemType>
-		void ListenAddComponent(void(SystemType::* callback)(ComponentSignal), SignalPriority priority = SignalPriority::medium)
-		{
-			for (auto& world : GetWorlds())
-			{
-				world->ListenAddComponentSignal<ComponentType>(callback, static_cast<SystemType*>(this));
-			}
-		}
-
-		/// @brief Set a callback for every time a component of type ComponentType is created on an entity of a specific world
-		/// Use this method in system's constructor for it to work even for component created before Engine::Launch
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType, typename SystemType>
-		void ListenAddComponent(World* world, void(SystemType::* callback)(ComponentSignal), SignalPriority priority = SignalPriority::medium)
-		{
-			world->ListenAddComponentSignal<ComponentType>(callback, static_cast<SystemType*>(this));
-		}
-
-		/// @brief Set a callback for every time a component of type ComponentType is removed on an entity of any world
-		/// Use this method in system's constructor for it to work even for component created before Engine::Launch
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType, typename SystemType>
-		void ListenRemoveComponent(void(SystemType::* callback)(ComponentSignal), SignalPriority priority = SignalPriority::medium)
-		{
-			for (auto& world : GetWorlds())
-			{
-				world->ListenRemoveComponentSignal<ComponentType>(callback, static_cast<SystemType*>(this));
-			}
-		}
-
-		/// @brief Set a callback for every time a component of type ComponentType is removed on an entity of a specific world
-		/// Use this method in system's constructor for it to work even for component created before Engine::Launch
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType, typename SystemType>
-		void ListenRemoveComponent(World* world, void(SystemType::* callback)(ComponentSignal), SignalPriority priority = SignalPriority::medium)
-		{
-			world->ListenRemoveComponentSignal<ComponentType>(callback, static_cast<SystemType*>(this));
-		}
-
-		/// @brief Remove every callbacks for when a component of type ComponentType is added in any world
-		/// Use this method in system's constructor for it to work even for component created before Engine::Launch
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType>
-		void StopListenAddComponent()
-		{
-			for (auto& world : GetWorlds())
-			{
-				world->StopListenAddComponentSignal<ComponentType>(this);
-			}
-		}
-
-		/// @brief Remove every callbacks for when a component of type ComponentType is added in a specific world
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType>
-		void StopListenAddComponent(World* world)
-		{
-			world->StopListenAddComponentSignal<ComponentType>(this);
-		}
-
-		/// @brief Remove every callbacks for when a component of type ComponentType is removed in any worlds
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType>
-		void StopListenRemoveComponent()
-		{
-			for (auto& world : GetWorlds())
-			{
-				world->StopListenRemoveComponentSignal<ComponentType>(this);
-			}
-		}
-
-		/// @brief Remove every callbacks for when a component of type ComponentType is removed in a specific world
-		/// @param callback Method to call upon creation
-		/// @param priority if multiple callback are set, higher priority get called first
-		template <typename ComponentType>
-		void StopListenRemoveComponent(World* world)
-		{
-			world->ListenRemoveComponentSignal<ComponentType>(this);
-		}
-	
 		/// @brief Invoke a lambda or a free function for each entities of every worlds containing the given components.
 		/// The functor parameters will have acess to a reference of the given components.
 		/// @tparam ...ComponentType Given component
@@ -167,27 +76,8 @@ namespace SandCastle
 		template <typename... ComponentType, typename Functor>
 		void ForeachComponents(Functor function)
 		{
-			for (auto& world : GetWorlds())
-			{
-				auto view = world->registry.view<ComponentType...>();
-				for (auto entityId : view)
-				{
-					[&] <std::size_t... I>(std::index_sequence<I...>)
-					{
-						function(std::get<I>(view.get(entityId))...);
-					}(std::make_index_sequence<sizeof...(ComponentType)>());
-				}
-			}
-		};
 
-		/// @brief Invoke a lambda or a free function for each entities of a specific world containing the given components.
-		/// The functor parameters will have acess to a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function Lambda or free function
-		template <typename... ComponentType, typename Functor>
-		void ForeachComponents(World* world, Functor function)
-		{
-			auto view = world->registry.view<ComponentType...>();
+			auto view = Entity::registry.view<ComponentType...>();
 			for (auto entityId : view)
 			{
 				[&] <std::size_t... I>(std::index_sequence<I...>)
@@ -195,6 +85,7 @@ namespace SandCastle
 					function(std::get<I>(view.get(entityId))...);
 				}(std::make_index_sequence<sizeof...(ComponentType)>());
 			}
+
 		};
 
 		/// @brief Invoke a lambda or a free function for each entities of every worlds containing the given components.
@@ -204,38 +95,16 @@ namespace SandCastle
 		template <typename... ComponentType, typename Functor>
 		void ForeachEntities(Functor function)
 		{
-			for (auto& world : GetWorlds())
-			{
-				auto view = world->registry.view<ComponentType...>();
-				for (auto entityId : view)
-				{
-					[&] <std::size_t... I>(std::index_sequence<I...>)
-					{
-						Entity entity(entityId, world);
-						function(entity, std::get<I>(view.get(entityId))...);
-					}(std::make_index_sequence<sizeof...(ComponentType)>());
-				}
-			}
-		};
-
-		/// @brief Invoke a lambda or a free function for each entities of a specific world containing the given components.
-		/// The functor parameters will have acess to the entity and a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function Lambda or free function
-		template <typename... ComponentType, typename Functor>
-		void ForeachEntities(World* world, Functor function)
-		{
-			auto view = world->registry.view<ComponentType...>();
+			auto view = Entity::registry.view<ComponentType...>();
 			for (auto entityId : view)
 			{
 				[&] <std::size_t... I>(std::index_sequence<I...>)
 				{
-					Entity entity(entityId, world);
+					Entity entity(entityId);
 					function(entity, std::get<I>(view.get(entityId))...);
 				}(std::make_index_sequence<sizeof...(ComponentType)>());
 			}
 		};
-
 
 		/// @brief Invoke a member method of this system for each entities of every worlds containing the given components.
 		/// The functor parameters will have acess to the entity and a reference of the given components.
@@ -244,38 +113,16 @@ namespace SandCastle
 		template <typename... ComponentType, typename SystemType>
 		void ForeachEntities(void(SystemType::* function)(Entity, ComponentType&...))
 		{
-			for (auto& world : GetWorlds())
-			{
-				auto view = world->registry.view<ComponentType...>();
-				for (auto entityId : view)
-				{
-					[&] <std::size_t... I>(std::index_sequence<I...>)
-					{
-						Entity entity(entityId, world);
-						(static_cast<SystemType*>(this)->*function)(entity, std::get<I>(view.get(entityId))...);
-					}(std::make_index_sequence<sizeof...(ComponentType)>());
-				}
-			}
-		};
-
-		/// @brief Invoke a member method of this system for each entities of a specific world containing the given components.
-		/// The functor parameters will have acess to the entity and a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function The member function pointer
-		template <typename... ComponentType, typename SystemType>
-		void ForeachEntities(World* world, void(SystemType::* function)(Entity, ComponentType&...))
-		{
-			auto view = world->registry.view<ComponentType...>();
+			auto view = Entity::registry.view<ComponentType...>();
 			for (auto entityId : view)
 			{
 				[&] <std::size_t... I>(std::index_sequence<I...>)
 				{
-					Entity entity(entityId, world);
+					Entity entity(entityId);
 					(static_cast<SystemType*>(this)->*function)(entity, std::get<I>(view.get(entityId))...);
 				}(std::make_index_sequence<sizeof...(ComponentType)>());
 			}
 		};
-
 	private:
 
 		int m_priority = 0;

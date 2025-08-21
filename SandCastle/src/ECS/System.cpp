@@ -4,8 +4,5 @@
 
 namespace SandCastle
 {
-	std::vector<World*>& System::GetWorlds()
-	{
-		return Systems::GetWorlds();
-	}
+
 }

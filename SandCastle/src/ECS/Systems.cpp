@@ -5,7 +5,6 @@
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 #include "SandCastle/Engine.h"
-#include "SandCastle/ECS/World.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/Camera.h"
@@ -284,44 +283,18 @@ namespace SandCastle
 		}
 	}
 
-	World* Systems::CreateWorld()
-	{
-		return CreateWorld("World_" + std::to_string(Instance()->m_worlds.pointers.size()));
-	}
-
-	World* Systems::CreateWorld(std::string name)
-	{
-		//To do error message if twice same name
-		World* world = new World(name);
-		Systems::Instance()->m_worlds.Push(world);
-		return world;
-	}
-
-	void Systems::DestroyWorld(std::string name)
-	{
-		//To do, queue up the destruction process.
-		Systems::Instance()->m_worlds.Destroy(name);
-	}
-
 	void Systems::SetMainCamera(Camera* camera)
 	{
 		auto instance = Instance();
-		for (auto& world : instance->m_worlds.pointers)
+
+		auto view = Entity::registry.view<Camera>();
+		for (auto& camera : view)
 		{
-			auto view = world->registry.view<Camera>();
-			for (auto& camera : view)
-			{
-				view.get<Camera>(camera).isMain = false;
-			}
+			view.get<Camera>(camera).isMain = false;
 		}
+
 		camera->isMain = true;
 		instance->m_mainCamera = camera;
-	}
-
-	void Systems::SetMainWorld(World* world)
-	{
-		auto instance = Instance();
-		instance->m_worlds.mainWorld = world;
 	}
 
 	void Systems::SetFixedUpdateTime(float seconds)
@@ -332,22 +305,6 @@ namespace SandCastle
 	void Systems::SetTimeScale(float scale)
 	{
 		Time::timeScale = scale;
-	}
-
-	World* Systems::GetWorld(std::string name)
-	{
-		return Systems::Instance()->m_worlds.Get(name);
-	}
-
-	World* Systems::GetMainWorld()
-	{
-		//To do, error handling
-		return Systems::Instance()->m_worlds.mainWorld;
-	}
-
-	std::vector<World*>& Systems::GetWorlds()
-	{
-		return Systems::Instance()->m_worlds.pointers;
 	}
 
 	Camera* Systems::GetMainCamera()
@@ -365,32 +322,5 @@ namespace SandCastle
 		}
 		return camera->ScreenToWorld(Mouse::GetPosition(), Window::GetSize());
 	}
-
-	//////////////
-	/// Worlds ///
-	//////////////
-
-	void Systems::Worlds::Push(World* world)
-	{
-		pointers.emplace_back(world);
-		names.emplace_back(world->GetName());
-		if (pointers.size() == 1)
-			mainWorld = world;
-	}
-
-	void Systems::Worlds::Destroy(std::string name)
-	{
-		int64_t index = Container::FindIndex(names, name);
-		Container::RemoveAt(names, index);
-		delete pointers[index];
-		Container::RemoveAt(pointers, index);
-	}
-
-	World* Systems::Worlds::Get(std::string name)
-	{
-		int64_t index = Container::FindIndex(names, name);
-		return pointers[index];
-	}
-
 }
 

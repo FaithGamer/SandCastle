@@ -1,38 +1,21 @@
 #include "pch.h"
 #include "SandCastle/ECS/Entity.h"
-#include "SandCastle/ECS/World.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
+	entt::registry Entity::registry = entt::registry();
+
 	Entity::Entity(EntityId entityId) : m_id(entityId)
 	{
-		m_registry = &Systems::GetMainWorld()->registry;
-		m_valid = true;
-	}
-
-	Entity::Entity(EntityId entityId, World* world) : m_id(entityId)
-	{
-		m_registry = &Systems::GetMainWorld()->registry;
 		m_valid = true;
 	}
 
 	Entity Entity::Create()
 	{
 		Entity entity;
-		auto world = Systems::GetMainWorld();
-		entity.m_id = world->registry.create();
-		entity.m_registry = &world->registry;
-		entity.m_valid = true;
-		return entity;
-	}
-
-	Entity Entity::Create(World* world)
-	{
-		Entity entity;
-		entity.m_id = world->registry.create();
-		entity.m_registry = &world->registry;
+		entity.m_id = registry.create();
 		entity.m_valid = true;
 		return entity;
 	}
@@ -42,11 +25,6 @@ namespace SandCastle
 		if (!entity.Valid())
 		{
 			LOG_ERROR("Cannot add an invalid entity as a children.");
-			return;
-		}
-		if (entity.m_registry != m_registry)
-		{
-			LOG_ERROR("Cannot add an entity child if it doesn't belong to the same world as parent.");
 			return;
 		}
 		if (entity.GetId() == m_id)
@@ -83,7 +61,7 @@ namespace SandCastle
 			return;
 		}
 
-		Entity(*find_it, m_registry).JustUnparent();
+		Entity(*find_it).JustUnparent();
 	}
 
 	void Entity::Unparent()
@@ -103,7 +81,7 @@ namespace SandCastle
 
 	bool Entity::Valid()
 	{
-		return m_valid && m_registry->valid(m_id);
+		return m_valid && registry.valid(m_id);
 	}
 
 	Transform* Entity::gtr()
@@ -126,12 +104,12 @@ namespace SandCastle
 		{
 			for (auto& child : children->children)
 			{
-				Entity(child, m_registry).DestroyFromParent();
+				Entity(child).DestroyFromParent();
 			}
 		}
 		Unparent();
 		m_valid = false;
-		m_registry->destroy(m_id);
+		registry.destroy(m_id);
 	}
 
 	void Entity::DestroyFromParent()
@@ -147,12 +125,12 @@ namespace SandCastle
 		{
 			for (auto& child : children->children)
 			{
-				Entity(child, m_registry).DestroyFromParent();
+				Entity(child).DestroyFromParent();
 			}
 		}
 
 		m_valid = false;
-		m_registry->destroy(m_id);
+		registry.destroy(m_id);
 	}
 
 	void Entity::JustUnparent()
@@ -178,10 +156,4 @@ namespace SandCastle
 			RemoveComponent<Children>();
 		}
 	}
-
-	Entity::Entity(EntityId entityId, entt::registry* registry) : m_id(entityId), m_registry(registry), m_valid(true)
-	{
-
-	}
-
 }
