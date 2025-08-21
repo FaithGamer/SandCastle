@@ -47,14 +47,12 @@ namespace SandCastle
 	}
 	inline void Texture::LoadFromMemory(unsigned char* buffer, int size)
 	{
-		stbi_set_flip_vertically_on_load(true);
 		m_pixels = stbi_load_from_memory(buffer, size, &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load a texture from memory.");
 	}
 
 	inline void Texture::LoadFromFile(std::string path)
 	{
-		stbi_set_flip_vertically_on_load(true);
 		m_pixels = stbi_load(path.c_str(), &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load texture: " + path);
 	}
@@ -93,6 +91,17 @@ namespace SandCastle
 
 		//Unbind since we are done configuring this texture
 		glBindTexture(GL_TEXTURE_2D, 0);
+		SignalReady();
+	}
+	inline void Texture::SignalReady()
+	{
+		// Create a fence so other contexts can see when uploads are done
+		GLsync f = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		glFlush(); // make the fence visible across shared contexts
+
+		// Replace any previous fence (if any)
+		GLsync old = m_pendingFence.exchange(f, std::memory_order_acq_rel);
+		if (old) glDeleteSync(old);
 	}
 	inline void Texture::GenerateEmpty(TextureImportSettings importSettings)
 	{
@@ -119,41 +128,27 @@ namespace SandCastle
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+		SignalReady();
 	}
 	void Texture::Create1x1White()
 	{
-		//generate 1x1 white texture
 		glGenTextures(1, &m_id);
 		glBindTexture(GL_TEXTURE_2D, m_id);
-		m_pixels = new unsigned char(0xd);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)1, (GLsizei)1, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_pixels);
 
-		//Texture Wrapping
-		GLfloat borderColor[] = { 1.0f, 0.0f, 1.0f, 1.0f };
+		const unsigned char whiteRGBA[4] = { 255, 255, 255, 255 }; // pure white
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteRGBA);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_importSettings.wrapping);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_importSettings.wrapping);
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-		//Texture filtering
-		GLint minFilter = m_importSettings.useMipmaps ? GL_LINEAR_MIPMAP_LINEAR : m_importSettings.filtering;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_importSettings.filtering);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_importSettings.filtering);
 
-		if (m_importSettings.useMipmaps)
-		{
-			//glGenerateMipmap(GL_TEXTURE_2D);
-		}
-
-		delete m_pixels;
-
-		//Unbind since we are done configuring this texture
 		glBindTexture(GL_TEXTURE_2D, 0);
+		SignalReady();
 	}
-
-
-
 	void Texture::Reload(std::string path, TextureImportSettings importSettings)
 	{
+		WaitIfPending();
 		glDeleteTextures(1, &m_id);
 		if (m_importSettings.keepData)
 		{
@@ -176,6 +171,7 @@ namespace SandCastle
 
 	void Texture::Bind(uint32_t textureUnit) const
 	{
+		WaitIfPending();
 		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		glBindTexture(GL_TEXTURE_2D, m_id);
 	}
@@ -292,6 +288,7 @@ namespace SandCastle
 		// Switch PBO for next frame
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		m_currentPBO = 1 - m_currentPBO;
+		SignalReady();
 	}
 
 	void Texture::UpdateRegion(int x, int y, int w, int h, const void* src, int srcStride)
@@ -371,6 +368,22 @@ namespace SandCastle
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Create a fence so other contexts can see when uploads are done
+		GLsync f = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		glFlush(); // make the fence visible across shared contexts
+
+		// Replace any previous fence (if any)
+		GLsync old = m_pendingFence.exchange(f, std::memory_order_acq_rel);
+		if (old) glDeleteSync(old);
+	}
+
+	inline void Texture::WaitIfPending() const
+	{
+		if (GLsync f = m_pendingFence.exchange(0, std::memory_order_acq_rel)) {
+			glClientWaitSync(f, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+			glDeleteSync(f);
+		}
 	}
 
 	//

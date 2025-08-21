@@ -88,11 +88,13 @@ namespace SandCastle
         inline void LoadFromMemory(unsigned char* buffer, int size);
         inline void LoadFromFile(std::string paths);
         inline void Generate(TextureImportSettings importSettings);
-
+        inline void SignalReady();
+        inline void WaitIfPending() const;
         // NEW: generate empty storage (no pixels), e.g., atlas bootstrapping
         inline void GenerateEmpty(TextureImportSettings importSettings);
 
         void Create1x1White();
+      
         friend RenderTexture;
 
         TextureImportSettings m_importSettings;
@@ -107,5 +109,6 @@ namespace SandCastle
         size_t m_pboSize = 0;
         bool   m_pboEnabled = false;
         bool   m_pboMapped = false;
+        mutable std::atomic<GLsync> m_pendingFence{ 0 };
     };
 }
