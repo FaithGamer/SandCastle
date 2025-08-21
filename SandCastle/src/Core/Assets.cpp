@@ -207,6 +207,7 @@ namespace SandCastle
 	void Assets::Init()
 	{
 		//Can't be done in constructor because of recursion
+		stbi_set_flip_vertically_on_load(true);
 		InitAddAssetFunctions();
 		LoadAssets();
 		CompileShaders();
