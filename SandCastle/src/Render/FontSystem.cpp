@@ -8,6 +8,7 @@
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Core/Random.h"
 
 namespace fs = std::filesystem;
 
@@ -443,7 +444,7 @@ namespace SandCastle
 			for (int x = 0; x < W; ++x)
 			{
 				const int srcX = x - pad;
-				const int srcY = (H - y) - pad;
+				const int srcY = H - y - pad;
 				const unsigned char a = (w > 0 && h > 0) ? px(srcX, srcY) : 0;
 
 				const int dst = (y * W + x) * 4;
@@ -699,7 +700,7 @@ namespace SandCastle
 		else
 		{
 			// Original fast path: render grayscale bitmap and expand to RGBA white
-			if (FT_Load_Char(font.face, cp, FT_LOAD_DEFAULT)) return false;
+			if (FT_Load_Char(font.face, cp, FT_LOAD_RENDER)) return false;
 			const FT_GlyphSlot slot = font.face->glyph;
 			const int w = slot->bitmap.width;
 			const int h = slot->bitmap.rows;
