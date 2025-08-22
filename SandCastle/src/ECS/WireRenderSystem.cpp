@@ -12,12 +12,12 @@ namespace SandCastle
 
 	void WireRenderSystem::OnLateUpdate()
 	{
-		sptr<Renderer2D> renderer = Renderer2D::Instance();
+		/*sptr<Renderer2D> renderer = Renderer2D::Instance();
 
 		ForeachComponents<WireRender, Transform>([renderer](WireRender& wire, Transform& transform)
 			{
 				renderer->DrawWire(wire, transform, wire.GetLayer());
-			});
+			});*/
 	}
 
 	int WireRenderSystem::GetUsedMethod()

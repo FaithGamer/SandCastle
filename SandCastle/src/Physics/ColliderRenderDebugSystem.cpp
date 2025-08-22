@@ -46,14 +46,14 @@ namespace SandCastle
 		m_debugLayer = Renderer2D::GetLayerId("DebugLayer");
 
 		//Create ColliderRender for every body
-		ForeachEntities<KinematicBody>([](Entity entity, KinematicBody& body)
+		/*ForeachEntities<KinematicBody>([](Entity entity, KinematicBody& body)
 			{
 				AddColliderRender(entity, &body);
 			});
 		ForeachEntities<StaticBody>([](Entity entity, StaticBody& body)
 			{
 				AddColliderRender(entity, &body);
-			});
+			});*/
 	}
 
 	void ColliderRenderDebugSystem::OnUpdate(Time delta)

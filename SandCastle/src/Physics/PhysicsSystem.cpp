@@ -29,10 +29,10 @@ namespace SandCastle
 	}*/
 	void PhysicsSystem::OnUpdate(Time deltaTime)
 	{
-		ForeachComponents<KinematicBody, Transform>([](KinematicBody& body, Transform& transform)
+		/*ForeachComponents<KinematicBody, Transform>([](KinematicBody& body, Transform& transform)
 			{
 				body.UpdateTransform(transform.GetPosition(), transform.GetRotation().z);
-			});
+			});*/
 	}
 	int PhysicsSystem::GetUsedMethod()
 	{
