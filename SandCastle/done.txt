@@ -181,8 +181,20 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -do the fancy macros <3
 -font test done.
 
+22
+-view should always iterate on all the components needed.
+-using the SandCastle Each wrapper result in a significant loss of perf.
+-therefore I got rid of all the SandCastle wrapper (ForeachEntities and such);
+-Entity::View
+-Entity::DestroyAll
+-making 1 component view THEN getting the comp is much less efficient
+-group for two components is faster.
+-creating view/group on the go doesnt make significant diff.
+-using group for sprite render now
+
+>change to group for all SandCastle systems
+
 >physics must listen to add component somewhat (re integrate listen component methods ?)
-System ForEach, GetView
 
 >get rid of world, let's have only one static registry, like Entity::registry
 >have a DestroyAll<> method

@@ -23,7 +23,7 @@ public:
 	{
 		trollCount = 0;
 		auto mouse = Systems::GetMouseWorldPos();
-		ForeachEntities<Troll>([&](Entity entity, Troll& troll)
+		Entity::View<Troll>().each([&](Entity entity, Troll& troll)
 			{
 				troll.timer -= delta;
 				if (troll.timer <= 0.f)

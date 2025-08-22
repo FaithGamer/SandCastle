@@ -22,8 +22,10 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	//Benchmark2();
+	Benchmark2();
 	//Delegates();
 	//Signals();
-	FontTest();
+	//FontTest();
+
+
 }

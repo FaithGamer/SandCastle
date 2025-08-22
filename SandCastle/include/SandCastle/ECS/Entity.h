@@ -30,6 +30,25 @@ namespace SandCastle
 		/// @brief Create an entity in the main world
 		static Entity Create();
 
+		/// @brief Destroy all entities having the mentioned components
+		template <typename... Component>
+		static void DestroyAll()
+		{
+			registry.clear<Component...>();
+		}
+		template<typename Type, typename... Other, typename... Exclude>
+		inline static auto
+			View(entt::exclude_t<Exclude...> exclude = entt::exclude_t{})
+		{
+			return registry.view<Type, Other..., Exclude...>(exclude);
+		}
+		template<typename Type, typename... Other, typename... Exclude>
+		inline static auto
+			Group(entt::exclude_t<Exclude...> exclude = entt::exclude_t{})
+		{
+			return registry.group<Type, Other..., Exclude...>(exclude);
+		}
+
 		void AddChild(Entity entity);
 		void RemoveChild(EntityId entity);
 		void Unparent();
@@ -41,38 +60,38 @@ namespace SandCastle
 		/// @brief Add a component if it doesn't exists yet.
 		/// @param args Parameters for the component constructor.
 		/// @return Added component, or the one already in place.
-		template <typename ComponentType, typename... Args>
-		ComponentType* AddComponent(Args&&... args)
+		template <typename Component, typename... Args>
+		Component* AddComponent(Args&&... args)
 		{
 			if (!Valid())
 			{
 				LOG_WARN("Trying to add a component to an invalid entity!");
 				return nullptr;
 			}
-			return &registry.get_or_emplace<ComponentType>(m_id, std::forward<Args>(args)...);
+			return &registry.get_or_emplace<Component>(m_id, std::forward<Args>(args)...);
 		}
 		/// @brief Remove a component
-		/// @tparam ComponentType 
-		template <typename ComponentType>
+		/// @tparam Component 
+		template <typename Component>
 		void RemoveComponent()
 		{
-			registry.remove<ComponentType>(m_id);
+			registry.remove<Component>(m_id);
 		}
 		/// @brief Access an entity component if it exists.
 		/// Do not store the pointer as it may be invalidated.
 		/// @return Component pointer, nullptr if doesn't exists.
-		template <typename ComponentType>
-		ComponentType* GetComponent()
+		template <typename Component>
+		Component* GetComponent()
 		{
-			return registry.try_get<ComponentType>(m_id);
+			return registry.try_get<Component>(m_id);
 		}
 		
 		/// @brief Access an entity component if it exists
 		/// @return Component reference, nullptr if doesn't exists.
-		template <typename ComponentType>
-		ComponentType* GetComponentNoCheck()
+		template <typename Component>
+		Component* GetComponentNoCheck()
 		{
-			return &registry.get<ComponentType>(m_id);
+			return &registry.get<Component>(m_id);
 		}
 		/// @brief Get the EntityId
 		/// The EntityId will remain the same during the entity lifetime.

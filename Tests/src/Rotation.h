@@ -36,7 +36,8 @@ public:
 	}
 	void OnUpdate(Time time) override
 	{
-		ForeachEntities<Rotate>([&](Entity entity, Rotate& rotate)
+		auto view = Entity::View<Rotate>();
+		view.each([&](Entity entity, Rotate& rotate)
 			{
 				auto trans = entity.GetComponent<Transform>();
 

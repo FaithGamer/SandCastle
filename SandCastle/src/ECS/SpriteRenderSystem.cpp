@@ -25,40 +25,44 @@ namespace SandCastle
 	{
 		m_zSort = sort;
 	}
+
 	bool SpriteRenderSystem::GetZSort()
 	{
 		return m_zSort;
 	}
+
 	void SpriteRenderSystem::OnClearBatches()
 	{
-		ForeachComponents<SpriteRender>([&](SpriteRender& sprite)
+		static auto group = Entity::Group<SpriteRender, Transform>();
+		group.each([&](SpriteRender& sprite, Transform& tr)
 			{
 				sprite.needUpdateRenderBatch = true;
 			});
 	}
+
 	void SpriteRenderSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
-
+		static auto group = Entity::Group<SpriteRender, Transform>();
 		if (!m_zSort)
 		{
-			ForeachComponents<SpriteRender, Transform>([renderer](SpriteRender& sprite, Transform& transform)
+			group.each([&](SpriteRender& sprite, Transform& tr)
 				{
 					if (sprite.needUpdateRenderBatch)
 					{
 						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetMaterial());
 						sprite.needUpdateRenderBatch = false;
 					}
-					renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &transform));
+					renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &tr));
 				});
 		}
 		else
 		{
 			std::list<OrderedSpriteTransform> ordered;
 
-			ForeachComponents<SpriteRender, Transform>([&ordered, renderer](SpriteRender& sprite, Transform& transform)
+			group.each([&](SpriteRender& sprite, Transform& tr)
 				{
-					auto ord = OrderedSpriteTransform(&sprite, &transform, transform.GetPosition().z);
+					auto ord = OrderedSpriteTransform(&sprite, &tr, tr.GetPosition().z);
 					ordered.emplace_back(ord);
 				});
 

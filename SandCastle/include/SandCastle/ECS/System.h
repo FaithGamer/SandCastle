@@ -67,62 +67,6 @@ namespace SandCastle
 		/// @brief Gives an string identifier to the system, for debugging purposes
 		virtual std::string DebugName() { return "System"; }
 
-	protected:
-
-		/// @brief Invoke a lambda or a free function for each entities of every worlds containing the given components.
-		/// The functor parameters will have acess to a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function Lambda or free function
-		template <typename... ComponentType, typename Functor>
-		void ForeachComponents(Functor function)
-		{
-
-			auto view = Entity::registry.view<ComponentType...>();
-			for (auto entityId : view)
-			{
-				[&] <std::size_t... I>(std::index_sequence<I...>)
-				{
-					function(std::get<I>(view.get(entityId))...);
-				}(std::make_index_sequence<sizeof...(ComponentType)>());
-			}
-
-		};
-
-		/// @brief Invoke a lambda or a free function for each entities of every worlds containing the given components.
-		/// The functor parameters will have acess to the entity and a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function Lambda or free function
-		template <typename... ComponentType, typename Functor>
-		void ForeachEntities(Functor function)
-		{
-			auto view = Entity::registry.view<ComponentType...>();
-			for (auto entityId : view)
-			{
-				[&] <std::size_t... I>(std::index_sequence<I...>)
-				{
-					Entity entity(entityId);
-					function(entity, std::get<I>(view.get(entityId))...);
-				}(std::make_index_sequence<sizeof...(ComponentType)>());
-			}
-		};
-
-		/// @brief Invoke a member method of this system for each entities of every worlds containing the given components.
-		/// The functor parameters will have acess to the entity and a reference of the given components.
-		/// @tparam ...ComponentType Given component
-		/// @param function The member function pointer
-		template <typename... ComponentType, typename SystemType>
-		void ForeachEntities(void(SystemType::* function)(Entity, ComponentType&...))
-		{
-			auto view = Entity::registry.view<ComponentType...>();
-			for (auto entityId : view)
-			{
-				[&] <std::size_t... I>(std::index_sequence<I...>)
-				{
-					Entity entity(entityId);
-					(static_cast<SystemType*>(this)->*function)(entity, std::get<I>(view.get(entityId))...);
-				}(std::make_index_sequence<sizeof...(ComponentType)>());
-			}
-		};
 	private:
 
 		int m_priority = 0;

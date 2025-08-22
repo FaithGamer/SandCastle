@@ -117,7 +117,8 @@ namespace SandCastle
 	//Animation System
 	void AnimationSystem::OnUpdate(Time delta)
 	{
-		ForeachComponents<Animator, SpriteRender, Transform>([&](Animator& animator, SpriteRender& sprite, Transform& transform)
+		static auto group = Entity::Group<Animator, SpriteRender, Transform>();
+		group.each([&](Animator& animator, SpriteRender& sprite, Transform& transform)
 			{
 				if (animator.currentState == nullptr)
 					return;

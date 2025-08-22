@@ -70,7 +70,7 @@ public:
 		if (timer < 1.f)
 			return;
 		timer = 0.f;
-		ForeachEntities<Dummy>([&](Entity e, Dummy& d)
+		Entity::View<Dummy>().each([&](Entity e, Dummy& d)
 			{
 				e.Destroy();
 			});
