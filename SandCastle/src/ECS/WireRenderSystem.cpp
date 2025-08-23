@@ -10,7 +10,7 @@ namespace SandCastle
 		SetPriority(-9999);
 	}
 
-	void WireRenderSystem::OnLateUpdate()
+	void WireRenderSystem::LateUpdate()
 	{
 		/*sptr<Renderer2D> renderer = Renderer2D::Instance();
 
@@ -22,6 +22,6 @@ namespace SandCastle
 
 	int WireRenderSystem::GetUsedMethod()
 	{
-		return System::Method::Render;
+		return System::Method::LateUpdt;
 	}
 }

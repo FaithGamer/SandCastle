@@ -99,11 +99,10 @@ namespace SandCastle
 		int i = 0;
 		while (m_fixedUpdateAccumulator >= Time::fixedDelta)
 		{
-			Time scaledFixedDelta = (float)Time::fixedDelta * Time::timeScale;
 			m_fixedUpdateAccumulator -= Time::fixedDelta;
 			for (auto& system : m_fixedUpdateSystems)
 			{
-				system.system->OnFixedUpdate(scaledFixedDelta);
+				system.system->OnFixedUpdate();
 			}
 			if (++i > m_maxFixedUpdate)
 			{
@@ -114,11 +113,11 @@ namespace SandCastle
 
 		for (auto& system : m_updateSystems)
 		{
-			system.system->OnUpdate(deltaScaled);
+			system.system->Update();
 		}
 		for (auto& system : m_lateUpdateSystems)
 		{
-			system.system->OnLateUpdate();
+			system.system->LateUpdate();
 		}
 		//End CPU Time
 		STOP_PROFILING("cpu_main");
@@ -169,7 +168,7 @@ namespace SandCastle
 			if (!HasSystem(system.typeId))
 			{
 				int usedMethodBitmask = system.system->GetUsedMethod();
-				if (usedMethodBitmask & System::Method::Update)
+				if (usedMethodBitmask & System::Method::Updt)
 				{
 					m_updateSystems.push_back(system);
 					std::sort(m_updateSystems.begin(), m_updateSystems.end(), CompareSystemPriority());
@@ -189,7 +188,7 @@ namespace SandCastle
 					m_imGuiSystems.push_back(system);
 					std::sort(m_imGuiSystems.begin(), m_imGuiSystems.end(), CompareSystemPriority());
 				}
-				if (usedMethodBitmask & System::Method::Render)
+				if (usedMethodBitmask & System::Method::LateUpdt)
 				{
 					m_lateUpdateSystems.push_back(system);
 					std::sort(m_lateUpdateSystems.begin(), m_lateUpdateSystems.end(), CompareSystemPriority());
@@ -207,7 +206,7 @@ namespace SandCastle
 		//Call OnStart with right priority order
 		for (auto& system : mustCallOnStart)
 		{
-			system.system->OnStart();
+			system.system->Start();
 		}
 
 		m_pendingSystemIn.clear();

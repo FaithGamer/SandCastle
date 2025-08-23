@@ -115,8 +115,9 @@ namespace SandCastle
 	}
 
 	//Animation System
-	void AnimationSystem::OnUpdate(Time delta)
+	void AnimationSystem::Update()
 	{
+		auto delta = Time::Delta();
 		auto group = Entity::registry.group<Animator>(entt::get<SpriteRender, Transform>);
 		group.each([&](Animator& animator, SpriteRender& sprite, Transform& transform)
 			{
@@ -161,7 +162,7 @@ namespace SandCastle
 
 	int AnimationSystem::GetUsedMethod()
 	{
-		return System::Method::Update;
+		return System::Method::Updt;
 	}
 
 	Keyframe AnimationSystem::EvaluateTransform(Animator& animator)

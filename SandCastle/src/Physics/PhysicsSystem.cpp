@@ -11,7 +11,7 @@ namespace SandCastle
 		//ListenAddComponent<KinematicBody>(&PhysicsSystem::OnAddKinematicBody);
 		//ListenAddComponent<StaticBody>(&PhysicsSystem::OnAddStaticBody);
 	}
-	void PhysicsSystem::OnStart()
+	void PhysicsSystem::Start()
 	{
 	}
 	/*void PhysicsSystem::OnAddKinematicBody(ComponentSignal signal)
@@ -27,7 +27,7 @@ namespace SandCastle
 		body->userData = Collider::UserData(signal.entity);
 
 	}*/
-	void PhysicsSystem::OnUpdate(Time deltaTime)
+	void PhysicsSystem::Update()
 	{
 		/*ForeachComponents<KinematicBody, Transform>([](KinematicBody& body, Transform& transform)
 			{
@@ -36,7 +36,7 @@ namespace SandCastle
 	}
 	int PhysicsSystem::GetUsedMethod()
 	{
-		return System::Method::Update;
+		return System::Method::Updt;
 	}
 
 }

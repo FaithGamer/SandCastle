@@ -8,7 +8,7 @@ namespace SandCastle
 	{
 	public:
 		WireRenderSystem();
-		void OnLateUpdate() override;
+		void LateUpdate() override;
 		int GetUsedMethod() override;
 	};
 }

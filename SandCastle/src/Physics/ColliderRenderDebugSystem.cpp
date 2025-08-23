@@ -41,7 +41,7 @@ namespace SandCastle
 		}
 	}
 
-	void ColliderRenderDebugSystem::OnStart()
+	void ColliderRenderDebugSystem::Start()
 	{
 		m_debugLayer = Renderer2D::GetLayerId("DebugLayer");
 
@@ -56,14 +56,14 @@ namespace SandCastle
 			});*/
 	}
 
-	void ColliderRenderDebugSystem::OnUpdate(Time delta)
+	void ColliderRenderDebugSystem::Update()
 	{
 		if (!m_updateQueueAuto)
 			return;
 		UpdateQueue();
 	}
 
-	/*void ColliderRenderDebugSystem::OnLateUpdate()
+	/*void ColliderRenderDebugSystem::LateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		ForeachEntities<ColliderRender, Transform>([&](Entity entity, ColliderRender& collider, Transform& transform)
@@ -74,7 +74,7 @@ namespace SandCastle
 
 	int ColliderRenderDebugSystem::GetUsedMethod()
 	{
-		return System::Method::Render | System::Method::Update;
+		return System::Method::Render | System::Method::Updt;
 	}
 
 	void ColliderRenderDebugSystem::OnRemove()

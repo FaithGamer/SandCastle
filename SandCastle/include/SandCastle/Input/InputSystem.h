@@ -18,7 +18,7 @@ namespace SandCastle
 		};
 	public:
 		InputSystem();
-		void OnStart() override;
+		void Start() override;
 		bool OnEvent(SDL_Event& event);
 		/// @brief Every subsequent keyboard/mouse/controller event will try to bind to this input
 		/// Call EndRebind()  when you're done.

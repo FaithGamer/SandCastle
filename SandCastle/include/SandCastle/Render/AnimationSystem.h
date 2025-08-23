@@ -67,7 +67,7 @@ namespace SandCastle
 	class AnimationSystem : public System
 	{
 	public:
-		void OnUpdate(Time delta) override;
+		void Update() override;
 		int GetUsedMethod() override;
 
 		Keyframe EvaluateTransform(Animator& animator);

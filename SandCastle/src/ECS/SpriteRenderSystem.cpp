@@ -40,7 +40,7 @@ namespace SandCastle
 			});
 	}
 
-	void SpriteRenderSystem::OnLateUpdate()
+	void SpriteRenderSystem::LateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		auto group = Entity::registry.group<SpriteRender, Transform>();
@@ -106,6 +106,6 @@ namespace SandCastle
 
 	int SpriteRenderSystem::GetUsedMethod()
 	{
-		return System::Method::Render;
+		return System::Method::LateUpdt;
 	}
 }

@@ -8,14 +8,14 @@ namespace SandCastle
 	{
 	public:
 		ColliderRenderDebugSystem();
-		void OnStart() override;
-		void OnUpdate(Time delta) override;
-		/*void OnLateUpdate() override;
+		void Start() override;
+		void Update() override;
+		/*void LateUpdate() override;
 		int GetUsedMethod() override;
 		void OnRemove() override;*/
 
 		/// @brief Construct the collider render entities that have been queued up.
-		///By default this method is called automatically OnUpdate
+		///By default this method is called automatically Update
 		///You can disable this behaviour with UpdateQueueAuto
 		void UpdateQueue();
 

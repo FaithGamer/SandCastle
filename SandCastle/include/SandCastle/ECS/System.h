@@ -13,27 +13,27 @@ namespace SandCastle
 
 		typedef enum
 		{
-			Update = 1,
+			Updt = 1,
 			FixedUpdate = 2,
 			Event = 4,
 			ImGui = 8,
-			Render = 16
+			LateUpdt = 16
 		}Method;
 
 		virtual ~System() {}
 
 		/// @brief Called when the system is pushed within Systems
-		virtual void OnStart() {}
+		virtual void Start() {}
 
 		/// @brief Called as often as possible.
 		/// @param deltaTime Time elapsed since last call.
-		virtual void OnUpdate(Time deltaTime) {}
+		virtual void Update() {}
 
 		/// @brief Called on a fixed timestep.
-		virtual void OnFixedUpdate(Time fixedDeltaTime) {}
+		virtual void OnFixedUpdate() {}
 
-		/// @brief Called after every other OnUpdate/OnFixedUpdate
-		virtual void OnLateUpdate() {}
+		/// @brief Called after every other Update/OnFixedUpdate
+		virtual void LateUpdate() {}
 
 		/// @brief This is where you can create ImGui elements
 		/// Warning! Contrarlily to all the other virtual method (including OnLateUpdate)
@@ -59,7 +59,7 @@ namespace SandCastle
 
 		/// @brief bitmask telling SandCastle wich method are being used.
 		/// overriding this will help the engine save some amount of CPU power.
-		virtual int GetUsedMethod() { return Update | FixedUpdate | Event | ImGui | Render; }
+		virtual int GetUsedMethod() { return Updt | FixedUpdate | Event | ImGui | LateUpdt; }
 
 		/// @brief Higher priority will have it's methods called before lower priority
 		virtual int GetPriority() { return m_priority; }

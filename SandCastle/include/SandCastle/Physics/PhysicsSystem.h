@@ -8,8 +8,8 @@ namespace SandCastle
 	{
 	public:
 		PhysicsSystem();
-		void OnStart() override;
-		void OnUpdate(Time deltaTime) override;
+		void Start() override;
+		void Update() override;
 		int GetUsedMethod() override;
 		//void OnAddKinematicBody(ComponentSignal signal);
 	//	void OnAddStaticBody(ComponentSignal signal);

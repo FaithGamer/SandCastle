@@ -19,10 +19,11 @@ struct Troll
 class TrollSys : public System
 {
 public:
-	void OnUpdate(Time delta) override
+	void Update() override
 	{
 		trollCount = 0;
 		auto mouse = Systems::GetMouseWorldPos();
+		auto delta = Time::Delta();
 		Entity::View<Troll>().each([&](Entity entity, Troll& troll)
 			{
 				troll.timer -= delta;

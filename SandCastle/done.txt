@@ -198,6 +198,7 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -groups: only for internal usage
 -have a DestroyAll<> method
 -null spriterender check in sprite render ssystem
+-renamed system methods, removed delta
 
 Render:
 >layer sorting

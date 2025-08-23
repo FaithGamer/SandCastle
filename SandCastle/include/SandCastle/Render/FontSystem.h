@@ -74,7 +74,7 @@ namespace SandCastle
 	public:
 		FontSystem();
 		~FontSystem();
-		void OnStart() override;
+		void Start() override;
 
 		FontID MakeFont(std::string filename,
 			int size,

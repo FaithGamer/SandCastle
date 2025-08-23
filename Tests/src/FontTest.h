@@ -31,7 +31,7 @@ std::vector<uint32_t> Utf8ToCodepoints(const std::string& s)
 class FontTestSys : public System
 {
 public:
-	void OnStart() override
+	void Start() override
 	{
 		auto cps = Utf8ToCodepoints((const char*)u8"mon de");
 		for (auto cp : cps)
@@ -52,9 +52,9 @@ public:
 		//Entity::CreateSprite().GetComponent<SpriteRender>()->SetSprite(s1);
 		//Entity::CreateSprite();
 	}
-	void OnUpdate(Time delta) override
+	void Update() override
 	{
-
+		auto delta = Time::Delta();
 		auto ranChar = [&]() -> char {
 			std::string charset =
 				"abcdefghijklmnopqrstuvwxyz"

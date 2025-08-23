@@ -12,7 +12,7 @@ void OnClick1(InputSignal* signal)
 class BenchmarkSystem : public System
 {
 public:
-	void OnStart() override
+	void Start() override
 	{
 		int spriteCount = 50000;
 		Vec2f space(16.f / 9.f * 50.f, 50);

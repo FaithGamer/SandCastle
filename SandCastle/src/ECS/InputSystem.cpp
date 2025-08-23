@@ -13,7 +13,7 @@ namespace SandCastle
 		SetPriority(-10000);
 	}
 
-	void InputSystem::OnStart()
+	void InputSystem::Start()
 	{
 		//Open one game controller
 

@@ -13,6 +13,14 @@
 
 using namespace SandCastle;
 
+class LayerTest : System
+{
+public:
+	void Start() override
+	{
+
+	}
+};
 int main()
 {
 	//Launch();

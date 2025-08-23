@@ -145,7 +145,7 @@ namespace SandCastle
 		FT_Done_FreeType(m_ft);
 	}
 
-	void FontSystem::OnStart()
+	void FontSystem::Start()
 	{
 		GLint maxTextureSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);

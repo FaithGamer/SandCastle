@@ -29,12 +29,12 @@ struct Rotate
 class RotateSystem : public System
 {
 public:
-	void OnStart() override
+	void Start() override
 	{
 		auto dirs = Inputs::GetInputMap("map")->GetInput("Dirs");
 		dirs->signal.Listen(&RotateSystem::OnDir, this);
 	}
-	void OnUpdate(Time time) override
+	void Update() override
 	{
 		auto view = Entity::View<Rotate>();
 		view.each([&](Entity entity, Rotate& rotate)
