@@ -33,7 +33,7 @@ namespace SandCastle
 
 	void SpriteRenderSystem::OnClearBatches()
 	{
-		static auto group = Entity::Group<SpriteRender, Transform>();
+		static auto group = Entity::registry.group<SpriteRender, Transform>();
 		group.each([&](SpriteRender& sprite, Transform& tr)
 			{
 				sprite.needUpdateRenderBatch = true;
@@ -43,11 +43,13 @@ namespace SandCastle
 	void SpriteRenderSystem::OnLateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
-		static auto group = Entity::Group<SpriteRender, Transform>();
+		auto group = Entity::registry.group<SpriteRender, Transform>();
 		if (!m_zSort)
 		{
 			group.each([&](SpriteRender& sprite, Transform& tr)
 				{
+					if (sprite.GetSprite() == nullptr)
+						return;
 					if (sprite.needUpdateRenderBatch)
 					{
 						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetMaterial());
@@ -62,6 +64,8 @@ namespace SandCastle
 
 			group.each([&](SpriteRender& sprite, Transform& tr)
 				{
+					if (sprite.GetSprite() == nullptr)
+						return;
 					auto ord = OrderedSpriteTransform(&sprite, &tr, tr.GetPosition().z);
 					ordered.emplace_back(ord);
 				});

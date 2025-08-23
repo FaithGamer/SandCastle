@@ -36,19 +36,18 @@ namespace SandCastle
 		{
 			registry.clear<Component...>();
 		}
-		template<typename Type, typename... Other, typename... Exclude>
+
+		/// @brief Create a view over entities having Component
+		/// use when you iterate one component
+		template<typename Component, typename... Other, typename... Exclude>
 		inline static auto
 			View(entt::exclude_t<Exclude...> exclude = entt::exclude_t{})
 		{
-			return registry.view<Type, Other..., Exclude...>(exclude);
-		}
-		template<typename Type, typename... Other, typename... Exclude>
-		inline static auto
-			Group(entt::exclude_t<Exclude...> exclude = entt::exclude_t{})
-		{
-			return registry.group<Type, Other..., Exclude...>(exclude);
+			return registry.view<Component, Other..., Exclude...>(exclude);
 		}
 
+		/// @brief The child's transform become affected by the parent's transform
+		/// @param entity 
 		void AddChild(Entity entity);
 		void RemoveChild(EntityId entity);
 		void Unparent();

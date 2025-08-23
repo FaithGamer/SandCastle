@@ -182,6 +182,7 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -font test done.
 
 22
+
 -view should always iterate on all the components needed.
 -using the SandCastle Each wrapper result in a significant loss of perf.
 -therefore I got rid of all the SandCastle wrapper (ForeachEntities and such);
@@ -192,44 +193,39 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -creating view/group on the go doesnt make significant diff.
 -using group for sprite render now
 
->change to group for all SandCastle systems
+23
 
->physics must listen to add component somewhat (re integrate listen component methods ?)
+-groups: only for internal usage
+-have a DestroyAll<> method
+-null spriterender check in sprite render ssystem
 
->get rid of world, let's have only one static registry, like Entity::registry
->have a DestroyAll<> method
->some character of text randomly not show (does not happen in idlecolony)
-
->theres an empty quad for the text space, do we really want to keep this entity ?
->SpriteRender bool to decide if it is sorted Z or not
->integrate the font system from idle colony
->create font with a material
->create ui text with point size, not px size
-
-
->math inverselerp
->check renderer thread safety
+Render:
 >layer sorting
 >per layer z sorting (enabled/disabled)
 >consider get rid of sprite origin
+>check renderer thread safety
+>add render option to material
+>quad render camera culling
+>reintegrate wire and lines
+
+>math inverselerp
+>physics must listen to add component somewhat (re integrate listen component methods ?)
+>migrate box2D 3
+>create ui text with point size, not px size
 >check gpu max texture size.
 >custom path for assets, fonts, and so on... maybe in the same class as Roaming ?
->reintegrate wire and lines
+
 >unit test signal more?
 >Worker.Wait called just after queuing a task can just.. not wait really!
->simplify creation of task (void return only. )
 >localization system built in the asset
->add render option to material
 >unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
->migrate box2D 3
->quad culling
+
 >include GUI stuff (translate UI position to game world and so forth)
->improve redering (see redering section)
 >text input (SDL_StartTextInput...)
 >Implement LoveAudio from idle colony as a default audio system
 >audio spacialization
 >Implement steamworks from idle colony
->Implement a default GameSystem class inspired from the pattern in IdleColony
+>Implement a default GameSystem class with state machine
 >Complete UI system
 >Particle system
 >Transform animation system
@@ -242,7 +238,3 @@ Thoughts:
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
 
-UI:
-
->start by managing fonts (create texture, or set of textures, for font in one size)
->
