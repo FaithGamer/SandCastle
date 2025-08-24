@@ -209,10 +209,14 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -found the best pixel perfect way: tex ppu = 1, cam zoom = 0.00277777f
 -so no fancy pixel prefect shader are needed
 -just keep resolution to 720 or 1080 and such.
+-sprite origin with half float to keep QuadRenderData tight
+-camera main as static field
+-mouse::getworldpos
+-inputs fancy getter
+-pix perfect game example
 
 tasks:
 
->consider get rid of sprite origin
 >check renderer thread safety
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system

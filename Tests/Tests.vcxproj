@@ -44,6 +44,7 @@
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\LayerTest.h" />
+    <ClInclude Include="src\PixPerfectGame.h" />
     <ClInclude Include="src\Rotation.h" />
     <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\Signals.h" />
