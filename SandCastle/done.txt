@@ -199,42 +199,50 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -have a DestroyAll<> method
 -null spriterender check in sprite render ssystem
 -renamed system methods, removed delta
+-layer sorting
+-per layer z sorting (enabled/disabled)
 
-Render:
->layer sorting
->per layer z sorting (enabled/disabled)
+tasks:
+
+>fix the coordinates system (ppu and such)
 >consider get rid of sprite origin
 >check renderer thread safety
->add render option to material
->quad render camera culling
->reintegrate wire and lines
-
+>Implement a default GameSystem class with state machine
+>Implement LoveAudio from idle colony as a default audio system
+>Implement steamworks from idle colony
 >math inverselerp
->physics must listen to add component somewhat (re integrate listen component methods ?)
->migrate box2D 3
+
+secondary tasks:
+
+>localization system built in the asset
+>text input (SDL_StartTextInput...)
+>audio spacialization
+>Transform animation system
+
+UI:
+
+>ui system
 >create ui text with point size, not px size
 >check gpu max texture size.
 >custom path for assets, fonts, and so on... maybe in the same class as Roaming ?
 
->unit test signal more?
->Worker.Wait called just after queuing a task can just.. not wait really!
->localization system built in the asset
->unparenting a child while iterating the parent children lead to a crash (see AssetTests.cpp in Sandbox)
+render:
 
->include GUI stuff (translate UI position to game world and so forth)
->text input (SDL_StartTextInput...)
->Implement LoveAudio from idle colony as a default audio system
->audio spacialization
->Implement steamworks from idle colony
->Implement a default GameSystem class with state machine
->Complete UI system
+>check and fix transparency between layers
+>quad render camera culling
+>add render option to material
+>reintegrate wire and lines (or think about it)
 >Particle system
->Transform animation system
-  
->m_listeners (signalsender) shouldn't be a multi set but a set, to not allow multiple time listening with the same callabck;
 
-Thoughts:
+physics:
 
+>physics must listen to add component somewhat (re integrate listen component methods ?)
+>migrate box2D 3
+
+thoughts:
+
+>Worker.Wait called just after queuing a task can just.. not wait really!
+>unparenting a child while iterating the parent children lead to a crash because it invalidate iterator (see AssetTests.cpp in Sandbox)
 >Serialized, Get error must propagate to all parents?
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.

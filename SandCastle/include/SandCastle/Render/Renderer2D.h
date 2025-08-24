@@ -46,14 +46,63 @@ namespace SandCastle
 		unsigned int height = 0;
 		bool active = false;
 		bool offscreen = false;
+		bool zsort = false;
 	};
-	struct RenderingThread
+	class RenderQueue
 	{
-		std::atomic<size_t> current;
-		int layerMax[2]{ 0, 0 };
-		std::vector<QuadRenderData> sorted[2][MAX_LAYERS];
-		std::vector<QuadRenderData> queue[2];
+	public:
+		RenderQueue()
+		{
+			for (int i = 0; i < MAX_LAYERS; i++)
+			{
+				zsort[i] = false;
+			}
+		}
+		inline void Swap()
+		{
+			_current = _current == 1 ? 0 : 1;
+		}
+		inline void Push(QuadRenderData&& data)
+		{
+			_queues[!_current][data.layerID].emplace_back(std::move(data));
+		}
+		inline void Clear()
+		{
+			for (uint32_t layer = 0; layer < (uint32_t)MAX_LAYERS; layer++)
+			{
+				_queues[_current][layer].clear();
+			}
+		}
+		inline void Sort()
+		{
+			auto& queues = _queues[_current];
+
+			for (uint32_t layer = 0; layer < (uint32_t)MAX_LAYERS; layer++)
+			{
+				if (!zsort[layer])
+					continue;
+				auto& q = queues[layer];
+				if (q.empty())
+					continue;
+				if (q.size() > 1)
+				{
+					std::sort(q.begin(), q.end(),
+						[](const QuadRenderData& a, const QuadRenderData& b) noexcept {
+							return a.pos.z < b.pos.z;
+						});
+				}
+			}
+		}
+		std::unordered_map<uint32_t, bool> zsort;
 		WorkerThread thread;
+		inline std::vector<QuadRenderData>& Get(size_t layer)
+		{
+			return _queues[_current][layer];
+		}
+	private:
+		int _layerMax[2]{ 0, 0 };
+		std::atomic<size_t> _current = 0;
+		std::vector<QuadRenderData> _queues[2][MAX_LAYERS];
 	};
 	struct OffscreenRenderLayer
 	{
@@ -96,7 +145,10 @@ namespace SandCastle
 		void SetRenderTarget(sptr<RenderTarget> target);
 		static Material* CreateMaterial(Shader* shader);
 
-		void PushQuad(const QuadRenderData&& quad);
+		inline void PushQuad(QuadRenderData&& quad)
+		{
+			m_queue.Push(std::move(quad));
+		}
 
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
@@ -118,7 +170,10 @@ namespace SandCastle
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
 		static uint32_t AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
-
+		/// @brief Set true to draw sprites on this layer sorted by Z position.
+		/// Set to true if you want to ensure coherent drawing of overlapping sprites.
+		/// Set to false (default) if you want maximum speed.
+		static void SetLayerSortZ(uint32_t layer, bool zsort);
 		/// @brief Add a layer that won't display but can be used in the shader of other layers.
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
@@ -191,7 +246,7 @@ namespace SandCastle
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace);
 	private:
-		RenderingThread m_thread;
+		RenderQueue m_queue;
 		// Batched Quads
 
 		std::unordered_map<uint64_t, uint32_t> m_quadBatchFinder;

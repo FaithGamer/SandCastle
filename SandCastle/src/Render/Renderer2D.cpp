@@ -28,13 +28,13 @@ namespace SandCastle
 
 	void Renderer2D::Init()
 	{
-		m_thread.thread.StartThread();
+		m_queue.thread.StartThread();
 		if (m_init)
 		{
 			LOG_ERROR("Trying to init the renderer twice.");
 			return;
 		}
-		m_thread.thread.Queue(&Renderer2D::InitThread, this);
+		m_queue.thread.Queue(&Renderer2D::InitThread, this);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10)); //stupid safety to make sure the wait wall just after actually work
 		Wait();
 	}
@@ -46,7 +46,7 @@ namespace SandCastle
 			LOG_ERROR("Trying to init the renderer twice.");
 			return;
 		}
-		m_thread.thread.Queue(&Renderer2D::PostAssetInitThread, this);
+		m_queue.thread.Queue(&Renderer2D::PostAssetInitThread, this);
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		Wait();
 	}
@@ -155,7 +155,7 @@ namespace SandCastle
 
 	Renderer2D::~Renderer2D()
 	{
-		m_thread.thread.StopThread();
+		m_queue.thread.StopThread();
 		Wait();
 		//To do
 		delete m_whiteTexture;
@@ -191,10 +191,15 @@ namespace SandCastle
 	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
-		ins->m_thread.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
+		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
 		ins->Wait();
 		return ins->m_lastLayerAdded;
 
+	}
+
+	void Renderer2D::SetLayerSortZ(uint32_t layer, bool zsort)
+	{
+		Renderer2D::Instance()->m_queue.zsort[layer] = false;
 	}
 
 	uint32_t Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
@@ -286,7 +291,7 @@ namespace SandCastle
 		if (batch == ins->m_quadBatchFinder.end())
 		{
 			//Create batch if doesn't exists
-			ins->m_thread.thread.Queue(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
+			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
 			ins->Wait();
 
 			uint32_t index = (uint32_t)ins->m_quadBatchs.size() - 1;
@@ -416,17 +421,19 @@ namespace SandCastle
 	{
 		START_PROFILING("cpu_render");
 		Begin();
-		for (int i = 0; i < m_thread.queue[m_thread.current].size(); i++)
+		/*for (int i = 0; i < m_queue.queue[m_queue.current].size(); i++)
 		{
-			DrawQuad(m_thread.queue[m_thread.current][i]);
-		}
-		/*for (int i = m_thread.layerMax[m_thread.current]; i >= 0; i--)
-		{
-			for (int j = 0; j < m_thread.sorted[m_thread.current][i].size(); j++)
-			{
-				DrawQuad(m_thread.sorted[m_thread.current][i][j]);
-			}
+			DrawQuad(m_queue.queue[m_queue.current][i]);
 		}*/
+		m_queue.Sort();
+		for (int i = m_layers.size() - 1; i >= 0; i--)
+		{
+			auto& queue = m_queue.Get(i);
+			for (int j = 0; j < queue.size(); j++)
+			{
+				DrawQuad(queue[j]);
+			}
+		}
 		End();
 
 #ifdef SC_IMGUI
@@ -437,7 +444,7 @@ namespace SandCastle
 #endif
 
 		Window::RenderWindow();
-		m_thread.queue[m_thread.current].clear();
+		m_queue.Clear();
 		STOP_PROFILING("cpu_render");
 	}
 	void Renderer2D::OnWindowResizeThread()
@@ -589,11 +596,6 @@ namespace SandCastle
 		auto ins = Instance();
 		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size()));
 		return ins->m_materials.back();
-	}
-	void Renderer2D::PushQuad(const QuadRenderData&& quad)
-	{
-		int current = m_thread.current == 1 ? 0 : 1;
-		m_thread.queue[current].emplace_back(quad);
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
 	{
@@ -774,12 +776,12 @@ namespace SandCastle
 	void Renderer2D::OnWindowResize(Vec2u size)
 	{
 		Wait();
-		m_thread.thread.Queue(&Renderer2D::OnWindowResizeThread, this);
+		m_queue.thread.Queue(&Renderer2D::OnWindowResizeThread, this);
 	}
 
 	void Renderer2D::Wait()
 	{
-		m_thread.thread.Wait();
+		m_queue.thread.Wait();
 	}
 
 	void Renderer2D::Process()
@@ -789,8 +791,8 @@ namespace SandCastle
 		if (Systems::GetMainCamera() == nullptr)
 			return;
 		Wait();
-		m_thread.current = m_thread.current == 1 ? 0 : 1;
-		m_thread.thread.Queue(&Renderer2D::RenderThread, this);
+		m_queue.Swap();
+		m_queue.thread.Queue(&Renderer2D::RenderThread, this);
 	}
 
 	sptr<VertexArray> Renderer2D::GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace)
