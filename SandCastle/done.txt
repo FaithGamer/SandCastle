@@ -202,9 +202,16 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -layer sorting
 -per layer z sorting (enabled/disabled)
 
+24:
+
+-renamed camera wordToScreenRatio -> zoom
+-renamed default shader: default
+-found the best pixel perfect way: tex ppu = 1, cam zoom = 0.555555f
+-so no fancy pixel prefect shader are needed
+-just keep resolution to 720 or 1080 and such.
+
 tasks:
 
->fix the coordinates system (ppu and such)
 >consider get rid of sprite origin
 >check renderer thread safety
 >Implement a default GameSystem class with state machine

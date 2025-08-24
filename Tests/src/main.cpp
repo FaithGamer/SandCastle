@@ -10,39 +10,36 @@
 #include "Delegates.h"
 #include "Signals.h"
 #include "FontTest.h"
+#include "LayerTest.h"
 
 using namespace SandCastle;
 
-class LayerTest : public System
+
+struct Tag
 {
-public:
+	int t;
+};
+class MoveS : public System
+{
 	void Start() override
 	{
-		auto l1 = Renderer2D::AddLayer("l1");
-		auto l2 = Renderer2D::AddLayer("l2");
-		auto l3 = Renderer2D::AddLayer("l3");
 
-		float scale = 0.5;
-
-		auto t1 = Entity::CreateSprite("trollface.png_0_0");
-		t1.gtr()->SetPosition(-6, 0, -5);
-		t1.gtr()->SetScale(scale);
-		t1.gc<SpriteRender>()->SetLayer(l3);
-		t1.gc<SpriteRender>()->color = Vec4f(0, 0, 1, 1);
-
-		auto t2 = Entity::CreateSprite("trollface.png_0_0");
-		t2.gtr()->SetPosition(-0, 0, 0);
-		t2.gtr()->SetScale(scale);
-		t2.gc<SpriteRender>()->SetLayer(l2);
-		t2.gc<SpriteRender>()->color = Vec4f(0, 1, 0, 1);
-
-		auto t3 = Entity::CreateSprite("trollface.png_0_0");
-		t3.gtr()->SetPosition(6, 0, 5);
-		t3.gtr()->SetScale(scale);
-		t3.gc<SpriteRender>()->SetLayer(l1);
-		t3.gc<SpriteRender>()->color = Vec4f(1, 0, 0, 1);
 	}
+	void Update() override
+	{
+		auto delta = Time::Delta();
 
+		static float timer = 0.f;
+		timer += delta*0.1f;
+
+		float x = std::sin(timer) * 100.f;
+
+		auto view = Entity::View<Tag, Transform>();
+		view.each([&](Tag& t, Transform& tr)
+			{
+				tr.SetPosition(x, 0, 0);
+			});
+	}
 };
 int main()
 {
@@ -53,12 +50,16 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	Benchmark2();
+	//Benchmark2();
 	//Delegates();
 	//Signals();
 	//FontTest();
+	//LayerTest();
 
-	/*Engine::Init();
-	Systems::Push<LayerTest>();
-	Engine::Launch();*/
+	Engine::Init();
+	Systems::GetMainCamera()->zoom = 0.00555555f;
+	auto e = Entity::CreateSprite("360.png_0_0");
+	e.adc<Tag>();
+	Systems::Push<MoveS>();
+	Engine::Launch();
 }
