@@ -130,7 +130,7 @@ namespace SandCastle
 		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
-		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
+		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("default.shader"));
 		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
 		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
@@ -512,7 +512,7 @@ namespace SandCastle
 		SetRenderTarget(Window::Instance());
 		//Set the camera matrices into the uniform buffer
 		m_sceneUniform.camProj = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-		m_sceneUniform.camZoom = camera->worldToScreenRatio * 2;
+		m_sceneUniform.camZoom = camera->zoom;
 		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
 		m_sceneUniform.winHeight = (float)Window::GetSize().y;
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);

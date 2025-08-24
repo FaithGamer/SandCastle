@@ -47,7 +47,7 @@ namespace SandCastle
 		Vec2f WorldToScreen(Vec3f worldPosition, Vec2u screenSize) const;
 		Vec3f ScreenToWorld(Vec2f screenPosition, Vec2u screenSize) const;
 
-		float worldToScreenRatio;
+		float zoom;
 		bool isMain;
 
 	private:

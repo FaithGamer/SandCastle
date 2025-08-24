@@ -90,7 +90,7 @@ public:
 void FontTest()
 {
 	Engine::Init();
-	Systems::GetMainCamera()->worldToScreenRatio = .04f;
+	Systems::GetMainCamera()->zoom = .04f;
 	Systems::Push<FontTestSys>();
 	Engine::Launch();
 }

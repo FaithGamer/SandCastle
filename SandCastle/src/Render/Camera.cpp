@@ -16,7 +16,7 @@ namespace SandCastle
 		m_fieldOfView(45.f), m_aspectRatio(1), m_nearClippingPlane(-98), m_farClippingPlane(98),
 		m_needComputeProjectionMatrix(true), m_needComputeViewMatrix(true), m_projectionMatrix(1.f),
 		m_viewMatrix(1.f), m_orthographic(true),
-		worldToScreenRatio(0.02f), isMain(false)
+		zoom(0.02f), isMain(false)
 	{
 	}
 
@@ -189,7 +189,7 @@ namespace SandCastle
 	Vec3f Camera::GetPosition() const
 	{
 		//
-		// turn Vec3f(m_position.x * m_aspectRatio *worldToScreenRatio, m_position.y * worldToScreenRatio, m_position.z * worldToScreenRatio);
+		// turn Vec3f(m_position.x * m_aspectRatio *zoom, m_position.y * zoom, m_position.z * zoom);
 
 		return m_position;
 	}
@@ -226,8 +226,8 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			Vec2f screenNorm =
-				Vec2f(-worldPosition.x / m_aspectRatio * worldToScreenRatio, worldPosition.y * worldToScreenRatio)
-				- Vec2f(-m_position.x / m_aspectRatio * worldToScreenRatio, m_position.y * worldToScreenRatio);
+				Vec2f(-worldPosition.x / m_aspectRatio * zoom, worldPosition.y * zoom)
+				- Vec2f(-m_position.x / m_aspectRatio * zoom, m_position.y * zoom);
 			return Vec2f((-screenNorm.x + 0.5f) * screenSize.x, (-screenNorm.y + 0.5f) * screenSize.y);
 		}
 		else
@@ -243,8 +243,8 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			Vec2f screenNorm = { screenPosition.x / screenSize.x - 0.5f, screenPosition.y / screenSize.y - 0.5f };
-			return{ screenNorm.x * m_aspectRatio / worldToScreenRatio + m_position.x,
-			-screenNorm.y / worldToScreenRatio + m_position.y, 0 };
+			return{ screenNorm.x * m_aspectRatio / zoom + m_position.x,
+			-screenNorm.y / zoom + m_position.y, 0 };
 		}
 		else
 		{
@@ -256,8 +256,8 @@ namespace SandCastle
 	void Camera::ComputeViewMatrix() const
 	{
 		m_viewMatrix = glm::lookAt(
-			(glm::vec3)m_position * worldToScreenRatio * 2.f,
-			(glm::vec3)m_position * worldToScreenRatio * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
+			(glm::vec3)m_position * zoom * 2.f,
+			(glm::vec3)m_position * zoom * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
 
 		//view matrix will be composed like this
 		// 
