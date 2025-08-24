@@ -1,0 +1,15 @@
+{
+    "frame_per_second": 5,
+    "frames":
+    [
+        {
+            "sprite": "swordman.png_1_0"
+        },
+        {
+            "sprite": "swordman.png_1_1"
+        },
+        {
+            "sprite": "swordman.png_1_2"
+        }
+    ]
+}
