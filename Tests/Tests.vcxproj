@@ -43,15 +43,15 @@
     <ClInclude Include="src\FontTest.h" />
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
+    <ClInclude Include="src\LayerTest.h" />
     <ClInclude Include="src\Rotation.h" />
     <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\Signals.h" />
     <ClInclude Include="src\WindowEvents.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\batch_renderer.frag" />
-    <None Include="assets\shaders\batch_renderer.vert" />
-    <None Include="assets\shaders\batch_renderer_pixel_art" />
+    <None Include="assets\shaders\default.frag" />
+    <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default_layer.frag" />
     <None Include="assets\shaders\default_layer.vert" />
     <None Include="assets\shaders\line.frag" />

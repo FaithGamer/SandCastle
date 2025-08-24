@@ -150,7 +150,7 @@ namespace SandCastle
 		GLint maxTextureSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 		m_maxAtlasSize = std::min(4096, maxTextureSize);
-		m_defaultMaterial = Renderer2D::CreateMaterial(Assets::Get<Shader>("batch_renderer.shader"));
+		m_defaultMaterial = Renderer2D::CreateMaterial(Assets::Get<Shader>("default.shader"));
 	}
 
 	// ---------- MakeFont (primary: spec) ----------
