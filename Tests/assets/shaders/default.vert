@@ -17,6 +17,8 @@ layout(std140) uniform scene
     float uCamZoom;
     float uCamAspectRatio;
     float uWinHeight;
+    float uTargetHeight;
+    float uReduction;
 };
 
 void main() 

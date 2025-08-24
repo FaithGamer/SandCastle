@@ -217,6 +217,10 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 tasks:
 
+>enforce window rendering area height (black borders)
+Camera->EnforceHeight(360)//render area will only increase by 360px increments
+Camera->EnforceRatio(16/9)//render area will always be 16/9
+
 >check renderer thread safety
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system

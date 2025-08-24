@@ -272,6 +272,8 @@ namespace SandCastle
 			float camZoom;
 			float camAspectRatio;
 			float winHeight;
+			float targetHeight;
+			float reduction;
 		};
 
 		GLuint m_sceneUniformBinding = 0;

@@ -5,8 +5,8 @@
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Render/Camera.h"
 #include "SandCastle/Core/Log.h"
-
-
+#include "SandCastle/Core/Math.h"
+#include "SandCastle/Render/Window.h"
 
 namespace SandCastle
 {
@@ -82,12 +82,16 @@ namespace SandCastle
 
 	void Camera::SetAspectRatio(float aspectRatio)
 	{
+		if (m_forceHeight > 0)
+			ComputePixelPerfect();
 		m_aspectRatio = aspectRatio;
 		m_needComputeProjectionMatrix = true;
 	}
 
 	void Camera::SetAspectRatio(Vec2u xOverY)
 	{
+		if (m_forceHeight > 0)
+			ComputePixelPerfect();
 		m_aspectRatio = (float)xOverY.x / (float)xOverY.y;
 		m_needComputeProjectionMatrix = true;
 	}
@@ -116,6 +120,24 @@ namespace SandCastle
 	float Camera::GetFarClippingPlane()
 	{
 		return m_farClippingPlane;
+	}
+
+	void Camera::ForceHeight(unsigned int px)
+	{
+		m_forceHeight = px;
+		ComputePixelPerfect();
+	}
+
+	void Camera::ForceRatio(float ratio)
+	{
+		m_forceRatio = ratio;
+		ComputePixelPerfect();
+	}
+
+	void Camera::Blackbox(bool vertical, bool horizontal)
+	{
+		m_blackBox.first = vertical;
+		m_blackBox.second = horizontal;
 	}
 
 	void Camera::MoveWorld(Vec3f offset)
@@ -189,9 +211,6 @@ namespace SandCastle
 	}
 	Vec3f Camera::GetPosition() const
 	{
-		//
-		// turn Vec3f(m_position.x * m_aspectRatio *zoom, m_position.y * zoom, m_position.z * zoom);
-
 		return m_position;
 	}
 	float Camera::GetAspectRatio() const
@@ -222,13 +241,35 @@ namespace SandCastle
 	{
 		return glm::lookAt((glm::vec3)m_position, (glm::vec3)m_target, (glm::vec3)m_worldUp);
 	}
+	unsigned int Camera::GetForceHeight()
+	{
+		return m_forceHeight;
+	}
+
+	float Camera::GetForceRatio()
+	{
+		return m_forcedReduction;
+	}
+
+	std::pair<bool, bool> Camera::GetBlackbox()
+	{
+		return m_blackBox;
+	}
+	unsigned int Camera::GetTargetHeight() const
+	{
+		return m_targetHeight;
+	}
+	float Camera::GetReduction() const
+	{
+		return m_forcedReduction;
+	}
 	Vec2f Camera::WorldToScreen(Vec3f worldPosition, Vec2u screenSize) const
 	{
 		if (m_orthographic)
 		{
 			Vec2f screenNorm =
-				Vec2f(-worldPosition.x / m_aspectRatio * zoom, worldPosition.y * zoom)
-				- Vec2f(-m_position.x / m_aspectRatio * zoom, m_position.y * zoom);
+				Vec2f(-worldPosition.x / m_aspectRatio * zoom / m_forcedReduction, worldPosition.y * zoom / m_forcedReduction)
+				- Vec2f(-m_position.x / m_aspectRatio * zoom / m_forcedReduction, m_position.y * zoom / m_forcedReduction);
 			return Vec2f((-screenNorm.x + 0.5f) * screenSize.x, (-screenNorm.y + 0.5f) * screenSize.y);
 		}
 		else
@@ -244,8 +285,8 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			Vec2f screenNorm = { screenPosition.x / screenSize.x - 0.5f, screenPosition.y / screenSize.y - 0.5f };
-			return{ screenNorm.x * m_aspectRatio / zoom + m_position.x,
-			-screenNorm.y / zoom + m_position.y, 0 };
+			return{ screenNorm.x * m_aspectRatio / zoom / m_forcedReduction + m_position.x,
+			-screenNorm.y / zoom / m_forcedReduction + m_position.y, 0 };
 		}
 		else
 		{
@@ -257,8 +298,8 @@ namespace SandCastle
 	void Camera::ComputeViewMatrix() const
 	{
 		m_viewMatrix = glm::lookAt(
-			(glm::vec3)m_position * zoom * 2.f,
-			(glm::vec3)m_position * zoom * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
+			(glm::vec3)m_position * zoom * m_forcedReduction * 2.f,
+			(glm::vec3)m_position * zoom * m_forcedReduction * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
 
 		//view matrix will be composed like this
 		// 
@@ -294,6 +335,15 @@ namespace SandCastle
 		rightWithRoll.y -= sin(glm::radians(m_roll));*/
 		m_localUp = (m_localRight.Cross(m_localBack)).Normalized();
 		//m_localUp = glm::normalize(glm::cross((glm::vec3)m_localRight, (glm::vec3)m_localBack));
+	}
+
+	void Camera::ComputePixelPerfect()
+	{
+		m_forcedReduction = 1.f; // reset
+		unsigned int wh = (unsigned int)Window::GetSize().y;
+		//Find the nearest/inferior multiple
+		m_targetHeight = Math::FloorMultiple(wh, m_forceHeight);
+		m_forcedReduction = (float)m_targetHeight / (float)wh;
 	}
 
 	void Camera::ComputeProjectionMatrix() const

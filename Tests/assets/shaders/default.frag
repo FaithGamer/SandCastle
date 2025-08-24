@@ -8,12 +8,29 @@ in float vTexIndex;
 
 uniform sampler2D uTextures[16];
 
+layout(std140) uniform scene
+{
+    mat4 uCamProj;
+    float uCamZoom;
+    float uCamAspectRatio;
+    float uWinHeight;
+    float uTargetHeight;
+    float uReduction;
+};
+
 void main()
 {
 
 vec2 uvDx = dFdx(vTexCoords);
 vec2 uvDy = dFdy(vTexCoords);
 
+    float pad = 0.5 * (uWinHeight - uTargetHeight);
+    if (pad > 0.0)
+    {
+        float y = gl_FragCoord.y; 
+        if (y < pad || y >= (uWinHeight - pad)) 
+            discard;
+    }
 switch(int(round(vTexIndex)))
 {
     case 0:  oColor = textureGrad(uTextures[0],  vTexCoords, uvDx, uvDy) * vColor; break;

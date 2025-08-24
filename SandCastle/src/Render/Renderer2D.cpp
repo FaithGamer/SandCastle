@@ -127,7 +127,7 @@ namespace SandCastle
 
 		m_defaultRenderOptions = makesptr<RenderOptions>();
 		m_defaultRenderOptionsLayer = makesptr<RenderOptions>();
-		m_defaultRenderOptionsLayer->SetDepthTest(false);
+		m_defaultRenderOptionsLayer->SetDepthTest(true);
 		auto window = Window::Instance();
 
 		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("default.shader"));
@@ -515,6 +515,9 @@ namespace SandCastle
 		m_sceneUniform.camZoom = camera->zoom * 2.f;
 		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
 		m_sceneUniform.winHeight = (float)Window::GetSize().y;
+		m_sceneUniform.reduction = camera->GetReduction();
+		auto targ = camera->GetTargetHeight();
+		m_sceneUniform.targetHeight = targ > 0 ? targ : Window::GetSize().y;
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);
 
 		//ResetStats
@@ -579,7 +582,7 @@ namespace SandCastle
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, batch.textureSlots[i]);
 		}
-
+		glEnable(GL_DEPTH_TEST);
 		//Issue the draw call after binding adequat context
 		batch.layer.target->Bind();
 		batch.vertexArray->Bind();
@@ -641,7 +644,8 @@ namespace SandCastle
 		Vec2f origin((float)quad.orgX, (float)quad.orgY);
 		for (int i = 0; i < 4; i++)
 		{
-			batch.quadPtr->vertexPos = VertexPos(quadVertexPosition[i]-origin, quad.pos, quad.size, quad.rotation);
+			auto vertPos = (quadVertexPosition[i] - origin);// *m_sceneUniform.reduction;
+			batch.quadPtr->vertexPos = VertexPos(vertPos, quad.pos, quad.size, quad.rotation);
 			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvOrColor);
 			batch.quadPtr->color = quad.type == 0 ? quad.uvOrColor : Vec4f(1);
 			batch.quadPtr->texIndex = textureIndex;
@@ -708,7 +712,7 @@ namespace SandCastle
 			rotated.z + pos.z
 		};
 
-		return worldPos;
+		return worldPos * m_sceneUniform.reduction;
 	}
 
 	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, uint32_t layer)

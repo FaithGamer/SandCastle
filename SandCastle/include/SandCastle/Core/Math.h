@@ -131,6 +131,20 @@ namespace SandCastle
 			target = current + deltaAngle;
 			return MoveTowards(current, target, maxDelta);
 		}
+		template <typename T>
+		inline T NearestMultiple(T input, T step)
+		{
+			if (step == 0) return input;
+			T quotient = static_cast<T>(std::round(static_cast<double>(input) / step));
+			return quotient * step;
+		}
+		template <typename T>
+		inline T FloorMultiple(T input, T step)
+		{
+			if (step == 0) return input;
+			T quotient = input / step;
+			return quotient * step;
+		}
 	}
 }
 

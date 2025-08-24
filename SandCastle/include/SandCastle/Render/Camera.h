@@ -26,6 +26,9 @@ namespace SandCastle
 		void SetFarClippingPlane(float farClippingPlane);
 		float GetNearClippingPlane();
 		float GetFarClippingPlane();
+		void ForceHeight(unsigned int px);
+		void ForceRatio(float ratio);
+		void Blackbox(bool vertical, bool horizontal);
 
 		void MoveWorld(Vec3f offset);
 		void MoveWorld(float x, float y, float z);
@@ -43,6 +46,11 @@ namespace SandCastle
 		Mat4 GetViewMatrix() const;
 		Mat4 GetProjectionMatrix() const;
 		Mat4 GetTargetViewMatrix() const;
+		unsigned int GetForceHeight();
+		float GetForceRatio();
+		std::pair<bool, bool> GetBlackbox();
+		unsigned int GetTargetHeight() const;
+		float GetReduction() const;
 
 		Vec2f WorldToScreen(Vec3f worldPosition, Vec2u screenSize) const;
 		Vec3f ScreenToWorld(Vec2f screenPosition, Vec2u screenSize) const;
@@ -54,6 +62,7 @@ namespace SandCastle
 		void ComputeViewMatrix() const;
 		void ComputeProjectionMatrix() const;
 		void ComputeDirection();
+		void ComputePixelPerfect();
 
 		Vec3f m_target;
 
@@ -71,6 +80,11 @@ namespace SandCastle
 		float m_aspectRatio;
 		float m_nearClippingPlane;
 		float m_farClippingPlane;
+		float m_forceRatio = 0.f;
+		float m_forcedReduction = 1.f;
+		unsigned int m_forceHeight = 0;
+		unsigned int m_targetHeight = 0;
+		std::pair<bool, bool> m_blackBox = std::make_pair(false, false);
 
 		mutable Mat4 m_projectionMatrix;
 		mutable Mat4 m_viewMatrix;
