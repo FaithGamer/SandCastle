@@ -84,7 +84,7 @@ public:
 private:
 	int max = 50000;
 	float time = 3.f;
-	float tps = 1000;
+	float tps = 10000;
 	float scale = 1.f;
 	float accumulator = 0;
 };

@@ -97,7 +97,6 @@ namespace SandCastle
 			sprite->GetDimensions() * (Vec2f)transform->GetScale(),
 			transform->GetRotation().z,
 			texture->GetId(),
-			texture->GetPixelPerUnit(),
 			render->GetLayer(),
 			render->renderBatch,
 			render->color.a

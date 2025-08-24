@@ -50,16 +50,16 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	//Benchmark2();
+	Benchmark2();
 	//Delegates();
 	//Signals();
 	//FontTest();
 	//LayerTest();
 
-	Engine::Init();
-	Systems::GetMainCamera()->zoom = 0.00555555f;
+	/*Engine::Init();
+	Systems::GetMainCamera()->zoom = 0.002777777f; //pixel perfect for 1.f ppu texture
 	auto e = Entity::CreateSprite("360.png_0_0");
 	e.adc<Tag>();
 	Systems::Push<MoveS>();
-	Engine::Launch();
+	Engine::Launch();*/
 }

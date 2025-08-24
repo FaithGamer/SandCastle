@@ -512,7 +512,7 @@ namespace SandCastle
 		SetRenderTarget(Window::Instance());
 		//Set the camera matrices into the uniform buffer
 		m_sceneUniform.camProj = camera->GetProjectionMatrix() * camera->GetViewMatrix();
-		m_sceneUniform.camZoom = camera->zoom;
+		m_sceneUniform.camZoom = camera->zoom * 2.f;
 		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
 		m_sceneUniform.winHeight = (float)Window::GetSize().y;
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);

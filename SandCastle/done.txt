@@ -206,7 +206,7 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 -renamed camera wordToScreenRatio -> zoom
 -renamed default shader: default
--found the best pixel perfect way: tex ppu = 1, cam zoom = 0.555555f
+-found the best pixel perfect way: tex ppu = 1, cam zoom = 0.00277777f
 -so no fancy pixel prefect shader are needed
 -just keep resolution to 720 or 1080 and such.
 

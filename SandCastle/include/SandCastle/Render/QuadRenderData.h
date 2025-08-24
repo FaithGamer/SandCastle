@@ -14,7 +14,6 @@ namespace SandCastle
 		Vec2f size;
 		float rotation;
 		GLuint textureID;
-		float texturePPU;
 		uint32_t layerID;
 		uint32_t batchID;
 		float alpha;
