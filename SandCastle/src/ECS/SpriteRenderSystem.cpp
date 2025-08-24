@@ -93,6 +93,8 @@ namespace SandCastle
 		return QuadRenderData(
 			1,
 			transform->GetPosition(),
+			sprite->orgX,
+			sprite->orgY,
 			uvs,
 			sprite->GetDimensions() * (Vec2f)transform->GetScale(),
 			transform->GetRotation().z,

@@ -4,7 +4,7 @@
 namespace SandCastle
 {
 
-	Sprite::Sprite(const Texture* texture) : m_texture(texture), m_origin(0)
+	Sprite::Sprite(const Texture* texture) : m_texture(texture)
 	{
 		m_textureCoords[0] = Vec2f(0, 0);
 		m_textureCoords[1] = Vec2f(0, 1);
@@ -13,12 +13,13 @@ namespace SandCastle
 		ComputeDimensions();
 	}
 
-	Sprite::Sprite(const Texture* texture, Rect textureRect) : m_texture(texture), m_origin(0)
+	Sprite::Sprite(const Texture* texture, Rect textureRect) : m_texture(texture)
 	{
 		SetTextureRect(textureRect);
 	}
 
-	Sprite::Sprite(const Texture* texture, Rect textureRect, Vec2f origin) : m_texture(texture), m_origin(origin)
+	Sprite::Sprite(const Texture* texture, Rect textureRect, numeric::float16_t ox, numeric::float16_t oy)
+		: m_texture(texture), orgX(ox), orgY(oy)
 	{
 		SetTextureRect(textureRect);
 	}
@@ -27,11 +28,6 @@ namespace SandCastle
 	{
 		TextureCoordsRelative(m_textureCoords, textureRect, resolutionFactor);
 		ComputeDimensions();
-	}
-
-	void Sprite::SetOrigin(Vec2f origin)
-	{
-		m_origin = origin;
 	}
 
 	void Sprite::TextureCoordsRelative(Vec2f* coords, Rect rect, float resFactor)

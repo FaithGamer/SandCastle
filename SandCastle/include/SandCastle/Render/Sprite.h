@@ -4,6 +4,7 @@
 #include "SandCastle/Core/std_macros.h"
 #include "SandCastle/Render/Rect.h"
 #include "SandCastle/Render/Texture.h"
+#include "float16_t.hpp"
 
 namespace SandCastle
 {
@@ -14,7 +15,7 @@ namespace SandCastle
 		//To do add pivot point
 		Sprite(const Texture* texture);
 		Sprite(const Texture* texture, Rect textureRect);
-		Sprite(const Texture* texture, Rect textureRect, Vec2f origin);
+		Sprite(const Texture* texture, Rect textureRect, numeric::float16_t ox, numeric::float16_t oy);
 	
 		void TextureCoordsRelative(Vec2f* coords, Rect rect, float resFactor = 1.f);
 		void ComputeDimensions();
@@ -26,12 +27,6 @@ namespace SandCastle
 		void SetTextureRect(Rect textureRect, float resolutionFactor = 1.f);
 		/// @brief Set sprite origin point in normalized sprite coordinate
 		/// 0, 0 is centered.
-		void SetOrigin(Vec2f origin);
-
-		inline Vec2f GetOrigin() const
-		{
-			return m_origin;
-		}
 		inline const Texture* GetTexture() const
 		{
 			return m_texture;
@@ -53,11 +48,12 @@ namespace SandCastle
 		{
 			return m_uvs;
 		}
-
+		numeric::float16_t orgX = 0.f;
+		numeric::float16_t orgY = 0.f;
 	private:
 		Vec2f m_textureCoords[4];
 		Vec2f m_dimensions;
-		Vec2f m_origin;
+	
 		Vec4f m_uvs; //texture coord top left, and bottom right corners
 		const Texture* m_texture;
 

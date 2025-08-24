@@ -9,8 +9,8 @@
     "Spritesheet": {
         "Height": 360,
         "Origin": [
-            0.0,
-            0.0
+            0.5,
+            0.5
         ],
         "Padding": [
             0.0,

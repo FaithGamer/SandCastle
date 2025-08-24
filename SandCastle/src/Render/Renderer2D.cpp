@@ -638,9 +638,10 @@ namespace SandCastle
 			{0.5f, 0.5f},
 			{-0.5f, 0.5f}
 		};
+		Vec2f origin((float)quad.orgX, (float)quad.orgY);
 		for (int i = 0; i < 4; i++)
 		{
-			batch.quadPtr->vertexPos = VertexPos(quadVertexPosition[i], quad.pos, quad.size, quad.rotation);
+			batch.quadPtr->vertexPos = VertexPos(quadVertexPosition[i]-origin, quad.pos, quad.size, quad.rotation);
 			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvOrColor);
 			batch.quadPtr->color = quad.type == 0 ? quad.uvOrColor : Vec4f(1);
 			batch.quadPtr->texIndex = textureIndex;
