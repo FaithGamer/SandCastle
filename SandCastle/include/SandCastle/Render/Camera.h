@@ -48,7 +48,7 @@ namespace SandCastle
 		Vec3f ScreenToWorld(Vec2f screenPosition, Vec2u screenSize) const;
 
 		float zoom;
-		bool isMain;
+		static Camera* main;
 
 	private:
 		void ComputeViewMatrix() const;

@@ -22,7 +22,7 @@ public:
 	void Update() override
 	{
 		trollCount = 0;
-		auto mouse = Systems::GetMouseWorldPos();
+		auto mouse = Mouse::GetWorldPos();
 		auto delta = Time::Delta();
 		Entity::View<Troll>().each([&](Entity entity, Troll& troll)
 			{
@@ -40,7 +40,7 @@ public:
 				trans->Move(offset);
 
 				float prox = Math::Clamp01(1.f - (trans->GetPosition().Distance(mouse) / 4.f));
-				float target = Math::VecToAngle(mouse - (Vec2f)trans->GetPosition());
+				float target = Math::VecToAngle(mouse - trans->GetPosition());
 				float newAngle = Math::MoveTowardsAngle(Math::VecToAngle(troll.dir), target, 360 * prox * delta * troll.speed);
 				float newSpeed = Math::MoveTowards(troll.speed, Math::Lerp(2.f, 100.f, prox), 100 * delta);
 				troll.speed = newSpeed;

@@ -20,5 +20,6 @@ namespace SandCastle
 		Button ButtonFromName(std::string name);
 		/// @brief Get the mouse position in window coordinates
 		Vec2f GetPosition();
+		Vec3f GetWorldPos();
 	}
 }

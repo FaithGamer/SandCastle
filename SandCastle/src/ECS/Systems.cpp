@@ -22,7 +22,7 @@ namespace SandCastle
 
 	void Systems::Init()
 	{
-		SetMainCamera(&m_defaultCamera);
+		Camera::main = &m_defaultCamera;
 		Window::GetResizeSignal()->Listen(&Camera::SetAspectRatio, &m_defaultCamera);
 		m_defaultCamera.SetAspectRatio(Window::GetAspectRatio());
 	}
@@ -282,20 +282,6 @@ namespace SandCastle
 		}
 	}
 
-	void Systems::SetMainCamera(Camera* camera)
-	{
-		auto instance = Instance();
-
-		auto view = Entity::registry.view<Camera>();
-		for (auto& camera : view)
-		{
-			view.get<Camera>(camera).isMain = false;
-		}
-
-		camera->isMain = true;
-		instance->m_mainCamera = camera;
-	}
-
 	void Systems::SetFixedUpdateTime(float seconds)
 	{
 		Time::fixedDelta = seconds;
@@ -304,22 +290,6 @@ namespace SandCastle
 	void Systems::SetTimeScale(float scale)
 	{
 		Time::timeScale = scale;
-	}
-
-	Camera* Systems::GetMainCamera()
-	{
-		return Instance()->m_mainCamera;
-	}
-
-	Vec2f Systems::GetMouseWorldPos()
-	{
-		Camera* camera = Instance()->m_mainCamera;
-		if (!camera)
-		{
-			LOG_WARN("Systems::GetMouseWorldPos, no main camera, Vec2f(0, 0) returned");
-			return Vec2f(0, 0);
-		}
-		return camera->ScreenToWorld(Mouse::GetPosition(), Window::GetSize());
 	}
 }
 

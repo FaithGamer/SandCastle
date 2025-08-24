@@ -90,7 +90,7 @@ public:
 void FontTest()
 {
 	Engine::Init();
-	Systems::GetMainCamera()->zoom = .04f;
+	Camera::main->zoom = .04f;
 	Systems::Push<FontTestSys>();
 	Engine::Launch();
 }

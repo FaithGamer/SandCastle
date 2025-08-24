@@ -110,25 +110,12 @@ namespace SandCastle
 		/// @brief For internal use only.
 		void ImGuiUpdates();
 
-		/// @brief Set the camera used for rendering into the window by the SandCastle rendering Systems (like the SpriteRenderSystem)
-		/// Note that the entities rendered by the SandCastle Systems will be those within the same world as the camera.
-		/// @param camera Pointer to the camera, the Camera component is a PointableComponenent
-		static void SetMainCamera(Camera* camera);
-
 		/// @brief Set the interval between two FixedUpdate call
 		/// @param seconds Interval in seconds
 		static void SetFixedUpdateTime(float seconds);
 
 		/// @brief Set a multiplier to the deltaTime and fixedDeltaTime
 		static void SetTimeScale(float scale);
-
-		/// @brief Return camera used for window rendering
-		/// @return main camera
-		static Camera* GetMainCamera();
-
-		/// @brief Return the mouse position in wolrd unit relative to the main camera
-		/// @return mouse position
-		static Vec2f GetMouseWorldPos();
 	private:
 
 		friend Engine;
@@ -156,7 +143,6 @@ namespace SandCastle
 		std::vector<SystemIdPriority> m_lateUpdateSystems;
 
 		Camera m_defaultCamera;
-		Camera* m_mainCamera = nullptr;
 
 		std::vector<SystemIdPriority> m_pendingSystemIn;
 		std::vector<int32_t> m_pendingSystemOut;

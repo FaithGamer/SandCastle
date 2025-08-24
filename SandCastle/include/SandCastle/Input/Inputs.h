@@ -31,6 +31,8 @@ namespace SandCastle
 		/// @param name Name on the input map
 		static void DestroyInputMap(std::string name);
 
+		/// @brief Get an input from one of the input maps;
+		static sptr<Input> Get(String mapName, String inputName);
 		static std::vector<sptr<InputMap>>& GetInputMaps();
 		static sptr<InputMap> GetInputMap(std::string name);
 		static std::vector<std::string> GetInputMapNameList();

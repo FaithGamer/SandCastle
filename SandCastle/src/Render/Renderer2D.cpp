@@ -500,7 +500,7 @@ namespace SandCastle
 	}
 	void Renderer2D::Begin()
 	{
-		auto camera = Systems::GetMainCamera();
+		auto camera = Camera::main;
 		m_rendering = true;
 
 		for (auto& layer : m_layers)
@@ -789,7 +789,7 @@ namespace SandCastle
 	{
 		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
 			return;
-		if (Systems::GetMainCamera() == nullptr)
+		if (Camera::main == nullptr)
 			return;
 		Wait();
 		m_queue.Swap();

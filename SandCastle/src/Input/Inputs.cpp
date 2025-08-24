@@ -77,6 +77,15 @@ namespace SandCastle
 		instance->m_inputMaps.Add(name);
 	}
 
+	sptr<Input> Inputs::Get(String mapName, String inputName)
+	{
+		auto ins = Instance();
+		auto map = ins->m_inputMaps.Get(mapName);
+		if (map == nullptr)
+			return nullptr;
+		return map->GetInput(inputName);
+	}
+
 	std::vector<sptr<InputMap>>& Inputs::GetInputMaps()
 	{
 		return Inputs::Instance()->m_inputMaps.inputs;

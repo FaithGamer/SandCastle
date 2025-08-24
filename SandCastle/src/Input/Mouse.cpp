@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Input/Mouse.h"
+#include "SandCastle/ECS/Systems.h"
+#include "SandCastle/Render/Window.h"
 
 namespace SandCastle
 {
@@ -45,6 +47,16 @@ namespace SandCastle
 			float y;
 			SDL_GetMouseState(&x, &y);
 			return Vec2f(x, y);
+		}
+		Vec3f GetWorldPos()
+		{
+			Camera* camera = Camera::main;
+			if (!camera)
+			{
+				LOG_ERROR("Mouse::GetWorldPos, no main camera, Vec3f(0, 0, 0) returned");
+				return Vec3f(0, 0, 0);
+			}
+			return camera->ScreenToWorld(GetPosition(), Window::GetSize());
 		}
 	}
 }

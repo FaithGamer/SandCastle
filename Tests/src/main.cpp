@@ -23,23 +23,34 @@ class MoveS : public System
 {
 	void Start() override
 	{
+		auto e = Entity::CreateAnimatedSprite("swordman_walk.anim");
+		e.adc<Tag>();
 
+		Inputs::Get("Player", "Dest")->signal.Listen(&MoveS::OnDest, this);
+	}
+	void MoveToDest(Transform& tr)
+	{
+		auto dir = (dest - tr.GetPosition()).Normalized();
+		auto delta = Time::Delta();
+		auto offset = dir * speed * delta;
+
+		tr.Move(offset);
 	}
 	void Update() override
 	{
 		auto delta = Time::Delta();
-
-		static float timer = 0.f;
-		timer += delta*0.1f;
-
-		float x = std::sin(timer) * 100.f;
-
 		auto view = Entity::View<Tag, Transform>();
 		view.each([&](Tag& t, Transform& tr)
 			{
-				tr.SetPosition(x, 0, 0);
+				MoveToDest(tr);
 			});
 	}
+	void OnDest(InputSignal* signal)
+	{
+		dest = Mouse::GetWorldPos();
+	}
+	Vec3f dest;
+	float speed = 5.f;
 };
 int main()
 {
@@ -57,9 +68,11 @@ int main()
 	//LayerTest();
 
 	Engine::Init();
-	Systems::GetMainCamera()->zoom = 0.002777777f; //pixel perfect for 1.f ppu texture
-	auto e = Entity::CreateSprite("360.png_0_0");
-	e.adc<Tag>();
+	Window::SetClearColor(Vec4f(0.6, 0.6, 0.6, 1.f));
+	Camera::main->zoom = 0.002777777f; //pixel perfect for 1.f ppu texture
+	auto inputs = Inputs::CreateInputMap("Player");
+	auto dir = inputs->CreateButtonInput("Dest");
+	dir->BindMouse(Mouse::Button::Left);
 	Systems::Push<MoveS>();
 	Engine::Launch();
 }
