@@ -215,6 +215,12 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -inputs fancy getter
 -pix perfect game example
 
+27
+
+-Camera ensure ratio
+-Camera pixel perfect
+-Camera black bar (crop rendering area)
+
 tasks:
 
 >enforce window rendering area height (black borders)

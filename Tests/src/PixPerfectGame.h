@@ -14,6 +14,8 @@ class SwordmanSys : public System
 		auto e = Entity::CreateAnimatedSprite("swordman_walk.anim");
 		e.adc<Swordman>();
 		Inputs::Get("Player", "Dest")->signal.Listen(&SwordmanSys::OnDest, this);
+		Inputs::Get("Player", "Zoom")->signal.Listen(&SwordmanSys::OnZoom, this);
+		
 	}
 	void MoveToDest(Transform& tr)
 	{
@@ -48,6 +50,17 @@ class SwordmanSys : public System
 				FlipSprite(tr);
 			});
 	}
+	void OnZoom(InputSignal* signal)
+	{
+		static float zoom = 1.f;
+		if (zoom >= 1.f && zoom < 4.f)
+			zoom += 1.f;
+		else if (zoom < 1.f)
+			zoom *= 2.f;
+		else
+			zoom = 0.25f;
+		Camera::main->SetPxZoom(zoom);
+	}
 	Vec3f dest;
 	float speed = 200.f;
 };
@@ -61,8 +74,11 @@ void PixPerfectGame()
 	constraints.cropH = true;
 	constraints.cropW = true;
 	Camera::main->SetConstraints(constraints);
+	
 	auto inputs = Inputs::CreateInputMap("Player");
 	auto dir = inputs->CreateButtonInput("Dest");
+	auto zoom = inputs->CreateButtonInput("Zoom");
+	zoom->BindMouse(Mouse::Button::Right);
 	dir->BindMouse(Mouse::Button::Left);
 	Systems::Push<SwordmanSys>();
 	auto e = Entity::CreateSprite("background.png_0_0");

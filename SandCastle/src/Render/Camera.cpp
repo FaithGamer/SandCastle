@@ -123,7 +123,12 @@ namespace SandCastle
 		}
 		m_px.pxZoom = scale;
 		float min = 1.f / ((float)m_targetSize.y / (float)m_px.pxStep);
-		float z = Math::RoundPow2(scale, min);
+		float z = scale;
+		if (scale < 1.f)
+			z = Math::RoundPow2(scale, min);
+		else
+			z = std::round(z);
+
 		zoom = z / (float)m_px.pxStep;
 	}
 
