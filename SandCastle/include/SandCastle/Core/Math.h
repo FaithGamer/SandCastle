@@ -145,22 +145,69 @@ namespace SandCastle
 			T quotient = input / step;
 			return quotient * step;
 		}
-		inline float NearPow2(float x, float min = 0.25f) 
+		/// @brief Round to the nearest power of two.
+		/// @param value value to be rounded
+		/// @param min minimum returned value
+		/// @return the rounded value
+		inline float RoundPow2(float value, float min = 0.125f) 
 		{
-			if (x <= 0.0f) 
-				return min; // handle non-positive input safely
+			if (value <= 0.0f) 
+				return min;
 
 			// compute log base 2
-			float exponent = std::log2(x);
+			float exponent = std::log2(value);
 
 			// round exponent to nearest integer
 			int nearestExp = static_cast<int>(std::round(exponent));
 
 			// compute 2^nearestExp
 			float result = std::pow(2.0f, nearestExp);
+			if (result < min) 
+				result = min;
 
-			// clamp minimum at 0.25
-			if (result < min) result = min;
+			return result;
+		}
+		/// @brief Floor to the nearest power of two.
+		/// @param value value to be floored
+		/// @param min minimum returned value
+		/// @return the rounded value
+		inline float FloorPow2(float value, float min = 0.125f)
+		{
+			if (value <= 0.0f)
+				return min;
+
+			// compute log base 2
+			float exponent = std::log2(value);
+
+			// round exponent to nearest integer
+			int nearestExp = static_cast<int>(std::floor(exponent));
+
+			// compute 2^nearestExp
+			float result = std::pow(2.0f, nearestExp);
+			if (result < min)
+				result = min;
+
+			return result;
+		}
+		/// @brief Ceil to the nearest power of two.
+		/// @param value value to be ceiled
+		/// @param min minimum returned value
+		/// @return the rounded value
+		inline float CeilPow2(float value, float min = 0.125f)
+		{
+			if (value <= 0.0f)
+				return min;
+
+			// compute log base 2
+			float exponent = std::log2(value);
+
+			// round exponent to nearest integer
+			int nearestExp = static_cast<int>(std::ceil(exponent));
+
+			// compute 2^nearestExp
+			float result = std::pow(2.0f, nearestExp);
+			if (result < min)
+				result = min;
 
 			return result;
 		}
