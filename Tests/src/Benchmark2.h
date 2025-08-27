@@ -55,9 +55,6 @@ public:
 		for (int i = 0; i < (int)accumulator; i++)
 		{
 			auto entt = Entity::CreateAnimatedSprite();
-			/*auto anim = entt.AddComponent<Animator>();
-			anim->AddAnimation("default", "anim_test.anim");
-			anim->SetAnimation("default");*/
 			entt.GetComponent<Transform>()->SetScale(0.1f * scale);
 			auto troll = entt.AddComponent<Troll>();
 			troll->timer = Random::Range(0.1f, time * 2.f);
