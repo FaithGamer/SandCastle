@@ -55,8 +55,12 @@ void PixPerfectGame()
 {
 	Engine::Init();
 	Window::SetClearColor(Vec4f(0, 0, 0, 1.f));
-	Camera::main->zoom = 0.002777777f; //pixel perfect for 1.f ppu texture
-	Camera::main->ForceHeight(360);
+	Camera::Constraints constraints;
+	constraints.pxStep = 360;
+	constraints.targetRatio = 16.f / 9.f;
+	constraints.cropH = true;
+	constraints.cropW = true;
+	Camera::main->SetConstraints(constraints);
 	auto inputs = Inputs::CreateInputMap("Player");
 	auto dir = inputs->CreateButtonInput("Dest");
 	dir->BindMouse(Mouse::Button::Left);

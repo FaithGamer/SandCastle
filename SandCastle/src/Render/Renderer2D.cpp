@@ -510,14 +510,19 @@ namespace SandCastle
 		}
 
 		SetRenderTarget(Window::Instance());
-		//Set the camera matrices into the uniform buffer
-		m_sceneUniform.camProj = camera->GetProjectionMatrix() * camera->GetViewMatrix();
+		//Scene data
+		m_sceneUniform.camProjView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 		m_sceneUniform.camZoom = camera->zoom * 2.f;
 		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
-		m_sceneUniform.winHeight = (float)Window::GetSize().y;
+		m_sceneUniform.winSize = (Vec2f)Window::GetSize();
+		m_sceneUniform.targetSize = (Vec2f)camera->GetTargetSize();
 		m_sceneUniform.reduction = camera->GetReduction();
-		auto targ = camera->GetTargetHeight();
-		m_sceneUniform.targetHeight = targ > 0 ? targ : Window::GetSize().y;
+		auto contraints = camera->GetConstraints();
+		m_sceneUniform.cropMask = 0;
+		if (contraints.cropH)
+			m_sceneUniform.cropMask |= (1 << 0);
+		if (contraints.cropW)
+			m_sceneUniform.cropMask |= (1 << 1);
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);
 
 		//ResetStats

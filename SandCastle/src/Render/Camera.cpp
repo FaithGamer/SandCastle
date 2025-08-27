@@ -19,6 +19,7 @@ namespace SandCastle
 		m_viewMatrix(1.f), m_orthographic(true),
 		zoom(0.02f)
 	{
+		m_targetSize = (Vec2f)Window::GetSize();
 	}
 
 	Camera::~Camera()
@@ -82,18 +83,19 @@ namespace SandCastle
 
 	void Camera::SetAspectRatio(float aspectRatio)
 	{
-		if (m_forceHeight > 0)
-			ComputePixelPerfect();
+		ComputePixelPerfect();
+		if (m_px.targetRatio > 0)
+		{
+
+		}
 		m_aspectRatio = aspectRatio;
 		m_needComputeProjectionMatrix = true;
 	}
 
 	void Camera::SetAspectRatio(Vec2u xOverY)
 	{
-		if (m_forceHeight > 0)
-			ComputePixelPerfect();
-		m_aspectRatio = (float)xOverY.x / (float)xOverY.y;
-		m_needComputeProjectionMatrix = true;
+		m_targetSize = xOverY;
+		SetAspectRatio((float)xOverY.x / (float)xOverY.y);
 	}
 
 	void Camera::SetNearClippingPlane(float nearClippingPlane)
@@ -112,6 +114,19 @@ namespace SandCastle
 		m_needComputeProjectionMatrix = true;
 	}
 
+	void Camera::SetPxZoom(float scale)
+	{
+		if (m_px.pxStep <= 0)
+		{
+			LOG_WARN("Setting camera PxZoom but no pxStep constraints set.");
+			return;
+		}
+		m_px.pxZoom = scale;
+		float min = 1.f / ((float)m_targetSize.y / (float)m_px.pxStep);
+		float z = Math::RoundPow2(scale, min);
+		zoom = z / (float)m_px.pxStep;
+	}
+
 	float Camera::GetNearClippingPlane()
 	{
 		return m_nearClippingPlane;
@@ -122,22 +137,10 @@ namespace SandCastle
 		return m_farClippingPlane;
 	}
 
-	void Camera::ForceHeight(unsigned int px)
+	void Camera::SetConstraints(Constraints constraints)
 	{
-		m_forceHeight = px;
+		m_px = constraints;
 		ComputePixelPerfect();
-	}
-
-	void Camera::ForceRatio(float ratio)
-	{
-		m_forceRatio = ratio;
-		ComputePixelPerfect();
-	}
-
-	void Camera::Blackbox(bool vertical, bool horizontal)
-	{
-		m_blackBox.first = vertical;
-		m_blackBox.second = horizontal;
 	}
 
 	void Camera::MoveWorld(Vec3f offset)
@@ -241,35 +244,25 @@ namespace SandCastle
 	{
 		return glm::lookAt((glm::vec3)m_position, (glm::vec3)m_target, (glm::vec3)m_worldUp);
 	}
-	unsigned int Camera::GetForceHeight()
+	Vec2u Camera::GetTargetSize() const
 	{
-		return m_forceHeight;
-	}
-
-	float Camera::GetForceRatio()
-	{
-		return m_forcedReduction;
-	}
-
-	std::pair<bool, bool> Camera::GetBlackbox()
-	{
-		return m_blackBox;
-	}
-	unsigned int Camera::GetTargetHeight() const
-	{
-		return m_targetHeight;
+		return m_targetSize;
 	}
 	float Camera::GetReduction() const
 	{
-		return m_forcedReduction;
+		return m_reduction;
+	}
+	Camera::Constraints Camera::GetConstraints() const
+	{
+		return m_px;
 	}
 	Vec2f Camera::WorldToScreen(Vec3f worldPosition, Vec2u screenSize) const
 	{
 		if (m_orthographic)
 		{
 			Vec2f screenNorm =
-				Vec2f(-worldPosition.x / m_aspectRatio * zoom / m_forcedReduction, worldPosition.y * zoom / m_forcedReduction)
-				- Vec2f(-m_position.x / m_aspectRatio * zoom / m_forcedReduction, m_position.y * zoom / m_forcedReduction);
+				Vec2f(-worldPosition.x / m_aspectRatio * zoom / m_reduction, worldPosition.y * zoom / m_reduction)
+				- Vec2f(-m_position.x / m_aspectRatio * zoom / m_reduction, m_position.y * zoom / m_reduction);
 			return Vec2f((-screenNorm.x + 0.5f) * screenSize.x, (-screenNorm.y + 0.5f) * screenSize.y);
 		}
 		else
@@ -285,8 +278,8 @@ namespace SandCastle
 		if (m_orthographic)
 		{
 			Vec2f screenNorm = { screenPosition.x / screenSize.x - 0.5f, screenPosition.y / screenSize.y - 0.5f };
-			return{ screenNorm.x * m_aspectRatio / zoom / m_forcedReduction + m_position.x,
-			-screenNorm.y / zoom / m_forcedReduction + m_position.y, 0 };
+			return{ screenNorm.x * m_aspectRatio / zoom / m_reduction + m_position.x,
+			-screenNorm.y / zoom / m_reduction + m_position.y, 0 };
 		}
 		else
 		{
@@ -298,8 +291,8 @@ namespace SandCastle
 	void Camera::ComputeViewMatrix() const
 	{
 		m_viewMatrix = glm::lookAt(
-			(glm::vec3)m_position * zoom * m_forcedReduction * 2.f,
-			(glm::vec3)m_position * zoom * m_forcedReduction * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
+			(glm::vec3)m_position * zoom * m_reduction * 2.f,
+			(glm::vec3)m_position * zoom * m_reduction * 2.f + (glm::vec3)m_localBack, (glm::vec3)m_localUp);
 
 		//view matrix will be composed like this
 		// 
@@ -339,11 +332,60 @@ namespace SandCastle
 
 	void Camera::ComputePixelPerfect()
 	{
-		m_forcedReduction = 1.f; // reset
+		unsigned int ww = (unsigned int)Window::GetSize().x;
 		unsigned int wh = (unsigned int)Window::GetSize().y;
-		//Find the nearest/inferior multiple
-		m_targetHeight = Math::FloorMultiple(wh, m_forceHeight);
-		m_forcedReduction = (float)m_targetHeight / (float)wh;
+		m_reduction = 1.f; // reset
+		if (m_px.pxStep > 0)
+		{
+			//Find the nearest/inferior multiple
+			m_targetSize.y = std::max(m_px.pxStep, Math::FloorMultiple(wh, m_px.pxStep));
+			ComputeReduction();
+			//Make sure window is at least the target size
+			if (wh < m_targetSize.y)
+				Window::SetSize(ww, m_targetSize.y);
+		}
+		if (m_px.targetRatio > 0.01f)
+		{
+			//Match targetX with targetY
+			m_targetSize.x = (unsigned int)std::round((float)m_targetSize.y * m_px.targetRatio);
+			int safe = 0;
+
+			while (m_px.pxStep > 0 && m_targetSize.x > ww)
+			{
+				//Reduce targetY by stepping
+				if (m_targetSize.y > m_px.pxStep)
+				{
+					m_targetSize.y -= m_px.pxStep;
+					ComputeReduction();
+					m_targetSize.x = (unsigned int)std::round((float)m_targetSize.y * m_px.targetRatio);
+				}
+				else
+				{
+					//Only enforcing the window width can make the constraints match.
+					m_targetSize.y = m_px.pxStep;
+					ComputeReduction();
+					m_targetSize.x = (unsigned int)std::round((float)m_targetSize.y * m_px.targetRatio);
+					Window::SetSize(m_targetSize.x, wh);
+					break;
+				}
+			}
+			if (m_targetSize.x > ww)
+			{
+				//If stepping wasn't enabled
+				//Set targetY with the largest possible that respect both the enforced ratio and the current window size
+				m_targetSize.y = std::min(wh, (unsigned int)std::round((float)ww / m_px.targetRatio));
+				ComputeReduction();
+				//And inffer targetX
+				m_targetSize.x = (unsigned int)std::round((float)m_targetSize.y * m_px.targetRatio);
+			}
+			if (m_px.pxStep > 0)
+				SetPxZoom(m_px.pxZoom);
+		}
+	}
+
+	void Camera::ComputeReduction()
+	{
+		m_reduction = (float)m_targetSize.y / (float)Window::GetSize().y;
 	}
 
 	void Camera::ComputeProjectionMatrix() const

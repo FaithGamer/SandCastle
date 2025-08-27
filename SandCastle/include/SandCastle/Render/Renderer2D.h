@@ -268,11 +268,12 @@ namespace SandCastle
 
 		struct SceneBufferData
 		{
-			Mat4 camProj;
+			Mat4 camProjView;
 			float camZoom;
 			float camAspectRatio;
-			float winHeight;
-			float targetHeight;
+			Vec2f winSize;
+			Vec2f targetSize;
+			int cropMask;
 			float reduction;
 		};
 

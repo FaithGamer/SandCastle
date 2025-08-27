@@ -10,11 +10,12 @@ uniform sampler2D uTextures[16];
 
 layout(std140) uniform scene
 {
-    mat4 uCamProj;
+    mat4 uCamProjView;
     float uCamZoom;
     float uCamAspectRatio;
-    float uWinHeight;
-    float uTargetHeight;
+    vec2 uWinSize;
+    vec2 uTargetSize;
+    int uCropMask;
     float uReduction;
 };
 
@@ -24,13 +25,26 @@ void main()
 vec2 uvDx = dFdx(vTexCoords);
 vec2 uvDy = dFdy(vTexCoords);
 
-    float pad = 0.5 * (uWinHeight - uTargetHeight);
+if((uCropMask & (1 << 0)) != 0)
+{    
+    float pad = 0.5 * (uWinSize.y - uTargetSize.y);
     if (pad > 0.0)
     {
         float y = gl_FragCoord.y; 
-        if (y < pad || y >= (uWinHeight - pad)) 
+        if (y < pad || y >= (uWinSize.y - pad)) 
             discard;
     }
+}
+if((uCropMask & (1 << 1)) != 0)
+{
+    float pad = 0.5 * (uWinSize.x - uTargetSize.x);
+    if (pad > 0.0)
+    {
+        float x = gl_FragCoord.x; 
+        if (x < pad || x >= (uWinSize.x - pad)) 
+            discard;
+    }
+}
 switch(int(round(vTexIndex)))
 {
     case 0:  oColor = textureGrad(uTextures[0],  vTexCoords, uvDx, uvDy) * vColor; break;
@@ -51,6 +65,6 @@ switch(int(round(vTexIndex)))
     case 15: oColor = textureGrad(uTextures[15], vTexCoords, uvDx, uvDy) * vColor; break;
 }
 
-	if(oColor.a <0.2)
+	if(oColor.a <0.01)
 		discard;
 }

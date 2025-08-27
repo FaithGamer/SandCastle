@@ -13,11 +13,12 @@ out float vTexIndex;
 
 layout(std140) uniform scene
 {
-    mat4 uCamProj;
+    mat4 uCamProjView;
     float uCamZoom;
     float uCamAspectRatio;
-    float uWinHeight;
-    float uTargetHeight;
+    vec2 uWinSize;
+    vec2 uTargetSize;
+    int uCropMask;
     float uReduction;
 };
 
@@ -28,5 +29,5 @@ void main()
     vTexIndex = iTexIndex;
     
     vec3 pos = iVertexPos.xyz * uCamZoom;
-    gl_Position = uCamProj  * vec4(pos, 1.0);
+    gl_Position = uCamProjView  * vec4(pos, 1.0);
 }
