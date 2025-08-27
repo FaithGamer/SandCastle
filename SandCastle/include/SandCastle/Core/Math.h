@@ -145,6 +145,25 @@ namespace SandCastle
 			T quotient = input / step;
 			return quotient * step;
 		}
+		inline float NearPow2(float x, float min = 0.25f) 
+		{
+			if (x <= 0.0f) 
+				return min; // handle non-positive input safely
+
+			// compute log base 2
+			float exponent = std::log2(x);
+
+			// round exponent to nearest integer
+			int nearestExp = static_cast<int>(std::round(exponent));
+
+			// compute 2^nearestExp
+			float result = std::pow(2.0f, nearestExp);
+
+			// clamp minimum at 0.25
+			if (result < min) result = min;
+
+			return result;
+		}
 	}
 }
 
