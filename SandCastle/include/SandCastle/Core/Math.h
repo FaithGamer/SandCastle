@@ -134,14 +134,20 @@ namespace SandCastle
 		template <typename T>
 		inline T NearestMultiple(T input, T step)
 		{
-			if (step == 0) return input;
+			if (input < step)
+				return step;
+			if (step == 0)
+				return input;
 			T quotient = static_cast<T>(std::round(static_cast<double>(input) / step));
 			return quotient * step;
 		}
 		template <typename T>
 		inline T FloorMultiple(T input, T step)
 		{
-			if (step == 0) return input;
+			if (input < step)
+				return step;
+			if (step == 0) 
+				return input;
 			T quotient = input / step;
 			return quotient * step;
 		}
