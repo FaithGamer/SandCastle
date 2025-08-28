@@ -3,13 +3,13 @@
     "frames":
     [
         {
-            "sprite": "swordman.png_1_0"
+            "sprite": "swordman.png_0_0"
         },
         {
-            "sprite": "swordman.png_1_1"
+            "sprite": "swordman.png_0_1"
         },
         {
-            "sprite": "swordman.png_1_2"
+            "sprite": "swordman.png_0_2"
         }
     ]
 }
