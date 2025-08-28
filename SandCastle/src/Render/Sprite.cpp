@@ -10,6 +10,8 @@ namespace SandCastle
 		m_textureCoords[1] = Vec2f(0, 1);
 		m_textureCoords[2] = Vec2f(1, 1);
 		m_textureCoords[3] = Vec2f(1, 0);
+		auto size = texture->GetSize();
+		SetTextureRect(Rect(0, 0, size.x, size.y));
 		ComputeDimensions();
 	}
 
@@ -26,6 +28,7 @@ namespace SandCastle
 
 	void Sprite::SetTextureRect(Rect textureRect, float resolutionFactor)
 	{
+		m_textureRect = textureRect;
 		TextureCoordsRelative(m_textureCoords, textureRect, resolutionFactor);
 		ComputeDimensions();
 	}
