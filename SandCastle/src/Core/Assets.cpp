@@ -65,7 +65,7 @@ namespace SandCastle
 				texRect.width = (float)width;
 				texRect.height = (float)height;
 
-				String spriteName = filename + "_" + std::to_string(y) + "_" + std::to_string(x);
+				String spriteName = filename + "_" + std::to_string((rows-1)-y) + "_" + std::to_string(x);
 				InsertAsset(spriteName, MakeAsset<Sprite>(
 					texture, 
 					texRect, 
