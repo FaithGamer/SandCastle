@@ -35,6 +35,10 @@ namespace SandCastle
 		{
 			return m_dimensions;
 		}
+		inline Rect GetTextureRect() const
+		{
+			return m_textureRect;
+		}
 		/// @brief Each individual vertex texture UV from vertex 0 to 3
 		/// @param index 
 		/// @return 
@@ -53,6 +57,7 @@ namespace SandCastle
 	private:
 		Vec2f m_textureCoords[4];
 		Vec2f m_dimensions;
+		Rect m_textureRect;
 	
 		Vec4f m_uvs; //texture coord top left, and bottom right corners
 		const Texture* m_texture;
