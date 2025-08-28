@@ -1,0 +1,21 @@
+{
+    "ImportSettings": {
+        "Filtering": "Nearest",
+        "KeepData": false,
+        "Mipmaps": true,
+        "PixelPerUnit": 1.0,
+        "Wrapping": "Repeat"
+    },
+    "Spritesheet": {
+        "Height": 30,
+        "Origin": [
+            0.0,
+            0.0
+        ],
+        "Padding": [
+            0.0,
+            0.0
+        ],
+        "Width": 30
+    }
+}

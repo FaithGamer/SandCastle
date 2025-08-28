@@ -221,17 +221,59 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -Camera pixel perfect
 -Camera black bar (crop rendering area)
 
-tasks:
+28
 
->enforce window rendering area height (black borders)
-Camera->EnforceHeight(360)//render area will only increase by 360px increments
-Camera->EnforceRatio(16/9)//render area will always be 16/9
+-texture create from subregion
+-sprite asset Y swapped for more intuitive reading
+-sprite texture rect kept and accessible
+-basic UI frame drawing.
+
+>interface between transform position and anchored position
+
+>ui system.
+We need to think of an api than enable to generate
+easily, in screen space: frames, texts, buttons, fillbar, tabs, checkboxes, sliders. 
+
+>frame moving can sometimes show 1px separation between top/mid, etc...
+>think about anchor and frame/element placement
+
+-AnchorPoint determine how the frame grows and where is it's 0.0 point in frame
+-ContentDirection determine how content is added
+Frame.SetSize(0, 100) -> 0 = fit content
+content wraps.
+
+Ui::PushFrameSprites("frame_border.png");
+Ui::Start("Frame1");
+Ui::SetAnchor(middle_center/top_left/top_right/top_center...); 
+Ui::SetAlignDirection(vertical_down/vertical_up/horizontal_right/right_left);
+Ui::SetAlignAnchor(left/centered/right); (left/right becomes top/bottom when align is horizontal )
+
+Ui::Start("Subframe1");
+Ui::SetFrameAlign(Horizontal); //The element in the current frame will align, left to right
+Ui::SetPadding(1.f); //The elements in the current frame will space each other by 1
+Ui::SetMargin(1.f); //The 
+Ui::PushText
+Ui::PushButtonSprites("button.png")
+Ui::PushButtonHoverSprites("button_hover.png")
+Ui::PushButtonPressedSprites("button_pressed.png")
+Ui::PushButtonTextSize(3.f);
+if(Ui::Button("Button"))
+{
+
+}
+Ui::GetFrameSize();
+Ui::End();
+
+
+tasks:
 
 >check renderer thread safety
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony
 >math inverselerp
+>custom path for assets, fonts, and so on... Roaming system
+>versioning and app name
 
 secondary tasks:
 
@@ -240,12 +282,16 @@ secondary tasks:
 >audio spacialization
 >Transform animation system
 
+bugs:
+
+>asset log error not always log in the .txt logs?
+
 UI:
 
 >ui system
 >create ui text with point size, not px size
 >check gpu max texture size.
->custom path for assets, fonts, and so on... maybe in the same class as Roaming ?
+
 
 render:
 
@@ -268,3 +314,6 @@ thoughts:
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
 
+minor stuff:
+
+>camera pixel perfect zoom can result in jittery sprites.
