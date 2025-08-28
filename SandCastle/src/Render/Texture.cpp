@@ -73,9 +73,9 @@ namespace SandCastle
 
 		// Compute GL source rect (Rect is top-left based)
 		GLint sx0 = region.left;
-		GLint sy0 = srcH - (region.top + region.height);
+		GLint sy0 = region.top;
 		GLint sx1 = region.left + region.width;
-		GLint sy1 = srcH - region.top;
+		GLint sy1 = (region.top + region.height);
 
 		// Clamp to source bounds
 		sx0 = std::max(0, std::min(sx0, srcW));
