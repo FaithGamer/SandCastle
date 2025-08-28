@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Serialization.h"
-
+#include "SandCastle/Render/Rect.h"
 
 namespace SandCastle
 {
@@ -52,6 +52,9 @@ namespace SandCastle
         Texture();
         Texture(std::string path, TextureImportSettings importSettings = TextureImportSettings());
         Texture(unsigned char* buffer, int size, TextureImportSettings importSettings = TextureImportSettings());
+        //Copy a texture subregion into a new texture, should probably be used through Renderer2D::CreateSubTexture
+        //To ensure thread safety with rendering thread
+        Texture(const Texture* sourceTexture, const Rect region);
 
         // NEW: construct an empty RGBA8 texture you’ll fill/update later (e.g., font atlas).
         Texture(int width, int height, TextureImportSettings importSettings = TextureImportSettings());
@@ -61,6 +64,7 @@ namespace SandCastle
 
         void Bind(uint32_t textureUnit = 0) const;
         void SetPixelPerUnit(float ppu);
+        void SetWrapping(TextureWrapping wrapping);
 
         GLuint GetId() const;
         Vec2i GetSize() const;
@@ -98,6 +102,7 @@ namespace SandCastle
         friend RenderTexture;
 
         TextureImportSettings m_importSettings;
+        float m_ppu = 1.f;
         Vec2i m_size;
         int m_nbChannels;
         unsigned char* m_pixels;

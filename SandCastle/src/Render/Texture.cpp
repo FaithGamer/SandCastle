@@ -8,17 +8,17 @@
 
 namespace SandCastle
 {
-	
+
 	Texture::Texture() : m_id(0), m_pixels(nullptr), m_nbChannels(0), m_importSettings(TextureImportSettings()), m_size(1, 1)
 	{
-		m_importSettings.pixelPerUnit = 1.f / m_importSettings.pixelPerUnit;
+		m_ppu = 1.f / m_importSettings.pixelPerUnit;
 	}
 
 	Texture::Texture(std::string path, TextureImportSettings importSettings)
 		: m_size(0, 0), m_nbChannels(0), m_pixels(nullptr), m_id(0), m_importSettings(importSettings)
 	{
 		//Texture from file
-		m_importSettings.pixelPerUnit = 1.f / m_importSettings.pixelPerUnit;
+		m_ppu = 1.f / importSettings.pixelPerUnit;
 
 		if (path == "white")
 		{
@@ -34,7 +34,7 @@ namespace SandCastle
 		: m_size(0, 0), m_nbChannels(0), m_pixels(nullptr), m_id(0), m_importSettings(importSettings)
 	{
 		//Texture from memory
-		m_importSettings.pixelPerUnit = 1.f / m_importSettings.pixelPerUnit;
+		m_ppu = 1.f / importSettings.pixelPerUnit;
 		LoadFromMemory(buffer, size);
 		Generate(importSettings);
 	}
@@ -42,8 +42,103 @@ namespace SandCastle
 	Texture::Texture(int width, int height, TextureImportSettings importSettings)
 		: m_size(width, height), m_nbChannels(4), m_pixels(nullptr), m_id(0), m_importSettings(importSettings)
 	{
-		m_importSettings.pixelPerUnit = 1.f / m_importSettings.pixelPerUnit;
+		m_ppu = 1.f / importSettings.pixelPerUnit;
 		GenerateEmpty(importSettings);
+	}
+
+	Texture::Texture(const Texture* sourceTexture, const Rect region)
+		: m_size(region.width, region.height), m_nbChannels(4), m_pixels(nullptr), m_id(0)
+	{
+		m_importSettings = sourceTexture->m_importSettings;
+		m_ppu = 1.f / m_importSettings.pixelPerUnit;
+		ASSERT_LOG_ERROR(sourceTexture, "Null sourceTexture");
+		const GLuint srcTex = sourceTexture->GetId();
+		ASSERT_LOG_ERROR(srcTex != 0, "Invalid source texture");
+
+		// Save a bit of state we’ll touch
+		GLint prevTex = 0, prevReadFBO = 0, prevDrawFBO = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevReadFBO);
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevDrawFBO);
+
+		// Query source size at its base level
+		glBindTexture(GL_TEXTURE_2D, srcTex);
+		GLint baseLevel = 0;
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &baseLevel);
+
+		GLint srcW = 0, srcH = 0;
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, baseLevel, GL_TEXTURE_WIDTH, &srcW);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, baseLevel, GL_TEXTURE_HEIGHT, &srcH);
+		ASSERT_LOG_ERROR(srcW > 0 && srcH > 0, "Source texture has no pixels at base level");
+
+		// Compute GL source rect (Rect is top-left based)
+		GLint sx0 = region.left;
+		GLint sy0 = srcH - (region.top + region.height);
+		GLint sx1 = region.left + region.width;
+		GLint sy1 = srcH - region.top;
+
+		// Clamp to source bounds
+		sx0 = std::max(0, std::min(sx0, srcW));
+		sx1 = std::max(0, std::min(sx1, srcW));
+		sy0 = std::max(0, std::min(sy0, srcH));
+		sy1 = std::max(0, std::min(sy1, srcH));
+		ASSERT_LOG_ERROR(sx1 > sx0 && sy1 > sy0, "Empty/out-of-bounds copy region");
+
+		// Create destination texture
+		glGenTextures(1, &m_id);
+		glBindTexture(GL_TEXTURE_2D, m_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+		// Basic params
+		const GLint minFilter = m_importSettings.useMipmaps ? GL_LINEAR_MIPMAP_LINEAR : m_importSettings.filtering;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_importSettings.filtering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_importSettings.wrapping);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_importSettings.wrapping);
+
+		// Build simple READ/DRAW FBOs
+		GLuint readFBO = 0, drawFBO = 0;
+		glGenFramebuffers(1, &readFBO);
+		glGenFramebuffers(1, &drawFBO);
+
+		// READ: source
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
+		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, srcTex, baseLevel);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+		// DRAW: destination
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFBO);
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_id, 0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+		// Check both FBOs
+		const GLenum readStatus = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
+		const GLenum drawStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+		ASSERT_LOG_ERROR(readStatus == GL_FRAMEBUFFER_COMPLETE, "READ FBO incomplete");
+		ASSERT_LOG_ERROR(drawStatus == GL_FRAMEBUFFER_COMPLETE, "DRAW FBO incomplete");
+
+		// Blit (nearest = exact copy)
+		glBlitFramebuffer(
+			sx0, sy0, sx1, sy1,          // source rect (flipped+clamped)
+			0, 0, m_size.x, m_size.y,// destination rect (full)
+			GL_COLOR_BUFFER_BIT,
+			GL_NEAREST
+		);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, prevReadFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevDrawFBO);
+		glDeleteFramebuffers(1, &readFBO);
+		glDeleteFramebuffers(1, &drawFBO);
+
+		if (m_importSettings.useMipmaps)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_id);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		SignalReady();
 	}
 	inline void Texture::LoadFromMemory(unsigned char* buffer, int size)
 	{
@@ -56,7 +151,7 @@ namespace SandCastle
 		m_pixels = stbi_load(path.c_str(), &m_size.x, &m_size.y, &m_nbChannels, 4);
 		ASSERT_LOG_ERROR(m_pixels, "Failed to load texture: " + path);
 	}
-	
+
 	inline void Texture::Generate(TextureImportSettings importSettings)
 	{
 		//Generate and bind an OpenGL texture
@@ -178,9 +273,17 @@ namespace SandCastle
 
 	void Texture::SetPixelPerUnit(float ppu)
 	{
-		m_importSettings.pixelPerUnit = 1.f / ppu;
+		m_importSettings.pixelPerUnit = ppu;
+		m_ppu = 1.f / m_importSettings.pixelPerUnit;
 	}
-
+	void Texture::SetWrapping(TextureWrapping wrapping)
+	{
+		WaitIfPending();
+		glBindTexture(GL_TEXTURE_2D, m_id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	GLuint Texture::GetId() const
 	{
 		return m_id;
@@ -194,7 +297,7 @@ namespace SandCastle
 
 	float Texture::GetPixelPerUnit() const
 	{
-		return m_importSettings.pixelPerUnit;
+		return m_ppu;
 	}
 
 	void Texture::EnablePBOStreaming(bool enable, size_t pboSizeBytes)
@@ -429,9 +532,9 @@ namespace SandCastle
 		pixelPerUnit = parameters.GetFloat("PixelPerUnit");
 		useMipmaps = parameters.GetBool("Mipmaps");
 		keepData = parameters.GetBool("KeepData");
-		if(parameters.HaveField("LodMin"))
+		if (parameters.HaveField("LodMin"))
 			lodMin = parameters.GetInt("LodMin");
-		if(parameters.HaveField("LodMax"))
+		if (parameters.HaveField("LodMax"))
 			lodMax = parameters.GetInt("LodMax");
 		valid = parameters.HadGetError();
 	}

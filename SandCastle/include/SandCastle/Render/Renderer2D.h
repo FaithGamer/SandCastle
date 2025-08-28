@@ -144,6 +144,7 @@ namespace SandCastle
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
 		static Material* CreateMaterial(Shader* shader);
+		static Texture* CreateSubTexture(const Texture* source, Rect region);
 
 		inline void PushQuad(QuadRenderData&& quad)
 		{
@@ -228,6 +229,7 @@ namespace SandCastle
 		void RenderThread();
 		void OnWindowResizeThread();
 		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		void CreateSubTextureThread(const Texture* source, Rect region);
 		void Begin();
 		void End();
 		void Flush(uint32_t batchIndex);
@@ -300,6 +302,7 @@ namespace SandCastle
 
 		//Others
 		uint32_t m_lastLayerAdded = 0;
+		Texture* m_createdTexture = nullptr;
 		bool m_rendering;
 		Statistics m_stats;
 		float m_aspectRatio;

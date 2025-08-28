@@ -9,12 +9,12 @@
 #include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/SpriteRender.h"
-#include "SandCastle/ECS/SpriteRenderSystem.h"
+#include "SandCastle/Render/SpriteRenderSystem.h"
+#include "SandCastle/Render/LineRendererSystem.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Core/Print.h"
-#include "SandCastle/ECS/LineRendererSystem.h"
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/Core/Math.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
@@ -498,6 +498,10 @@ namespace SandCastle
 
 		m_lastLayerAdded = (uint32_t)m_layers.size() - 1;
 	}
+	void Renderer2D::CreateSubTextureThread(const Texture* source, Rect region)
+	{
+		m_createdTexture = new Texture(source, region);
+	}
 	void Renderer2D::Begin()
 	{
 		auto camera = Camera::main;
@@ -604,6 +608,14 @@ namespace SandCastle
 		auto ins = Instance();
 		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size()));
 		return ins->m_materials.back();
+	}
+	Texture* Renderer2D::CreateSubTexture(const Texture* source, Rect region)
+	{
+		auto ins = Instance();
+		ins->m_queue.thread.Queue(&Renderer2D::CreateSubTextureThread, ins.get(), source, region);
+		ins->Wait();
+		return ins->m_createdTexture;
+
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
 	{
