@@ -18,3 +18,4 @@
 #include "SandCastle/Render/RenderTexture.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Render/FontSystem.h"
+#include "SandCastle/Render/Ui.h"

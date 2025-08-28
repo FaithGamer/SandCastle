@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SandCastle/ECS/LineRendererSystem.h"
+#include "SandCastle/Render/LineRendererSystem.h"
 #include "SandCastle/Render/LineRenderer.h"
 #include "SandCastle/Render/Renderer2D.h"
 

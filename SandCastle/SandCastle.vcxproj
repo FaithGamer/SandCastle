@@ -280,7 +280,6 @@
     <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\ECS\InputSystem.cpp" />
     <ClCompile Include="src\ECS\LineRendererSystem.cpp" />
-    <ClCompile Include="src\ECS\Scene.cpp" />
     <ClCompile Include="src\ECS\SpriteRenderSystem.cpp" />
     <ClCompile Include="src\ECS\System.cpp" />
     <ClCompile Include="src\ECS\Systems.cpp" />
@@ -318,6 +317,7 @@
     <ClCompile Include="src\Render\SpriteRender.cpp" />
     <ClCompile Include="src\Render\Texture.cpp" />
     <ClCompile Include="src\Render\Transform.cpp" />
+    <ClCompile Include="src\Render\Ui.cpp" />
     <ClCompile Include="src\Render\UniformBuffer.cpp" />
     <ClCompile Include="src\Render\VertexArray.cpp" />
     <ClCompile Include="src\Render\VertexBuffer.cpp" />
@@ -356,12 +356,11 @@
     <ClInclude Include="include\SandCastle\ECS\Entity.h" />
     <ClInclude Include="include\SandCastle\ECS\EntityId.h" />
     <ClInclude Include="include\SandCastle\Input\InputSystem.h" />
-    <ClInclude Include="include\SandCastle\ECS\LineRendererSystem.h" />
-    <ClInclude Include="include\SandCastle\ECS\Scene.h" />
-    <ClInclude Include="include\SandCastle\ECS\SpriteRenderSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
-    <ClInclude Include="include\SandCastle\ECS\WireRenderSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />
     <ClInclude Include="include\SandCastle\EngineParameters.h" />
     <ClInclude Include="include\SandCastle\Entt.h" />
@@ -406,6 +405,7 @@
     <ClInclude Include="include\SandCastle\Render\SpriteRender.h" />
     <ClInclude Include="include\SandCastle\Render\Texture.h" />
     <ClInclude Include="include\SandCastle\Render\Transform.h" />
+    <ClInclude Include="include\SandCastle\Render\Ui.h" />
     <ClInclude Include="include\SandCastle\Render\UniformBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\VertexArray.h" />
     <ClInclude Include="include\SandCastle\Render\VertexBuffer.h" />

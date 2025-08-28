@@ -1,7 +1,5 @@
 #include "pch.h"
-#include "SandCastle/ECS/SpriteRenderSystem.h"
-
-#include "SandCastle/Render.h"
+#include "SandCastle/Render/SpriteRenderSystem.h"
 
 namespace SandCastle
 {

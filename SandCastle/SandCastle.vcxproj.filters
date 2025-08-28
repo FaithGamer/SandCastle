@@ -81,9 +81,6 @@
     <ClCompile Include="src\ECS\LineRendererSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ECS\Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\ECS\SpriteRenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -228,6 +225,9 @@
     <ClCompile Include="src\Render\FontSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Ui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h">
@@ -305,13 +305,10 @@
     <ClInclude Include="include\SandCastle\Input\InputSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\LineRendererSystem.h">
+    <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\SpriteRenderSystem.h">
+    <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\ECS\System.h">
@@ -320,7 +317,7 @@
     <ClInclude Include="include\SandCastle\ECS\Systems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\ECS\WireRenderSystem.h">
+    <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Input\Bindings.h">
@@ -492,6 +489,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Core\Fancy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\Ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
