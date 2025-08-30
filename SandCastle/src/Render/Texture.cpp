@@ -300,17 +300,18 @@ namespace SandCastle
 		return m_ppu;
 	}
 
-	void Texture::EnablePBOStreaming(bool enable, size_t pboSizeBytes)
+	void Texture::SetPBOStreaming(bool enable)
 	{
 		if (enable == m_pboEnabled)
 			return;
-
+		m_pboSize = static_cast<size_t>(m_size.x) * static_cast<size_t>(m_size.y) * 4; // RGBA8
+		if (m_pboSize == 0)
+		{
+			LOG_ERROR("Texture PBO size = 0");
+			return;
+		}
 		if (enable)
 		{
-			if (pboSizeBytes == 0)
-				pboSizeBytes = static_cast<size_t>(m_size.x) * static_cast<size_t>(m_size.y) * 4; // RGBA8
-
-			m_pboSize = pboSizeBytes;
 			glGenBuffers(2, m_pbos);
 
 			for (int i = 0; i < 2; ++i)
@@ -331,154 +332,59 @@ namespace SandCastle
 			m_currentPBO = 0;
 			m_pboSize = 0;
 			m_pboEnabled = false;
-			m_pboMapped = false;
 		}
 	}
 
-	void* Texture::MapUploadBuffer(size_t bytes)
+	void Texture::UpdateRegion(int x, int y, int w, int h, const void* rgba8)
 	{
-		if (!m_pboEnabled || bytes == 0 || bytes > m_pboSize)
-			return nullptr;
-
-		GLuint pbo = m_pbos[m_currentPBO];
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
-
-		// Orphan previous storage to avoid stalls
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, (GLsizeiptr)m_pboSize, nullptr, GL_STREAM_DRAW);
-
-		// Fast write-only map. UNSYNCHRONIZED assumes you manage hazards (we orphaned so it's safe).
-		void* ptr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, (GLsizeiptr)bytes,
-			GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-
-		m_pboMapped = (ptr != nullptr);
-		return ptr;
-	}
-
-	void Texture::UnmapAndCommit(int x, int y, int w, int h, int srcStride)
-	{
-		if (!m_pboEnabled || !m_pboMapped)
+		if (w <= 0 || h <= 0)
+		{
+			LOG_ERROR("Texture::UpdateRegion, w or h is zero.");
 			return;
-
-		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-		m_pboMapped = false;
-
-		// Upload from PBO to texture
-		glBindTexture(GL_TEXTURE_2D, m_id);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		if (srcStride == 0 || srcStride == w * 4)
-		{
-			// Tightly packed
-			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, (const GLvoid*)0);
-		}
-		else
-		{
-			// If caller wrote row-strided data into the PBO (contiguously), use per-row uploads
-			// Compute address per row by adjusting pointer offset before each call
-			// (We keep it simple and do h calls; for large rects consider a temporary tight copy)
-			for (int row = 0; row < h; ++row)
-			{
-				const GLvoid* rowPtr = (const GLvoid*)((uintptr_t)0 + (uintptr_t)row * (uintptr_t)srcStride);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y + row, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, rowPtr);
-			}
 		}
 
-		if (m_importSettings.useMipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// Switch PBO for next frame
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-		m_currentPBO = 1 - m_currentPBO;
-		SignalReady();
-	}
-
-	void Texture::UpdateRegion(int x, int y, int w, int h, const void* src, int srcStride)
-	{
-		if (w <= 0 || h <= 0) return;
-
 		glBindTexture(GL_TEXTURE_2D, m_id);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		if (!m_pboEnabled)
+			SetPBOStreaming(true);
+
+		GLsizeiptr regionSize = (GLsizeiptr)w * (GLsizeiptr)h * (GLsizeiptr)4;
+
+		//Bind PBO
+		GLuint pbo = m_pbos[m_currentPBO];
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+		// Orphan previous storage to avoid stalls
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, (GLsizeiptr)m_pboSize, nullptr, GL_STREAM_DRAW);
+		//Map pbo (dst is a pointer to the memory region we want to update)
+		void* dst = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, regionSize,
+			GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+
+		if (dst)
 		{
-			// Fallback: direct upload
-			if (srcStride == 0 || srcStride == w * 4)
-			{
-				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, src);
-			}
-			else
-			{
-				const uint8_t* row = static_cast<const uint8_t*>(src);
-				for (int r = 0; r < h; ++r)
-				{
-					glTexSubImage2D(GL_TEXTURE_2D, 0, x, y + r, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
-					row += srcStride;
-				}
-			}
+			// Upload from PBO to texture
+			memcpy(dst, rgba8, regionSize);
+			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+			glBindTexture(GL_TEXTURE_2D, m_id);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, (const GLvoid*)0);
+
+			if (m_importSettings.useMipmaps)
+				glGenerateMipmap(GL_TEXTURE_2D);
+
+			//Clean state
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+			//Swap double buffer
+			m_currentPBO = 1 - m_currentPBO;
 		}
 		else
 		{
-			const size_t needed = (srcStride ? (size_t)srcStride * (size_t)h
-				: (size_t)w * 4ull * (size_t)h);
-			void* dst = MapUploadBuffer(needed);
-			if (dst)
-			{
-				if (srcStride == 0 || srcStride == w * 4)
-				{
-					memcpy(dst, src, needed);
-					UnmapAndCommit(x, y, w, h, w * 4);
-				}
-				else
-				{
-					// Copy row by row into PBO linearly
-					uint8_t* write = static_cast<uint8_t*>(dst);
-					const uint8_t* read = static_cast<const uint8_t*>(src);
-					for (int r = 0; r < h; ++r)
-					{
-						memcpy(write, read, (size_t)w * 4);
-						write += (size_t)w * 4;
-						read += srcStride;
-					}
-					UnmapAndCommit(x, y, w, h, w * 4);
-				}
-			}
-			else
-			{
-				// Fallback if map failed
-				if (srcStride == 0 || srcStride == w * 4)
-				{
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pbos[m_currentPBO]);
-					glBufferData(GL_PIXEL_UNPACK_BUFFER, (GLsizeiptr)needed, src, GL_STREAM_DRAW);
-					glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, (const GLvoid*)0);
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-					m_currentPBO = 1 - m_currentPBO;
-				}
-				else
-				{
-					const uint8_t* row = static_cast<const uint8_t*>(src);
-					for (int r = 0; r < h; ++r)
-					{
-						glTexSubImage2D(GL_TEXTURE_2D, 0, x, y + r, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, row);
-						row += srcStride;
-					}
-				}
-			}
+			LOG_ERROR("Texture::UpdateRegion, could not map region.");
+			return;
 		}
 
-		if (m_importSettings.useMipmaps)
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// Create a fence so other contexts can see when uploads are done
-		GLsync f = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		glFlush(); // make the fence visible across shared contexts
-
-		// Replace any previous fence (if any)
-		GLsync old = m_pendingFence.exchange(f, std::memory_order_acq_rel);
-		if (old) glDeleteSync(old);
+		SignalReady();
 	}
 
 	inline void Texture::WaitIfPending() const
