@@ -46,7 +46,6 @@ namespace SandCastle
 		unsigned int height = 0;
 		bool active = false;
 		bool offscreen = false;
-		bool zsort = false;
 	};
 	class RenderQueue
 	{
@@ -55,7 +54,7 @@ namespace SandCastle
 		{
 			for (int i = 0; i < MAX_LAYERS; i++)
 			{
-				zsort[i] = false;
+				zsort[i] = true;
 			}
 		}
 		inline void Swap()
@@ -88,7 +87,7 @@ namespace SandCastle
 				{
 					std::sort(q.begin(), q.end(),
 						[](const QuadRenderData& a, const QuadRenderData& b) noexcept {
-							return a.pos.z < b.pos.z;
+							return a.pos.z > b.pos.z;
 						});
 				}
 			}
@@ -206,6 +205,7 @@ namespace SandCastle
 		static uint32_t GetLayerId(std::string name);
 		/// @brief Get Every layers id
 		static std::vector<uint32_t> GetLayers();
+		static Material* GetMaterial(MaterialID id);
 		/// @brief Get a batch based on what layer/shader/render options is used. nullptr = default shader/render options
 		/// @return BatchId
 		static uint32_t GetBatchId(uint32_t layerIndex, Material* material);

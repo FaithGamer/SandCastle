@@ -199,7 +199,7 @@ namespace SandCastle
 
 	void Renderer2D::SetLayerSortZ(uint32_t layer, bool zsort)
 	{
-		Renderer2D::Instance()->m_queue.zsort[layer] = false;
+		Renderer2D::Instance()->m_queue.zsort[layer] = zsort;
 	}
 
 	uint32_t Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
@@ -273,6 +273,11 @@ namespace SandCastle
 			layers[i] = ins->m_layers[i].index;
 		}
 		return layers;
+	}
+
+	Material* Renderer2D::GetMaterial(MaterialID id)
+	{
+		return Instance()->m_materials[(size_t)id];
 	}
 
 	uint32_t Renderer2D::GetBatchId(uint32_t layerIndex, Material* material)
@@ -421,10 +426,6 @@ namespace SandCastle
 	{
 		START_PROFILING("cpu_render");
 		Begin();
-		/*for (int i = 0; i < m_queue.queue[m_queue.current].size(); i++)
-		{
-			DrawQuad(m_queue.queue[m_queue.current][i]);
-		}*/
 		m_queue.Sort();
 		for (int i = m_layers.size() - 1; i >= 0; i--)
 		{
@@ -551,7 +552,7 @@ namespace SandCastle
 	{
 		//Bind target framebuffer
 		m_target->Bind();
-		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_DEPTH_TEST);
 
 		//Put offscreen layer in according texture slots
 		for (auto& offscreenLayer : m_offscreenLayers)
@@ -729,7 +730,7 @@ namespace SandCastle
 			rotated.z + pos.z
 		};
 
-		return worldPos * m_sceneUniform.reduction;
+		return worldPos;
 	}
 
 	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, uint32_t layer)
