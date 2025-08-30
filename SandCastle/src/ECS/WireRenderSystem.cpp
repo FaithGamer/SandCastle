@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SandCastle/ECS/WireRenderSystem.h"
+#include "SandCastle/Render/WireRenderSystem.h"
 #include "SandCastle/Render/WireRender.h"
 #include "SandCastle/Render/Renderer2D.h"
 
