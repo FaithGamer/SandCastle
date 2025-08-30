@@ -3,14 +3,16 @@
 
 namespace SandCastle
 {
+	uint32_t SpriteRender::defaultLayer = 0;
+
 	SpriteRender::SpriteRender()
-		: m_sprite(nullptr), m_material(nullptr), m_layer(0), color(Vec4f(1, 1, 1, 1)),
+		: m_sprite(nullptr), m_material(nullptr), m_layer(defaultLayer), color(Vec4f(1, 1, 1, 1)),
 		needUpdateRenderBatch(true), renderBatch(0), spriteDimensionsChanged(true)
 	{
 
 	}
 	SpriteRender::SpriteRender(Sprite* sprite, Material* material = nullptr)
-		: m_sprite(sprite), m_material(material), m_layer(0), color(Vec4f(1, 1, 1, 1)),
+		: m_sprite(sprite), m_material(material), m_layer(defaultLayer), color(Vec4f(1, 1, 1, 1)),
 		needUpdateRenderBatch(true), renderBatch(0), spriteDimensionsChanged(true)
 	{
 
