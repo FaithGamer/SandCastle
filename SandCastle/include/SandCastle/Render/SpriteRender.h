@@ -46,6 +46,7 @@ namespace SandCastle
 		bool needUpdateRenderBatch;
 		uint32_t renderBatch;
 		bool spriteDimensionsChanged;
+		static uint32_t defaultLayer;
 	
 	protected:
 		Material* m_material;
