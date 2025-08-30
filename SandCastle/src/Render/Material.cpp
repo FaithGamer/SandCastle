@@ -85,9 +85,9 @@ namespace SandCastle
 
 
 			if (size > 1)
-				AddProperty(type, name, location);
-			else
 				AddPropertyArray(type, name, location, size);
+			else
+				AddProperty(type, name, location);
 		}
 	}
 	void Material::AddProperty(GLenum type, String name, GLint location)
