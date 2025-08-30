@@ -12,60 +12,72 @@
 #include "FontTest.h"
 #include "LayerTest.h"
 #include "PixPerfectGame.h"
+#include "SubTexture.h"
+#include "FrameTest.h"
 
-
-struct UiFrame
+struct Txt
 {
 	int tag;
 };
 class UiSys : public System
 {
+public:
+
+	void Start() override
+	{
+		auto uiLayer = Renderer2D::AddLayer("ui");
+		auto worldLayer = Renderer2D::AddLayer("world");
+		SpriteRender::defaultLayer = worldLayer;
+
+		auto fSys = sys(FontSystem);
+		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
+		uiMat->SetFloat("uDpi", 1.f / 360.f);
+		fSys->SetLayer(uiLayer);
+		fSys->SetMaterial(uiMat);
+		fSys->SetPPU(1.f);
+		auto font = fSys->MakeFont("alata-regular.ttf", 50, 2);
+
+		Camera::main->SetPxZoom(2);
+		fSys->UseFont(font);
+
+		for (int i = 0; i < 100; i++)
+		{
+			float x = Random::Range(-300, 300);
+			float y = Random::Range(-180, 180);
+			auto entt = Entity::CreateSprite("swordman.png_0_0");
+			entt.gtr()->SetPosition(x, y, -5);
+		}
+
+		auto se2 = fSys->Write((const char*)u8"Hello World");
+		se2.root.adc<Txt>();
+	}
 	void Update() override
 	{
 		static float timer = 0.f;
 		auto delta = Time::Delta();
 		timer += delta;
-		float ypos = std::sin(timer*10.f);
-		auto view =Entity::View<UiFrame, Transform>();
-		view.each([&](UiFrame& fr, Transform& tr)
+		float ypos = std::sin(timer) * 1000.f;
+		float xpos = ypos;
+
+		auto view = Entity::View<Txt, Transform>();
+		view.each([&](Txt& t, Transform& tr)
 			{
-				tr.SetPosition(0, ypos, 0);
+				tr.SetPosition(xpos, 0, 0);
 			});
+
 	}
+
 };
 void UiTest()
 {
 	Engine::Init();
 	Systems::Push<UiSys>();
-	Ui ui;
-	//Camera::main->zoom = 0.003f;
 	Camera::Constraints cons;
+	Window::SetClearColor(Vec4f(1, 0, 0, 1));
 	cons.SetDefault();
 	Camera::main->SetConstraints(cons);
-	auto e =ui.MakeFrameSprites(0, Vec2f(140, 140), "frame.png", true);
-	e.GetComponent<Transform>()->SetPosition(0, 0, 0);
-	e.adc<UiFrame>();
-
-	/*auto tex = Renderer2D::CreateSubTexture(sprite->GetTexture(), sprite->GetTextureRect());
-	auto spr = new Sprite(tex);
-	auto e = Entity::Create();
-	e.adc<Transform>();
-	e.adc<SpriteRender>()->SetSprite(spr);*/
 	Engine::Launch();
 }
-
-/*void TextureFromSubTextureTest()
-{
-	Engine::Init();
-	Camera::main->zoom = 0.01;
-	auto frame = Assets::Get<Sprite>("frame.png_0_0");
-	Texture* texture = Renderer2D::CreateSubTexture(frame->GetTexture(), frame->GetTextureRect());
-	texture->SetWrapping(TextureWrapping::Repeat);
-	Sprite* sprite = new Sprite(texture, Rect(0, 0, 1000, 30));
-	Entity e = Entity::CreateSprite();
-	e.gc<SpriteRender>()->SetSprite(sprite);
-	Engine::Launch();
-}*/
 
 using namespace SandCastle;
 int main()
@@ -77,12 +89,13 @@ int main()
 	//Rotation();
 	//WindowEvents();
 	//Serialization();
-	//Benchmark2();
+	Benchmark2();
 	//Delegates();
 	//Signals();
 	//FontTest();
 	//LayerTest();
-//	PixPerfectGame();
-	//TextureFromSubTextureTest();
-	UiTest();
+	//PixPerfectGame();
+	//SubTexture();
+	//FrameTest();
+	//UiTest();
 }

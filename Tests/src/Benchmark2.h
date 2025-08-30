@@ -90,6 +90,9 @@ void Benchmark2()
 {
 	Engine::Init();
 	auto map = Inputs::CreateInputMap();
+	auto l = Renderer2D::GetLayerId("Window");
+	SpriteRender::defaultLayer = l;
+	Renderer2D::SetLayerSortZ(l, true);
 	auto btn = map->CreateButtonInput("click");
 	btn->BindMouse(Mouse::Button::Left);
 	btn->signal.Listen(&OnClick2);
