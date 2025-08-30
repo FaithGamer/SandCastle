@@ -28,6 +28,6 @@ void main()
     vTexCoords = iUv;
     vTexIndex = iTexIndex;
     
-    vec3 pos = iVertexPos.xyz * uCamZoom;
+    vec3 pos = iVertexPos.xyz * uReduction * uCamZoom;
     gl_Position = uCamProjView  * vec4(pos, 1.0);
 }
