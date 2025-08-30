@@ -211,6 +211,11 @@ namespace SandCastle
 		m_maxAtlasSize = pixels;
 	}
 
+	void FontSystem::SetLayer(uint32_t layer)
+	{
+		m_layer = layer;
+	}
+
 	// ---------- CreateSentence (kerning + wrapping + line spacing) ----------
 	Sentence FontSystem::Write(const std::string& utf8,
 		float maxWidth,
@@ -283,6 +288,7 @@ namespace SandCastle
 					auto sr = e.AddComponent<SpriteRender>();
 					sr->SetMaterial(font.material);
 					sr->SetSprite(g.sprite.get());
+					sr->SetLayer(font.layer);
 
 					sent.root.AddChild(e);
 					sent.glyphEntities.push_back(e);
@@ -329,6 +335,7 @@ namespace SandCastle
 			auto sr = e.AddComponent<SpriteRender>();
 			sr->SetMaterial(font.material);
 			sr->SetSprite(g.sprite.get());
+			sr->SetLayer(font.layer);
 
 			sent.root.AddChild(e);
 			sent.glyphEntities.push_back(e);

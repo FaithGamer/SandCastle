@@ -54,6 +54,7 @@ namespace SandCastle
 		bool  hasFallbackGlyph = false;   // true once baked
 		float outlineThickness = 0.f;     // in pixels (stroke radius)
 		Vec4f outlineColor = { 0, 0, 0, 1 };
+		uint32_t layer = 0;
 	};
 
 	struct Sentence
@@ -85,6 +86,7 @@ namespace SandCastle
 		void SetPPU(float ppu);
 		void SetMaterial(Material* material);
 		void SetMaxAtlasSize(int pixels);
+		void SetLayer(uint32_t layer);
 		Sentence Write(const std::string& utf8,
 			float maxWidth = -1.f,
 			float lineSpacing = 1.0f);
@@ -137,5 +139,6 @@ namespace SandCastle
 		Material* m_material = nullptr;
 		Material* m_defaultMaterial = nullptr;
 		String m_fontFolder = "assets/fonts/";
+		uint32_t m_layer = 0;
 	};
 }
