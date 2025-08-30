@@ -150,7 +150,7 @@ namespace SandCastle
 		GLint maxTextureSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 		m_maxAtlasSize = std::min(4096, maxTextureSize);
-		m_defaultMaterial = Renderer2D::CreateMaterial(Assets::Get<Shader>("default.shader"));
+		m_defaultMaterial = Renderer2D::GetMaterial(0);
 	}
 
 	// ---------- MakeFont (primary: spec) ----------
@@ -368,7 +368,6 @@ namespace SandCastle
 		tis.pixelPerUnit = font.ppu;
 
 		auto tex = makesptr<Texture>(side, side, tis);
-		tex->EnablePBOStreaming(true);
 
 		font.atlases.clear();
 		font.atlasSizes.clear();
@@ -406,12 +405,11 @@ namespace SandCastle
 		TextureImportSettings tis;
 		tis.keepData = false;
 		tis.useMipmaps = true;
-		tis.filtering = TextureFiltering::Linear;
+		tis.filtering = TextureFiltering::Nearest;
 		tis.wrapping = TextureWrapping::Clamp;
 		tis.pixelPerUnit = m_fonts[id].ppu;
 
 		auto tex = makesptr<Texture>(side, side, tis);
-		tex->EnablePBOStreaming(true);
 
 		auto& pagesVec = m_dynPages[id];
 		pagesVec.push_back(DynamicPage{ side, side, 0, 0, 0 });
@@ -439,9 +437,9 @@ namespace SandCastle
 			return srcAlpha[Y * w + X];
 			};
 
-		for (int y = 0; y < H; ++y)
+		for (int y = 0; y < H; y++)
 		{
-			for (int x = 0; x < W; ++x)
+			for (int x = 0; x < W; x++)
 			{
 				const int srcX = x - pad;
 				const int srcY = H - y - pad;
@@ -564,7 +562,7 @@ namespace SandCastle
 		std::vector<unsigned char> rgba = EdgeExtrudeRGBA(alpha.data(), boxW, boxH, kPad);
 
 		auto& tex = font.atlases[page];
-		tex->UpdateRegion(pos.x, pos.y, reqW, reqH, rgba.data(), reqW * 4);
+		tex->UpdateRegion(pos.x, pos.y, reqW, reqH, rgba.data());
 
 		Glyph g;
 		g.codepoint = REPLACEMENT_CP;
@@ -573,7 +571,7 @@ namespace SandCastle
 		g.advancePx = boxW + std::max(1, boxW / 8);
 		g.atlasIndex = page;
 		g.sprite = makesptr<Sprite>(font.atlases[g.atlasIndex].get());
-		g.sprite->SetTextureRect(Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad), (float)boxW, (float)boxH }, 1.0f);
+		g.sprite->SetTextureRect(Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad + 1), (float)boxW, (float)boxH }, 1.0f);
 
 		font.fallbackGlyph = g;
 		font.hasFallbackGlyph = true;
@@ -588,119 +586,170 @@ namespace SandCastle
 		if (gindex == 0) return false;
 
 		// We need advance regardless of rendering path
-		if (FT_Load_Glyph(font.face, gindex, FT_LOAD_DEFAULT)) return false;
-		int advancePx = (int)(font.face->glyph->advance.x >> 6);
+		
 
 		// Outline path: render stroke + fill, composite into a single RGBA
 		if (font.outlineThickness > 0.0f)
 		{
+			if (FT_Load_Glyph(font.face, gindex, FT_LOAD_DEFAULT))
+				return false;
+			int advancePx = (int)(font.face->glyph->advance.x >> 6);
 			advancePx += font.outlineThickness;
 			FT_Glyph glyphFill = nullptr;
 			FT_Glyph glyphStroke = nullptr;
 			FT_Stroker stroker = nullptr;
 
-			FT_Get_Glyph(font.face->glyph, &glyphFill);
-			FT_Glyph_Copy(glyphFill, &glyphStroke);
-
-			// Configure stroker in 26.6 pixels
-			FT_Stroker_New(m_ft, &stroker);
-			FT_Stroker_Set(stroker,
-				(FT_Fixed)std::lround(font.outlineThickness * 64.0f),
-				FT_STROKER_LINECAP_ROUND,
-				FT_STROKER_LINEJOIN_ROUND,
-				0);
-
-			// Outside border
-			FT_Glyph_StrokeBorder(&glyphStroke, stroker, 0 /* outside */, 1 /* destroy outline */);
-
-			// Convert to bitmaps
-			FT_Glyph_To_Bitmap(&glyphFill, FT_RENDER_MODE_NORMAL, nullptr, 1);
-			FT_Glyph_To_Bitmap(&glyphStroke, FT_RENDER_MODE_NORMAL, nullptr, 1);
-
-			FT_BitmapGlyph bmf = (FT_BitmapGlyph)glyphFill;
-			FT_BitmapGlyph bms = (FT_BitmapGlyph)glyphStroke;
-			const FT_Bitmap& bf = bmf->bitmap;
-			const FT_Bitmap& bs = bms->bitmap;
-
-			int stroke_left = bms->left;
-			int stroke_top = bms->top;
-			int stroke_right = bms->left + (int)bs.width;
-			int stroke_bottom = bms->top - (int)bs.rows;
-
-			int w = std::max(0, stroke_right - stroke_left);
-			int h = std::max(0, stroke_top - stroke_bottom);
-
-			// Allocate RGBA (no pad yet)
-			std::vector<unsigned char> rgba;
-			rgba.assign((size_t)w * (size_t)h * 4u, 0);
-
-			auto put_px = [&](int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-				if (x < 0 || y < 0 || x >= w || y >= h) return;
-				size_t i = (size_t)(y * w + x) * 4u;
-				// Alpha is straight; color overwrite policy determined by caller
-				rgba[i + 0] = r; rgba[i + 1] = g; rgba[i + 2] = b; rgba[i + 3] = a;
+			auto cleanup = [&]() {
+				if (glyphFill)   FT_Done_Glyph(glyphFill);
+				if (glyphStroke) FT_Done_Glyph(glyphStroke);
+				if (stroker)     FT_Stroker_Done(stroker);
 				};
 
-			// Composite order: first outline, then fill overwrites color where present
-			// Copy outline bitmap
-			for (int y = 0; y < (int)bs.rows; ++y)
+			// 3) Extract glyph outline twice: one for fill, one we’ll stroke
+			if (FT_Get_Glyph(font.face->glyph, &glyphFill)) { cleanup(); return false; }
+			if (FT_Glyph_Copy(glyphFill, &glyphStroke)) { cleanup(); return false; }
+
+			// 4) Configure stroker (thickness in 26.6)
+			if (FT_Stroker_New(m_ft, &stroker)) { cleanup(); return false; }
+			FT_Stroker_Set(
+				stroker,
+				(FT_Fixed)std::lround(font.outlineThickness * 64.0), // thickness
+				FT_STROKER_LINECAP_ROUND,
+				FT_STROKER_LINEJOIN_ROUND,
+				0 // miter limit (ignored for ROUND)
+			);
+
+			// 5) Apply outside stroke to the copy
+			// destroy=1 lets FreeType free the source outline packed into glyphStroke
+			if (FT_Glyph_StrokeBorder(&glyphStroke, stroker, 0, 1)) { cleanup(); return false; }
+
+			// 6) Convert both to 8-bit coverage bitmaps (grayscale AA)
+			if (FT_Glyph_To_Bitmap(&glyphFill, FT_RENDER_MODE_NORMAL, nullptr, 1)) { cleanup(); return false; }
+			if (FT_Glyph_To_Bitmap(&glyphStroke, FT_RENDER_MODE_NORMAL, nullptr, 1)) { cleanup(); return false; }
+
+			FT_BitmapGlyph bmf = reinterpret_cast<FT_BitmapGlyph>(glyphFill);
+			FT_BitmapGlyph bms = reinterpret_cast<FT_BitmapGlyph>(glyphStroke);
+			const FT_Bitmap& bf = bmf->bitmap; // fill bitmap
+			const FT_Bitmap& bs = bms->bitmap; // stroke bitmap
+
+			// 7) Union bounding box in pixel space (FreeType: left/top are bearing from baseline; top is upward)
+			const int fill_left = bmf->left;
+			const int fill_top = bmf->top;
+			const int fill_right = bmf->left + (int)bf.width;
+			const int fill_bottom = bmf->top - (int)bf.rows;
+
+			const int stroke_left = bms->left;
+			const int stroke_top = bms->top;
+			const int stroke_right = bms->left + (int)bs.width;
+			const int stroke_bottom = bms->top - (int)bs.rows;
+
+			const int left = std::min(fill_left, stroke_left);
+			const int right = std::max(fill_right, stroke_right);
+			const int top = std::max(fill_top, stroke_top);
+			const int bottom = std::min(fill_bottom, stroke_bottom);
+
+			const int w = std::max(0, right - left);
+			const int h = std::max(0, top - bottom);
+			if (w == 0 || h == 0) { cleanup(); return false; }
+
+			// 8) Offsets into the union image (y-down in destination buffer)
+			const int dx_f = fill_left - left;
+			const int dy_f = top - fill_top;
+			const int dx_s = stroke_left - left;
+			const int dy_s = top - stroke_top;
+
+			// 9) Destination RGBA (premultiplied)
+			std::vector<unsigned char> rgba((size_t)w * (size_t)h * 4u, 0);
+
+			// Utility: handle positive/negative pitch safely
+			auto row_ptr = [](const FT_Bitmap& b, int y) -> const unsigned char* {
+				int pitch = b.pitch;
+				if (pitch >= 0)
+					return b.buffer + y * pitch;
+				// Negative pitch: first row is at the end of the buffer
+				return b.buffer + (b.rows - 1 - y) * (-pitch);
+				};
+
+			auto sampleCoverage = [&](const FT_Bitmap& b, int dx, int dy, int x, int y) -> float {
+				const int xx = x - dx;
+				const int yy = y - dy;
+				if (xx < 0 || yy < 0 || xx >= (int)b.width || yy >= (int)b.rows) return 0.0f;
+				const unsigned char* row = row_ptr(b, yy);
+				return row[xx] / 255.0f; // coverage 0..1
+				};
+
+			// Colors (linear-ish). Your outlineColor should be in [0..1]
+			const float Cs_r = std::clamp(font.outlineColor.x, 0.0f, 1.0f);
+			const float Cs_g = std::clamp(font.outlineColor.y, 0.0f, 1.0f);
+			const float Cs_b = std::clamp(font.outlineColor.z, 0.0f, 1.0f);
+
+			// Fill color is white; change if needed
+			constexpr float Cf_r = 1.0f, Cf_g = 1.0f, Cf_b = 1.0f;
+
+			// 10) Composite FILL over STROKE into premultiplied RGBA
+			for (int y = 0; y < h; ++y)
 			{
-				for (int x = 0; x < (int)bs.width; ++x)
+				for (int x = 0; x < w; ++x)
 				{
-					unsigned char a = bs.buffer[y * bs.pitch + x];
-					if (a == 0) continue;
-					int dx = (bms->left + x) - stroke_left;
-					int dy = (stroke_top - (bms->top - y)) - 1; // convert baseline coords to image coords
-					put_px(dx, dy, f2ub(font.outlineColor.x), f2ub(font.outlineColor.y), f2ub(font.outlineColor.z), a);
-				}
-			}
-			// Copy fill bitmap (white), overwrite color & alpha
-			for (int y = 0; y < (int)bf.rows; ++y)
-			{
-				for (int x = 0; x < (int)bf.width; ++x)
-				{
-					unsigned char a = bf.buffer[y * bf.pitch + x];
-					if (a == 0) continue;
-					int dx = (bmf->left + x) - stroke_left;
-					int dy = (stroke_top - (bmf->top - y)) - 1;
-					put_px(dx, dy, 255, 255, 255, a);
+					const float as = sampleCoverage(bs, dx_s, dy_s, x, y);
+					const float af = sampleCoverage(bf, dx_f, dy_f, x, y);
+
+					// Porter-Duff OVER with premultiplied colors
+					const float a = af + as * (1.0f - af);
+					float Cp_r = Cf_r * af + Cs_r * as * (1.0f - af);
+					float Cp_g = Cf_g * af + Cs_g * as * (1.0f - af);
+					float Cp_b = Cf_b * af + Cs_b * as * (1.0f - af);
+
+					// Clamp & store
+					const size_t i = (size_t)(y * w + x) * 4u;
+					rgba[i + 0] = (unsigned char)std::lround(std::clamp(Cp_r, 0.0f, 1.0f) * 255.0f);
+					rgba[i + 1] = (unsigned char)std::lround(std::clamp(Cp_g, 0.0f, 1.0f) * 255.0f);
+					rgba[i + 2] = (unsigned char)std::lround(std::clamp(Cp_b, 0.0f, 1.0f) * 255.0f);
+					rgba[i + 3] = (unsigned char)std::lround(std::clamp(a, 0.0f, 1.0f) * 255.0f);
 				}
 			}
 
-			// Padding (edge clamp)
+			// 11) Atlas placement with padding (edge clamp)
 			constexpr int kPad = 2;
 			const int reqW = std::max(1, w + 2 * kPad);
 			const int reqH = std::max(1, h + 2 * kPad);
 
-			Vec2i pos{ 0,0 };
+			Vec2i pos{ 0, 0 };
 			int page = PlaceOnPage(font.id, reqW, reqH, kPad, pos);
 
+			// You must provide PadRGBA(rgba, w, h, pad) -> vector<uint8_t> with clamped borders
 			std::vector<unsigned char> padded = PadRGBA(rgba.data(), w, h, kPad);
 
 			auto& tex = font.atlases[page];
-			tex->UpdateRegion(pos.x, pos.y, reqW, reqH, padded.data(), reqW * 4);
+			if (reqW > 0 && reqH > 0)
+				tex->UpdateRegion(pos.x, pos.y, reqW, reqH, padded.data());
 
+			// 12) Emit glyph metrics/sprite rect
 			Glyph g;
 			g.codepoint = cp;
 			g.sizePx = Vec2i{ w, h };
-			g.bearingPx = Vec2i{ stroke_left, stroke_top };
+			g.bearingPx = Vec2i{ left, top }; // left/top of union box (matches how we built it)
 			g.advancePx = advancePx;
 			g.atlasIndex = page;
 			g.sprite = makesptr<Sprite>(font.atlases[g.atlasIndex].get());
-			g.sprite->SetTextureRect(Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad), (float)w, (float)h }, 1.0f);
+
+			// Texture rect inside the padded region; keep your +1 if you need it for texel alignment
+			g.sprite->SetTextureRect(
+				Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad + 1), (float)w, (float)h },
+				1.0f
+			);
 
 			font.glyphs[cp] = g;
 
-			// Cleanup
-			if (glyphFill) FT_Done_Glyph(glyphFill);
-			if (glyphStroke) FT_Done_Glyph(glyphStroke);
-			if (stroker) FT_Stroker_Done(stroker);
+			cleanup();
 			return true;
 		}
 		else
 		{
 			// Original fast path: render grayscale bitmap and expand to RGBA white
-			if (FT_Load_Char(font.face, cp, FT_LOAD_RENDER)) return false;
+			if (FT_Load_Char(font.face, cp, FT_LOAD_RENDER))
+				return false;
+			int advancePx = (int)(font.face->glyph->advance.x >> 6);
 			const FT_GlyphSlot slot = font.face->glyph;
 			const int w = slot->bitmap.width;
 			const int h = slot->bitmap.rows;
@@ -721,7 +770,8 @@ namespace SandCastle
 				rgba.assign((size_t)reqW * (size_t)reqH * 4u, 0);
 
 			auto& tex = font.atlases[page];
-			tex->UpdateRegion(pos.x, pos.y, reqW, reqH, rgba.data(), reqW * 4);
+			if (reqW > 0 && reqH > 0)
+				tex->UpdateRegion(pos.x, pos.y, reqW, reqH, rgba.data());
 
 			Glyph g;
 			g.codepoint = cp;
@@ -730,7 +780,7 @@ namespace SandCastle
 			g.advancePx = advancePx;
 			g.atlasIndex = page;
 			g.sprite = makesptr<Sprite>(font.atlases[g.atlasIndex].get());
-			g.sprite->SetTextureRect(Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad), (float)w, (float)h }, 1.0f);
+			g.sprite->SetTextureRect(Rect{ (float)(pos.x + kPad), (float)(pos.y + kPad + 1), (float)w, (float)h }, 1.0f);
 
 			font.glyphs[cp] = g;
 			return true;
