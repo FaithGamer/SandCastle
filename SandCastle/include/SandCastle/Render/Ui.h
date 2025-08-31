@@ -6,7 +6,6 @@
 #include "SandCastle/Render/Sprite.h"
 namespace SandCastle
 {
-
 	class Ui
 	{
 	public:
@@ -44,7 +43,6 @@ namespace SandCastle
 		}SpriteCorner;
 
 	public:
-
 		Entity MakeFrameSprites(FrameID id, Vec2f size, String texture, bool fixedStep);
 
 	private:

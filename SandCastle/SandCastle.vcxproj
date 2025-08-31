@@ -356,6 +356,7 @@
     <ClInclude Include="include\SandCastle\ECS\Entity.h" />
     <ClInclude Include="include\SandCastle\ECS\EntityId.h" />
     <ClInclude Include="include\SandCastle\Input\InputSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\Layer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h" />
     <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\System.h" />

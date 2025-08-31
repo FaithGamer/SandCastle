@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SandCastle/Render/SpriteRenderSystem.h"
+#include "SandCastle/Render/Renderer2D.h"
 
 namespace SandCastle
 {
@@ -31,55 +32,21 @@ namespace SandCastle
 
 	void SpriteRenderSystem::OnClearBatches()
 	{
-		static auto group = Entity::registry.group<SpriteRender, Transform>();
-		group.each([&](SpriteRender& sprite, Transform& tr)
-			{
-				sprite.needUpdateRenderBatch = true;
-			});
+
 	}
 
 	void SpriteRenderSystem::LateUpdate()
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		auto group = Entity::registry.group<SpriteRender, Transform>();
-		if (!m_zSort)
-		{
-			group.each([&](SpriteRender& sprite, Transform& tr)
-				{
-					if (sprite.GetSprite() == nullptr)
-						return;
-					if (sprite.needUpdateRenderBatch)
-					{
-						sprite.renderBatch = renderer->GetBatchId(sprite.GetLayer(), sprite.GetMaterial());
-						sprite.needUpdateRenderBatch = false;
-					}
-					renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &tr));
-				});
-		}
-		else
-		{
-			std::list<OrderedSpriteTransform> ordered;
 
-			group.each([&](SpriteRender& sprite, Transform& tr)
-				{
-					if (sprite.GetSprite() == nullptr)
-						return;
-					auto ord = OrderedSpriteTransform(&sprite, &tr, tr.GetPosition().z);
-					ordered.emplace_back(ord);
-				});
-
-			ordered.sort();
-
-			for (auto& sprite : ordered)
+		group.each([&](SpriteRender& sprite, Transform& tr)
 			{
-				if (sprite.sprite->needUpdateRenderBatch)
-				{
-					sprite.sprite->renderBatch = renderer->GetBatchId(sprite.sprite->GetLayer(), sprite.sprite->GetMaterial());
-					sprite.sprite->needUpdateRenderBatch = false;
-				}
-				renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(sprite.sprite, sprite.transform));
-			}
-		}
+				if (sprite.GetSprite() == nullptr)
+					return;
+				renderer->PushQuad(MakeQuadRenderDataFromSpriteRender(&sprite, &tr));
+			});
+
 	}
 
 	QuadRenderData SpriteRenderSystem::MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform)
@@ -98,7 +65,7 @@ namespace SandCastle
 			transform->GetRotation().z,
 			texture->GetId(),
 			render->GetLayer(),
-			render->renderBatch,
+			render->GetMaterialID(),
 			render->color.a
 		);
 	}

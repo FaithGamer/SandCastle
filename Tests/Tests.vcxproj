@@ -41,6 +41,7 @@
     <ClInclude Include="src\DrawAnimation.h" />
     <ClInclude Include="src\DrawSprite.h" />
     <ClInclude Include="src\FontTest.h" />
+    <ClInclude Include="src\FrameTest.h" />
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\LayerTest.h" />
@@ -48,6 +49,7 @@
     <ClInclude Include="src\Rotation.h" />
     <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\Signals.h" />
+    <ClInclude Include="src\SubTexture.h" />
     <ClInclude Include="src\WindowEvents.h" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +60,10 @@
     <None Include="assets\shaders\line.frag" />
     <None Include="assets\shaders\line.geom" />
     <None Include="assets\shaders\line.vert" />
+    <None Include="assets\shaders\pixel.frag" />
+    <None Include="assets\shaders\pixel.vert" />
+    <None Include="assets\shaders\ui.frag" />
+    <None Include="assets\shaders\ui.vert" />
     <None Include="assets\shaders\wire.frag" />
     <None Include="assets\shaders\wire.vert" />
   </ItemGroup>

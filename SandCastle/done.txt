@@ -228,15 +228,30 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -sprite texture rect kept and accessible
 -basic UI frame drawing.
 
->interface between transform position and anchored position
+30
 
->ui system.
+-fixed font drawing
+-cleaned texture update region
+-fixed material properties
+-fixed zsort
+-new batches
+
+31
+
+>fix layer not showing
+>fix window layer being behind other layers
+>add color unsigned char to QuadData, replace uvOrColor
+>replace m_maxOffscreen layer by define
+UI:
+
 We need to think of an api than enable to generate
 easily, in screen space: frames, texts, buttons, fillbar, tabs, checkboxes, sliders. 
 
+>interface between transform position and anchored position
 >frame moving can sometimes show 1px separation between top/mid, etc...
 >think about anchor and frame/element placement
-
+>create ui text with point size, not px size
+>check gpu max texture size.
 -AnchorPoint determine how the frame grows and where is it's 0.0 point in frame
 -ContentDirection determine how content is added
 Frame.SetSize(0, 100) -> 0 = fit content
@@ -285,13 +300,6 @@ secondary tasks:
 bugs:
 
 >asset log error not always log in the .txt logs?
-
-UI:
-
->ui system
->create ui text with point size, not px size
->check gpu max texture size.
-
 
 render:
 

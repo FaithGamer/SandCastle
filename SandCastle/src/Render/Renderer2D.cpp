@@ -130,21 +130,31 @@ namespace SandCastle
 		m_defaultRenderOptionsLayer->SetDepthTest(true);
 		auto window = Window::Instance();
 
-		m_defaultBatchMaterial = CreateMaterial(Assets::Get<Shader>("default.shader"));
-		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"));
+		//Create default materials
+		auto defaultShader = Assets::Get<Shader>("default.shader");
+		//Not using CreateMaterial because it would be blocking thread by attempting to create the batch.
+		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size()));
+		m_defaultBatchMaterial = m_materials.back();
+		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"), true);
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
 		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
 
-		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		sptr<VertexArray> defaultLayerVertexArray = GenerateLayerVertexArray(screenSpace);
-
 		//Screen layer
-		m_layers.push_back(RenderLayer("Window", 0, window, m_defaultLayerMaterial, m_defaultRenderOptionsLayer, defaultLayerVertexArray));
+		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
+		m_layers.push_back(RenderLayer("Window",
+			0,
+			window,
+			m_defaultLayerMaterial,
+			m_defaultRenderOptionsLayer,
+			GenerateLayerVertexArray(screenSpace, 0)));
+		m_layerMax++;
+		m_lastLayerAdded = m_layerMax;
 
+		//Create initial quad batch for windoww layer and default batch material
+		Renderer2D::CreateQuadBatchThread(m_layers.back(), m_defaultBatchMaterial);
 		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), m_maxOffscreenLayers + 1);
 
 		//Listen to window resize signal
-
 		Window::GetResizeSignal()->Listen(&Renderer2D::OnWindowResize, this);
 
 		//Set render target to be the window by default
@@ -176,38 +186,39 @@ namespace SandCastle
 		shader->SetUniformArray(location, &sampler[0], (GLsizei)sampler.size());
 	}
 
-	uint64_t Renderer2D::GenerateBatchId(uint64_t a, uint64_t b)
-	{
-		b = (b + 1) * 1000;
-		a = (a + 1) * 1000000;
-		return a + b;
-	}
-
 	void Renderer2D::SetRenderTarget(sptr<RenderTarget> target)
 	{
 		m_target = target;
 	}
 
-	uint32_t Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
+	LayerID Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
 		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
+
 		ins->Wait();
+		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
+		for (auto& mat : ins->m_materials)
+		{
+			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
+		}
+		ins->Wait();
+		ins->m_layerMax++;
 		return ins->m_lastLayerAdded;
 
 	}
 
-	void Renderer2D::SetLayerSortZ(uint32_t layer, bool zsort)
+	void Renderer2D::SetLayerSortZ(LayerID layer, bool zsort)
 	{
 		Renderer2D::Instance()->m_queue.zsort[layer] = zsort;
 	}
 
-	uint32_t Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
+	LayerID Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		return AddLayer(name, 0, material, renderOptions);
 	}
 
-	uint32_t Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex)
+	LayerID Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex)
 	{
 		auto ins = Instance();
 		ins->Wait();
@@ -218,15 +229,15 @@ namespace SandCastle
 
 		sptr<RenderTexture> layer = makesptr<RenderTexture>(Window::GetSize());
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		sptr<VertexArray> layerVertexArray = ins->GenerateLayerVertexArray(screenSpace);
 		uint32_t index = (uint32_t)ins->m_layers.size();
+		sptr<VertexArray> layerVertexArray = ins->GenerateLayerVertexArray(screenSpace, index);
 		ins->m_layers.push_back(RenderLayer(name, index, layer, ins->m_defaultLayerMaterial, ins->m_defaultRenderOptionsLayer, layerVertexArray, false, true));
 		ins->m_offscreenLayers.push_back(OffscreenRenderLayer(layer, sampler2DIndex, index));
 
 		return (uint32_t)ins->m_layers.size() - 1;
 	}
 
-	void Renderer2D::SetLayerScreenSpace(uint32_t layer, const std::vector<Vec2f>& screenSpace)
+	void Renderer2D::SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace)
 	{
 		auto ins = Instance();
 		if (screenSpace.size() != 4)
@@ -244,7 +255,7 @@ namespace SandCastle
 			LOG_WARN("Cannot change layer screen space of the screen layer. Layer screen space hasn't been changed.");
 			return;
 		}
-		ins->m_layers[layer].vertexArray = ins->GenerateLayerVertexArray(screenSpace);
+		ins->m_layers[layer].vertexArray = ins->GenerateLayerVertexArray(screenSpace, layer);
 	}
 
 	uint32_t Renderer2D::GetLayerId(std::string name)
@@ -280,58 +291,20 @@ namespace SandCastle
 		return Instance()->m_materials[(size_t)id];
 	}
 
-	uint32_t Renderer2D::GetBatchId(uint32_t layerIndex, Material* material)
-	{
-		//To do: bake the batchs based on assets
-		auto ins = Instance();
-
-		uint32_t materialId = 0;
-		if (material != nullptr)
-			materialId = material->GetID();
-
-		uint64_t id = ins->GenerateBatchId(layerIndex, materialId);
-
-
-		auto batch = ins->m_quadBatchFinder.find(id);
-		if (batch == ins->m_quadBatchFinder.end())
-		{
-			//Create batch if doesn't exists
-			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatch, ins.get(), ins->m_layers[layerIndex], material);
-			ins->Wait();
-
-			uint32_t index = (uint32_t)ins->m_quadBatchs.size() - 1;
-			ins->m_quadBatchs.back().index = index;
-
-			ins->m_quadBatchFinder.insert(std::make_pair(id, index));
-
-			if (ins->m_rendering)
-			{
-				ins->StartBatch(index);
-			}
-
-			return index;
-		}
-		else
-		{
-			uint32_t index = batch->second;
-			return index;
-		}
-	}
-
-	void Renderer2D::SetLayerMaterial(uint32_t layer, Material* material)
+	void Renderer2D::SetLayerMaterial(LayerID layer, Material* material)
 	{
 		auto ins = Instance();
 		ins->SetShaderUniformSampler(material->GetShader(), ins->m_maxOffscreenLayers + 1);
 		ins->m_layers[layer].material = material;
 	}
 
-	void Renderer2D::SetLayerRenderOptions(uint32_t layer, sptr<RenderOptions> renderOptions)
+	void Renderer2D::SetLayerRenderOptions(LayerID layer, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
 		ins->m_layers[layer].renderOptions = renderOptions;
 	}
 
-	void Renderer2D::SetLayerHeight(uint32_t layer, unsigned int height)
+	void Renderer2D::SetLayerHeight(LayerID layer, unsigned int height)
 	{
 		auto ins = Instance();
 		ins->m_layers[layer].height = height;
@@ -340,40 +313,23 @@ namespace SandCastle
 		ins->m_layers[layer].target->SetSize({ width, height });
 	}
 
-	void Renderer2D::PreallocateQuadBatch(int count)
-	{
-		for (int i = 0; i < count; i++)
-		{
-			m_quadBatchs.push_back(QuadBatch());
-			m_freeQuadBatchs.push_back(m_quadBatchs.size() - 1);
-		}
-	}
-
-	void Renderer2D::CreateQuadBatch(RenderLayer& layer, Material* material)
-	{
-		size_t index = 0;
-		if (!m_freeQuadBatchs.empty())
-		{
-			//Recycle a free batch
-			index = m_freeQuadBatchs[0];
-			Container::RemoveAt(m_freeQuadBatchs, 0);
-		}
-		else
-		{
-			//Allocate a new batch
-			m_quadBatchs.push_back(QuadBatch());
-			AllocateQuadBatch(m_quadBatchs.back());
-			index = m_quadBatchs.size() - 1;
-		}
-
-		SetupQuadBatch(m_quadBatchs[index], layer, material);
-	}
-
-	void Renderer2D::SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Material* material)
+	void Renderer2D::CreateQuadBatchThread(RenderLayer& layer, Material* material)
 	{
 		if (material == nullptr)
 			material = m_defaultBatchMaterial;
+		LayerID layerId = layer.index;
+		MaterialID matId = material->GetID();
+		ASSERT_LOG_ERROR((layerId < MAX_LAYERS), "LayerId above max layer count!");
 
+		while (m_batches[(size_t)layerId].size() <= (size_t)matId)
+		{
+			m_batches[(size_t)layerId].emplace_back(QuadBatch());
+		}
+
+		auto& batch = m_batches[(size_t)layerId][(size_t)matId];
+		if (batch.allocated)
+			return;
+		AllocateQuadBatch(batch);
 		batch.material = material;
 		batch.layer = layer;
 
@@ -383,6 +339,7 @@ namespace SandCastle
 
 		//Bind shader to the scene uniform buffer
 		shader->BindUniformBlock("scene", m_sceneUniformBinding);
+		batch.allocated = true;
 	}
 
 	void Renderer2D::AllocateQuadBatch(QuadBatch& batch)
@@ -408,19 +365,10 @@ namespace SandCastle
 		batch.textureSlots[0] = m_whiteTextureID;
 	}
 
-	void Renderer2D::FreeQuadBatch(uint32_t batch)
-	{
-		m_freeQuadBatchs.push_back(batch);
-	}
-
 	void Renderer2D::ClearBatches()
 	{
 		auto i = Instance();
-		i->m_freeQuadBatchs.clear();
-		i->m_quadBatchs.clear();
-		i->m_quadBatchFinder.clear();
-		//to do, make this a signal
-		Systems::Get<SpriteRenderSystem>()->OnClearBatches();
+		//to do
 	}
 	void Renderer2D::RenderThread()
 	{
@@ -480,9 +428,9 @@ namespace SandCastle
 			renderOptions = m_defaultRenderOptionsLayer;
 
 		SetShaderUniformSampler(material->GetShader(), m_maxOffscreenLayers + 1);
-
+		LayerID index = (LayerID)m_layers.size();
 		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace);
+		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace, index);
 		auto windowSize = Window::GetSize();
 		sptr<RenderTexture> layer;
 		if (height == 0)
@@ -494,10 +442,10 @@ namespace SandCastle
 			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
 			layer = makesptr<RenderTexture>(Vec2u(width, height));
 		}
-		m_layers.push_back(RenderLayer(name, (uint32_t)m_layers.size(), layer, material, renderOptions, layerVertexArray, height, false, false));
+		m_layers.push_back(RenderLayer(name, index, layer, material, renderOptions, layerVertexArray, height, false, false));
 		m_renderLayers.push_back(&m_layers.back());
 
-		m_lastLayerAdded = (uint32_t)m_layers.size() - 1;
+		m_lastLayerAdded = index;
 	}
 	void Renderer2D::CreateSubTextureThread(const Texture* source, Rect region)
 	{
@@ -534,16 +482,12 @@ namespace SandCastle
 		m_stats.drawCalls = 0;
 		m_stats.quadCount = 0;
 
-		for (auto& batch : m_quadBatchs)
-		{
-			StartBatch(batch.index);
-		}
+		StartBatches();
 	}
 
 	void Renderer2D::End()
 	{
-		for (auto& batch : m_quadBatchs)
-			Flush(batch.index);
+		FlushBatches();
 		RenderLayers();
 		m_rendering = false;
 	}
@@ -552,7 +496,7 @@ namespace SandCastle
 	{
 		//Bind target framebuffer
 		m_target->Bind();
-		//glDisable(GL_DEPTH_TEST);
+		glDisable(GL_DEPTH_TEST);
 
 		//Put offscreen layer in according texture slots
 		for (auto& offscreenLayer : m_offscreenLayers)
@@ -561,7 +505,6 @@ namespace SandCastle
 		}
 
 		//Draw every layers
-
 		for (auto layer = m_layers.rbegin(); layer != m_layers.rend(); layer++)
 		{
 			if (!layer->active || layer->index == 0 || layer->offscreen)
@@ -576,15 +519,12 @@ namespace SandCastle
 		}
 	}
 
-	void Renderer2D::Flush(uint32_t batchIndex)
+	void Renderer2D::Flush(QuadBatch& batch)
 	{
-		Clock clock;
-		QuadBatch& batch = m_quadBatchs[(size_t)batchIndex];
-		if (batch.indexCount == 0)
-			return;
-
 		//Send the vertex data from CPU to GPU
 		uint32_t dataSize = (uint32_t)((uint8_t*)batch.quadPtr - (uint8_t*)batch.quadBase);
+		if (dataSize <= 0)
+			return;
 		batch.quadBuffer->SetData(batch.quadBase, dataSize);
 
 		for (uint32_t i = 0; i < batch.textureSlotIndex; i++)
@@ -604,11 +544,22 @@ namespace SandCastle
 		m_layers[batch.layer.index].active = true;
 	}
 
-	Material* Renderer2D::CreateMaterial(Shader* shader)
+	Material* Renderer2D::CreateMaterial(Shader* shader, bool layer)
 	{
 		auto ins = Instance();
 		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size()));
+
+		if (layer)
+			return ins->m_materials.back();
+
+		//Create quad batch for every layers
+		for (auto& layer : ins->m_layers)
+		{
+			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, ins->m_materials.back());
+		}
+		ins->Wait();
 		return ins->m_materials.back();
+
 	}
 	Texture* Renderer2D::CreateSubTexture(const Texture* source, Rect region)
 	{
@@ -620,12 +571,15 @@ namespace SandCastle
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
 	{
-		auto& batch = m_quadBatchs[quad.batchID];
+		auto& batch = m_batches[(size_t)quad.layerID][(size_t)quad.materialID];
 		float textureIndex = -1.0f;
 
 		//Check if we still have space in the batch for more indices
 		if (batch.indexCount >= m_maxIndices)
-			NextBatch(quad.batchID);
+		{
+			FlushBatches();
+			StartBatches();
+		}
 
 		//Find if the texture has been used in the current batch
 		for (uint32_t i = 1; i < batch.textureSlotIndex; i++)
@@ -641,7 +595,10 @@ namespace SandCastle
 		{
 			//Check if there is still space for a texture
 			if (batch.textureSlotIndex >= MAX_TEXTURE_INDEX)
-				NextBatch(quad.batchID);
+			{
+				FlushBatches();
+				StartBatches();
+			}
 
 			//Set the current texture index
 			textureIndex = (float)batch.textureSlotIndex;
@@ -733,7 +690,7 @@ namespace SandCastle
 		return worldPos;
 	}
 
-	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, uint32_t layer)
+	void Renderer2D::DrawLine(LineRenderer& line, Transform& transform, LayerID layer)
 	{
 		if (line.GetPointCount() < 2)
 			return;
@@ -751,7 +708,7 @@ namespace SandCastle
 		glDrawElements(GL_LINE_STRIP_ADJACENCY, (GLsizei)line.GetPointCount() + 2, GL_UNSIGNED_INT, 0);
 	}
 
-	void Renderer2D::DrawWire(WireRender& wire, Transform& transform, uint32_t layer)
+	void Renderer2D::DrawWire(WireRender& wire, Transform& transform, LayerID layer)
 	{
 		if (wire.GetPointCount() < 2)
 			return;
@@ -777,23 +734,41 @@ namespace SandCastle
 		return Instance()->m_stats;
 	}
 
-	void Renderer2D::StartBatch(uint32_t batchIndex)
+	void Renderer2D::StartBatch(QuadBatch& batch)
 	{
 		//Reset vertex array data
-		m_quadBatchs[batchIndex].quadPtr = m_quadBatchs[batchIndex].quadBase;
+		batch.quadPtr = batch.quadBase;
 
 		//Reset counter
-		m_quadBatchs[batchIndex].indexCount = 0;
-		m_quadBatchs[batchIndex].quadCount = 0;
+		batch.indexCount = 0;
+		batch.quadCount = 0;
 
 		//Reset texture slot index
-		m_quadBatchs[batchIndex].textureSlotIndex = 1;
+		batch.textureSlotIndex = 1;
 	}
 
-	void Renderer2D::NextBatch(uint32_t batchIndex)
+	void Renderer2D::StartBatches()
 	{
-		Flush(batchIndex);
-		StartBatch(batchIndex);
+		for (int i = MAX_LAYERS - 1; i >= 0; i--)
+		{
+			for (auto& batch : m_batches[i])
+			{
+				if (batch.allocated)
+					StartBatch(batch);
+			}
+		}
+	}
+
+	void Renderer2D::FlushBatches()
+	{
+		for (int i = MAX_LAYERS - 1; i >= 0; i--)
+		{
+			for (auto& batch : m_batches[i])
+			{
+				if (batch.allocated)
+					Flush(batch);
+			}
+		}
 	}
 
 	void Renderer2D::OnWindowResize(Vec2u size)
@@ -818,17 +793,17 @@ namespace SandCastle
 		m_queue.thread.Queue(&Renderer2D::RenderThread, this);
 	}
 
-	sptr<VertexArray> Renderer2D::GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace)
+	sptr<VertexArray> Renderer2D::GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace, LayerID layer)
 	{
 		//Create a vertex array for a layer
 
 		//The screen coordinates the layer will be rendered into.
 		float layerVertices[]
 		{
-		screenSpace[0].x, screenSpace[0].y, 0,  0.0, 0.0,
-		screenSpace[1].x, screenSpace[1].y, 0,  1.0, 0.0,
-		screenSpace[2].x, screenSpace[2].y, 0,  1.0, 1.0,
-		screenSpace[3].x, screenSpace[3].y, 0,  0.0, 1.0,
+		screenSpace[0].x, screenSpace[0].y, 0.f,  0.0, 0.0,
+		screenSpace[1].x, screenSpace[1].y, 0.f,  1.0, 0.0,
+		screenSpace[2].x, screenSpace[2].y, 0.f,  1.0, 1.0,
+		screenSpace[3].x, screenSpace[3].y, 0.f,  0.0, 1.0,
 		};
 
 		AttributeLayout layout({

@@ -16,6 +16,7 @@
 #include "SandCastle/Render/QuadRenderData.h"
 #include "SandCastle/Render/Material.h"
 #include "SandCastle/Core/Worker.h"
+#include "SandCastle/Render/Layer.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 #define MAX_LAYERS 32
@@ -28,6 +29,7 @@ namespace SandCastle
 	class Shader;
 	class RenderOptions;
 
+
 	struct QuadData
 	{
 		Vec3f vertexPos = { 0, 0, 0 };
@@ -38,7 +40,7 @@ namespace SandCastle
 	struct RenderLayer
 	{
 		std::string name = "RenderLayerDefault";
-		uint32_t index = 0;
+		LayerID index = 0;
 		sptr<RenderTarget> target = nullptr;
 		Material* material = nullptr;
 		sptr<RenderOptions> renderOptions = nullptr;
@@ -67,7 +69,7 @@ namespace SandCastle
 		}
 		inline void Clear()
 		{
-			for (uint32_t layer = 0; layer < (uint32_t)MAX_LAYERS; layer++)
+			for (LayerID layer = 0; layer < (LayerID)MAX_LAYERS; layer++)
 			{
 				_queues[_current][layer].clear();
 			}
@@ -76,7 +78,7 @@ namespace SandCastle
 		{
 			auto& queues = _queues[_current];
 
-			for (uint32_t layer = 0; layer < (uint32_t)MAX_LAYERS; layer++)
+			for (LayerID layer = 0; layer < (LayerID)MAX_LAYERS; layer++)
 			{
 				if (!zsort[layer])
 					continue;
@@ -92,7 +94,7 @@ namespace SandCastle
 				}
 			}
 		}
-		std::unordered_map<uint32_t, bool> zsort;
+		std::unordered_map<LayerID, bool> zsort;
 		WorkerThread thread;
 		inline std::vector<QuadRenderData>& Get(size_t layer)
 		{
@@ -107,13 +109,11 @@ namespace SandCastle
 	{
 		sptr<RenderTexture> target = nullptr;
 		uint32_t textureUnit = 1;
-		uint32_t index = 1;
+		LayerID index = 1;
 	};
 	struct QuadBatch
 	{
-		uint32_t index = 0;
-		uint32_t userCount = 0;
-
+		bool allocated = false;
 		sptr<VertexArray> vertexArray;
 		sptr<VertexBuffer> quadBuffer;
 
@@ -142,7 +142,7 @@ namespace SandCastle
 
 		~Renderer2D();
 		void SetRenderTarget(sptr<RenderTarget> target);
-		static Material* CreateMaterial(Shader* shader);
+		static Material* CreateMaterial(Shader* shader, bool layer = false);
 		static Texture* CreateSubTexture(const Texture* source, Rect region);
 
 		inline void PushQuad(QuadRenderData&& quad)
@@ -152,10 +152,10 @@ namespace SandCastle
 
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
-		void DrawLine(LineRenderer& line, Transform& transform, uint32_t layer);
+		void DrawLine(LineRenderer& line, Transform& transform, LayerID layer);
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
-		void DrawWire(WireRender& wire, Transform& transform, uint32_t layer);
+		void DrawWire(WireRender& wire, Transform& transform, LayerID layer);
 
 		/// @brief Set the default shader used when rendering quads/sprites
 		/// @param shader 
@@ -165,37 +165,31 @@ namespace SandCastle
 		/// The order cannot be changed ever again, and the layers cannot be removed.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static uint32_t AddLayer(std::string name, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static LayerID AddLayer(std::string name, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
 		/// @brief Add a layer on the bottom of the render queue with a fixed height, it will keep the aspect ratio of the window.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static uint32_t AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static LayerID AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
 		/// @brief Set true to draw sprites on this layer sorted by Z position.
 		/// Set to true if you want to ensure coherent drawing of overlapping sprites.
 		/// Set to false (default) if you want maximum speed.
-		static void SetLayerSortZ(uint32_t layer, bool zsort);
+		static void SetLayerSortZ(LayerID layer, bool zsort);
 		/// @brief Add a layer that won't display but can be used in the shader of other layers.
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
 		/// Must be comprised in between 1 and 15.
-		static uint32_t AddOffscreenLayer(std::string name, uint32_t sampler2DIndex);
+		static LayerID AddOffscreenLayer(std::string name, uint32_t sampler2DIndex);
 
 		/// @brief Set the space the layer take up on the screen,
 		/// @param screenSpace  normalized screen space (vector must be of size 4)
-		static void SetLayerScreenSpace(uint32_t layer, const std::vector<Vec2f>& screenSpace);
+		static void SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace);
 		/// @brief Set the shader used to render a layer.
-		static void SetLayerMaterial(uint32_t layer, Material* shader);
+		static void SetLayerMaterial(LayerID layer, Material* shader);
 		/// @brief Set the RenderOptions used when rendering a layer
-		static void SetLayerRenderOptions(uint32_t layer, sptr<RenderOptions> renderOptions);
+		static void SetLayerRenderOptions(LayerID layer, sptr<RenderOptions> renderOptions);
 		/// @brief Set the layer height (width will be calculated to fit the aspect ratio of the window)
-		static void SetLayerHeight(uint32_t layer, unsigned int height);
+		static void SetLayerHeight(LayerID layer, unsigned int height);
 
-		/// @brief Can be used for optimization if you know how much QuadBatch you will be using.
-		/// @param count Number of quadbatch to allocate space for.
-		void PreallocateQuadBatch(int count);
-		/// @brief Use with care only if you know what you are doing, as every attempt to draw using this batch will result in undefined behaviour
-		/// @param batch 
-		void FreeQuadBatch(uint32_t batch);
 		/// @brief remove all batches.
 		static void ClearBatches();
 
@@ -206,9 +200,6 @@ namespace SandCastle
 		/// @brief Get Every layers id
 		static std::vector<uint32_t> GetLayers();
 		static Material* GetMaterial(MaterialID id);
-		/// @brief Get a batch based on what layer/shader/render options is used. nullptr = default shader/render options
-		/// @return BatchId
-		static uint32_t GetBatchId(uint32_t layerIndex, Material* material);
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
 
@@ -232,28 +223,25 @@ namespace SandCastle
 		void CreateSubTextureThread(const Texture* source, Rect region);
 		void Begin();
 		void End();
-		void Flush(uint32_t batchIndex);
 
-		void StartBatch(uint32_t batchIndex);
-		void NextBatch(uint32_t batchIndex);
+		void StartBatch(QuadBatch& batch);
+		void StartBatches();
+		void Flush(QuadBatch& batch);
+		void FlushBatches();
 		void DrawQuad(const QuadRenderData& quad);
 
 		Vec3f VertexPos(const Vec2f& vert, const Vec3f& pos, const Vec2f& size, float rot) const;
 		Vec2f Uv(const Vec2f& vert, int type, const Vec4f& uvOrColor) const;
-		void SetupQuadBatch(QuadBatch& batch, RenderLayer& layer, Material* material);
 		void AllocateQuadBatch(QuadBatch& batch);
-		void CreateQuadBatch(RenderLayer& layer, Material* material);
-		uint64_t GenerateBatchId(uint64_t a, uint64_t b);
+		void CreateQuadBatchThread(RenderLayer& layer, Material* material);
 		void RenderLayers();
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
-		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace);
+		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace, LayerID layer);
 	private:
 		RenderQueue m_queue;
-		// Batched Quads
 
-		std::unordered_map<uint64_t, uint32_t> m_quadBatchFinder;
-		std::vector<QuadBatch> m_quadBatchs;
-		std::vector<size_t> m_freeQuadBatchs;
+		// Batches
+		std::vector<QuadBatch> m_batches[MAX_LAYERS];
 
 		uint32_t m_maxQuads;
 		uint32_t m_maxVertices;
@@ -290,6 +278,7 @@ namespace SandCastle
 		std::vector<OffscreenRenderLayer> m_offscreenLayers;
 		std::vector<RenderLayer*> m_renderLayers;
 		Material* m_defaultLayerMaterial;
+		LayerID m_layerMax = 0;
 
 		//Materials
 		std::vector<Material*> m_materials;
@@ -301,7 +290,7 @@ namespace SandCastle
 		Shader* m_defaultWireShader;
 
 		//Others
-		uint32_t m_lastLayerAdded = 0;
+		LayerID m_lastLayerAdded = 0;
 		Texture* m_createdTexture = nullptr;
 		bool m_rendering;
 		Statistics m_stats;
