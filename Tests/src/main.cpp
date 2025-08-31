@@ -93,9 +93,9 @@ int main()
 	//Delegates();
 	//Signals();
 	//FontTest();
-	LayerTest();
+	//LayerTest();
 	//PixPerfectGame();
 	//SubTexture();
 	//FrameTest();
-	//UiTest();
+	UiTest();
 }

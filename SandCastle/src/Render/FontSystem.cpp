@@ -176,6 +176,7 @@ namespace SandCastle
 		font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu);
 		font.outlineThickness = std::max(0.f, outlineThickness);
 		font.outlineColor = outlineColor;
+		font.layer = m_layer;
 
 
 		InitLazyPages(font); // start with an empty atlas we’ll grow on - demand

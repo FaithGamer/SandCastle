@@ -240,8 +240,11 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 -window layer showing behind other layer is not related to some layers not showing at all
 -fixed layer not showing
->add color unsigned char to QuadData, replace uvOrColor
->replace m_maxOffscreen layer by define
+-add color unsigned char to QuadData, replace uvOrColor
+-replace m_maxOffscreen layer by define
+-fixed font using layers
+-material knows if its for layer or not to avoid creating useless batches
+-fixed sampler2D[] material error message
 
 UI:
 
