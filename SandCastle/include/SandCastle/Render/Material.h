@@ -8,7 +8,7 @@
 namespace SandCastle
 {
 	class Renderer2D;
-	typedef uint32_t MaterialID;
+	typedef uint16_t MaterialID;
 	struct MaterialProperty
 	{
 		GLint location;

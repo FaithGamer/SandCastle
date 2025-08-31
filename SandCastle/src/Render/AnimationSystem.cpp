@@ -2,6 +2,7 @@
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Render/SpriteRender.h"
 #include "SandCastle/Core/Assets.h"
+#include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {

@@ -5,8 +5,8 @@
 #include "SandCastle/Render/Rect.h"
 #include "SandCastle/Render/Texture.h"
 #include "SandCastle/Render/Material.h"
-#include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/Sprite.h"
+#include "SandCastle/Render/Layer.h"
 
 namespace SandCastle
 {
@@ -15,11 +15,11 @@ namespace SandCastle
 	{
 	public:
 		SpriteRender();
-		SpriteRender(Sprite* sprite, Material* material);
+		SpriteRender(Sprite* sprite, MaterialID material = 0);
 
 		void SetSprite(Sprite* sprite);
-		void SetMaterial(Material* Material);
-		void SetLayer(uint32_t Layer);
+		void SetMaterial(MaterialID Material);
+		void SetLayer(LayerID Layer);
 
 		inline Sprite* GetSprite() const
 		{
@@ -31,27 +31,25 @@ namespace SandCastle
 			return m_sprite->GetTexture();
 		}
 
-		inline Material* GetMaterial() const
+		inline MaterialID GetMaterialID() const
 		{
 			return m_material;
 		}
 
-		inline uint32_t GetLayer() const
+		inline LayerID GetLayer() const
 		{
 			return m_layer;
 		}
 
 	public:
 		Vec4f color;
-		bool needUpdateRenderBatch;
-		uint32_t renderBatch;
 		bool spriteDimensionsChanged;
-		static uint32_t defaultLayer;
+		static LayerID defaultLayer;
 	
 	protected:
-		Material* m_material;
+		MaterialID m_material = 0;
 		Sprite* m_sprite;
-		uint32_t m_layer;
+		LayerID m_layer;
 
 	};
 }

@@ -286,7 +286,7 @@ namespace SandCastle
 					ch->originalPosition = pos;
 
 					auto sr = e.AddComponent<SpriteRender>();
-					sr->SetMaterial(font.material);
+					sr->SetMaterial(font.material->GetID());
 					sr->SetSprite(g.sprite.get());
 					sr->SetLayer(font.layer);
 
@@ -333,7 +333,7 @@ namespace SandCastle
 			auto ch = e.AddComponent<Character>();
 			ch->originalPosition = pos;
 			auto sr = e.AddComponent<SpriteRender>();
-			sr->SetMaterial(font.material);
+			sr->SetMaterial(font.material->GetID());
 			sr->SetSprite(g.sprite.get());
 			sr->SetLayer(font.layer);
 

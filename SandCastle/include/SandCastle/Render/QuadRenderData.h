@@ -3,6 +3,9 @@
 #include <glad/glad.h>
 #include "SandCastle/Core/Vec.h"
 #include <float16_t.hpp>
+#include "SandCastle/Render/Layer.h"
+#include "SandCastle/Render/Material.h"
+
 
 namespace SandCastle
 {
@@ -17,8 +20,8 @@ namespace SandCastle
 		Vec2f size;
 		float rotation;
 		GLuint textureID;
-		uint32_t layerID;
-		uint32_t batchID;
+		LayerID layerID;
+		MaterialID materialID;
 		float alpha;
 	};
 }
