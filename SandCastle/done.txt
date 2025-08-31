@@ -238,10 +238,11 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 31
 
->fix layer not showing
->fix window layer being behind other layers
+-window layer showing behind other layer is not related to some layers not showing at all
+-fixed layer not showing
 >add color unsigned char to QuadData, replace uvOrColor
 >replace m_maxOffscreen layer by define
+
 UI:
 
 We need to think of an api than enable to generate
@@ -282,6 +283,7 @@ Ui::End();
 
 tasks:
 
+>optimize transform memory layout (get rid of mat4 at all ?)
 >check renderer thread safety
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system
@@ -296,6 +298,7 @@ secondary tasks:
 >text input (SDL_StartTextInput...)
 >audio spacialization
 >Transform animation system
+>fix window layer being behind other layers
 
 bugs:
 

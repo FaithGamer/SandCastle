@@ -7,6 +7,7 @@
 #include "SandCastle/Render/Material.h"
 #include "SandCastle/Render/Sprite.h"
 #include "SandCastle/Render/Layer.h"
+#include "SandCastle/Render/Color.h"
 
 namespace SandCastle
 {
@@ -42,14 +43,13 @@ namespace SandCastle
 		}
 
 	public:
-		Vec4f color;
-		bool spriteDimensionsChanged;
+		Color color;
+		LayerID m_layer;
 		static LayerID defaultLayer;
 	
 	protected:
 		MaterialID m_material = 0;
 		Sprite* m_sprite;
-		LayerID m_layer;
 
 	};
 }

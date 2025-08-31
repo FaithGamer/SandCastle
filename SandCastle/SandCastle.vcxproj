@@ -251,6 +251,7 @@
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
+    <ClCompile Include="src\Render\Color.cpp" />
     <ClCompile Include="src\Render\FontSystem.cpp" />
     <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="include\SandCastle\ECS\Entity.h" />
     <ClInclude Include="include\SandCastle\ECS\EntityId.h" />
     <ClInclude Include="include\SandCastle\Input\InputSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\Color.h" />
     <ClInclude Include="include\SandCastle\Render\Layer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h" />
     <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h" />

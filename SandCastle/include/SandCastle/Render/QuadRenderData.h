@@ -5,7 +5,7 @@
 #include <float16_t.hpp>
 #include "SandCastle/Render/Layer.h"
 #include "SandCastle/Render/Material.h"
-
+#include "SandCastle/Render/Color.h"
 
 namespace SandCastle
 {
@@ -16,12 +16,12 @@ namespace SandCastle
 		Vec3f pos;
 		numeric::float16_t orgX;
 		numeric::float16_t orgY;
-		Vec4f uvOrColor;
+		Vec4f uvs;
 		Vec2f size;
 		float rotation;
 		GLuint textureID;
 		LayerID layerID;
 		MaterialID materialID;
-		float alpha;
+		Color color;
 	};
 }

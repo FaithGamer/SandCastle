@@ -98,7 +98,6 @@ namespace SandCastle
 		m_maxQuads = 100000;
 		m_maxVertices = m_maxQuads * 4;
 		m_maxIndices = m_maxQuads * 6;
-		m_maxOffscreenLayers = 15;
 
 		//IndexBuffer (quads)
 		uint32_t* quadIndices = new uint32_t[m_maxIndices];
@@ -152,7 +151,7 @@ namespace SandCastle
 
 		//Create initial quad batch for windoww layer and default batch material
 		Renderer2D::CreateQuadBatchThread(m_layers.back(), m_defaultBatchMaterial);
-		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), m_maxOffscreenLayers + 1);
+		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), MAX_OFF_LAYERS + 1);
 
 		//Listen to window resize signal
 		Window::GetResizeSignal()->Listen(&Renderer2D::OnWindowResize, this);
@@ -293,7 +292,7 @@ namespace SandCastle
 	void Renderer2D::SetLayerMaterial(LayerID layer, Material* material)
 	{
 		auto ins = Instance();
-		ins->SetShaderUniformSampler(material->GetShader(), ins->m_maxOffscreenLayers + 1);
+		ins->SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
 		ins->m_layers[layer].material = material;
 	}
 
@@ -424,7 +423,7 @@ namespace SandCastle
 		if (renderOptions == nullptr)
 			renderOptions = m_defaultRenderOptionsLayer;
 
-		SetShaderUniformSampler(material->GetShader(), m_maxOffscreenLayers + 1);
+		SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
 		LayerID index = (LayerID)m_layers.size();
 		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace, index);

@@ -6,12 +6,12 @@ namespace SandCastle
 	LayerID SpriteRender::defaultLayer = 0;
 
 	SpriteRender::SpriteRender()
-		: m_sprite(nullptr), m_material(0), m_layer(defaultLayer), color(Vec4f(1, 1, 1, 1)), spriteDimensionsChanged(true)
+		: m_sprite(nullptr), m_material(0), m_layer(defaultLayer)
 	{
 
 	}
 	SpriteRender::SpriteRender(Sprite* sprite, MaterialID material)
-		: m_sprite(sprite), m_material(material), m_layer(defaultLayer), color(Vec4f(1, 1, 1, 1)), spriteDimensionsChanged(true)
+		: m_sprite(sprite), m_material(material), m_layer(defaultLayer)
 	{
 
 	}
@@ -22,8 +22,6 @@ namespace SandCastle
 
 		if (!m_sprite || m_sprite->GetDimensions() == sprite->GetDimensions())
 			return;
-
-		spriteDimensionsChanged = true;
 
 	}
 
