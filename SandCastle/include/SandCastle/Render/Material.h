@@ -43,9 +43,10 @@ namespace SandCastle
 		void Bind() const;
 		MaterialID GetID() const;
 		Shader* GetShader() const;
+		bool IsLayer() const;
 	private:
 		friend Renderer2D;
-		Material(Shader* shader, MaterialID);
+		Material(Shader* shader, MaterialID id, bool isLayer);
 		void ListUniforms();
 		void AddProperty(GLenum type, String name, GLint location);
 		void AddPropertyArray(GLenum type, String name, GLint location, GLsizei);
@@ -56,5 +57,6 @@ namespace SandCastle
 		std::unordered_map<String, MaterialPropertyArray> m_arrayProperties;
 		Shader* m_shader;
 		MaterialID m_id;
+		bool m_isLayer = false;
 	};
 }

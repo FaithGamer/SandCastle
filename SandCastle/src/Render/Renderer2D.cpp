@@ -132,7 +132,7 @@ namespace SandCastle
 		//Create default materials
 		auto defaultShader = Assets::Get<Shader>("default.shader");
 		//Not using CreateMaterial because it would be blocking thread by attempting to create the batch.
-		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size()));
+		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size(), false));
 		m_defaultBatchMaterial = m_materials.back();
 		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"), true);
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
@@ -199,7 +199,8 @@ namespace SandCastle
 		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
 		for (auto& mat : ins->m_materials)
 		{
-			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
+			if(!mat->IsLayer())
+				ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
 		}
 		ins->Wait();
 		ins->m_layerMax++;
@@ -542,7 +543,7 @@ namespace SandCastle
 	Material* Renderer2D::CreateMaterial(Shader* shader, bool layer)
 	{
 		auto ins = Instance();
-		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size()));
+		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size(), layer));
 
 		if (layer)
 			return ins->m_materials.back();
@@ -696,7 +697,7 @@ namespace SandCastle
 		m_defaultLineShader->SetUniform("uEndCapVertices", line.GetEndCapVertices());
 		m_defaultLineShader->SetUniformArray("uWidth", line.GetWidthArray(), (int)line.GetPointCount());
 		m_defaultLineShader->SetUniform("uColor", line.GetColor());*/
-		m_defaultLineShader->BindUniformBlock("camera", 0);
+		m_defaultLineShader->BindUniformBlock("scene", 0);
 		m_defaultLineShader->Bind();
 
 		line.Bind();

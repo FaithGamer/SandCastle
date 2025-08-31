@@ -4,7 +4,10 @@
 
 namespace SandCastle
 {
-	Material::Material(Shader* shader, MaterialID id) : m_shader(shader), m_id(id)
+	Material::Material(Shader* shader, MaterialID id, bool isLayer)
+		: m_shader(shader),
+		m_id(id),
+		m_isLayer(isLayer)
 	{
 		ListUniforms();
 	}
@@ -52,6 +55,10 @@ namespace SandCastle
 	Shader* Material::GetShader() const
 	{
 		return m_shader;
+	}
+	bool Material::IsLayer() const
+	{
+		return m_isLayer;
 	}
 	void Material::ListUniforms()
 	{
@@ -155,6 +162,10 @@ namespace SandCastle
 			}
 			m_arrayProperties.insert(std::make_pair(name, property));
 			break;
+		case GL_SAMPLER_2D:
+			//User can't use sampler2D[], this is set to avoid error message
+			//Because it's used only by the renderer
+			break;
 		default:
 			LOG_ERROR("Unsupported uniform-array type in shader {0} type GLenum: {1}", m_shader->GetName(), type);
 			break;
@@ -178,7 +189,7 @@ namespace SandCastle
 			LOG_ERROR("The property array {0}, doesn't exists for the shader {1}", name, m_shader->GetName());
 		}
 		return it_prop;
-		
+
 	}
 	bool Material::SetFloat(String name, float value)
 	{
