@@ -252,7 +252,7 @@
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />
-    <ClCompile Include="src\Render\FontSystem.cpp" />
+    <ClCompile Include="src\Render\Writer.cpp" />
     <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
     <ClCompile Include="src\Core\Assets.cpp" />
@@ -394,7 +394,7 @@
     <ClInclude Include="include\SandCastle\Render\AnimationSystem.h" />
     <ClInclude Include="include\SandCastle\Render\Buffer.h" />
     <ClInclude Include="include\SandCastle\Render\Camera.h" />
-    <ClInclude Include="include\SandCastle\Render\FontSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\Writer.h" />
     <ClInclude Include="include\SandCastle\Render\IndexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h" />
     <ClInclude Include="include\SandCastle\Render\Material.h" />

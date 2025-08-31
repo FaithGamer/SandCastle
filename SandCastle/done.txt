@@ -248,6 +248,11 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 UI:
 
+>rename Writer Writer
+>Writer is held by Ui
+>Ui is a singleton
+>centered text
+
 We need to think of an api than enable to generate
 easily, in screen space: frames, texts, buttons, fillbar, tabs, checkboxes, sliders. 
 

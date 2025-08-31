@@ -25,22 +25,23 @@ public:
 
 	void Start() override
 	{
+	
 		auto uiLayer = Renderer2D::AddLayer("ui");
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
 
-		auto fSys = sys(FontSystem);
+		auto fSys = Ui::GetWriter();
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
 		uiMat->SetFloat("uDpi", 1.f / 360.f);
 		fSys->SetLayer(uiLayer);
 		fSys->SetMaterial(uiMat);
-		fSys->SetPPU(1.f);
+		fSys->SetPPU(1.f);  
 		auto font = fSys->MakeFont("alata-regular.ttf", 50, 2);
-
 		Camera::main->SetPxZoom(2);
 		fSys->UseFont(font);
 
-		for (int i = 0; i < 100; i++)
+		//Create some world entities
+		for (int i = 0; i < 400; i++)
 		{
 			float x = Random::Range(-300, 300);
 			float y = Random::Range(-180, 180);
@@ -48,6 +49,7 @@ public:
 			entt.gtr()->SetPosition(x, y, -5);
 		}
 
+	
 		auto se2 = fSys->Write((const char*)u8"Hello World");
 		se2.root.adc<Txt>();
 	}

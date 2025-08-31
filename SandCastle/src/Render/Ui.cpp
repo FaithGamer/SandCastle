@@ -83,6 +83,15 @@ namespace SandCastle
 			wDim.y = rect.height * ppu; //world length
 		}
 	}
+	Ui::Ui()
+	{
+		m_writer = new Writer();
+	}
+	Ui::~Ui()
+	{
+		delete m_writer;
+	}
+	
 	Entity Ui::MakeFrameSprites(FrameID id, Vec2f size, String texture, bool fixedStep)
 	{
 		//Ensure the existence of border texture 
@@ -128,7 +137,7 @@ namespace SandCastle
 
 		Anchor anchor = Anchor::TopLeft;
 
-		auto& frame = m_frames[id]; //Get create the frame
+		auto& frame = m_frames[id]; //Get/Create the frame
 
 		auto& tex = m_bordersTex[texture].tex;
 		if (tex.size() < 5)
@@ -233,5 +242,9 @@ namespace SandCastle
 			frame.root.AddChild(e);
 		}
 		return frame.root;
+	}
+	Writer* Ui::GetWriter()
+	{
+		return Instance()->m_writer;
 	}
 }

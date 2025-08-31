@@ -70,12 +70,11 @@ namespace SandCastle
 		Vec3f originalPosition{ 0,0,0 };
 	};
 
-	class FontSystem : public System
+	class Writer
 	{
 	public:
-		FontSystem();
-		~FontSystem();
-		void Start() override;
+		Writer();
+		~Writer();
 
 		FontID MakeFont(std::string filename,
 			int size,
@@ -95,6 +94,14 @@ namespace SandCastle
 	private:
 		// Helpers
 		static std::vector<uint32_t> Utf8ToCodepoints(const std::string& s);
+		void InitLazyPages(Font& font);
+		void EnsureGlyphs(Font& font, const std::vector<uint32_t>& cps);
+		bool BakeOneGlyph(Font& font, uint32_t cp);
+		int PlaceOnPage(FontID id, int reqW, int reqH, int pad, Vec2i& outPos);
+		std::vector<unsigned char> EdgeExtrudeRGBA(const unsigned char* srcAlpha, int w, int h, int pad);
+		std::vector<unsigned char> PadRGBA(const unsigned char* srcRGBA, int w, int h, int pad);
+		void MakeTofuAlpha(int w, int h, int border, std::vector<unsigned char>& alpha);
+		bool BakeFallbackGlyph(Font& font);
 
 		struct ShelfPacker
 		{
@@ -117,16 +124,6 @@ namespace SandCastle
 			int w = 0, h = 0;
 			int shelfY = 0, shelfH = 0, cursorX = 0;
 		};
-
-		// NEW: lazy baking helpers
-		void InitLazyPages(Font& font);
-		void EnsureGlyphs(Font& font, const std::vector<uint32_t>& cps);
-		bool BakeOneGlyph(Font& font, uint32_t cp);
-		int PlaceOnPage(FontID id, int reqW, int reqH, int pad, Vec2i& outPos);
-		std::vector<unsigned char> EdgeExtrudeRGBA(const unsigned char* srcAlpha, int w, int h, int pad);
-		std::vector<unsigned char> PadRGBA(const unsigned char* srcRGBA, int w, int h, int pad);
-		void MakeTofuAlpha(int w, int h, int border, std::vector<unsigned char>& alpha);
-		bool BakeFallbackGlyph(Font& font);
 
 	private:
 		FT_Library m_ft = nullptr;

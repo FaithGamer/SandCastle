@@ -16,7 +16,7 @@
 #include "SandCastle/Physics/PhysicsSystem.h"
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"
-#include "SandCastle/Render/FontSystem.h"
+#include "SandCastle/Render/Ui.h"
 
 
 namespace SandCastle
@@ -57,6 +57,8 @@ namespace SandCastle
 		Renderer2D::AddLayer("DebugLayer");
 		LOG_INFO("Initializing Physics...");
 		Physics::Instance();
+		LOG_INFO("Loading UI...");
+		Ui::Instance();
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
 		system->Init();
@@ -72,7 +74,6 @@ namespace SandCastle
 		Systems::Push<WireRenderSystem>();
 		Systems::Push<AnimationSystem>();
 		Systems::Push<PhysicsSystem>();
-		Systems::Push<FontSystem>();
 	}
 
 	void Engine::Launch()

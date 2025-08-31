@@ -1,6 +1,6 @@
 
 #include "pch.h"
-#include "SandCastle/Render/FontSystem.h"
+#include "SandCastle/Render/Writer.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
@@ -108,7 +108,7 @@ namespace SandCastle
 		for (auto& s : out) s.second *= ppu;
 		return out;
 	}
-	std::vector<uint32_t> FontSystem::Utf8ToCodepoints(const std::string& s)
+	std::vector<uint32_t> Writer::Utf8ToCodepoints(const std::string& s)
 	{
 		std::vector<uint32_t> cps;
 		size_t i = 0, n = s.size();
@@ -130,12 +130,17 @@ namespace SandCastle
 	}
 
 	// ---------- Lifecycle ----------
-	FontSystem::FontSystem()
+	Writer::Writer()
 	{
 		FT_Error err = FT_Init_FreeType(&m_ft);
 		ASSERT_LOG_ERROR(err == 0, "FreeType init failed.");
+
+		GLint maxTextureSize = 0;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+		m_maxAtlasSize = std::min(4096, maxTextureSize);
+		m_defaultMaterial = Renderer2D::GetMaterial(0);
 	}
-	FontSystem::~FontSystem()
+	Writer::~Writer()
 	{
 		for (auto& kv : m_fonts)
 		{
@@ -145,16 +150,8 @@ namespace SandCastle
 		FT_Done_FreeType(m_ft);
 	}
 
-	void FontSystem::Start()
-	{
-		GLint maxTextureSize = 0;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-		m_maxAtlasSize = std::min(4096, maxTextureSize);
-		m_defaultMaterial = Renderer2D::GetMaterial(0);
-	}
-
 	// ---------- MakeFont (primary: spec) ----------
-	FontID FontSystem::MakeFont(std::string filename, int size,
+	FontID Writer::MakeFont(std::string filename, int size,
 		float outlineThickness, Vec4f outlineColor)
 	{
 		// Load face by path
@@ -188,37 +185,37 @@ namespace SandCastle
 		return m_current;
 	}
 
-	void FontSystem::SetFontFolder(String path)
+	void Writer::SetFontFolder(String path)
 	{
 		m_fontFolder = path;
 	}
 
-	void FontSystem::UseFont(FontID id)
+	void Writer::UseFont(FontID id)
 	{
 		ASSERT_LOG_ERROR(m_fonts.count(id) != 0, "UseFont: invalid FontID");
 		m_current = id;
 	}
 
-	void FontSystem::SetPPU(float ppu)
+	void Writer::SetPPU(float ppu)
 	{
 		m_ppu = ppu;
 	}
-	void FontSystem::SetMaterial(Material* material)
+	void Writer::SetMaterial(Material* material)
 	{
 		m_material = material;
 	}
-	void FontSystem::SetMaxAtlasSize(int pixels)
+	void Writer::SetMaxAtlasSize(int pixels)
 	{
 		m_maxAtlasSize = pixels;
 	}
 
-	void FontSystem::SetLayer(uint32_t layer)
+	void Writer::SetLayer(uint32_t layer)
 	{
 		m_layer = layer;
 	}
 
 	// ---------- CreateSentence (kerning + wrapping + line spacing) ----------
-	Sentence FontSystem::Write(const std::string& utf8,
+	Sentence Writer::Write(const std::string& utf8,
 		float maxWidth,
 		float lineSpacing)
 	{
@@ -348,7 +345,7 @@ namespace SandCastle
 		return sent;
 	}
 
-	float FontSystem::GetFontWorldSize(FontID font)
+	float Writer::GetFontWorldSize(FontID font)
 	{
 		auto it = m_fonts.find(font);
 		if (it == m_fonts.end())
@@ -363,7 +360,7 @@ namespace SandCastle
 
 	static int NextPow2(int x) { int p = 1; while (p < x) p <<= 1; return p; }
 
-	void FontSystem::InitLazyPages(Font& font)
+	void Writer::InitLazyPages(Font& font)
 	{
 		const int base = std::max(256, NextPow2(font.size * 16));
 		const int side = std::min(m_maxAtlasSize, base);
@@ -387,7 +384,7 @@ namespace SandCastle
 		m_dynPages[font.id].push_back(DynamicPage{ side, side, 0, 0, 0 });
 	}
 
-	int FontSystem::PlaceOnPage(FontID id, int reqW, int reqH, int pad, Vec2i& outPos)
+	int Writer::PlaceOnPage(FontID id, int reqW, int reqH, int pad, Vec2i& outPos)
 	{
 		int pageIndex = 0;
 		auto& pages = m_dynPages[id];
@@ -433,7 +430,7 @@ namespace SandCastle
 		return pageIndex;
 	}
 
-	std::vector<unsigned char> FontSystem::EdgeExtrudeRGBA(const unsigned char* srcAlpha, int w, int h, int pad)
+	std::vector<unsigned char> Writer::EdgeExtrudeRGBA(const unsigned char* srcAlpha, int w, int h, int pad)
 	{
 		std::vector<unsigned char> out;
 		const int W = w + 2 * pad, H = h + 2 * pad;
@@ -463,7 +460,7 @@ namespace SandCastle
 		return out;
 	}
 
-	std::vector<unsigned char> FontSystem::PadRGBA(const unsigned char* srcRGBA, int w, int h, int pad)
+	std::vector<unsigned char> Writer::PadRGBA(const unsigned char* srcRGBA, int w, int h, int pad)
 	{
 		std::vector<unsigned char> out;
 		const int W = w + 2 * pad, H = h + 2 * pad;
@@ -493,7 +490,7 @@ namespace SandCastle
 		return out;
 	}
 
-	void FontSystem::MakeTofuAlpha(int w, int h, int border, std::vector<unsigned char>& alpha)
+	void Writer::MakeTofuAlpha(int w, int h, int border, std::vector<unsigned char>& alpha)
 	{
 		w = std::max(w, 8);
 		h = std::max(h, 8);
@@ -534,7 +531,7 @@ namespace SandCastle
 		drawDiag(true);
 	}
 
-	bool FontSystem::BakeFallbackGlyph(Font& font)
+	bool Writer::BakeFallbackGlyph(Font& font)
 	{
 		const uint32_t REPLACEMENT_CP = 0xFFFD;
 		if (FT_Get_Char_Index(font.face, REPLACEMENT_CP) != 0)
@@ -588,7 +585,7 @@ namespace SandCastle
 
 	static inline unsigned char f2ub(float v) { v = std::clamp(v, 0.0f, 1.0f); return (unsigned char)std::round(v * 255.0f); }
 
-	bool FontSystem::BakeOneGlyph(Font& font, uint32_t cp)
+	bool Writer::BakeOneGlyph(Font& font, uint32_t cp)
 	{
 		FT_UInt gindex = FT_Get_Char_Index(font.face, cp);
 		if (gindex == 0) return false;
@@ -795,7 +792,7 @@ namespace SandCastle
 		}
 	}
 
-	void FontSystem::EnsureGlyphs(Font& font, const std::vector<uint32_t>& cps)
+	void Writer::EnsureGlyphs(Font& font, const std::vector<uint32_t>& cps)
 	{
 		std::unordered_set<uint32_t> missing;
 		missing.reserve(cps.size());

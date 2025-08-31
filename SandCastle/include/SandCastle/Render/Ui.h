@@ -4,9 +4,11 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Render/Texture.h"
 #include "SandCastle/Render/Sprite.h"
+#include "SandCastle/Internal/Singleton.h"
+#include "SandCastle/Render/Writer.h"
 namespace SandCastle
 {
-	class Ui
+	class Ui : public Singleton<Ui>
 	{
 	public:
 		
@@ -43,8 +45,10 @@ namespace SandCastle
 		}SpriteCorner;
 
 	public:
+		Ui();
+		~Ui();
 		Entity MakeFrameSprites(FrameID id, Vec2f size, String texture, bool fixedStep);
-
+		static Writer* GetWriter();
 	private:
 		void MakeBorderTex(String texture);
 
@@ -66,5 +70,7 @@ namespace SandCastle
 		};
 		std::unordered_map<String, RepeatTextures> m_bordersTex;
 		std::unordered_map<FrameID, Frame> m_frames;
+
+		Writer* m_writer;
 	};
 }

@@ -39,7 +39,7 @@ public:
 			LOG_INFO("{0}", cp);
 		}
 
-		auto font = Systems::Get<FontSystem>();
+		auto font = Ui::GetWriter();
 		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50, 3.f, Vec4f(1, 0, 0, 1));
 		font->UseFont(fontId);
 		auto s = font->Write((const char*)u8"mon de");
@@ -80,7 +80,7 @@ public:
 			str += ranChar();
 		}
 
-		auto e = sys(FontSystem)->Write(str);
+		auto e = Ui::GetWriter()->Write(str);
 		e.root.AddComponent<Dummy>();
 		e.root.gtr()->Move(-e.width * 0.5f, 0, 0);
 
