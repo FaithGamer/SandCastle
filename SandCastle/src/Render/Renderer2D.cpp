@@ -127,7 +127,7 @@ namespace SandCastle
 
 		m_defaultRenderOptions = makesptr<RenderOptions>();
 		m_defaultRenderOptionsLayer = makesptr<RenderOptions>();
-		m_defaultRenderOptionsLayer->SetDepthTest(true);
+		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
 		//Create default materials
@@ -194,8 +194,8 @@ namespace SandCastle
 	LayerID Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
 		auto ins = Instance();
+		ASSERT_LOG_ERROR((ins->m_layers.size() < (MAX_LAYERS / 2)), "{0} layer, is over the max layer count: {1}.", name, MAX_LAYERS / 2);
 		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
-
 		ins->Wait();
 		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
 		for (auto& mat : ins->m_materials)
@@ -205,7 +205,6 @@ namespace SandCastle
 		ins->Wait();
 		ins->m_layerMax++;
 		return ins->m_lastLayerAdded;
-
 	}
 
 	void Renderer2D::SetLayerSortZ(LayerID layer, bool zsort)
@@ -420,8 +419,6 @@ namespace SandCastle
 	}
 	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
 	{
-		ASSERT_LOG_ERROR((m_layers.size() < (MAX_LAYERS / 2)), "Max render layer ({0}) reached.", MAX_LAYERS / 2);
-
 		if (material == nullptr)
 			material = m_defaultLayerMaterial;
 		if (renderOptions == nullptr)
@@ -496,7 +493,6 @@ namespace SandCastle
 	{
 		//Bind target framebuffer
 		m_target->Bind();
-		glDisable(GL_DEPTH_TEST);
 
 		//Put offscreen layer in according texture slots
 		for (auto& offscreenLayer : m_offscreenLayers)
@@ -621,8 +617,8 @@ namespace SandCastle
 		{
 			auto vertPos = (quadVertexPosition[i] - origin);// *m_sceneUniform.reduction;
 			batch.quadPtr->vertexPos = VertexPos(vertPos, quad.pos, quad.size, quad.rotation);
-			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvOrColor);
-			batch.quadPtr->color = quad.type == 0 ? quad.uvOrColor : Vec4f(1);
+			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvs);
+			batch.quadPtr->color = quad.color;
 			batch.quadPtr->texIndex = textureIndex;
 
 			//Incrementing the pointed value of the quad vertex array

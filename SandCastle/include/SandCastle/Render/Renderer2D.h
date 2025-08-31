@@ -20,6 +20,7 @@
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 #define MAX_LAYERS 32
+#define MAX_OFF_LAYERS 15 //1 must be kept for the currently draw layer
 
 namespace SandCastle
 {
@@ -246,7 +247,6 @@ namespace SandCastle
 		uint32_t m_maxQuads;
 		uint32_t m_maxVertices;
 		uint32_t m_maxIndices;
-		uint32_t m_maxOffscreenLayers;
 
 		Material* m_defaultBatchMaterial;
 		sptr<RenderOptions> m_defaultRenderOptions;

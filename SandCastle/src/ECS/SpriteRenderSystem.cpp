@@ -66,7 +66,7 @@ namespace SandCastle
 			texture->GetId(),
 			render->GetLayer(),
 			render->GetMaterialID(),
-			render->color.a
+			render->color
 		);
 	}
 
