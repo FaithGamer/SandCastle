@@ -24,6 +24,7 @@
 
 namespace SandCastle
 {
+	class Ui;
 	using FontID = uint32_t;
 	typedef std::pair<uint32_t, uint32_t> GlyphRange;
 	struct Glyph
@@ -73,25 +74,46 @@ namespace SandCastle
 	class Writer
 	{
 	public:
-		Writer();
+		
 		~Writer();
 
 		FontID MakeFont(std::string filename,
 			int size,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
+		/// @brief Give a fancy name to the font to find it easily later 
+		/// across all your project.
+		void NameFont(FontID font, String name);
+		/// @brief Set the font that will be used for every subsequent Write
 		void UseFont(FontID id);
+		/// @brief Set the font that will be used for every subsequent Write, using its fancy name
+		void UseFont(String name);
+		/// @brief Set the folder path for the font assets
 		void SetFontFolder(String path);
+		/// @brief Set the PPU that will be used for every subsequent MakeFont
 		void SetPPU(float ppu);
+		/// @brief Set the material that will be used for every subsequent MakeFont
 		void SetMaterial(Material* material);
 		void SetMaxAtlasSize(int pixels);
+		/// @brief Set the Layer that will be used for every subsequent MakeFont
 		void SetLayer(uint32_t layer);
+
 		Sentence Write(const std::string& utf8,
 			float maxWidth = -1.f,
 			float lineSpacing = 1.0f);
+
+		Sentence Write(const std::string& utf8,
+			FontID font,
+			Material* material,
+			LayerID layer,
+			float maxWidth = -1.f,
+			float lineSpacing = 1.0f);
+
 		float GetFontWorldSize(FontID font);
 
 	private:
+		friend Ui;
+		Writer(Material* material, LayerID layer);
 		// Helpers
 		static std::vector<uint32_t> Utf8ToCodepoints(const std::string& s);
 		void InitLazyPages(Font& font);
@@ -127,15 +149,14 @@ namespace SandCastle
 
 	private:
 		FT_Library m_ft = nullptr;
-		FontID m_nextId = 0;
-		std::unordered_map<FontID, std::vector<DynamicPage>> m_dynPages;
-		std::unordered_map<FontID, Font> m_fonts;
+		std::vector<std::vector<DynamicPage>> m_dynPages;
+		std::vector<Font> m_fonts;
+		std::unordered_map<String, FontID> m_fontFinder;
 		FontID m_current = 0;
 		int m_maxAtlasSize = 4096;
 		float m_ppu = 50.f;
 		Material* m_material = nullptr;
-		Material* m_defaultMaterial = nullptr;
-		String m_fontFolder = "assets/fonts/";
 		uint32_t m_layer = 0;
+		String m_fontFolder = "assets/fonts/";
 	};
 }

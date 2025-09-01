@@ -130,7 +130,8 @@ namespace SandCastle
 	}
 
 	// ---------- Lifecycle ----------
-	Writer::Writer()
+	Writer::Writer(Material* material, LayerID layer) 
+		: m_material(material), m_layer(layer)
 	{
 		FT_Error err = FT_Init_FreeType(&m_ft);
 		ASSERT_LOG_ERROR(err == 0, "FreeType init failed.");
@@ -138,19 +139,17 @@ namespace SandCastle
 		GLint maxTextureSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 		m_maxAtlasSize = std::min(4096, maxTextureSize);
-		m_defaultMaterial = Renderer2D::GetMaterial(0);
 	}
 	Writer::~Writer()
 	{
-		for (auto& kv : m_fonts)
+		for (auto& font : m_fonts)
 		{
-			if (kv.second.face)
-				FT_Done_Face(kv.second.face);
+			if (font.face)
+				FT_Done_Face(font.face);
 		}
 		FT_Done_FreeType(m_ft);
 	}
 
-	// ---------- MakeFont (primary: spec) ----------
 	FontID Writer::MakeFont(std::string filename, int size,
 		float outlineThickness, Vec4f outlineColor)
 	{
@@ -164,25 +163,23 @@ namespace SandCastle
 		FT_Select_Charmap(font.face, FT_ENCODING_UNICODE);
 		FT_Set_Pixel_Sizes(font.face, 0, size);
 
-
+		auto index = (FontID)m_fonts.size();
 		font.ppu = m_ppu;
-		font.material = m_material != nullptr ? m_material : m_defaultMaterial;
-		font.id = ++m_nextId;
+		font.id = index;
 		font.size = size;
 		font.name = filename;
 		font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu);
 		font.outlineThickness = std::max(0.f, outlineThickness);
 		font.outlineColor = outlineColor;
+		font.material = m_material;
 		font.layer = m_layer;
-
 
 		InitLazyPages(font); // start with an empty atlas we’ll grow on - demand
 		BakeFallbackGlyph(font);
 
-		m_fonts[font.id] = std::move(font);
+		m_fonts.emplace_back(std::move(font));
 
-		m_current = m_nextId;
-		return m_current;
+		return index;
 	}
 
 	void Writer::SetFontFolder(String path)
@@ -190,10 +187,30 @@ namespace SandCastle
 		m_fontFolder = path;
 	}
 
+	void Writer::NameFont(FontID font, String name)
+	{
+		m_fontFinder[name] = font;
+	}
+
 	void Writer::UseFont(FontID id)
 	{
-		ASSERT_LOG_ERROR(m_fonts.count(id) != 0, "UseFont: invalid FontID");
+		if (m_fonts.size() <= id)
+		{
+			LOG_ERROR("Writer::UseFont, Invalid font Id");
+			return;
+		}
 		m_current = id;
+	}
+
+	void Writer::UseFont(String name)
+	{
+		auto it = m_fontFinder.find(name);
+		if (it == m_fontFinder.end())
+		{
+			LOG_ERROR("The font {0}, cannot be found.");
+			return;
+		}
+		m_current = it->second;
 	}
 
 	void Writer::SetPPU(float ppu)
@@ -214,13 +231,26 @@ namespace SandCastle
 		m_layer = layer;
 	}
 
-	// ---------- CreateSentence (kerning + wrapping + line spacing) ----------
 	Sentence Writer::Write(const std::string& utf8,
 		float maxWidth,
 		float lineSpacing)
 	{
-		ASSERT_LOG_ERROR(m_fonts.count(m_current) != 0, "Write: no current font set");
-		Font& font = m_fonts[m_current];
+		if (m_fonts.size() <= (size_t)m_current)
+		{
+			LOG_ERROR("Writer::Write, invalid m_current (fontId out of range)");
+			return Sentence();
+		}
+		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, lineSpacing);
+	}
+
+	Sentence Writer::Write(const std::string& utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, float lineSpacing)
+	{
+		if (m_fonts.size() <= (size_t)fontId)
+		{
+			LOG_ERROR("Writer::Write, invalid fontId (out of range)");
+			return Sentence();
+		}
+		Font& font = m_fonts[(size_t)fontId];
 
 		auto cps = Utf8ToCodepoints(utf8);
 		EnsureGlyphs(font, cps);
@@ -284,9 +314,9 @@ namespace SandCastle
 					ch->originalPosition = pos;
 
 					auto sr = e.AddComponent<SpriteRender>();
-					sr->SetMaterial(font.material->GetID());
+					sr->SetMaterial(material->GetID());
 					sr->SetSprite(g.sprite.get());
-					sr->SetLayer(font.layer);
+					sr->SetLayer(layer);
 
 					sent.root.AddChild(e);
 					sent.glyphEntities.push_back(e);
@@ -331,9 +361,9 @@ namespace SandCastle
 			auto ch = e.AddComponent<Character>();
 			ch->originalPosition = pos;
 			auto sr = e.AddComponent<SpriteRender>();
-			sr->SetMaterial(font.material->GetID());
+			sr->SetMaterial(material->GetID());
 			sr->SetSprite(g.sprite.get());
-			sr->SetLayer(font.layer);
+			sr->SetLayer(layer);
 
 			sent.root.AddChild(e);
 			sent.glyphEntities.push_back(e);
@@ -347,15 +377,14 @@ namespace SandCastle
 
 	float Writer::GetFontWorldSize(FontID font)
 	{
-		auto it = m_fonts.find(font);
-		if (it == m_fonts.end())
+		if (m_fonts.size() <= font)
 		{
-			LOG_ERROR("FontID {0}, does not exists", font);
-			return 1;
+			LOG_ERROR("Writer::GetFontWorldSize, Invalid font ID");
+			return 1.f;
 		}
 
-		float ppu = it->second.atlases[0]->GetPixelPerUnit();
-		return (float)it->second.size * ppu;
+		float ppu = m_fonts[font].atlases[0]->GetPixelPerUnit();
+		return (float)m_fonts[font].size * ppu;
 	}
 
 	static int NextPow2(int x) { int p = 1; while (p < x) p <<= 1; return p; }
