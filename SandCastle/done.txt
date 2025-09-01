@@ -245,12 +245,27 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -fixed font using layers
 -material knows if its for layer or not to avoid creating useless batches
 -fixed sampler2D[] material error message
+-rename Writer Writer
+-Writer is held by Ui
+-Ui is a singleton
 
-UI:
 
->rename Writer Writer
->Writer is held by Ui
->Ui is a singleton
+01
+
+-fancy name to font
+-write can use custom material and layer
+-fonts assets should be handled by Assets
+-separate sprite template creations from frame creation
+-debug null texture during uitest
+-debug incorrect position of frame sprites
+
+>padding and edge extrude for frame border tex
+>test frame creation from template
+>test fancy font
+>One file for the Ui enums
+
+
+>play knightica
 >centered text
 
 We need to think of an api than enable to generate
