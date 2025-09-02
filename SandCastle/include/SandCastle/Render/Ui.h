@@ -80,104 +80,77 @@ class Frame : public UiElem
 
 namespace SandCastle
 {
-	typedef uint32_t UiElemID;
 
-	class UiElem
-	{
-
-	};
-
-	/// @brief Container for every Ui objects, can contain other canvas.
-	class Canvas : public UiElem
-	{
-	public:
-		Entity root;
-		Vec2f size;
-	};
+	
 
 	class Ui : public Singleton<Ui>
 	{
 	public:
 
+		/*---Elements---*/
+
+		/// @brief base class of every Ui objects.
+		class Elem;
+		/// @brief Container for every Ui objects, can contain other canvas.
+		class Canvas;
+		/// @brief Text
+		class Txt;
+
+		/*--- Types ---*/
+		//definitions in UiEnum.h
+
+		typedef uint32_t ElemID;
 		typedef uint32_t FrameID;
-		enum class Anchor
-		{
-			TopLeft,
-			TopCenter,
-			TopRight,
-			MiddleLeft,
-			MiddleCenter,
-			MiddleRight,
-			BotLeft,
-			BotCenter,
-			BotRight
-		};
-
-		enum class Align : int
-		{
-			Normal,
-			Inverse
-		};
-
-		enum class AlignDirection : int
-		{
-			TopDown,
-			DownTop,
-			LeftRight,
-			RightLeft
-		};
-
-		typedef enum : int
-		{
-			Top,
-			Left,
-			Mid,
-			Right,
-			Bot
-		}TexBorder;
-
-		typedef enum : int
-		{
-			TopLeft,
-			TopRight,
-			BotLeft,
-			BotRight
-
-		}SpriteCorner;
+		enum class Anchor;
+		enum class Layout;
+		enum class LayoutDir;
+		enum class TexBorder;
+		enum class SpriteCorner;
 
 	public:
 		Ui();
 		~Ui();
 
-		//static FontID MakeFont(String font, )
-		// 
+
 		/*---Initialization---*/
 
+		/// @brief Create the sprites and textures needed to be used later for any type of frames (canvas, buttons...)
+		/// The texture MUST already have 3x3 sprites (use the .texture file to set up properly).
+		/// @param fixedStep Set true if your texture has a repeating pattern that must be consistent.
+		/// The frame size will be constrainted to increase/decrease by stepped increment, according to the sprites size.
 		static void MakeFrameTemplate(String texture, bool fixedStep);
+		/// @brief Create a font that will be available for usage later at any time.
+		/// @param filename font filename
+		/// @param fancyName identification name of easy usage
+		/// @param size font height in uiSize 
+		/// (by default, ui full height is 360.f
+		/// so a font of size 180.f would take half the screen.)
 		static void MakeFont(String filename,
 			String fancyName,
-			int size,
+			float uiSize,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
 
 		/*---Ui creation---*/
 
-		static void BeginCanvas();
+		static ElemID BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
+		static ElemID Text(std::string_view utf8, float maxWidth = -1.f);
+		static void EndCanvas();
 
 		/*---State---*/
 
-		/// @brief Set the material that will be used for every subsequent ui element creation
-		static void PushMaterial(Material* material);
-		/// @brief Set the font that will be used for every subsequent ui element creation
-		static void PushFont(FontID font);
-		/// @brief Set the layer that will be used for every subsequent ui element creation
-		static void PushLayer(LayerID layer);
-		/// @brief Remove the top of the material stack (can't remove the last element)
-		static void PopMaterial(Material* material);
-		/// @brief Remove the top of the font stack (can't remove the last element)
-		static void PopFont(FontID font);
-		/// @brief Remove the top of the layer stack (can't remove the last element)
-		static void PopLayer(LayerID layer);
+		/// @brief Set the material that will be used for every subsequent ui creation
+		static void SetMaterial(Material* material);
+		/// @brief Set the font that will be used for every subsequent ui creation
+		static void SetFont(FontID font);
+		/// @brief Set the font that will be used for every subsequent ui creation
+		static void SetFont(String fancyName);
+		/// @brief Set the layer that will be used for every subsequent ui creation
+		static void SetLayer(LayerID layer);
+		/// @brief Set the frame that will be used for every subsequent canvas creation
+		static void SetCanvasFrame(String texture);
+		/// @brief Set the frame that will be used for every subsequent button creation
+		static void SetButtonFrame(String texture);
 
 		/*---Utility---*/
 
@@ -193,20 +166,15 @@ namespace SandCastle
 		/// @brief Get the material used (top of the stack)
 		static Material* GetMaterial();
 		static FontID GetFont();
-		static LayerID GetLayer(); 
+		static LayerID GetLayer();
 
 		//Public only for test
-		Entity InstanceFrame(UiElemID id, String texture, Vec2f size);
 	private:
-		//Helpers
-		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
-		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
-		//Instantiation
 
-	
+		/*---Structs---*/
 		struct RepeatTextures
 		{
-			
+
 		};
 
 		struct BorderSprite
@@ -225,11 +193,32 @@ namespace SandCastle
 			std::vector<Texture*> repeatTex;
 		};
 
+		/*---Helpers---*/
+		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
+		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
+
+		/*---Instantiation---*/
+		ElemID InstanceElem(Elem* elem);
+		Entity InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size);
+
+	private:
+		//Helper
 		Writer* m_writer;
-		std::stack<Material*> m_material;
-		std::stack<FontID> m_font;
-		std::stack<LayerID> m_layer;
+
+		//Data
 		std::unordered_map<String, FrameTemplate> m_frameTemplates;
-		std::unordered_map<UiElemID, std::vector<BorderSprite>> m_borderSprites; //
+		std::unordered_map<ElemID, std::vector<BorderSprite>> m_borderSprites;
+
+		//State (creation of new elements)
+		Material* m_material;
+		FontID m_font;
+		LayerID m_layer;
+		FrameTemplate* m_canvasFrame;
+		FrameTemplate* m_buttonFrame;
+		std::stack<Canvas*> m_canvas;
+		std::unordered_map<ElemID, Elem*> m_elems;
+
+		static ElemID m_nextId;
+
 	};
 }

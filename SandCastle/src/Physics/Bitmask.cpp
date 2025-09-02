@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SandCastle/Physics/Bitmask.h"
+#include "SandCastle/Core/Bitmask.h"
 #include "SandCastle/Core/Log.h"
 
 namespace SandCastle

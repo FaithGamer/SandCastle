@@ -259,8 +259,22 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -debug null texture during uitest
 -debug incorrect position of frame sprites
 
->padding and edge extrude for frame border tex
->test frame creation from template
+02
+
+-test frame creation from template
+-padding and edge extrude for frame borders seem unecessary atm with UiTest at least
+
+>remove push/pop mat/layer/font, make it Set
+
+>StartCanvas
+>add a text inside
+>EndCanvas
+
+>assert error if no canvas during elem creation
+>text anchoring top left by default
+>fix spaces advance size whith outline
+>Ui::Txt must know it's own size
+>canvas size must match frame size (especially with fixedstep)
 >test fancy font
 >One file for the Ui enums
 
@@ -306,6 +320,7 @@ Ui::End();
 
 tasks:
 
+>rename Filter to MaskFilter and use template
 >optimize transform memory layout (get rid of mat4 at all ?)
 >check renderer thread safety
 >Implement a default GameSystem class with state machine

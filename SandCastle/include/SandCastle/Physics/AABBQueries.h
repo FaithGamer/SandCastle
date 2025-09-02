@@ -6,7 +6,7 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Physics/Collider.h"
 #include "SandCastle/Physics/Body.h"
-#include "SandCastle/Physics/Bitmask.h"
+#include "SandCastle/Core/Bitmask.h"
 namespace SandCastle
 {
 

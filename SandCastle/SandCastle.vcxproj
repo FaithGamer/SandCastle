@@ -252,6 +252,9 @@
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />
+    <ClCompile Include="src\Render\UiCanvas.cpp" />
+    <ClCompile Include="src\Render\UiElem.cpp" />
+    <ClCompile Include="src\Render\UiTxt.cpp" />
     <ClCompile Include="src\Render\Writer.cpp" />
     <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
@@ -363,6 +366,10 @@
     <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
+    <ClInclude Include="include\SandCastle\Render\UiCanvas.h" />
+    <ClInclude Include="include\SandCastle\Render\UiElem.h" />
+    <ClInclude Include="include\SandCastle\Render\UiEnum.h" />
+    <ClInclude Include="include\SandCastle\Render\UiTxt.h" />
     <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />
     <ClInclude Include="include\SandCastle\EngineParameters.h" />
@@ -384,7 +391,7 @@
     <ClInclude Include="include\SandCastle\Internal\Singleton.h" />
     <ClInclude Include="include\SandCastle\PhysicsEngine.h" />
     <ClInclude Include="include\SandCastle\Physics\AABBQueries.h" />
-    <ClInclude Include="include\SandCastle\Physics\Bitmask.h" />
+    <ClInclude Include="include\SandCastle\Core\Bitmask.h" />
     <ClInclude Include="include\SandCastle\Physics\Body.h" />
     <ClInclude Include="include\SandCastle\Physics\Collider.h" />
     <ClInclude Include="include\SandCastle\Physics\ColliderRenderDebugSystem.h" />

@@ -98,11 +98,11 @@ namespace SandCastle
 		/// @brief Set the Layer that will be used for every subsequent MakeFont
 		void SetLayer(uint32_t layer);
 
-		Sentence Write(const std::string& utf8,
+		Sentence Write(std::string_view utf8,
 			float maxWidth = -1.f,
 			float lineSpacing = 1.0f);
 
-		Sentence Write(const std::string& utf8,
+		Sentence Write(std::string_view utf8,
 			FontID font,
 			Material* material,
 			LayerID layer,
@@ -110,12 +110,14 @@ namespace SandCastle
 			float lineSpacing = 1.0f);
 
 		float GetFontWorldSize(FontID font);
+		float GetPPU() const;
+		FontID GetFont(String fancyName) const;
 
 	private:
 		friend Ui;
 		Writer(Material* material, LayerID layer);
 		// Helpers
-		static std::vector<uint32_t> Utf8ToCodepoints(const std::string& s);
+		static std::vector<uint32_t> Utf8ToCodepoints(std::string_view s);
 		void InitLazyPages(Font& font);
 		void EnsureGlyphs(Font& font, const std::vector<uint32_t>& cps);
 		bool BakeOneGlyph(Font& font, uint32_t cp);
@@ -154,7 +156,7 @@ namespace SandCastle
 		std::unordered_map<String, FontID> m_fontFinder;
 		FontID m_current = 0;
 		int m_maxAtlasSize = 4096;
-		float m_ppu = 50.f;
+		float m_ppu = 1.f;
 		Material* m_material = nullptr;
 		uint32_t m_layer = 0;
 		String m_fontFolder = "assets/fonts/";

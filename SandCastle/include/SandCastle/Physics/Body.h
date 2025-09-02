@@ -3,7 +3,7 @@
 #include "box2d/box2d.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Physics/Collider.h"
-#include "SandCastle/Physics/Bitmask.h"
+#include "SandCastle/Core/Bitmask.h"
 #include "SandCastle/ECS/EntityId.h"
 #include "SandCastle/Core/std_macros.h"
 

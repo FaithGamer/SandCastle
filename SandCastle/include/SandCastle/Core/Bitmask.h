@@ -7,8 +7,43 @@
 
 namespace SandCastle
 {
-	/// @brief 15 flags
-	class Bitmask16
+	template <typename T>
+	class Bitmask
+	{
+	public:
+		Bitmask() : flags(0)
+		{
+
+		}
+		Bitmask(T Flags) : flags(Flags)
+		{
+
+		}
+		void Clear()
+		{
+			flags = 0;
+		}
+		void AddFlag(T flag)
+		{
+			flags = flags | flag;
+		}
+		void RemoveFlag(T flag)
+		{
+			flags = flags & ~flag;
+		}
+		bool Contains(T flag)
+		{
+			return (flags & flag) == flag;
+		}
+		T flags;
+	};
+
+	typedef Bitmask<uint8_t> Bitmask8;
+	typedef Bitmask<uint16_t> Bitmask16;
+	typedef Bitmask<uint32_t> Bitmask32;
+	typedef Bitmask<uint64_t> Bitmask64;
+
+	/*class Bitmask16
 	{
 	public:
 		Bitmask16() : flags(0)
@@ -94,7 +129,7 @@ namespace SandCastle
 			return (flags & flag) == flag;
 		}
 		uint64_t flags;
-	};
+	};*/
 
 
 	/// @brief Dynamic collection of named flags, enabling the generation of bitmasks with custom names for each flag

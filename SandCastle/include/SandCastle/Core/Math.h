@@ -151,6 +151,16 @@ namespace SandCastle
 			T quotient = input / step;
 			return quotient * step;
 		}
+		template <typename T>
+		inline T CeilMultiple(T input, T step)
+		{
+			if (input < step)
+				return step;
+			if (step == 0)
+				return input;
+			T quotient = static_cast<T>(std::ceil(static_cast<double>(input) / step));
+			return quotient * step;
+		}
 		/// @brief Round to the nearest power of two.
 		/// @param value value to be rounded
 		/// @param min minimum returned value

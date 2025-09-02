@@ -2,7 +2,7 @@
 
 #include "SandCastle/Internal/Singleton.h"
 #include "SandCastle/Physics/AABBQueries.h"
-#include "SandCastle/Physics/Bitmask.h"
+#include "SandCastle/Core/Bitmask.h"
 #include "SandCastle/Physics/Body.h"
 
 namespace SandCastle

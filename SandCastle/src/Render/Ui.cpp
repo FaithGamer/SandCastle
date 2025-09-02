@@ -6,6 +6,9 @@
 #include "SandCastle/Render/SpriteRender.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/UiEnum.h"
+#include "SandCastle/Render/UiCanvas.h"
+#include "SandCastle/Render/UiTxt.h"
 
 namespace SandCastle
 {
@@ -16,42 +19,45 @@ namespace SandCastle
 
 	}
 
+	Ui::ElemID Ui::m_nextId = 0;
+
 	Ui::Ui()
 	{
 		auto uiLayer = Renderer2D::AddLayer("ui");
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
 		uiMat->SetFloat("uDpi", 1.f / 180.f);
-		m_material.push(uiMat);
-		m_layer.push(uiLayer);
-		m_writer = new Writer(m_material.top(), m_layer.top());
+		m_material = uiMat;
+		m_layer = uiLayer;
+		m_writer = new Writer(m_material, m_layer);
+		m_writer->SetPPU(3.f);
 	}
+
 	Ui::~Ui()
 	{
 		delete m_writer;
 	}
-	
-	Entity Ui::InstanceFrame(UiElemID id, String texture, Vec2f size)
-	{
-		auto it = m_frameTemplates.find(texture);
-		if (it == m_frameTemplates.end())
-		{
-			LOG_ERROR("Frame template {0}, doesn't exists!", texture);
-			return Entity();
-		}
 
-		auto& frame = it->second;
-		
+	Ui::ElemID Ui::InstanceElem(Elem* elem)
+	{
+		auto id = m_nextId++;
+		elem->id = id;
+		m_elems[id] = elem;
+		return id;
+	}
+
+	Entity Ui::InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size)
+	{
 		//Dimensions
-		Vec2f sDim = frame.cornerSpr[0]->GetDimensions();
-		 
+		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
+
 		//Ensure frame size is at least the size of the four corners.
 		//Apply fixed step if relevant
-		if (frame.fixedStep || size.x < sDim.x * 2)
-			size.x = std::max(Math::NearestMultiple(size.x, sDim.x), sDim.x * 2.f);
-		if (frame.fixedStep || size.y < sDim.y * 2)
-			size.y = std::max(Math::NearestMultiple(size.y, sDim.y), sDim.y * 2.f);
+		if (frame->fixedStep || size.x < sDim.x * 2)
+			size.x = std::max(Math::CeilMultiple(size.x, sDim.x), sDim.x * 2.f);
+		if (frame->fixedStep || size.y < sDim.y * 2)
+			size.y = std::max(Math::CeilMultiple(size.y, sDim.y), sDim.y * 2.f);
 
-		float ppu = frame.repeatTex[0]->GetPixelPerUnit();
+		float ppu = frame->repeatTex[0]->GetPixelPerUnit();
 		Vec2f pxDim = sDim / ppu;
 		Vec2f pxSize = size / ppu;
 		Vec2f hDim = sDim * 0.5f;
@@ -66,25 +72,26 @@ namespace SandCastle
 			rect.left = 0;
 			rect.top = 0;
 			BorderSize(i, rect, wDim, pxSize, pxDim, sDim, ppu);
-			borderSpr.emplace_back(BorderSprite(frame.repeatTex[i], rect, wDim));
+			borderSpr.emplace_back(BorderSprite(frame->repeatTex[i], rect, wDim));
 		}
 
 		//Create the sprites entities:
 		auto entt = Entity::Create();
 		entt.adc<Transform>();
 		Anchor anchor = Anchor::TopLeft;
-		
+
 		//Corners
 		for (int i = 0; i < 4; i++)
 		{
-			auto& sprite = frame.cornerSpr[i];
+			auto& sprite = frame->cornerSpr[i];
 			auto e = Entity::Create();
 			auto spr = e.adc<SpriteRender>();
-			spr->SetLayer(m_layer.top());
-			spr->SetMaterial(m_material.top()->GetID());
+			spr->SetLayer(m_layer);
+			spr->SetMaterial(m_material->GetID());
 			auto tr = e.adc<Transform>();
 			spr->SetSprite(sprite);
-			switch (i)
+			auto type = (SpriteCorner)i;
+			switch (type)
 			{
 			case SpriteCorner::TopLeft:
 				tr->SetPosition(hDim.x, -hDim.y, 0);
@@ -111,12 +118,13 @@ namespace SandCastle
 			auto& sprite = borderSpr[i].sprite;
 			auto e = Entity::Create();
 			auto spr = e.adc<SpriteRender>();
-			spr->SetLayer(m_layer.top());
-			spr->SetMaterial(m_material.top()->GetID());
+			spr->SetLayer(m_layer);
+			spr->SetMaterial(m_material->GetID());
 			auto tr = e.adc<Transform>();
 			spr->SetSprite(&sprite);
 			auto re = sprite.GetTextureRect();
-			switch (i)
+			auto type = (TexBorder)i;
+			switch (type)
 			{
 			case TexBorder::Top:
 				tr->SetPosition(size.x * 0.5f, -hDim.y, 0.f);
@@ -138,12 +146,12 @@ namespace SandCastle
 			}
 			entt.AddChild(e);
 		}
-		
+
 		return entt;
 	}
 
 	/*---Initialization---*/
-	
+
 	void Ui::MakeFrameTemplate(String texture, bool fixedStep)
 	{
 		auto ins = Instance();
@@ -162,7 +170,8 @@ namespace SandCastle
 		{
 			String x = "_";
 			String y = "_";
-			switch (i)
+			auto type = (SpriteCorner)i;
+			switch (type)
 			{
 			case SpriteCorner::TopLeft:
 				x += "0";
@@ -185,44 +194,104 @@ namespace SandCastle
 			frame.cornerSpr.emplace_back(Assets::Get<Sprite>(spriteName));
 		}
 	}
-	void Ui::MakeFont(String filename, String fancyName, int size, float outlineThickness, Vec4f outlineColor)
+	void Ui::MakeFont(String filename, String fancyName, float uiSize, float outlineThickness, Vec4f outlineColor)
 	{
+		auto ins = Instance();
+		float ppu = ins->m_writer->GetPPU();
+		int pxSize = (int)std::round(uiSize * ppu);
+		int pxOutline = outlineThickness > 0.f ? (int)std::max(1, (int)std::round(outlineThickness * ppu)) : 0;
+		auto font = ins->m_writer->MakeFont(filename, pxSize, pxOutline, outlineColor);
+		ins->m_writer->NameFont(font, fancyName);
+	}
+
+	Ui::ElemID Ui::BeginCanvas(Vec2f size, bool frame)
+	{
+		auto i = Instance();
+		auto canvas = new Canvas();
+		i->InstanceElem(canvas);
+		if (size.x > 0.f)
+			canvas->fixedSize.AddFlag(Canvas::Horizontal);
+		if (size.y > 0.f)
+			canvas->fixedSize.AddFlag(Canvas::Vertical);
+		canvas->hasFrame = frame;
+		i->m_canvas.push(canvas);
+		return canvas->id;
+	}
+
+	Ui::ElemID Ui::Text(std::string_view utf8, float maxWidth)
+	{
+		auto i = Instance();
+		auto canvas = i->m_canvas.top();
+		if (canvas && canvas->fixedSize.Contains(Canvas::Horizontal))
+		{
+			maxWidth = std::min(canvas->size.x, maxWidth);
+		}
+		Txt* text = new Txt();
+		i->InstanceElem(text);
+		text->parent = canvas;
+		auto sentence = i->m_writer->Write(utf8, maxWidth);
+		if (canvas && maxWidth <= 0.f)
+		{
+			canvas->size.x = std::max(canvas->size.x, sentence.width);
+		}
+		if (canvas)
+		{
+			canvas->children.emplace_back(text);
+		}
+		
+		return text->id;
+	}
+
+	void Ui::EndCanvas()
+	{
+		auto i = Instance();
+		auto canvas = i->m_canvas.top();
+		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
+		{
+			canvas->frame = i->InstanceFrame(canvas->id, i->m_canvasFrame, canvas->size);
+		}
 	}
 
 	/*---State---*/
 
-	void Ui::PushMaterial(Material* material)
+	void Ui::SetMaterial(Material* material)
 	{
-		Instance()->m_material.push(material);
+		Instance()->m_material = material;
 	}
-	void Ui::PushFont(FontID font)
+	void Ui::SetFont(FontID font)
 	{
-		Instance()->m_font.push(font);
+		Instance()->m_font = font;
 	}
-	void Ui::PushLayer(LayerID layer)
+	void Ui::SetFont(String fancyName)
 	{
-		Instance()->m_layer.push(layer);
+		auto ins = Instance();
+		ins->m_font = ins->m_writer->GetFont(fancyName);
 	}
-	void Ui::PopMaterial(Material* material)
+	void Ui::SetLayer(LayerID layer)
 	{
-		if (Instance()->m_material.size() > 1)
-			Instance()->m_material.pop();
-		else
-			LOG_WARN("Trying to pop material stack but only one element left.");
+		Instance()->m_layer = layer;
 	}
-	void Ui::PopFont(FontID font)
+	void Ui::SetCanvasFrame(String texture)
 	{
-		if (Instance()->m_font.size() > 1)
-			Instance()->m_font.pop();
-		else
-			LOG_WARN("Trying to pop font stack but only one element left.");
+		auto ins = Instance();
+		auto it = ins->m_frameTemplates.find(texture);
+		if (it == ins->m_frameTemplates.end())
+		{
+			LOG_ERROR("Ui::SetCanvasFrame, the frame template {0}, doesn't exists.", texture);
+			return;
+		}
+		Instance()->m_canvasFrame = &it->second;
 	}
-	void Ui::PopLayer(LayerID layer)
+	void Ui::SetButtonFrame(String texture)
 	{
-		if (Instance()->m_layer.size() > 1)
-			Instance()->m_layer.pop();
-		else
-			LOG_WARN("Trying to pop layer stack but only one element left.");
+		auto ins = Instance();
+		auto it = ins->m_frameTemplates.find(texture);
+		if (it == ins->m_frameTemplates.end())
+		{
+			LOG_ERROR("Ui::SetCanvasFrame, the frame template {0}, doesn't exists.", texture);
+			return;
+		}
+		Instance()->m_buttonFrame = &it->second;
 	}
 	Vec3f Ui::UiToWorld(Vec3f uiPos)
 	{
@@ -238,18 +307,19 @@ namespace SandCastle
 	}
 	Material* Ui::GetMaterial()
 	{
-		return Instance()->m_material.top();
+		return Instance()->m_material;
 	}
 	FontID Ui::GetFont()
 	{
-		return Instance()->m_font.top();
+		return Instance()->m_font;
 	}
 	LayerID Ui::GetLayer()
 	{
-		return Instance()->m_layer.top();
+		return Instance()->m_layer;
 	}
 
 	/*---Helpers---*/
+
 	void Ui::MakeBorderTex(String texture, std::vector<Texture*>& tex)
 	{
 		//Create the repeating textures for frames
@@ -258,7 +328,8 @@ namespace SandCastle
 		{
 			String x = "_";
 			String y = "_";
-			switch (i)
+			auto type = (TexBorder)i;
+			switch (type)
 			{
 			case TexBorder::Top:
 				x += "1";
@@ -295,15 +366,15 @@ namespace SandCastle
 	void Ui::BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu)
 	{
 		//Calculate the sprite rect and world size of a sprite border (with texture repeat)
-
-		if (i == Ui::TexBorder::Top || i == Ui::TexBorder::Bot)
+		auto type = (TexBorder)i;
+		if (type == TexBorder::Top || type == TexBorder::Bot)
 		{
 			rect.width = pxSize.x - pxDim.x * 2; //pixel length
 			rect.height = pxDim.y; //pixel length
 			wDim.x = rect.width * ppu; //world length
 			wDim.y = sDim.y;
 		}
-		else if (i == Ui::TexBorder::Left || i == Ui::TexBorder::Right)
+		else if (type == TexBorder::Left || type == TexBorder::Right)
 		{
 			rect.width = pxDim.x; //pixel length
 			rect.height = pxSize.y - pxDim.y * 2; //pixel length

@@ -108,7 +108,7 @@ namespace SandCastle
 		for (auto& s : out) s.second *= ppu;
 		return out;
 	}
-	std::vector<uint32_t> Writer::Utf8ToCodepoints(const std::string& s)
+	std::vector<uint32_t> Writer::Utf8ToCodepoints(std::string_view s)
 	{
 		std::vector<uint32_t> cps;
 		size_t i = 0, n = s.size();
@@ -231,7 +231,7 @@ namespace SandCastle
 		m_layer = layer;
 	}
 
-	Sentence Writer::Write(const std::string& utf8,
+	Sentence Writer::Write(std::string_view utf8,
 		float maxWidth,
 		float lineSpacing)
 	{
@@ -243,7 +243,7 @@ namespace SandCastle
 		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, lineSpacing);
 	}
 
-	Sentence Writer::Write(const std::string& utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, float lineSpacing)
+	Sentence Writer::Write(std::string_view utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, float lineSpacing)
 	{
 		if (m_fonts.size() <= (size_t)fontId)
 		{
@@ -387,6 +387,22 @@ namespace SandCastle
 		return (float)m_fonts[font].size * ppu;
 	}
 
+	float Writer::GetPPU() const
+	{
+		return m_ppu;
+	}
+
+	FontID Writer::GetFont(String fancyName) const
+	{
+		auto font = m_fontFinder.find(fancyName);
+		if (font == m_fontFinder.end())
+		{
+			LOG_ERROR("Writer::GetFont, the fancy name {0}, doesn't exists.", fancyName);
+			return 0;
+		}
+		return font->second;
+	}
+
 	static int NextPow2(int x) { int p = 1; while (p < x) p <<= 1; return p; }
 
 	void Writer::InitLazyPages(Font& font)
@@ -409,6 +425,8 @@ namespace SandCastle
 		font.atlases.push_back(tex);
 		font.atlasSizes.push_back(Vec2i{ side, side });
 
+		while (m_dynPages.size() <= (size_t)font.id)
+			m_dynPages.emplace_back(std::vector<DynamicPage>());
 		m_dynPages[font.id].clear();
 		m_dynPages[font.id].push_back(DynamicPage{ side, side, 0, 0, 0 });
 	}
