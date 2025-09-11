@@ -55,7 +55,7 @@ namespace SandCastle
 		bool  hasFallbackGlyph = false;   // true once baked
 		float outlineThickness = 0.f;     // in pixels (stroke radius)
 		Vec4f outlineColor = { 0, 0, 0, 1 };
-		uint32_t layer = 0;
+		LayerID layer = 0;
 	};
 
 	struct Sentence
@@ -96,7 +96,7 @@ namespace SandCastle
 		void SetMaterial(Material* material);
 		void SetMaxAtlasSize(int pixels);
 		/// @brief Set the Layer that will be used for every subsequent MakeFont
-		void SetLayer(uint32_t layer);
+		void SetLayer(LayerID layer);
 
 		Sentence Write(std::string_view utf8,
 			float maxWidth = -1.f,
@@ -158,7 +158,7 @@ namespace SandCastle
 		int m_maxAtlasSize = 4096;
 		float m_ppu = 1.f;
 		Material* m_material = nullptr;
-		uint32_t m_layer = 0;
+		LayerID m_layer = 0;
 		String m_fontFolder = "assets/fonts/";
 	};
 }

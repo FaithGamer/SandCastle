@@ -54,9 +54,9 @@ namespace SandCastle
 		return MeasureCodepointAdvancePx(face, U'.');
 	}
 
-	std::unordered_map<uint32_t, float> SpaceAdv(FT_Face face, float ppu)
+	std::unordered_map<uint32_t, float> SpaceAdv(FT_Face face, float ppu, int outline)
 	{
-		const uint32_t spaces[] = {
+		constexpr uint32_t spaces[] = {
 			0x0020,0x00A0,0x1680,0x2000,0x2001,0x2002,0x2003,0x2004,0x2005,0x2006,0x2007,0x2008,0x2009,0x200A,0x202F,0x205F,0x3000,
 			0x200B,0x200C,0x200D,0x2060,0xFEFF,
 		};
@@ -80,24 +80,17 @@ namespace SandCastle
 			case 0x0020: out[cp] = emFrac(0.25f); break;
 			case 0x00A0: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
 			case 0x1680: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
-			case 0x2000:
 			case 0x2002: out[cp] = emFrac(0.5f); break;
-			case 0x2001:
 			case 0x2003: out[cp] = emFrac(1.0f); break;
 			case 0x2004: out[cp] = emFrac(1.0f / 3.0f); break;
 			case 0x2005: out[cp] = emFrac(0.25f); break;
 			case 0x2006: out[cp] = emFrac(1.0f / 6.0f); break;
 			case 0x2007: out[cp] = !std::isnan(digit_px) ? digit_px : (!std::isnan(space_px) ? space_px : emFrac(0.5f)); break;
 			case 0x2008: out[cp] = !std::isnan(punct_px) ? punct_px : (!std::isnan(space_px) ? space_px : emFrac(0.25f)); break;
-			case 0x2009:
 			case 0x202F: out[cp] = emFrac(0.2f); break;
 			case 0x200A: out[cp] = emFrac(0.1f); break;
 			case 0x205F: out[cp] = emFrac(2.0f / 9.0f); break;
 			case 0x3000: out[cp] = emFrac(1.0f); break;
-			case 0x200B:
-			case 0x200C:
-			case 0x200D:
-			case 0x2060:
 			case 0xFEFF: out[cp] = 0.0f; break;
 			default: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
 			}
@@ -105,7 +98,11 @@ namespace SandCastle
 		if (out.count(0x0020) && out.count(0x00A0)) {
 			if (out[0x00A0] < out[0x0020]) out[0x00A0] = out[0x0020];
 		}
-		for (auto& s : out) s.second *= ppu;
+		for (auto& s : out)
+		{
+			s.second *= ppu;
+			s.second += outline*2;
+		}
 		return out;
 	}
 	std::vector<uint32_t> Writer::Utf8ToCodepoints(std::string_view s)
@@ -168,7 +165,7 @@ namespace SandCastle
 		font.id = index;
 		font.size = size;
 		font.name = filename;
-		font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu);
+		font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu, outlineThickness);
 		font.outlineThickness = std::max(0.f, outlineThickness);
 		font.outlineColor = outlineColor;
 		font.material = m_material;
@@ -226,7 +223,7 @@ namespace SandCastle
 		m_maxAtlasSize = pixels;
 	}
 
-	void Writer::SetLayer(uint32_t layer)
+	void Writer::SetLayer(LayerID layer)
 	{
 		m_layer = layer;
 	}
@@ -302,7 +299,7 @@ namespace SandCastle
 
 					Vec3f pos(
 						pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-						pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu,
+						pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
 						0
 					);
 
@@ -351,7 +348,7 @@ namespace SandCastle
 
 			Vec3f pos(
 				pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-				pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu,
+				pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
 				0
 			);
 
