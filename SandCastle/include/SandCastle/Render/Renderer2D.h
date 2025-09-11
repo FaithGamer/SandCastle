@@ -201,6 +201,8 @@ namespace SandCastle
 		/// @brief Get Every layers id
 		static std::vector<uint32_t> GetLayers();
 		static Material* GetMaterial(MaterialID id);
+		static Material* GetDefaultQuadMaterial();
+		static Material* GetDefaultLayerMaterial();
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
 

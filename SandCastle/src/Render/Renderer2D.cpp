@@ -77,14 +77,8 @@ namespace SandCastle
 		auto size = Window::GetSize();
 		glViewport(0, 0, size.x, size.y);
 
-		//Enabling blending
+		//Globally enabling blending
 		glEnable(GL_BLEND);
-
-		//Enabling depth test
-		glEnable(GL_DEPTH_TEST);
-
-		//Standard blending parameters for most case uses
-		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
 		SDL_GL_SetSwapInterval(0);
 	}
@@ -290,6 +284,16 @@ namespace SandCastle
 		return Instance()->m_materials[(size_t)id];
 	}
 
+	Material* Renderer2D::GetDefaultQuadMaterial()
+	{
+		return Instance()->m_defaultBatchMaterial;
+	}
+
+	Material* Renderer2D::GetDefaultLayerMaterial()
+	{
+		return Instance()->m_defaultLayerMaterial;
+	}
+
 	void Renderer2D::SetLayerMaterial(LayerID layer, Material* material)
 	{
 		auto ins = Instance();
@@ -450,6 +454,9 @@ namespace SandCastle
 	}
 	void Renderer2D::Begin()
 	{
+		//Best blending setting for normal stuff
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 		auto camera = Camera::main;
 		m_rendering = true;
 
@@ -491,7 +498,11 @@ namespace SandCastle
 
 	void Renderer2D::RenderLayers()
 	{
+		//Premultiplied alpha for nice blending between layers
+		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		//Bind target framebuffer
+		
 		m_target->Bind();
 
 		//Put offscreen layer in according texture slots
