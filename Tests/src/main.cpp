@@ -14,6 +14,7 @@
 #include "PixPerfectGame.h"
 #include "SubTexture.h"
 #include "FrameTest.h"
+#include "DepthBlendTest.h"
 #include "UiTest.h"
 
 using namespace SandCastle;
@@ -34,5 +35,6 @@ int main()
 	//PixPerfectGame();
 	//SubTexture();
 	//FrameTest();
-	UiTest();
+	DepthBlendTest();
+	//UiTest();
 }

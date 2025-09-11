@@ -38,6 +38,7 @@
     <ClInclude Include="src\Benchmark2.h" />
     <ClInclude Include="src\Benchmark1.h" />
     <ClInclude Include="src\Delegates.h" />
+    <ClInclude Include="src\DepthBlendTest.h" />
     <ClInclude Include="src\DrawAnimation.h" />
     <ClInclude Include="src\DrawSprite.h" />
     <ClInclude Include="src\FontTest.h" />
