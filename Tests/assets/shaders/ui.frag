@@ -7,6 +7,7 @@ in vec2 vTexCoords;
 in float vTexIndex;
 
 uniform sampler2D uTextures[16];
+uniform float uDiscardAlpha = 0.f;
 
 layout(std140) uniform scene
 {
@@ -64,7 +65,6 @@ switch(int(round(vTexIndex)))
     case 14: oColor = textureGrad(uTextures[14], vTexCoords, uvDx, uvDy) * vColor; break;
     case 15: oColor = textureGrad(uTextures[15], vTexCoords, uvDx, uvDy) * vColor; break;
 }
-
-	if(oColor.a <0.01)
+	if(oColor.a < uDiscardAlpha)
 		discard;
 }
