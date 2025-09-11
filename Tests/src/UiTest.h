@@ -46,7 +46,6 @@ public:
 	}
 	void Start() override
 	{
-		//auto uiLayer = Renderer2D::AddLayer("ui");
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
 

@@ -35,6 +35,6 @@ int main()
 	//PixPerfectGame();
 	//SubTexture();
 	//FrameTest();
-	DepthBlendTest();
-	//UiTest();
+	//DepthBlendTest();
+	UiTest();
 }

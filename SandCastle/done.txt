@@ -75,6 +75,8 @@ July
 -window event test
 -Gamepad, mouse, key namespace
 
+August 
+
 01
 
 -Serialized: HadGetError, HadParseError, IsNull, (currently HadGetError is merged with HadParseError)
@@ -249,6 +251,7 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 -Writer is held by Ui
 -Ui is a singleton
 
+September
 
 01
 
@@ -263,21 +266,34 @@ Allocating gpu memory (texture atlases) without syncing with the render thread.
 
 -test frame creation from template
 -padding and edge extrude for frame borders seem unecessary atm with UiTest at least
+-remove push/pop mat/layer/font, make it Set
+-StartCanvas
+-add a text inside
+-EndCanvas
 
->remove push/pop mat/layer/font, make it Set
+11
 
->StartCanvas
->add a text inside
->EndCanvas
+-text over canvas (z)
+-text anchor point
+-learned that depth testing cannot be reliable in one single draw call.
+-error if no canvas during elem creation.
+But I am very suspicious of that...
+-YEAH! the culprit was the blending func!
+-Now there's a classic alpha blending for quads
+-And a premultiplied alpha blending for layers
+-everything draw nicely as expected \o/
+-Added access to default quad and layer materials
+-Added alpha discard as a uniform (default no discard.);
+-The alpha discard can be used to replace Z sort when there's no transparent fragments!
 
->assert error if no canvas during elem creation
->text anchoring top left by default
->fix spaces advance size whith outline
+
+
+>padding/margin of elements
+>canvas Y stretch
+
 >Ui::Txt must know it's own size
 >canvas size must match frame size (especially with fixedstep)
 >test fancy font
->One file for the Ui enums
-
 
 >play knightica
 >centered text
@@ -320,6 +336,11 @@ Ui::End();
 
 tasks:
 
+>game system pattern: Plmp, data in registry, signal are pointers.
+no need plmp if data is in registry and communication is only through signal?
+>localization system built in the asset
+
+>try use cereal for serialization
 >rename Filter to MaskFilter and use template
 >optimize transform memory layout (get rid of mat4 at all ?)
 >check renderer thread safety
@@ -332,11 +353,11 @@ tasks:
 
 secondary tasks:
 
->localization system built in the asset
 >text input (SDL_StartTextInput...)
 >audio spacialization
 >Transform animation system
 >fix window layer being behind other layers
+>fnv1a for strings like sounds
 
 bugs:
 
