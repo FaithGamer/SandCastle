@@ -12,6 +12,6 @@ namespace SandCastle
 		uint32_t GetID();
 		bool GetDepthTest();
 	private:
-		bool m_depthTest;
+		bool m_depthTest = true;
 	};
 }
