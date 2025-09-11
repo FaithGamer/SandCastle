@@ -24,6 +24,7 @@ namespace SandCastle
 	Ui::Ui()
 	{
 		auto uiLayer = Renderer2D::AddLayer("ui");
+		Renderer2D::SetLayerSortZ(uiLayer, true);
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
 		uiMat->SetFloat("uDpi", 1.f / 180.f);
 		m_material = uiMat;
@@ -37,10 +38,11 @@ namespace SandCastle
 		delete m_writer;
 	}
 
-	Ui::ElemID Ui::InstanceElem(Elem* elem)
+	Ui::ElemID Ui::InstanceElem(Elem* elem, Canvas* canvas)
 	{
 		auto id = m_nextId++;
 		elem->id = id;
+		elem->parent = canvas;
 		m_elems[id] = elem;
 		return id;
 	}
@@ -77,7 +79,8 @@ namespace SandCastle
 
 		//Create the sprites entities:
 		auto entt = Entity::Create();
-		entt.adc<Transform>();
+		auto rootTr  = entt.adc<Transform>();
+		rootTr->SetPosition(0, 0, m_z);
 		Anchor anchor = Anchor::TopLeft;
 
 		//Corners
@@ -200,6 +203,7 @@ namespace SandCastle
 		float ppu = ins->m_writer->GetPPU();
 		int pxSize = (int)std::round(uiSize * ppu);
 		int pxOutline = outlineThickness > 0.f ? (int)std::max(1, (int)std::round(outlineThickness * ppu)) : 0;
+		ins->m_writer->SetLayer(ins->m_layer);
 		auto font = ins->m_writer->MakeFont(filename, pxSize, pxOutline, outlineColor);
 		ins->m_writer->NameFont(font, fancyName);
 	}
@@ -208,48 +212,62 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new Canvas();
-		i->InstanceElem(canvas);
+		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
+		i->InstanceElem(canvas, parent);
 		if (size.x > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Horizontal);
 		if (size.y > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Vertical);
 		canvas->hasFrame = frame;
 		i->m_canvas.push(canvas);
+		i->m_z -= i->zStep;
 		return canvas->id;
 	}
 
 	Ui::ElemID Ui::Text(std::string_view utf8, float maxWidth)
 	{
 		auto i = Instance();
+	
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create UI Text without active canvas");
+	
 		auto canvas = i->m_canvas.top();
-		if (canvas && canvas->fixedSize.Contains(Canvas::Horizontal))
+		if (canvas->fixedSize.Contains(Canvas::Horizontal))
 		{
 			maxWidth = std::min(canvas->size.x, maxWidth);
 		}
 		Txt* text = new Txt();
-		i->InstanceElem(text);
-		text->parent = canvas;
-		auto sentence = i->m_writer->Write(utf8, maxWidth);
-		if (canvas && maxWidth <= 0.f)
+		i->InstanceElem(text, canvas);
+		text->sentence = i->m_writer->Write(utf8, maxWidth);
+		auto tr = text->sentence.root.GetComponent<Transform>();
+		tr->Move(0, 0, i->m_z);
+		if (maxWidth <= 0.f)
 		{
-			canvas->size.x = std::max(canvas->size.x, sentence.width);
+			canvas->size.x = std::max(canvas->size.x, text->sentence.width);
 		}
-		if (canvas)
-		{
-			canvas->children.emplace_back(text);
-		}
-		
+
+		canvas->children.emplace_back(text);
+
+
 		return text->id;
 	}
 
 	void Ui::EndCanvas()
 	{
 		auto i = Instance();
+		if (i->m_canvas.empty())
+		{
+			LOG_ERROR("EndCanvas called without an active canvas.");
+			return;
+		}
 		auto canvas = i->m_canvas.top();
+		i->m_z += i->zStep;
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
 			canvas->frame = i->InstanceFrame(canvas->id, i->m_canvasFrame, canvas->size);
 		}
+		auto tr =canvas->frame.GetComponent<Transform>();
+		auto pos = tr->GetPosition();
+
 	}
 
 	/*---State---*/

@@ -198,7 +198,7 @@ namespace SandCastle
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 
 		/*---Instantiation---*/
-		ElemID InstanceElem(Elem* elem);
+		ElemID InstanceElem(Elem* elem, Canvas* canvas);
 		Entity InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size);
 
 	private:
@@ -217,8 +217,10 @@ namespace SandCastle
 		FrameTemplate* m_buttonFrame;
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
+		float m_z = 0.f;
 
 		static ElemID m_nextId;
+		const float zStep = 1.f;
 
 	};
 }
