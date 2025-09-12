@@ -203,18 +203,18 @@ namespace SandCastle
 
 	private:
 		//Helper
-		Writer* m_writer;
+		Writer* m_writer = nullptr;
 
 		//Data
 		std::unordered_map<String, FrameTemplate> m_frameTemplates;
 		std::unordered_map<ElemID, std::vector<BorderSprite>> m_borderSprites;
 
 		//State (creation of new elements)
-		Material* m_material;
+		Material* m_material = nullptr;
 		FontID m_font;
 		LayerID m_layer;
-		FrameTemplate* m_canvasFrame;
-		FrameTemplate* m_buttonFrame;
+		FrameTemplate* m_canvasFrame = nullptr;
+		FrameTemplate* m_buttonFrame = nullptr;
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
 		float m_z = 0.f;

@@ -40,7 +40,7 @@ public:
 		Ui::SetFont("alata");
 
 		Ui::BeginCanvas();
-		Ui::Text("Hello World and everybody in this planet");
+		Ui::Text("Hello World and everybody on this planet", 100);
 		Ui::EndCanvas();
 
 	}

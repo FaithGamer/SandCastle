@@ -62,7 +62,7 @@ namespace SandCastle
 	{
 		Entity root;                           // parent entity for the sentence
 		std::vector<Entity> glyphEntities;     // child entities (one per glyph)
-		float width;
+		Vec2f size;
 	};
 
 	// NEW: store each character's "normal" computed position so FX can move them later.

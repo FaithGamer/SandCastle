@@ -275,7 +275,8 @@ namespace SandCastle
 		{
 			if (cp == (uint32_t)'\n')
 			{
-				pen.x = 0.f; pen.y -= lineStep; prevGlyphIndex = 0;
+				pen.x = 0.f; pen.y -= lineStep;
+				prevGlyphIndex = 0;
 				continue;
 			}
 
@@ -368,7 +369,8 @@ namespace SandCastle
 			pen.x += (kernPx * ppu) + (g.advancePx * ppu);
 			prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
 		}
-		sent.width = pen.x;
+		sent.size.x = std::max(pen.x, maxWidth);
+		sent.size.y = pen.y + ((float)font.size + font.outlineThickness) * ppu;
 		return sent;
 	}
 

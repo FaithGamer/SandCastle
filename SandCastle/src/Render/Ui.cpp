@@ -238,11 +238,16 @@ namespace SandCastle
 		Txt* text = new Txt();
 		i->InstanceElem(text, canvas);
 		text->sentence = i->m_writer->Write(utf8, maxWidth);
+		text->size = text->sentence.size;
 		auto tr = text->sentence.root.GetComponent<Transform>();
 		tr->Move(0, 0, i->m_z);
-		if (maxWidth <= 0.f)
+		if (!canvas->fixedSize.Contains(Canvas::Horizontal) && canvas->size.x < text->sentence.size.x)
 		{
-			canvas->size.x = std::max(canvas->size.x, text->sentence.width);
+			canvas->size.x = std::max(canvas->size.x, text->sentence.size.x);
+		}
+		if (!canvas->fixedSize.Contains(Canvas::Vertical))
+		{
+			canvas->size.y = std::max(canvas->size.y, text->sentence.size.y);
 		}
 
 		canvas->children.emplace_back(text);
