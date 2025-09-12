@@ -309,7 +309,6 @@ namespace SandCastle
 					if (currentWord.characters.empty()
 						|| currentWord.totalAdv + adv > maxWidth)
 					{
-						//RestartCurrWord();
 						return true;
 					}
 					auto& prevLine = lines[lines.size() - 2];
@@ -374,7 +373,6 @@ namespace SandCastle
 					float adv = it_space->second * ppu;
 					pen.x += adv;
 					RestartCurrWord();
-					//CheckLineBounds(adv);
 					continue;
 				}
 
@@ -398,14 +396,7 @@ namespace SandCastle
 				continue;
 			}
 
-			auto it_space = font.spacesAdv.find(cp);
-			if (it_space != font.spacesAdv.end())
-			{
-				float adv = it_space->second * ppu;
-				pen.x += adv;
-				//CheckLineBounds(adv);
-				RestartCurrWord();
-			}
+			
 
 			const Glyph& g = it->second;
 
@@ -428,6 +419,13 @@ namespace SandCastle
 
 			pen.x += nextAdv;
 			prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
+
+			//Reset word if space
+			auto it_space = font.spacesAdv.find(cp);
+			if (it_space != font.spacesAdv.end())
+			{
+				RestartCurrWord();
+			}
 		}
 		sent.size.x = std::max(pen.x, maxWidth);
 		sent.size.y = (-pen.y) + ((float)font.size + font.outlineThickness) * ppu;
