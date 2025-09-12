@@ -307,9 +307,9 @@ namespace SandCastle
 					NextLine();
 
 					if (currentWord.characters.empty()
-						|| currentWord.totalAdv > maxWidth)
+						|| currentWord.totalAdv + adv > maxWidth)
 					{
-						RestartCurrWord();
+						//RestartCurrWord();
 						return true;
 					}
 					auto& prevLine = lines[lines.size() - 2];
@@ -372,9 +372,9 @@ namespace SandCastle
 				if (it_space != font.spacesAdv.end())
 				{
 					float adv = it_space->second * ppu;
-					if (!CheckLineBounds(adv))
-						pen.x += adv;
+					pen.x += adv;
 					RestartCurrWord();
+					//CheckLineBounds(adv);
 					continue;
 				}
 
@@ -402,8 +402,8 @@ namespace SandCastle
 			if (it_space != font.spacesAdv.end())
 			{
 				float adv = it_space->second * ppu;
-				if (!CheckLineBounds(adv))
-					pen.x += adv;
+				pen.x += adv;
+				//CheckLineBounds(adv);
 				RestartCurrWord();
 			}
 
