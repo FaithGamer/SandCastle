@@ -14,96 +14,36 @@ namespace fs = std::filesystem;
 
 namespace SandCastle
 {
-	static bool GetGlyphAdvance26_6(FT_Face face, FT_UInt gindex, FT_Pos& out_advance_26_6)
+
+	inline bool IsSpace(uint32_t cp)
 	{
-		if (gindex == 0) return false; // glyph missing
-		if (FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT)) return false;
-		out_advance_26_6 = face->glyph->advance.x; // 26.6 fixed
-		return true;
-	}
-
-	// Try to measure a specific codepoint's advance; if missing, return NaN.
-	static float MeasureCodepointAdvancePx(FT_Face face, uint32_t cp)
-	{
-		FT_UInt gi = FT_Get_Char_Index(face, cp);
-		FT_Pos adv_26_6 = 0;
-		if (!GetGlyphAdvance26_6(face, gi, adv_26_6)) return std::numeric_limits<float>::quiet_NaN();
-		return adv_26_6 >> 6;
-	}
-
-	// Compute an "em" width in pixels for fallbacks.
-	// Uses the requested size in the face; call FT_Set_Pixel_Sizes or FT_Set_Char_Size first.
-	static float EmPixels(FT_Face face)
-	{
-		if (face->size && face->size->metrics.x_ppem > 0)
-			return static_cast<float>(face->size->metrics.x_ppem);
-
-		FT_Fixed x_scale = face->size ? face->size->metrics.x_scale : (1 << 16);
-		int em_in_px = FT_MulFix(face->units_per_EM ? face->units_per_EM : 2048, x_scale);
-		return static_cast<float>(em_in_px);
-	}
-
-	static float FigureWidthPx(FT_Face face)
-	{
-		float w = MeasureCodepointAdvancePx(face, U'0');
-		if (std::isnan(w)) w = MeasureCodepointAdvancePx(face, 0xFF10);
-		return w;
-	}
-	static float PunctWidthPx(FT_Face face)
-	{
-		return MeasureCodepointAdvancePx(face, U'.');
-	}
-
-	std::unordered_map<uint32_t, float> SpaceAdv(FT_Face face, float ppu, int outline)
-	{
-		constexpr uint32_t spaces[] = {
-			0x0020,0x00A0,0x1680,0x2000,0x2001,0x2002,0x2003,0x2004,0x2005,0x2006,0x2007,0x2008,0x2009,0x200A,0x202F,0x205F,0x3000,
-			0x200B,0x200C,0x200D,0x2060,0xFEFF,
-		};
-
-		std::unordered_map<uint32_t, float> out;
-		const float em_px = EmPixels(face);
-		const float space_px = MeasureCodepointAdvancePx(face, 0x0020);
-		const float nbspace_px = MeasureCodepointAdvancePx(face, 0x00A0);
-		const float digit_px = FigureWidthPx(face);
-		const float punct_px = PunctWidthPx(face);
-		auto emFrac = [&](float frac) -> float { return em_px * frac; };
-
-		for (uint32_t cp : spaces) {
-			double adv_px = MeasureCodepointAdvancePx(face, cp);
-
-			if (!std::isnan(adv_px)) {
-				out[cp] = adv_px;
-				continue;
-			}
-			switch (cp) {
-			case 0x0020: out[cp] = emFrac(0.25f); break;
-			case 0x00A0: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
-			case 0x1680: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
-			case 0x2002: out[cp] = emFrac(0.5f); break;
-			case 0x2003: out[cp] = emFrac(1.0f); break;
-			case 0x2004: out[cp] = emFrac(1.0f / 3.0f); break;
-			case 0x2005: out[cp] = emFrac(0.25f); break;
-			case 0x2006: out[cp] = emFrac(1.0f / 6.0f); break;
-			case 0x2007: out[cp] = !std::isnan(digit_px) ? digit_px : (!std::isnan(space_px) ? space_px : emFrac(0.5f)); break;
-			case 0x2008: out[cp] = !std::isnan(punct_px) ? punct_px : (!std::isnan(space_px) ? space_px : emFrac(0.25f)); break;
-			case 0x202F: out[cp] = emFrac(0.2f); break;
-			case 0x200A: out[cp] = emFrac(0.1f); break;
-			case 0x205F: out[cp] = emFrac(2.0f / 9.0f); break;
-			case 0x3000: out[cp] = emFrac(1.0f); break;
-			case 0xFEFF: out[cp] = 0.0f; break;
-			default: out[cp] = !std::isnan(space_px) ? space_px : emFrac(0.25f); break;
-			}
+		switch (cp) {
+		case 0x0020: // SPACE
+		case 0x00A0: // NO-BREAK SPACE
+		case 0x1680: // OGHAM SPACE MARK
+		case 0x2000: // EN QUAD
+		case 0x2001: // EM QUAD
+		case 0x2002: // EN SPACE
+		case 0x2003: // EM SPACE
+		case 0x2004: // THREE-PER-EM SPACE
+		case 0x2005: // FOUR-PER-EM SPACE
+		case 0x2006: // SIX-PER-EM SPACE
+		case 0x2007: // FIGURE SPACE
+		case 0x2008: // PUNCTUATION SPACE
+		case 0x2009: // THIN SPACE
+		case 0x200A: // HAIR SPACE
+		case 0x202F: // NARROW NO-BREAK SPACE
+		case 0x205F: // MEDIUM MATHEMATICAL SPACE
+		case 0x3000: // IDEOGRAPHIC SPACE
+		case 0x200B: // ZERO WIDTH SPACE
+		case 0x200C: // ZERO WIDTH NON-JOINER
+		case 0x200D: // ZERO WIDTH JOINER
+		case 0x2060: // WORD JOINER
+		case 0xFEFF: // ZERO WIDTH NO-BREAK SPACE (BOM)
+			return true;
+		default:
+			return false;
 		}
-		if (out.count(0x0020) && out.count(0x00A0)) {
-			if (out[0x00A0] < out[0x0020]) out[0x00A0] = out[0x0020];
-		}
-		for (auto& s : out)
-		{
-			s.second *= ppu;
-			s.second += outline * 2;
-		}
-		return out;
 	}
 	std::vector<uint32_t> Writer::Utf8ToCodepoints(std::string_view s)
 	{
@@ -165,7 +105,7 @@ namespace SandCastle
 		font.id = index;
 		font.size = size;
 		font.name = filename;
-		font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu, outlineThickness);
+		//font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu, outlineThickness);
 		font.outlineThickness = std::max(0.f, outlineThickness);
 		font.outlineColor = outlineColor;
 		font.material = m_material;
@@ -263,7 +203,7 @@ namespace SandCastle
 		uint32_t prevGlyphIndex = 0;
 
 		//Helpers
-		
+
 		struct WordChar
 		{
 			Entity entt;
@@ -273,6 +213,7 @@ namespace SandCastle
 		{
 			std::vector<WordChar> chars;
 			float totalAdv = 0;
+			float lastSpaceAdv = 0.f;
 		};
 		std::vector<Line> lines;
 		lines.emplace_back(Line());
@@ -313,6 +254,7 @@ namespace SandCastle
 					}
 					auto& prevLine = lines[lines.size() - 2];
 					auto& curLine = lines.back();
+					prevLine.totalAdv -= prevLine.lastSpaceAdv;
 					for (auto& ch : currentWord.characters)
 					{
 						ch.entt.gtr()->Move(-currentWord.advStart, -lineStep, 0);
@@ -330,7 +272,7 @@ namespace SandCastle
 				}
 				return false;
 			};
-		auto CreateGlyphEntities = [&](const Glyph& g, float adv)
+		auto CreateEntity = [&](const Glyph& g, float adv)
 			{
 				Vec3f pos(
 					pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
@@ -352,6 +294,7 @@ namespace SandCastle
 				currentWord.characters.emplace_back(WordChar(e, adv));
 				lines.back().chars.emplace_back(WordChar(e, adv));
 				lines.back().totalAdv += adv;
+				pen.x += adv;
 			};
 
 		//Iterating sentence CPS
@@ -363,40 +306,28 @@ namespace SandCastle
 				RestartCurrWord();
 				continue;
 			}
-
+			bool isSpace = IsSpace(cp);
 			auto it = font.glyphs.find(cp);
 			if (it == font.glyphs.end())
 			{
-				auto it_space = font.spacesAdv.find(cp);
-				if (it_space != font.spacesAdv.end())
+				if (isSpace)
 				{
-					float adv = it_space->second * ppu;
+					float adv = (float)font.size * ppu * 0.5f;
 					pen.x += adv;
 					RestartCurrWord();
-					continue;
+					lines.back().totalAdv += adv;
+					lines.back().lastSpaceAdv = adv;
 				}
-
-				if (font.hasFallbackGlyph)
+				else if (font.hasFallbackGlyph)
 				{
 					const Glyph& g = font.fallbackGlyph;
-
 					float nextAdv = (float)g.advancePx * ppu;
 					CheckLineBounds(nextAdv);
-					CreateGlyphEntities(g, nextAdv);
-
-					pen.x += nextAdv;
+					CreateEntity(g, nextAdv);
 					prevGlyphIndex = 0;
-
-					continue;
 				}
-				LOG_WARN("Invisible glyph has been drawn!");
-				float adv = (font.size * 0.6f) * ppu;
-				CheckLineBounds(adv);
-				pen.x += adv;
 				continue;
 			}
-
-			
 
 			const Glyph& g = it->second;
 
@@ -414,22 +345,27 @@ namespace SandCastle
 			}
 
 			float nextAdv = (kernPx + (float)g.advancePx) * ppu;
-			CheckLineBounds(nextAdv);
-			CreateGlyphEntities(g, nextAdv);
-
-			pen.x += nextAdv;
-			prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
+			bool lineR = CheckLineBounds(nextAdv);
+			if (!lineR)
+				prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
+			else
+				prevGlyphIndex = 0;
 
 			//Reset word if space
-			auto it_space = font.spacesAdv.find(cp);
-			if (it_space != font.spacesAdv.end())
+			if (isSpace)
 			{
+				pen.x += nextAdv;
 				RestartCurrWord();
+				lines.back().totalAdv += nextAdv;
+				lines.back().lastSpaceAdv = nextAdv;
+			}
+			else
+			{
+				CreateEntity(g, nextAdv);
 			}
 		}
 		sent.size.x = std::max(pen.x, maxWidth);
 		sent.size.y = (-pen.y) + ((float)font.size + font.outlineThickness) * ppu;
-
 
 		//Lines alignement
 		void (*Align)(Line & line, float w) = nullptr;

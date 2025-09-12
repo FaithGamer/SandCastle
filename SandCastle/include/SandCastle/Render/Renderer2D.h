@@ -28,8 +28,6 @@ namespace SandCastle
 	class RenderTarget;
 	class RenderTexture;
 	class Shader;
-	class RenderOptions;
-
 
 	struct QuadData
 	{
@@ -44,7 +42,6 @@ namespace SandCastle
 		LayerID index = 0;
 		sptr<RenderTarget> target = nullptr;
 		Material* material = nullptr;
-		sptr<RenderOptions> renderOptions = nullptr;
 		sptr<VertexArray> vertexArray;
 		unsigned int height = 0;
 		bool active = false;
@@ -166,11 +163,11 @@ namespace SandCastle
 		/// The order cannot be changed ever again, and the layers cannot be removed.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static LayerID AddLayer(std::string name, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static LayerID AddLayer(std::string name, Material* shader = nullptr);
 		/// @brief Add a layer on the bottom of the render queue with a fixed height, it will keep the aspect ratio of the window.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static LayerID AddLayer(std::string name, unsigned int height, Material* shader = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		static LayerID AddLayer(std::string name, unsigned int height, Material* shader = nullptr);
 		/// @brief Set true to draw sprites on this layer sorted by Z position.
 		/// Set to true if you want to ensure coherent drawing of overlapping sprites.
 		/// Set to false (default) if you want maximum speed.
@@ -185,9 +182,7 @@ namespace SandCastle
 		/// @param screenSpace  normalized screen space (vector must be of size 4)
 		static void SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace);
 		/// @brief Set the shader used to render a layer.
-		static void SetLayerMaterial(LayerID layer, Material* shader);
-		/// @brief Set the RenderOptions used when rendering a layer
-		static void SetLayerRenderOptions(LayerID layer, sptr<RenderOptions> renderOptions);
+		static void SetLayerMaterial(LayerID layer, Material* material);
 		/// @brief Set the layer height (width will be calculated to fit the aspect ratio of the window)
 		static void SetLayerHeight(LayerID layer, unsigned int height);
 
@@ -222,7 +217,7 @@ namespace SandCastle
 		void PostAssetInitThread();
 		void RenderThread();
 		void OnWindowResizeThread();
-		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr, sptr<RenderOptions> renderOptions = nullptr);
+		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr);
 		void CreateSubTextureThread(const Texture* source, Rect region);
 		void Begin();
 		void End();
@@ -251,8 +246,6 @@ namespace SandCastle
 		uint32_t m_maxIndices;
 
 		Material* m_defaultBatchMaterial;
-		sptr<RenderOptions> m_defaultRenderOptions;
-		sptr<RenderOptions> m_defaultRenderOptionsLayer;
 		Texture* m_whiteTexture;
 		GLuint m_whiteTextureID;
 		sptr<IndexBuffer> m_quadIndexBuffer;

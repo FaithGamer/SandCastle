@@ -52,7 +52,6 @@ namespace SandCastle
 		Material* material;
 		int size = 0;                                // pixel height
 		std::unordered_map<uint32_t, Glyph> glyphs;  // codepoint -> glyph
-		std::unordered_map<uint32_t, float> spacesAdv;
 		std::vector<GlyphRange> ranges;
 		std::vector<sptr<Texture>> atlases;          // one or more atlas textures
 		std::vector<Vec2i> atlasSizes;               // same length as atlases

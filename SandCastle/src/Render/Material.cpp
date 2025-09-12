@@ -1,13 +1,16 @@
 #include "pch.h"
 #include "SandCastle/Render/Material.h"
 #include "SandCastle/Core/Log.h"
+#include "SandCastle/Render/RenderOptions.h"
 
 namespace SandCastle
 {
 	Material::Material(Shader* shader, MaterialID id, bool isLayer)
 		: m_shader(shader),
 		m_id(id),
-		m_isLayer(isLayer)
+		m_isLayer(isLayer),
+		m_renderOptions(new RenderOptions)
+
 	{
 		ListUniforms();
 	}
@@ -47,6 +50,7 @@ namespace SandCastle
 			}
 		}
 		m_shader->Bind();
+		m_renderOptions->Bind();
 	}
 	MaterialID Material::GetID() const
 	{
@@ -55,6 +59,10 @@ namespace SandCastle
 	Shader* Material::GetShader() const
 	{
 		return m_shader;
+	}
+	RenderOptions* Material::GetRenderOptions() const
+	{
+		return m_renderOptions;
 	}
 	bool Material::IsLayer() const
 	{

@@ -7,6 +7,7 @@
 
 namespace SandCastle
 {
+	class RenderOptions;
 	class Renderer2D;
 	typedef uint16_t MaterialID;
 	struct MaterialProperty
@@ -39,10 +40,11 @@ namespace SandCastle
 		bool SetVec4f(String name, Vec4f value);
 		bool SetFloatArray(String name, const std::vector<float>& value);
 		bool SetIntArray(String name, const std::vector<int>& value);
-	
+		
 		void Bind() const;
 		MaterialID GetID() const;
 		Shader* GetShader() const;
+		RenderOptions* GetRenderOptions() const;
 		bool IsLayer() const;
 	private:
 		friend Renderer2D;
@@ -55,8 +57,9 @@ namespace SandCastle
 		//to do, add render options
 		std::unordered_map<String, MaterialProperty> m_properties;
 		std::unordered_map<String, MaterialPropertyArray> m_arrayProperties;
-		Shader* m_shader;
-		MaterialID m_id;
+		Shader* m_shader = nullptr;
+		RenderOptions* m_renderOptions = nullptr;
+		MaterialID m_id = 0;
 		bool m_isLayer = false;
 	};
 }

@@ -118,9 +118,6 @@ namespace SandCastle
 		m_whiteTexture = new Texture();
 		m_whiteTextureID = m_whiteTexture->GetId();
 
-		m_defaultRenderOptions = makesptr<RenderOptions>();
-		m_defaultRenderOptionsLayer = makesptr<RenderOptions>();
-		m_defaultRenderOptionsLayer->SetDepthTest(false);
 		auto window = Window::Instance();
 
 		//Create default materials
@@ -129,6 +126,7 @@ namespace SandCastle
 		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size(), false));
 		m_defaultBatchMaterial = m_materials.back();
 		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"), true);
+		m_defaultLayerMaterial->GetRenderOptions()->SetDepthTest(false);
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
 		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
 
@@ -138,7 +136,6 @@ namespace SandCastle
 			0,
 			window,
 			m_defaultLayerMaterial,
-			m_defaultRenderOptionsLayer,
 			GenerateLayerVertexArray(screenSpace, 0)));
 		m_layerMax++;
 		m_lastLayerAdded = m_layerMax;
@@ -184,11 +181,11 @@ namespace SandCastle
 		m_target = target;
 	}
 
-	LayerID Renderer2D::AddLayer(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
+	LayerID Renderer2D::AddLayer(std::string name, unsigned int height, Material* material)
 	{
 		auto ins = Instance();
 		ASSERT_LOG_ERROR((ins->m_layers.size() < (MAX_LAYERS / 2)), "{0} layer, is over the max layer count: {1}.", name, MAX_LAYERS / 2);
-		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material, renderOptions);
+		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material);
 		ins->Wait();
 		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
 		for (auto& mat : ins->m_materials)
@@ -206,9 +203,9 @@ namespace SandCastle
 		Renderer2D::Instance()->m_queue.zsort[layer] = zsort;
 	}
 
-	LayerID Renderer2D::AddLayer(std::string name, Material* material, sptr<RenderOptions> renderOptions)
+	LayerID Renderer2D::AddLayer(std::string name, Material* material)
 	{
-		return AddLayer(name, 0, material, renderOptions);
+		return AddLayer(name, 0, material);
 	}
 
 	LayerID Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex)
@@ -224,7 +221,7 @@ namespace SandCastle
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		uint32_t index = (uint32_t)ins->m_layers.size();
 		sptr<VertexArray> layerVertexArray = ins->GenerateLayerVertexArray(screenSpace, index);
-		ins->m_layers.push_back(RenderLayer(name, index, layer, ins->m_defaultLayerMaterial, ins->m_defaultRenderOptionsLayer, layerVertexArray, false, true));
+		ins->m_layers.push_back(RenderLayer(name, index, layer, ins->m_defaultLayerMaterial, layerVertexArray, false, true));
 		ins->m_offscreenLayers.push_back(OffscreenRenderLayer(layer, sampler2DIndex, index));
 
 		return (uint32_t)ins->m_layers.size() - 1;
@@ -299,12 +296,6 @@ namespace SandCastle
 		auto ins = Instance();
 		ins->SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
 		ins->m_layers[layer].material = material;
-	}
-
-	void Renderer2D::SetLayerRenderOptions(LayerID layer, sptr<RenderOptions> renderOptions)
-	{
-		auto ins = Instance();
-		ins->m_layers[layer].renderOptions = renderOptions;
 	}
 
 	void Renderer2D::SetLayerHeight(LayerID layer, unsigned int height)
@@ -421,12 +412,10 @@ namespace SandCastle
 			}
 		}
 	}
-	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material, sptr<RenderOptions> renderOptions)
+	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material)
 	{
 		if (material == nullptr)
 			material = m_defaultLayerMaterial;
-		if (renderOptions == nullptr)
-			renderOptions = m_defaultRenderOptionsLayer;
 
 		SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
 		LayerID index = (LayerID)m_layers.size();
@@ -443,7 +432,7 @@ namespace SandCastle
 			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
 			layer = makesptr<RenderTexture>(Vec2u(width, height));
 		}
-		m_layers.push_back(RenderLayer(name, index, layer, material, renderOptions, layerVertexArray, height, false, false));
+		m_layers.push_back(RenderLayer(name, index, layer, material, layerVertexArray, height, false, false));
 		m_renderLayers.push_back(&m_layers.back());
 
 		m_lastLayerAdded = index;
@@ -520,7 +509,6 @@ namespace SandCastle
 			std::static_pointer_cast<RenderTexture>(layer->target)->BindTexture(0);
 			layer->vertexArray->Bind();
 			layer->material->Bind();
-			layer->renderOptions->Bind();
 			GLuint indicesCount = layer->vertexArray->GetIndexBuffer()->GetCount();
 			glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
 		}
