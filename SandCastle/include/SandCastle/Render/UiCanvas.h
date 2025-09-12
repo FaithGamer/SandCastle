@@ -18,9 +18,12 @@ namespace SandCastle
 		Ui::Elem::Type GetType() const override;
 	public:
 		bool hasFrame = false;
+		Entity root;
 		Entity frame;
 		Bitmask8 fixedSize = 0;
 		std::vector<Ui::Elem*> children;
+		Vec2f cursor = Vec2f(0, 0);
+		Ui::Layout layout = Ui::Layout::LeftRight;
 	};
 
 }

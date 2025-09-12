@@ -4,6 +4,7 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Math.h"
 #include "SandCastle/Render/SpriteRender.h"
+#include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/UiEnum.h"
@@ -26,6 +27,7 @@ namespace SandCastle
 		auto uiLayer = Renderer2D::AddLayer("ui");
 		Renderer2D::SetLayerSortZ(uiLayer, true);
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
+		uiMat->GetRenderOptions()->SetDepthTest(false);
 		uiMat->SetFloat("uDpi", 1.f / 180.f);
 		m_material = uiMat;
 		m_layer = uiLayer;
@@ -43,6 +45,7 @@ namespace SandCastle
 		auto id = m_nextId++;
 		elem->id = id;
 		elem->parent = canvas;
+		elem->z = m_z;
 		m_elems[id] = elem;
 		return id;
 	}
@@ -235,24 +238,27 @@ namespace SandCastle
 		{
 			maxWidth = std::min(canvas->size.x, maxWidth);
 		}
+
+		//Instantiation
 		Txt* text = new Txt();
 		i->InstanceElem(text, canvas);
+		canvas->root.AddChild(text->sentence.root);
+		canvas->children.emplace_back(text);
+		text->padding = i->m_padding;
 		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
-		text->size = text->sentence.size;
-		auto tr = text->sentence.root.GetComponent<Transform>();
-		tr->Move(0, 0, i->m_z);
+		text->size = text->sentence.size + i->m_padding*2;
+		text->SetPosition(canvas->cursor);
+
+		//Canvas stretching
 		if (!canvas->fixedSize.Contains(Canvas::Horizontal) && canvas->size.x < text->sentence.size.x)
 		{
-			canvas->size.x = std::max(canvas->size.x, text->sentence.size.x);
+			canvas->size.x = std::max(canvas->size.x, text->size.x);
 		}
 		if (!canvas->fixedSize.Contains(Canvas::Vertical))
 		{
-			canvas->size.y = std::max(canvas->size.y, text->sentence.size.y);
+			canvas->size.y = std::max(canvas->size.y, text->size.y);
 		}
-
-		canvas->children.emplace_back(text);
-
-
+		i->AdvanceCursor(canvas);
 		return text->id;
 	}
 
@@ -319,6 +325,10 @@ namespace SandCastle
 	void Ui::SetTextAlign(TextAlign textAlign)
 	{
 		Instance()->m_textAlign = textAlign;
+	}
+	void Ui::SetPadding(Vec2f padding)
+	{
+		Instance()->m_padding = padding;
 	}
 	Vec3f Ui::UiToWorld(Vec3f uiPos)
 	{
@@ -415,6 +425,16 @@ namespace SandCastle
 			rect.width = pxSize.x - pxDim.x * 2; //pixel length
 			wDim.x = rect.width * ppu; //world length
 			wDim.y = rect.height * ppu; //world length
+		}
+	}
+
+	void Ui::AdvanceCursor(Canvas* canvas)
+	{
+		//Take the size of last element added
+		//Depedning on the direction, move the cursor.
+		switch (canvas->layout)
+		{
+
 		}
 	}
 }

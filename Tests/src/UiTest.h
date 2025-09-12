@@ -35,12 +35,13 @@ public:
 		Ui::Text("Hello World");
 		Ui::EndCanvas();*/
 
-		//Select t
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
 		Ui::BeginCanvas();
-		Ui::Text("Hello World and everybody on this planet", 100);
+		Ui::SetPadding(Vec2f(30, 30));
+	//	Ui::SetTextAlign(TextAlign::Center);
+		Ui::Text("Hello window view upon the paradise, but there's also spiderman who climbed up the top of the tallest moutain across the sky and this is why, therefore, the land has collapsed into a million bubbles.", 200);
 		Ui::EndCanvas();
 
 	}
@@ -50,14 +51,14 @@ public:
 		SpriteRender::defaultLayer = worldLayer;
 
 		//Init UI
-		Ui::MakeFrameTemplate("frame.png", true);
+		Ui::MakeFrameTemplate("frame.png", false);
 		//Optionally change the ppu before making font
 		//This can help to make the font px size 
 		//to be 1:1 for a specific screen resolution
 		Ui::GetWriter()->SetPPU(3.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
-		Ui::MakeFont("alata-regular.ttf", "alata", 14);
-	
+		Ui::MakeFont("alata-regular.ttf", "alata", 14, 2.f);
+
 		//Create ui stuff
 		CreateSomeUi();
 	}
@@ -80,6 +81,7 @@ public:
 			});
 	}
 };
+
 void UiTest()
 {
 	Engine::Init();

@@ -151,8 +151,10 @@ namespace SandCastle
 		static void SetCanvasFrame(String texture);
 		/// @brief Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrame(String texture);
-		/// @brief Set the text alignement that will be used for every subsequent button creation
+		/// @brief Set the text alignement that will be used for every subsequent text creation
 		static void SetTextAlign(TextAlign textAlign);
+		/// @brief Set the padding that will be used for every subsequent element creation.
+		static void SetPadding(Vec2f padding);
 
 		/*---Utility---*/
 
@@ -198,7 +200,7 @@ namespace SandCastle
 		/*---Helpers---*/
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
-
+		void AdvanceCursor(Canvas* canvas);
 		/*---Instantiation---*/
 		ElemID InstanceElem(Elem* elem, Canvas* canvas);
 		Entity InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size);
@@ -221,6 +223,7 @@ namespace SandCastle
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
 		float m_z = 0.f;
+		Vec2f m_padding = 0.f;
 
 		static ElemID m_nextId;
 		const float zStep = 1.f;
