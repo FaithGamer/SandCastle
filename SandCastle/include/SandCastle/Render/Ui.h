@@ -151,6 +151,8 @@ namespace SandCastle
 		static void SetCanvasFrame(String texture);
 		/// @brief Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrame(String texture);
+		/// @brief Set the text alignement that will be used for every subsequent button creation
+		static void SetTextAlign(TextAlign textAlign);
 
 		/*---Utility---*/
 
@@ -215,6 +217,7 @@ namespace SandCastle
 		LayerID m_layer;
 		FrameTemplate* m_canvasFrame = nullptr;
 		FrameTemplate* m_buttonFrame = nullptr;
+		TextAlign m_textAlign = TextAlign::Left;
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
 		float m_z = 0.f;

@@ -27,6 +27,12 @@ namespace SandCastle
 	class Ui;
 	using FontID = uint32_t;
 	typedef std::pair<uint32_t, uint32_t> GlyphRange;
+	enum class TextAlign
+	{
+		Left,
+		Center,
+		Right
+	};
 	struct Glyph
 	{
 		uint32_t codepoint = 0;
@@ -100,6 +106,7 @@ namespace SandCastle
 
 		Sentence Write(std::string_view utf8,
 			float maxWidth = -1.f,
+			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
 		Sentence Write(std::string_view utf8,
@@ -107,6 +114,7 @@ namespace SandCastle
 			Material* material,
 			LayerID layer,
 			float maxWidth = -1.f,
+			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
 		float GetFontWorldSize(FontID font);

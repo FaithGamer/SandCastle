@@ -230,6 +230,7 @@ namespace SandCastle
 
 	Sentence Writer::Write(std::string_view utf8,
 		float maxWidth,
+		TextAlign textAlign,
 		float lineSpacing)
 	{
 		if (m_fonts.size() <= (size_t)m_current)
@@ -237,10 +238,10 @@ namespace SandCastle
 			LOG_ERROR("Writer::Write, invalid m_current (fontId out of range)");
 			return Sentence();
 		}
-		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, lineSpacing);
+		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, textAlign, lineSpacing);
 	}
 
-	Sentence Writer::Write(std::string_view utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, float lineSpacing)
+	Sentence Writer::Write(std::string_view utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, TextAlign textAlign, float lineSpacing)
 	{
 		if (m_fonts.size() <= (size_t)fontId)
 		{
@@ -262,11 +263,19 @@ namespace SandCastle
 		uint32_t prevGlyphIndex = 0;
 
 		//Helpers
+		
 		struct WordChar
 		{
 			Entity entt;
 			float adv = 0.f;
 		};
+		struct Line
+		{
+			std::vector<WordChar> chars;
+			float totalAdv = 0;
+		};
+		std::vector<Line> lines;
+		lines.emplace_back(Line());
 		struct CurrentWord
 		{
 			std::vector<WordChar> characters;
@@ -274,7 +283,14 @@ namespace SandCastle
 			float advStart = 0;
 		};
 		CurrentWord currentWord;
-		auto RestartCurrWord = [&]()
+		auto NextLine = [&pen, &prevGlyphIndex, &lines, &lineStep]()
+			{
+				pen.x = 0.f;
+				pen.y -= lineStep;
+				prevGlyphIndex = 0;
+				lines.emplace_back(Line());
+			};
+		auto RestartCurrWord = [&currentWord, &pen]()
 			{
 				currentWord.characters.clear();
 				currentWord.totalAdv = 0.f;
@@ -288,20 +304,27 @@ namespace SandCastle
 					return false;
 				if ((pen.x + adv) > maxWidth)
 				{
-					pen.x = 0;
-					pen.y -= lineStep;
-					prevGlyphIndex = 0;
-					
+					NextLine();
+
 					if (currentWord.characters.empty()
 						|| currentWord.totalAdv > maxWidth)
 					{
 						RestartCurrWord();
 						return true;
 					}
+					auto& prevLine = lines[lines.size() - 2];
+					auto& curLine = lines.back();
 					for (auto& ch : currentWord.characters)
 					{
 						ch.entt.gtr()->Move(-currentWord.advStart, -lineStep, 0);
 						pen.x += ch.adv;
+						if (!prevLine.chars.empty())
+						{
+							prevLine.totalAdv -= prevLine.chars.back().adv;
+							prevLine.chars.pop_back();
+						}
+						curLine.chars.emplace_back(ch);
+						curLine.totalAdv += ch.adv;
 					}
 					RestartCurrWord();
 					return true;
@@ -309,35 +332,35 @@ namespace SandCastle
 				return false;
 			};
 		auto CreateGlyphEntities = [&](const Glyph& g, float adv)
-		{
-			Vec3f pos(
-				pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-				pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
-				0
-			);
-			Entity e = Entity::Create();
-			auto tr = e.AddComponent<Transform>();
-			tr->SetPosition(pos);
-			auto ch = e.AddComponent<Character>();
-			ch->originalPosition = pos;
-			auto sr = e.AddComponent<SpriteRender>();
-			sr->SetMaterial(material->GetID());
-			sr->SetSprite(g.sprite.get());
-			sr->SetLayer(layer);
-			sent.root.AddChild(e);
-			sent.glyphEntities.push_back(e);
-			currentWord.totalAdv += adv;
-			currentWord.characters.push_back(WordChar(e, adv));
-		};
+			{
+				Vec3f pos(
+					pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
+					pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
+					0
+				);
+				Entity e = Entity::Create();
+				auto tr = e.AddComponent<Transform>();
+				tr->SetPosition(pos);
+				auto ch = e.AddComponent<Character>();
+				ch->originalPosition = pos;
+				auto sr = e.AddComponent<SpriteRender>();
+				sr->SetMaterial(material->GetID());
+				sr->SetSprite(g.sprite.get());
+				sr->SetLayer(layer);
+				sent.root.AddChild(e);
+				sent.glyphEntities.push_back(e);
+				currentWord.totalAdv += adv;
+				currentWord.characters.emplace_back(WordChar(e, adv));
+				lines.back().chars.emplace_back(WordChar(e, adv));
+				lines.back().totalAdv += adv;
+			};
 
 		//Iterating sentence CPS
 		for (uint32_t cp : cps)
 		{
 			if (cp == (uint32_t)'\n')
 			{
-				pen.x = 0.f;
-				pen.y -= lineStep;
-				prevGlyphIndex = 0;
+				NextLine();
 				RestartCurrWord();
 				continue;
 			}
@@ -349,7 +372,7 @@ namespace SandCastle
 				if (it_space != font.spacesAdv.end())
 				{
 					float adv = it_space->second * ppu;
-					if(!CheckLineBounds(adv))
+					if (!CheckLineBounds(adv))
 						pen.x += adv;
 					RestartCurrWord();
 					continue;
@@ -407,7 +430,45 @@ namespace SandCastle
 			prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
 		}
 		sent.size.x = std::max(pen.x, maxWidth);
-		sent.size.y = pen.y + ((float)font.size + font.outlineThickness) * ppu;
+		sent.size.y = (-pen.y) + ((float)font.size + font.outlineThickness) * ppu;
+
+
+		//Lines alignement
+		void (*Align)(Line & line, float w) = nullptr;
+		switch (textAlign)
+		{
+		case TextAlign::Center:
+			Align = [](Line& line, float w) -> void
+				{
+					float offset = (w - line.totalAdv) * 0.5f;
+					for (int i = 0; i < line.chars.size(); i++)
+					{
+						line.chars[i].entt.gtr()->Move(offset, 0.f, 0.f);
+					}
+				};
+			break;
+		case TextAlign::Right:
+			Align = [](Line& line, float w) -> void
+				{
+					float offset = w - line.totalAdv;
+					for (int i = 0; i < line.chars.size(); i++)
+					{
+						line.chars[i].entt.gtr()->Move(offset, 0.f, 0.f);
+					}
+				};
+			break;
+		default:
+			break;
+		}
+
+		if (maxWidth > 0.f && Align != nullptr)
+		{
+			for (int i = 0; i < lines.size(); i++)
+			{
+				Align(lines[i], maxWidth);
+			}
+		}
+
 		return sent;
 	}
 

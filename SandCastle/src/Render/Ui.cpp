@@ -237,7 +237,7 @@ namespace SandCastle
 		}
 		Txt* text = new Txt();
 		i->InstanceElem(text, canvas);
-		text->sentence = i->m_writer->Write(utf8, maxWidth);
+		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
 		text->size = text->sentence.size;
 		auto tr = text->sentence.root.GetComponent<Transform>();
 		tr->Move(0, 0, i->m_z);
@@ -315,6 +315,10 @@ namespace SandCastle
 			return;
 		}
 		Instance()->m_buttonFrame = &it->second;
+	}
+	void Ui::SetTextAlign(TextAlign textAlign)
+	{
+		Instance()->m_textAlign = textAlign;
 	}
 	Vec3f Ui::UiToWorld(Vec3f uiPos)
 	{
