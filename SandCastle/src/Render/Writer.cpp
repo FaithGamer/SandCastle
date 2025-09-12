@@ -101,7 +101,7 @@ namespace SandCastle
 		for (auto& s : out)
 		{
 			s.second *= ppu;
-			s.second += outline*2;
+			s.second += outline * 2;
 		}
 		return out;
 	}
@@ -127,7 +127,7 @@ namespace SandCastle
 	}
 
 	// ---------- Lifecycle ----------
-	Writer::Writer(Material* material, LayerID layer) 
+	Writer::Writer(Material* material, LayerID layer)
 		: m_material(material), m_layer(layer)
 	{
 		FT_Error err = FT_Init_FreeType(&m_ft);
@@ -261,22 +261,84 @@ namespace SandCastle
 
 		uint32_t prevGlyphIndex = 0;
 
-		auto line = [&](Vec2f& pen, uint32_t& prevIndex, float max, float adv, float lineStep)
+		//Helpers
+		struct WordChar
+		{
+			Entity entt;
+			float adv = 0.f;
+		};
+		struct CurrentWord
+		{
+			std::vector<WordChar> characters;
+			float totalAdv = 0;
+			float advStart = 0;
+		};
+		CurrentWord currentWord;
+		auto RestartCurrWord = [&]()
 			{
-				if (max > 0.f && (pen.x + adv) > max)
-				{
-					pen.x = 0.f;
-					pen.y -= lineStep;
-					prevIndex = 0;
-				}
+				currentWord.characters.clear();
+				currentWord.totalAdv = 0.f;
+				currentWord.advStart = pen.x;
 			};
+		auto CheckLineBounds = [&](float adv) -> bool
+			{
+				if (maxWidth <= 0.f)
+					return false;
+				if (adv > maxWidth)
+					return false;
+				if ((pen.x + adv) > maxWidth)
+				{
+					pen.x = 0;
+					pen.y -= lineStep;
+					prevGlyphIndex = 0;
+					
+					if (currentWord.characters.empty()
+						|| currentWord.totalAdv > maxWidth)
+					{
+						RestartCurrWord();
+						return true;
+					}
+					for (auto& ch : currentWord.characters)
+					{
+						ch.entt.gtr()->Move(-currentWord.advStart, -lineStep, 0);
+						pen.x += ch.adv;
+					}
+					RestartCurrWord();
+					return true;
+				}
+				return false;
+			};
+		auto CreateGlyphEntities = [&](const Glyph& g, float adv)
+		{
+			Vec3f pos(
+				pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
+				pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
+				0
+			);
+			Entity e = Entity::Create();
+			auto tr = e.AddComponent<Transform>();
+			tr->SetPosition(pos);
+			auto ch = e.AddComponent<Character>();
+			ch->originalPosition = pos;
+			auto sr = e.AddComponent<SpriteRender>();
+			sr->SetMaterial(material->GetID());
+			sr->SetSprite(g.sprite.get());
+			sr->SetLayer(layer);
+			sent.root.AddChild(e);
+			sent.glyphEntities.push_back(e);
+			currentWord.totalAdv += adv;
+			currentWord.characters.push_back(WordChar(e, adv));
+		};
 
+		//Iterating sentence CPS
 		for (uint32_t cp : cps)
 		{
 			if (cp == (uint32_t)'\n')
 			{
-				pen.x = 0.f; pen.y -= lineStep;
+				pen.x = 0.f;
+				pen.y -= lineStep;
 				prevGlyphIndex = 0;
+				RestartCurrWord();
 				continue;
 			}
 
@@ -287,46 +349,39 @@ namespace SandCastle
 				if (it_space != font.spacesAdv.end())
 				{
 					float adv = it_space->second * ppu;
-					line(pen, prevGlyphIndex, maxWidth, adv, lineStep);
-					pen.x += adv;
+					if(!CheckLineBounds(adv))
+						pen.x += adv;
+					RestartCurrWord();
 					continue;
 				}
 
 				if (font.hasFallbackGlyph)
 				{
 					const Glyph& g = font.fallbackGlyph;
-					float nextAdvanceWorld = (float)g.advancePx * ppu;
-					line(pen, prevGlyphIndex, maxWidth, nextAdvanceWorld, lineStep);
 
-					Vec3f pos(
-						pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-						pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
-						0
-					);
+					float nextAdv = (float)g.advancePx * ppu;
+					CheckLineBounds(nextAdv);
+					CreateGlyphEntities(g, nextAdv);
 
-					Entity e = Entity::Create();
-					auto tr = e.AddComponent<Transform>();
-					tr->SetPosition(pos);
-
-					auto ch = e.AddComponent<Character>();
-					ch->originalPosition = pos;
-
-					auto sr = e.AddComponent<SpriteRender>();
-					sr->SetMaterial(material->GetID());
-					sr->SetSprite(g.sprite.get());
-					sr->SetLayer(layer);
-
-					sent.root.AddChild(e);
-					sent.glyphEntities.push_back(e);
-					pen.x += nextAdvanceWorld;
+					pen.x += nextAdv;
 					prevGlyphIndex = 0;
+
 					continue;
 				}
 				LOG_WARN("Invisible glyph has been drawn!");
 				float adv = (font.size * 0.6f) * ppu;
-				line(pen, prevGlyphIndex, maxWidth, adv, lineStep);
+				CheckLineBounds(adv);
 				pen.x += adv;
 				continue;
+			}
+
+			auto it_space = font.spacesAdv.find(cp);
+			if (it_space != font.spacesAdv.end())
+			{
+				float adv = it_space->second * ppu;
+				if (!CheckLineBounds(adv))
+					pen.x += adv;
+				RestartCurrWord();
 			}
 
 			const Glyph& g = it->second;
@@ -344,29 +399,11 @@ namespace SandCastle
 				}
 			}
 
-			float nextAdvanceWorld = (kernPx + (float)g.advancePx) * ppu;
-			line(pen, prevGlyphIndex, maxWidth, nextAdvanceWorld, lineStep);
+			float nextAdv = (kernPx + (float)g.advancePx) * ppu;
+			CheckLineBounds(nextAdv);
+			CreateGlyphEntities(g, nextAdv);
 
-			Vec3f pos(
-				pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-				pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
-				0
-			);
-
-			Entity e = Entity::Create();
-			auto tr = e.AddComponent<Transform>();
-			tr->SetPosition(pos);
-			auto ch = e.AddComponent<Character>();
-			ch->originalPosition = pos;
-			auto sr = e.AddComponent<SpriteRender>();
-			sr->SetMaterial(material->GetID());
-			sr->SetSprite(g.sprite.get());
-			sr->SetLayer(layer);
-
-			sent.root.AddChild(e);
-			sent.glyphEntities.push_back(e);
-
-			pen.x += (kernPx * ppu) + (g.advancePx * ppu);
+			pen.x += nextAdv;
 			prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
 		}
 		sent.size.x = std::max(pen.x, maxWidth);
@@ -637,7 +674,7 @@ namespace SandCastle
 		if (gindex == 0) return false;
 
 		// We need advance regardless of rendering path
-		
+
 
 		// Outline path: render stroke + fill, composite into a single RGBA
 		if (font.outlineThickness > 0.0f)
