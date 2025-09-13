@@ -318,7 +318,14 @@ But I am very suspicious of that...
 -basic layout working. (top down, wrap normal)
 -instead of advancing cursor after each elem creation, create every elems, then arrange the layout.
 -basic layout with lambdas working (clean implementation)
+-elem anchor 
+-elem anchor automatic depending on layout dir & wrap
+-good progress on UI overall
 
+>consider removing BotTop and RightLeft LayoutDir ??
+(because we can get the same result by inversing the insert direction + problem positioning)
+
+>Down top and Right left -> automatically align
 
 >canvas size must match frame size (especially with fixedstep)
 >do we use Elem::root ?? Do we parent elem inside of canvas ???

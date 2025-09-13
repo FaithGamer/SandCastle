@@ -8,10 +8,6 @@ namespace SandCastle
 		return Ui::Elem::Type::Canvas;
 	}
 
-	void Ui::Canvas::SetPosition(Vec2f pos)
-	{
-	}
-
 	void Ui::Canvas::OffsetRange(int begin, int end, Vec2f offset)
 	{
 		for (int i = begin; i < end; i++)
@@ -39,12 +35,13 @@ namespace SandCastle
 		Vec2f offsetTotal = Vec2f(0.f, 0.f);
 		Vec2f offset = Vec2f(0.f, 0.f);
 
-		/* lambda definitions */
+		/*- lambda definitions -*/
 
 		void (*WrapSize)(Vec2f childSize, float& wrapSize) = nullptr;
 		bool (*WrapCondition)(Bitmask8 fixedSize, Vec2f childSize, Vec2f cursor, Vec2f size) = nullptr;
 		void (*Wrapping)(float wrapSize, Vec2f & cursor, Vec2f & offset) = nullptr;
 		void (*MoveCursor)(Vec2f childSize, Vec2f & cursor, Vec2f & offset) = nullptr;
+		Vec2f(*BonusOffset)(Vec2f childSize, Vec2f canvasSize) = nullptr;
 
 		//WrapSize
 		auto HorizontalWrap = [](Vec2f childSize, float& wrapSize) -> void
@@ -100,48 +97,82 @@ namespace SandCastle
 				cursor.x += childSize.x;
 			};
 
+		auto BonusOffsetX = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
+			{
+				return Vec2f(childSize.x, 0);
+			};
+		auto BonusOffsetY = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
+			{
+				return Vec2f(0, -childSize.y);
+			};
+		auto BonusOffsetXY = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
+			{
+				return Vec2f(childSize.x,
+					-childSize.y);
+			};
+		auto NoBonusOffset = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
+			{
+				return 0.f;
+			};
+
 		//Use the right lambda depending on the layout
+		Anchor elemAnchor;
 		switch (layoutDir)
 		{
 		case LayoutDir::TopDown:
 			WrapSize = HorizontalWrap;
 			MoveCursor = MoveCursorDown;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
+			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::TopRight;
 			break;
 		case LayoutDir::LeftRight:
 			WrapSize = VerticalWrap;
 			MoveCursor = MoveCursorRight;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
+			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::BotLeft;
 			break;
 		case LayoutDir::DownTop:
 			WrapSize = HorizontalWrap;
 			MoveCursor = MoveCursorUp;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
+			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::BotLeft : Anchor::BotRight;
 			break;
 		case LayoutDir::RightLeft:
 			WrapSize = VerticalWrap;
 			MoveCursor = MoveCursorLeft;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
+			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopRight : Anchor::BotRight;
 			break;
 		default:
 			LOG_ERROR("Ui::Canvas::MakeLayout, Unknown Layout dir!");
 			break;
 		}
 
+		//>Current task, find how to compensate position when elem anchor is bot (and right aswell i guess ?)
+		//Solution, remove RightLeft and DownTop + add Bonus Offset for case whith inverse wrapping
+
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto& child = children[i];
-			
-			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
-				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
+			child->anchor = elemAnchor;
+			if (i == 0)
 			{
-				//It's time to wrap!
-				Wrapping(wrapSize, cursor, offsetTotal);
-				wrapSize = 0;
+				//cursor += InverseOffset(child->size);
 			}
 			else
 			{
-				offsetTotal += offset;	
+				if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
+					|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
+				{
+					//It's time to wrap!
+					//cursor += InverseOffset(child->size);
+					Wrapping(wrapSize, cursor, offsetTotal);
+					wrapSize = 0;
+				}
+				else
+				{
+					offsetTotal += offset;
+				}
 			}
 			offset = Vec2f(0, 0);
 			child->SetPosition(cursor);
@@ -173,9 +204,13 @@ namespace SandCastle
 		}
 
 		//Apply offset
-		if (offset.Magnitude() > 0.f)
+		if (offsetTotal.Magnitude() > 0.f)
 		{
 			OffsetRange(0, children.size(), offsetTotal);
 		}
+	}
+	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
+	{
+		anchor = Anchor;
 	}
 }
