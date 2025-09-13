@@ -7,7 +7,7 @@
         "Wrapping": "Repeat"
     },
     "Spritesheet": {
-        "Height": 30,
+        "Height": 10,
         "Origin": [
             0.0,
             0.0
@@ -16,6 +16,6 @@
             0.0,
             0.0
         ],
-        "Width": 30
+        "Width": 10
     }
 }

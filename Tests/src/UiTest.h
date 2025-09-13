@@ -38,7 +38,7 @@ public:
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
-		Ui::BeginCanvas(Vec2f(0, 200));
+		Ui::BeginCanvas(Vec2f(0, 150));
 		Ui::SetPadding(Vec2f(5, 5));
 	//	Ui::SetTextAlign(TextAlign::Center);
 		Ui::Text("Hello window");
@@ -49,12 +49,7 @@ public:
 		Ui::Text("Hello window");
 		Ui::Text("Hello window");
 		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
+
 		Ui::EndCanvas();
 
 	}
@@ -68,9 +63,9 @@ public:
 		//Optionally change the ppu before making font
 		//This can help to make the font px size 
 		//to be 1:1 for a specific screen resolution
-		Ui::GetWriter()->SetPPU(3.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
+		Ui::GetWriter()->SetPPU(2.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
-		Ui::MakeFont("alata-regular.ttf", "alata", 14, 2.f);
+		Ui::MakeFont("alata-regular.ttf", "alata", 14, .2f);
 
 		//Create ui stuff
 		CreateSomeUi();

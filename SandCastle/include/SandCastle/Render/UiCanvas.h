@@ -19,17 +19,23 @@ namespace SandCastle
 		Ui::Elem::Type GetType() const override;
 		void SetPosition(Vec2f pos) override;
 		void MakeLayout();
+
 	public:
+		Ui::LayoutDir layoutDir = Ui::LayoutDir::TopDown;
+		Ui::LayoutWrap layoutWrap = Ui::LayoutWrap::Normal;
+		Ui::LayoutAlign layoutAlign = Ui::LayoutAlign::Left;
+		Ui::Anchor anchor = Ui::Anchor::TopLeft;
+	private:
+		friend Ui;
+		void OffsetRange(int begin, int end, Vec2f offset);
+	private:
 		bool hasFrame = false;
 		Entity root;
 		Entity frame;
 		Bitmask8 fixedSize = 0;
 		std::vector<Ui::Elem*> children;
 		Vec2f cursor = Vec2f(0, 0); //remove ?
-		Ui::LayoutDir layoutDir = Ui::LayoutDir::LeftRight;
-		Ui::LayoutWrap layoutWrap = Ui::LayoutWrap::Normal;
-		Ui::LayoutAlign layoutAlign = Ui::LayoutAlign::Left;
-		Ui::Anchor anchor = Ui::Anchor::TopLeft;
+		
 	};
 
 }

@@ -61,8 +61,8 @@ namespace SandCastle
 
 		/*---Ui creation---*/
 
-		static ElemID BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
-		static ElemID Text(std::string_view utf8, float maxWidth = -1.f);
+		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
+		static Txt* Text(std::string_view utf8, float maxWidth = -1.f);
 		static void EndCanvas();
 		static void Delete(ElemID uiElem);
 

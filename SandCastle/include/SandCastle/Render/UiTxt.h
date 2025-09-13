@@ -11,7 +11,6 @@ namespace SandCastle
 
 	public:
 		Ui::Elem::Type GetType() const override;
-		void SetPosition(Vec2f pos) override;
 
 	public:
 		Sentence sentence;

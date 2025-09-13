@@ -211,10 +211,11 @@ namespace SandCastle
 		ins->m_writer->NameFont(font, fancyName);
 	}
 
-	Ui::ElemID Ui::BeginCanvas(Vec2f size, bool frame)
+	Ui::Canvas* Ui::BeginCanvas(Vec2f size, bool frame)
 	{
 		auto i = Instance();
 		auto canvas = new Canvas();
+		//canvas->root = Entity::Create();
 		canvas->size = size;
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		i->InstanceElem(canvas, parent);
@@ -225,10 +226,10 @@ namespace SandCastle
 		canvas->hasFrame = frame;
 		i->m_canvas.push(canvas);
 		i->m_z -= i->zStep;
-		return canvas->id;
+		return canvas;
 	}
 
-	Ui::ElemID Ui::Text(std::string_view utf8, float maxWidth)
+	Ui::Txt* Ui::Text(std::string_view utf8, float maxWidth)
 	{
 		auto i = Instance();
 	
@@ -243,25 +244,14 @@ namespace SandCastle
 		//Instantiation
 		Txt* text = new Txt();
 		i->InstanceElem(text, canvas);
-		canvas->root.AddChild(text->sentence.root);
-		canvas->children.emplace_back(text);
 		text->padding = i->m_padding;
 		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
 		text->size = text->sentence.size + i->m_padding*2;
+		text->root = text->sentence.root;
+		canvas->children.emplace_back(text);
+		//canvas->root.AddChild(text->sentence.root);
 
-		//text->SetPosition(canvas->cursor);
-
-		//Canvas stretching
-		/*if (!canvas->fixedSize.Contains(Canvas::Horizontal) && canvas->size.x < text->sentence.size.x)
-		{
-			canvas->size.x = std::max(canvas->size.x, text->size.x);
-		}
-		if (!canvas->fixedSize.Contains(Canvas::Vertical))
-		{
-			canvas->size.y = std::max(canvas->size.y, text->size.y);
-		}*/
-
-		return text->id;
+		return text;
 	}
 
 	void Ui::EndCanvas()
@@ -281,7 +271,21 @@ namespace SandCastle
 		}
 		auto tr =canvas->frame.GetComponent<Transform>();
 		auto pos = tr->GetPosition();
+	}
 
+	void Ui::Delete(ElemID uiElem)
+	{
+		auto i = Instance();
+		auto it = i->m_elems.find(uiElem);
+		if (it == i->m_elems.end())
+			return;
+
+		/*auto elem = it->second;
+		if (elem->parent)
+		{
+			elem->parent->children.remove(elem);
+		}*/
+		
 	}
 
 	/*---State---*/

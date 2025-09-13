@@ -286,56 +286,50 @@ But I am very suspicious of that...
 -Added alpha discard as a uniform (default no discard.);
 -The alpha discard can be used to replace Z sort when there's no transparent fragments!
 
+12
+
+-Ui::Txt know it's own size
+-Text wrapping respect words
+-canvas Y stretch
+-fixed sentence y size.
+-centered text
+-right aligned text
+-remove moving sentence to next line when wrapping a single word
+-fix text alignement (\n works, wrapping dont)
+-simplify space adv
+-don't create entity for spaces
+-fix text alignement center and right (remove the space adv)
+-add render option into material
+-remove render option for layer then (because it would be doublon);
+-(set ui material render option depth test to false (to fix overlaping depth test fight)
+-text padding
+-cursor of current element in the current canvas
+-element SetPosition
+-text set position teke padding into account
+-text size take padding into account
 
 
->padding/margin of elements
->canvas Y stretch
+13
 
->Ui::Txt must know it's own size
+-think about layout.
+-layout (leftright, topdown...)
+-layout wrapping: when reaching the max, where do we go ?
+-layout align: when reaching the max
+-basic layout working. (top down, wrap normal)
+-instead of advancing cursor after each elem creation, create every elems, then arrange the layout.
+-basic layout with lambdas working (clean implementation)
+
+
 >canvas size must match frame size (especially with fixedstep)
->test fancy font
-
->play knightica
->centered text
-
-We need to think of an api than enable to generate
-easily, in screen space: frames, texts, buttons, fillbar, tabs, checkboxes, sliders. 
-
->interface between transform position and anchored position
->frame moving can sometimes show 1px separation between top/mid, etc...
->think about anchor and frame/element placement
->create ui text with point size, not px size
->check gpu max texture size.
--AnchorPoint determine how the frame grows and where is it's 0.0 point in frame
--ContentDirection determine how content is added
-Frame.SetSize(0, 100) -> 0 = fit content
-content wraps.
-
-Ui::PushFrameSprites("frame_border.png");
-Ui::Start("Frame1");
-Ui::SetAnchor(middle_center/top_left/top_right/top_center...); 
-Ui::SetAlignDirection(vertical_down/vertical_up/horizontal_right/right_left);
-Ui::SetAlignAnchor(left/centered/right); (left/right becomes top/bottom when align is horizontal )
-
-Ui::Start("Subframe1");
-Ui::SetFrameAlign(Horizontal); //The element in the current frame will align, left to right
-Ui::SetPadding(1.f); //The elements in the current frame will space each other by 1
-Ui::SetMargin(1.f); //The 
-Ui::PushText
-Ui::PushButtonSprites("button.png")
-Ui::PushButtonHoverSprites("button_hover.png")
-Ui::PushButtonPressedSprites("button_pressed.png")
-Ui::PushButtonTextSize(3.f);
-if(Ui::Button("Button"))
-{
-
-}
-Ui::GetFrameSize();
-Ui::End();
-
+>do we use Elem::root ?? Do we parent elem inside of canvas ???
+>consider some context (padding, text align, etc...) be canvas dependent
+>rename Anchor to CanvasAnchor (for clarity)
+>Canvas SetPosition and anchoring (determine world ui pos from  anchored ui pos, only for canvas)
+>frame moving can sometimes show 1px separation between top/mid, etc... -> apply extrude on textures, or sprites
 
 tasks:
 
+>fix ImGui random assert crash (probly bc of threading)
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?
 >localization system built in the asset
