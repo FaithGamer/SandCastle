@@ -15,14 +15,11 @@ namespace SandCastle
 		};
 
 	public:
+		Elem();
 		virtual Type GetType() const = 0;
-		virtual void SetPosition(Vec2f pos)
-		{
-			pos.x += padding.x;
-			pos.y -= padding.y;
-			root.gtr()->SetPosition(pos.x, pos.y, z);
-		}
-	private:
+		virtual void SetPosition(Vec2f pos);
+		
+	protected:
 		friend Ui;
 		Ui::Canvas* parent;
 		Ui::ElemID id = 0;
@@ -31,6 +28,7 @@ namespace SandCastle
 		Vec2f size = Vec2f(0, 0);
 		Vec2f padding = Vec2f(0, 0);
 		Vec2f position = Vec2f(0, 0);
+		Ui::Anchor anchor;
 
 	};
 }

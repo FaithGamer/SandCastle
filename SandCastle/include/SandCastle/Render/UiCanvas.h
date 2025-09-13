@@ -17,9 +17,8 @@ namespace SandCastle
 		}SizeLimit;
 	public:
 		Ui::Elem::Type GetType() const override;
-		void SetPosition(Vec2f pos) override;
 		void MakeLayout();
-
+		void SetAnchor(Ui::Anchor anchor);
 	public:
 		Ui::LayoutDir layoutDir = Ui::LayoutDir::TopDown;
 		Ui::LayoutWrap layoutWrap = Ui::LayoutWrap::Normal;
@@ -34,7 +33,6 @@ namespace SandCastle
 		Entity frame;
 		Bitmask8 fixedSize = 0;
 		std::vector<Ui::Elem*> children;
-		Vec2f cursor = Vec2f(0, 0); //remove ?
 		
 	};
 
