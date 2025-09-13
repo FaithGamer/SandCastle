@@ -16,7 +16,7 @@ namespace SandCastle
 
 	public:
 		virtual Type GetType() const = 0;
-		virtual void SetPosition(Vec2f pos) {};
+		virtual void SetPosition(Vec2f pos) = 0;
 	public:
 		Ui::Canvas* parent;
 		Ui::ElemID id = 0;

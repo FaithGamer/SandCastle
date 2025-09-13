@@ -38,10 +38,23 @@ public:
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
-		Ui::BeginCanvas();
-		Ui::SetPadding(Vec2f(30, 30));
+		Ui::BeginCanvas(Vec2f(0, 200));
+		Ui::SetPadding(Vec2f(5, 5));
 	//	Ui::SetTextAlign(TextAlign::Center);
-		Ui::Text("Hello window view upon the paradise, but there's also spiderman who climbed up the top of the tallest moutain across the sky and this is why, therefore, the land has collapsed into a million bubbles.", 200);
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
+		Ui::Text("Hello window");
 		Ui::EndCanvas();
 
 	}

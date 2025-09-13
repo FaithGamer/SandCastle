@@ -215,6 +215,7 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new Canvas();
+		canvas->size = size;
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		i->InstanceElem(canvas, parent);
 		if (size.x > 0.f)
@@ -247,18 +248,19 @@ namespace SandCastle
 		text->padding = i->m_padding;
 		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
 		text->size = text->sentence.size + i->m_padding*2;
-		text->SetPosition(canvas->cursor);
+
+		//text->SetPosition(canvas->cursor);
 
 		//Canvas stretching
-		if (!canvas->fixedSize.Contains(Canvas::Horizontal) && canvas->size.x < text->sentence.size.x)
+		/*if (!canvas->fixedSize.Contains(Canvas::Horizontal) && canvas->size.x < text->sentence.size.x)
 		{
 			canvas->size.x = std::max(canvas->size.x, text->size.x);
 		}
 		if (!canvas->fixedSize.Contains(Canvas::Vertical))
 		{
 			canvas->size.y = std::max(canvas->size.y, text->size.y);
-		}
-		i->AdvanceCursor(canvas);
+		}*/
+
 		return text->id;
 	}
 
@@ -271,6 +273,7 @@ namespace SandCastle
 			return;
 		}
 		auto canvas = i->m_canvas.top();
+		canvas->MakeLayout();
 		i->m_z += i->zStep;
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
@@ -425,16 +428,6 @@ namespace SandCastle
 			rect.width = pxSize.x - pxDim.x * 2; //pixel length
 			wDim.x = rect.width * ppu; //world length
 			wDim.y = rect.height * ppu; //world length
-		}
-	}
-
-	void Ui::AdvanceCursor(Canvas* canvas)
-	{
-		//Take the size of last element added
-		//Depedning on the direction, move the cursor.
-		switch (canvas->layout)
-		{
-
 		}
 	}
 }

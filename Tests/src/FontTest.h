@@ -82,7 +82,7 @@ public:
 
 		auto e = Ui::GetWriter()->Write(str);
 		e.root.AddComponent<Dummy>();
-		e.root.gtr()->Move(-e.width * 0.5f, 0, 0);
+		e.root.gtr()->Move(-e.size.x * 0.5f, 0, 0);
 
 	}
 };

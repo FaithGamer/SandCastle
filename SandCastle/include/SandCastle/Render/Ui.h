@@ -9,80 +9,8 @@
 #include "SandCastle/Render/Writer.h"
 
 
-/*
-Cahier des charges:
-
-Initialization:
-Creation des template visuels:
-	frame
-	bouton
-	checkbox
-Creation des fonts
-Material et uniforms
-
-Mise à jour d'elements, sans recréer toute la frame.
-Donc mise a jour de la position de chaque éléments
-Push global des template d'element visuel (frame, boutton, checkbox)
-Bouttons avec callback < navigable
-Checkbox avec callback < navigable
-Textes avec alignements (gauche, centré)
-Insertion d'icones en milieu de texte
-Elements Navigables (selectionable)
-Navigation globale (left, top, right, bot)
-Frame stretch ou fixe ou hybride.
-Quand fixe, contenu size peut pas depasser
-Quand fixe, contenu position wrapping
-Agencement flexible du contenu des frames:
-	ancrage
-	aligné gauche/droite/centré
-	espace inter objets (padding)
-	espace exterieur (margin)
-	layout vertical ou horizontal
-	layout direction normal (top down/left right) ou reverse
-*/
-
-
-/*class UiElem
-{
-	UiID id;
-	Frame* parent;
-	Entity entt;
-	Vec2f size;
-	Vec2f pos; //anchored pos
-	Anchor anchor;
-
-};
-struct ButtonSignal
-{
-
-};
-class Button
-{
-	Signal<ButtonSignal> signal;
-};
-class Navigable
-{
-	Navigable* top;
-	Navigable* left;
-	Navigable* right;
-	Navigable* bot;
-};
-class Text : public UiElem
-{
-	Sentence text;
-};
-class Frame : public UiElem
-{
-	std::vector<BorderSprite> borderSprites;
-	std::vector<UiElem*> children;
-
-};*/
-
 namespace SandCastle
 {
-
-	
-
 	class Ui : public Singleton<Ui>
 	{
 	public:
@@ -102,15 +30,15 @@ namespace SandCastle
 		typedef uint32_t ElemID;
 		typedef uint32_t FrameID;
 		enum class Anchor;
-		enum class Layout;
-		enum class LayoutDir;
+		enum class LayoutDir; 
+		enum class LayoutWrap;
+		enum class LayoutAlign;
 		enum class TexBorder;
 		enum class SpriteCorner;
 
 	public:
 		Ui();
 		~Ui();
-
 
 		/*---Initialization---*/
 
@@ -136,6 +64,7 @@ namespace SandCastle
 		static ElemID BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
 		static ElemID Text(std::string_view utf8, float maxWidth = -1.f);
 		static void EndCanvas();
+		static void Delete(ElemID uiElem);
 
 		/*---State---*/
 
@@ -200,7 +129,6 @@ namespace SandCastle
 		/*---Helpers---*/
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
-		void AdvanceCursor(Canvas* canvas);
 		/*---Instantiation---*/
 		ElemID InstanceElem(Elem* elem, Canvas* canvas);
 		Entity InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size);
