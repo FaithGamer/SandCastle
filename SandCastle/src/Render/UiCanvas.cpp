@@ -36,6 +36,7 @@ namespace SandCastle
 		Vec2f stretch = Vec2f(0.f, 0.f);
 		//for down-top/right-left direction, we will need to offset
 		//every children in the opposite direction to stay consistent with the frame.
+		Vec2f offsetTotal = Vec2f(0.f, 0.f);
 		Vec2f offset = Vec2f(0.f, 0.f);
 
 		/* lambda definitions */
@@ -87,12 +88,12 @@ namespace SandCastle
 		auto MoveCursorUp = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
 				cursor.y += childSize.y;
-				offset.y -= childSize.y;
+				offset.y = -childSize.y;
 			};
 		auto MoveCursorLeft = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
 				cursor.x -= childSize.x;
-				offset.x += childSize.x;
+				offset.x = childSize.x;
 			};
 		auto MoveCursorRight = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
@@ -130,14 +131,19 @@ namespace SandCastle
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto& child = children[i];
+			
 			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
 				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
 			{
 				//It's time to wrap!
-				Wrapping(wrapSize, cursor, offset);
+				Wrapping(wrapSize, cursor, offsetTotal);
 				wrapSize = 0;
 			}
-
+			else
+			{
+				offsetTotal += offset;	
+			}
+			offset = Vec2f(0, 0);
 			child->SetPosition(cursor);
 			WrapSize(child->size, wrapSize);
 
@@ -169,7 +175,7 @@ namespace SandCastle
 		//Apply offset
 		if (offset.Magnitude() > 0.f)
 		{
-			OffsetRange(0, children.size(), offset);
+			OffsetRange(0, children.size(), offsetTotal);
 		}
 	}
 }
