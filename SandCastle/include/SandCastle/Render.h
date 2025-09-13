@@ -19,3 +19,6 @@
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Render/Writer.h"
 #include "SandCastle/Render/Ui.h"
+#include "SandCastle/Render/UiElem.h"
+#include "SandCastle/Render/UiCanvas.h"
+#include "SandCastle/Render/UiTxt.h"
