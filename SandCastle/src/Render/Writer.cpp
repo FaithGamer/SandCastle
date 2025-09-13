@@ -296,7 +296,7 @@ namespace SandCastle
 				lines.back().totalAdv += adv;
 				pen.x += adv;
 			};
-
+		float maxPenX = 0.f;
 		//Iterating sentence CPS
 		for (uint32_t cp : cps)
 		{
@@ -363,9 +363,10 @@ namespace SandCastle
 			{
 				CreateEntity(g, nextAdv);
 			}
+			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}
-		sent.size.x = std::max(pen.x, maxWidth);
-		sent.size.y = (-pen.y) + ((float)font.size + font.outlineThickness) * ppu;
+		sent.size.x = maxPenX;
+		sent.size.y = std::abs(pen.y) + ((float)font.size + font.outlineThickness) * ppu;
 
 		//Lines alignement
 		void (*Align)(Line & line, float w) = nullptr;
