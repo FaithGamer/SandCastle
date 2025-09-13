@@ -238,7 +238,7 @@ namespace SandCastle
 		auto canvas = i->m_canvas.top();
 		if (canvas->fixedSize.Contains(Canvas::Horizontal))
 		{
-			maxWidth = std::min(canvas->size.x, maxWidth);
+			maxWidth = maxWidth > 0.f ? std::min(canvas->size.x, maxWidth) : canvas->size.x;
 		}
 
 		//Instantiation
