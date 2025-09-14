@@ -331,12 +331,13 @@ But I am very suspicious of that...
 -to test better the layouts
 -parent canvas children root canvas
 -move canvas with anchor works
+-nesting canvas
+-fixed z fighting in nested canvas
 
 
 
 >add Canvas spacing (between element, no matter the direction/wrapping)
->Add canvas border (inner margin)
->do we use Elem::root ?? Do we parent elem inside of canvas ???
+>Add canvas border (inner margin) (and/or padding ?)
 
 
 >Any elem must be able to be hoverable/navigable/clickable (callbacks)

@@ -47,7 +47,7 @@ namespace SandCastle
 		auto id = m_nextId++;
 		elem->id = id;
 		elem->parent = canvas;
-		elem->z = m_z;
+		elem->z = -1.f;
 		m_elems[id] = elem;
 		if (canvas != nullptr)
 		{
@@ -60,7 +60,7 @@ namespace SandCastle
 	{
 		//Dimensions
 		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
-		float z = elem->z+1.f;
+		float z = 1.f;
 
 		//Ensure frame size is at least the size of the four corners.
 		//Apply fixed step if relevant
@@ -90,7 +90,7 @@ namespace SandCastle
 		//Create the sprites entities:
 		auto entt = Entity::Create();
 		auto rootTr = entt.adc<Transform>();
-		rootTr->SetPosition(0, 0, m_z);
+		rootTr->SetPosition(0, 0, z);
 		Anchor anchor = Anchor::TopLeft;
 
 		//Corners
@@ -107,16 +107,16 @@ namespace SandCastle
 			switch (type)
 			{
 			case SpriteCorner::TopLeft:
-				tr->SetPosition(hDim.x, -hDim.y, z);
+				tr->SetPosition(hDim.x, -hDim.y, 0);
 				break;
 			case SpriteCorner::TopRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -hDim.y, z);
+				tr->SetPosition(hDim.x + (size.x - sDim.x), -hDim.y, 0);
 				break;
 			case SpriteCorner::BotLeft:
-				tr->SetPosition(hDim.x, -size.y + hDim.y, z);
+				tr->SetPosition(hDim.x, -size.y + hDim.y, 0);
 				break;
 			case SpriteCorner::BotRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -size.y + hDim.y, z);
+				tr->SetPosition(hDim.x + (size.x - sDim.x), -size.y + hDim.y, 0);
 				break;
 			default:
 				break;
@@ -140,19 +140,19 @@ namespace SandCastle
 			switch (type)
 			{
 			case TexBorder::Top:
-				tr->SetPosition(size.x * 0.5f, -hDim.y, z);
+				tr->SetPosition(size.x * 0.5f, -hDim.y, 0);
 				break;
 			case TexBorder::Left:
-				tr->SetPosition(hDim.x, -size.y * 0.5f, z);
+				tr->SetPosition(hDim.x, -size.y * 0.5f, 0);
 				break;
 			case TexBorder::Mid:
-				tr->SetPosition(size.x * 0.5f, -size.y * 0.5f, z);
+				tr->SetPosition(size.x * 0.5f, -size.y * 0.5f, 0);
 				break;
 			case TexBorder::Right:
-				tr->SetPosition(size.x - hDim.x, -size.y * 0.5f, z);
+				tr->SetPosition(size.x - hDim.x, -size.y * 0.5f, 0);
 				break;
 			case TexBorder::Bot:
-				tr->SetPosition(size.x * 0.5f, -size.y + hDim.y, z);
+				tr->SetPosition(size.x * 0.5f, -size.y + hDim.y, 0);
 				break;
 			default:
 				break;
@@ -255,8 +255,6 @@ namespace SandCastle
 		text->size = text->sentence.size + i->m_padding * 2;
 		text->root = text->sentence.root;
 		i->AddElem(text, canvas);
-	
-		//canvas->root.AddChild(text->sentence.root);
 
 		return text;
 	}
@@ -294,8 +292,7 @@ namespace SandCastle
 		{
 			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, canvas->size);
 		}
-		auto tr = canvas->frame.GetComponent<Transform>();
-		auto pos = tr->GetPosition();
+		i->m_canvas.pop();
 	}
 
 	void Ui::Delete(ElemID uiElem)

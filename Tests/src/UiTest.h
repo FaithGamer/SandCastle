@@ -37,8 +37,33 @@ public:
 
 		//Ui::GetWriter()->Write("Hello!");
 
-		//Ui::SetCanvasFrame("frame.png");
+		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
+
+		auto canvas = Ui::BeginCanvas(Vec2f(150.f, 0));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		//canvas->SetAnchor(Ui::Anchor::TopRight);
+		//canvas->SetPosition(Vec2f(320, 180));
+		Ui::SetTextAlign(TextAlign::Center);
+		Ui::SetPadding(Vec2f(5, 5));
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::BeginCanvas();
+		Ui::Text("Bonjour a tous");
+		auto nested2 = Ui::BeginCanvas();
+		nested2->layoutDir = Ui::LayoutDir::LeftRight;
+		Ui::Image("green30.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::BeginCanvas();
+		Ui::Text("nested3");
+		Ui::EndCanvas();
+		Ui::EndCanvas();
+		Ui::EndCanvas();
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		
+		Ui::EndCanvas();
 
 		//Top Down VCenter
 		/*auto canvas = Ui::BeginCanvas(Vec2f(0, 150));
@@ -97,7 +122,7 @@ public:
 		Ui::EndCanvas();*/
 
 		//Images:
-		auto canvas = Ui::BeginCanvas(Vec2f(640.f, 0));
+		/*auto canvas = Ui::BeginCanvas(Vec2f(640.f, 0));
 		canvas->layoutDir = Ui::LayoutDir::LeftRight;
 		canvas->layoutAlignV = Ui::LayoutAlignV::Top;
 		canvas->layoutAlignH = Ui::LayoutAlignH::Left;
@@ -114,7 +139,7 @@ public:
 		Ui::Image("blue40-20.png_0_0");
 		Ui::Image("green30.png_0_0");
 		Ui::Image("green30.png_0_0");
-		Ui::EndCanvas();
+		Ui::EndCanvas();*/
 
 
 	}
