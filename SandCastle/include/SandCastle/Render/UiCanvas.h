@@ -24,17 +24,13 @@ namespace SandCastle
 		Ui::LayoutWrap layoutWrap = Ui::LayoutWrap::Normal;
 		Ui::LayoutAlignH layoutAlignH = Ui::LayoutAlignH::Left;
 		Ui::LayoutAlignV layoutAlignV = Ui::LayoutAlignV::Top;
-		Ui::Anchor anchor = Ui::Anchor::TopLeft;
 	private:
 		friend Ui;
 		void OffsetRange(int begin, int end, Vec2f offset);
 	private:
 		bool hasFrame = false;
-		Entity root;
 		Entity frame;
 		Bitmask8 fixedSize = 0;
 		std::vector<Ui::Elem*> children;
-		
 	};
-
 }

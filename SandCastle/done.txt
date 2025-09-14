@@ -328,11 +328,15 @@ But I am very suspicious of that...
 -alignement works.
 -frame Z based on elem Z
 -add Image
+-to test better the layouts
+-parent canvas children root canvas
+-move canvas with anchor works
 
->to test better the layouts
->anchor be canvas anchor (remove from uielem)
+
+
+>add Canvas spacing (between element, no matter the direction/wrapping)
+>Add canvas border (inner margin)
 >do we use Elem::root ?? Do we parent elem inside of canvas ???
->move canvas
 
 
 >Any elem must be able to be hoverable/navigable/clickable (callbacks)

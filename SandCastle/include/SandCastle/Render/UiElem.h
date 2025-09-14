@@ -32,6 +32,5 @@ namespace SandCastle
 		Vec2f padding = Vec2f(0, 0);
 		Vec2f position = Vec2f(0, 0);
 		Ui::Anchor anchor;
-
 	};
 }

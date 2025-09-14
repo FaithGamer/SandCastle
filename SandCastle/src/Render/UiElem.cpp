@@ -34,7 +34,6 @@ namespace SandCastle
 			root.gtr()->SetPosition(pos.x, pos.y, z);
 			break;
 		}
-		
 	}
 	void Ui::Elem::Move(Vec2f offset)
 	{

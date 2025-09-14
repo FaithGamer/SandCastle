@@ -37,7 +37,7 @@ public:
 
 		//Ui::GetWriter()->Write("Hello!");
 
-		Ui::SetCanvasFrame("frame.png");
+		//Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
 		//Top Down VCenter
@@ -97,16 +97,25 @@ public:
 		Ui::EndCanvas();*/
 
 		//Images:
-		auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
-		//canvas->layoutDir = Ui::LayoutDir::LeftRight;
-		//canvas->layoutAlignV = Ui::LayoutAlignV::Bot;
-	//	canvas->layoutAlignH = Ui::LayoutAlignH::Right;
+		auto canvas = Ui::BeginCanvas(Vec2f(640.f, 0));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->layoutAlignV = Ui::LayoutAlignV::Top;
+		canvas->layoutAlignH = Ui::LayoutAlignH::Left;
+		canvas->SetAnchor(Ui::Anchor::TopRight);
+		canvas->SetPosition(Vec2f(320, 180));
 		Ui::SetTextAlign(TextAlign::Center);
 		Ui::SetPadding(Vec2f(5, 5));
 		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
 		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
 		Ui::Image("green30.png_0_0");
 		Ui::EndCanvas();
+
 
 	}
 	void Start() override

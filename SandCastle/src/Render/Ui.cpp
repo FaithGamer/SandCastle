@@ -49,8 +49,11 @@ namespace SandCastle
 		elem->parent = canvas;
 		elem->z = m_z;
 		m_elems[id] = elem;
-		if(canvas != nullptr)
+		if (canvas != nullptr)
+		{
+			canvas->root.AddChild(elem->root);
 			canvas->children.emplace_back(elem);
+		}
 	}
 
 	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f size)
@@ -156,7 +159,7 @@ namespace SandCastle
 			}
 			entt.AddChild(e);
 		}
-
+		elem->root.AddChild(entt);
 		return entt;
 	}
 
@@ -219,7 +222,8 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new Canvas();
-		//canvas->root = Entity::Create();
+		canvas->root = Entity::Create();
+		canvas->root.AddComponent<Transform>();
 		canvas->size = size;
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (size.x > 0.f)

@@ -100,7 +100,7 @@ namespace SandCastle
 
 
 			//Use the right lambda depending on the layout
-		Anchor elemAnchor;
+		//Anchor elemAnchor;
 		switch (layoutDir)
 		{
 		case LayoutDir::TopDown:
@@ -138,8 +138,6 @@ namespace SandCastle
 			LOG_ERROR("Ui::Canvas::MakeLayout, Unknown Layout dir!");
 			break;
 		}
-
-
 
 		void (*LineMove)(Ui::Elem * elem, float lineL, Vec2f canvas) = nullptr;
 		void (*AllMove)(Ui::Elem * elem, Vec2f stretch, Vec2f canvas) = nullptr;
@@ -319,5 +317,6 @@ namespace SandCastle
 	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
 	{
 		anchor = Anchor;
+		SetPosition(position);
 	}
 }

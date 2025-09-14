@@ -18,8 +18,10 @@ namespace SandCastle
 			((float)sprite->orgX + 0.5f) * dim.x,
 			((float)sprite->orgY - 0.5f) * dim.y
 		};
+		position = pos;
 		pos += offset;
-		Ui::Elem::SetPosition(pos);
-
+		pos.x += padding.x;
+		pos.y -= padding.y;
+		root.gtr()->SetPosition(pos.x, pos.y, z);
 	}
 }
