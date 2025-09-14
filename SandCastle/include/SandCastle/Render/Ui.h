@@ -23,6 +23,8 @@ namespace SandCastle
 		class Canvas;
 		/// @brief Text
 		class Txt;
+		/// @brief Image (sprite)
+		class Img;
 
 		/*--- Types ---*/
 		//definitions in UiEnum.h
@@ -64,6 +66,7 @@ namespace SandCastle
 
 		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
 		static Txt* Text(std::string_view utf8, float maxWidth = -1.f);
+		static Img* Image(String sprite);
 		static void EndCanvas();
 		static void Delete(ElemID uiElem);
 
@@ -131,8 +134,8 @@ namespace SandCastle
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 		/*---Instantiation---*/
-		ElemID InstanceElem(Elem* elem, Canvas* canvas);
-		Entity InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size);
+		void AddElem(Elem* elem, Canvas* canvas);
+		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f size);
 
 	private:
 		//Helper

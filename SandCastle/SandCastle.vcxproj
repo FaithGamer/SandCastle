@@ -250,6 +250,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Render\UiImg.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />
     <ClCompile Include="src\Render\UiCanvas.cpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="include\SandCastle\Render\UiCanvas.h" />
     <ClInclude Include="include\SandCastle\Render\UiElem.h" />
     <ClInclude Include="include\SandCastle\Render\UiEnum.h" />
+    <ClInclude Include="include\SandCastle\Render\UiImg.h" />
     <ClInclude Include="include\SandCastle\Render\UiTxt.h" />
     <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />

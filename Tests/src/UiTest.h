@@ -82,7 +82,7 @@ public:
 		Ui::Text("les frites");
 		Ui::EndCanvas();*/
 
-		auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
+		/*auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
 		canvas->layoutDir = Ui::LayoutDir::LeftRight;
 		canvas->layoutAlignV = Ui::LayoutAlignV::Bot;
 		canvas->layoutAlignH = Ui::LayoutAlignH::Right;
@@ -94,6 +94,18 @@ public:
 		Ui::Text("oui");
 		Ui::Text("j'adore\ndes");
 		Ui::Text("les frites");
+		Ui::EndCanvas();*/
+
+		//Images:
+		auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
+		//canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		//canvas->layoutAlignV = Ui::LayoutAlignV::Bot;
+	//	canvas->layoutAlignH = Ui::LayoutAlignH::Right;
+		Ui::SetTextAlign(TextAlign::Center);
+		Ui::SetPadding(Vec2f(5, 5));
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("green30.png_0_0");
 		Ui::EndCanvas();
 
 	}

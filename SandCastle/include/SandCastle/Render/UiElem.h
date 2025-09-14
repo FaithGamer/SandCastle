@@ -11,7 +11,8 @@ namespace SandCastle
 		{
 			Canvas,
 			Text,
-			Button
+			Button,
+			Image
 		};
 
 	public:
@@ -23,7 +24,7 @@ namespace SandCastle
 	protected:
 		friend Canvas;
 		friend Ui;
-		Ui::Canvas* parent;
+		Ui::Canvas* parent = nullptr;
 		Ui::ElemID id = 0;
 		Entity root;
 		float z = 0.f;

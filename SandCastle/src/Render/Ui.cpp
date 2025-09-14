@@ -10,6 +10,8 @@
 #include "SandCastle/Render/UiEnum.h"
 #include "SandCastle/Render/UiCanvas.h"
 #include "SandCastle/Render/UiTxt.h"
+#include "SandCastle/Render/UiImg.h"
+
 
 namespace SandCastle
 {
@@ -40,20 +42,22 @@ namespace SandCastle
 		delete m_writer;
 	}
 
-	Ui::ElemID Ui::InstanceElem(Elem* elem, Canvas* canvas)
+	void Ui::AddElem(Elem* elem, Canvas* canvas)
 	{
 		auto id = m_nextId++;
 		elem->id = id;
 		elem->parent = canvas;
 		elem->z = m_z;
 		m_elems[id] = elem;
-		return id;
+		if(canvas != nullptr)
+			canvas->children.emplace_back(elem);
 	}
 
-	Entity Ui::InstanceFrame(ElemID id, FrameTemplate* frame, Vec2f size)
+	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f size)
 	{
 		//Dimensions
 		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
+		float z = elem->z+1.f;
 
 		//Ensure frame size is at least the size of the four corners.
 		//Apply fixed step if relevant
@@ -68,7 +72,7 @@ namespace SandCastle
 		Vec2f hDim = sDim * 0.5f;
 
 		//Instance border sprites at the right dimensions
-		auto& borderSpr = m_borderSprites[id];
+		auto& borderSpr = m_borderSprites[elem->id];
 		borderSpr.clear();
 		for (int i = 0; i < 5; i++)
 		{
@@ -100,16 +104,16 @@ namespace SandCastle
 			switch (type)
 			{
 			case SpriteCorner::TopLeft:
-				tr->SetPosition(hDim.x, -hDim.y, 0);
+				tr->SetPosition(hDim.x, -hDim.y, z);
 				break;
 			case SpriteCorner::TopRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -hDim.y, 0);
+				tr->SetPosition(hDim.x + (size.x - sDim.x), -hDim.y, z);
 				break;
 			case SpriteCorner::BotLeft:
-				tr->SetPosition(hDim.x, -size.y + hDim.y, 0);
+				tr->SetPosition(hDim.x, -size.y + hDim.y, z);
 				break;
 			case SpriteCorner::BotRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -size.y + hDim.y, 0);
+				tr->SetPosition(hDim.x + (size.x - sDim.x), -size.y + hDim.y, z);
 				break;
 			default:
 				break;
@@ -133,19 +137,19 @@ namespace SandCastle
 			switch (type)
 			{
 			case TexBorder::Top:
-				tr->SetPosition(size.x * 0.5f, -hDim.y, 0.f);
+				tr->SetPosition(size.x * 0.5f, -hDim.y, z);
 				break;
 			case TexBorder::Left:
-				tr->SetPosition(hDim.x, -size.y * 0.5f, 0.f);
+				tr->SetPosition(hDim.x, -size.y * 0.5f, z);
 				break;
 			case TexBorder::Mid:
-				tr->SetPosition(size.x * 0.5f, -size.y * 0.5f, 0.f);
+				tr->SetPosition(size.x * 0.5f, -size.y * 0.5f, z);
 				break;
 			case TexBorder::Right:
-				tr->SetPosition(size.x - hDim.x, -size.y * 0.5f, 0.f);
+				tr->SetPosition(size.x - hDim.x, -size.y * 0.5f, z);
 				break;
 			case TexBorder::Bot:
-				tr->SetPosition(size.x * 0.5f, -size.y + hDim.y, 0.f);
+				tr->SetPosition(size.x * 0.5f, -size.y + hDim.y, z);
 				break;
 			default:
 				break;
@@ -218,7 +222,6 @@ namespace SandCastle
 		//canvas->root = Entity::Create();
 		canvas->size = size;
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
-		i->InstanceElem(canvas, parent);
 		if (size.x > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Horizontal);
 		if (size.y > 0.f)
@@ -226,16 +229,16 @@ namespace SandCastle
 		canvas->hasFrame = frame;
 		i->m_canvas.push(canvas);
 		i->m_z -= i->zStep;
+		i->AddElem(canvas, parent);
 		return canvas;
 	}
 
 	Ui::Txt* Ui::Text(std::string_view utf8, float maxWidth)
 	{
 		auto i = Instance();
-
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create UI Text without active canvas");
-
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
 		auto canvas = i->m_canvas.top();
+
 		if (canvas->fixedSize.Contains(Canvas::Horizontal))
 		{
 			maxWidth = maxWidth > 0.f ? std::min(canvas->size.x, maxWidth) : canvas->size.x;
@@ -243,15 +246,33 @@ namespace SandCastle
 
 		//Instantiation
 		Txt* text = new Txt();
-		i->InstanceElem(text, canvas);
 		text->padding = i->m_padding;
 		text->sentence = i->m_writer->Write(utf8, maxWidth - i->m_padding.x * 2, i->m_textAlign);
 		text->size = text->sentence.size + i->m_padding * 2;
 		text->root = text->sentence.root;
-		canvas->children.emplace_back(text);
+		i->AddElem(text, canvas);
+	
 		//canvas->root.AddChild(text->sentence.root);
 
 		return text;
+	}
+
+	Ui::Img* Ui::Image(String sprite)
+	{
+		auto i = Instance();
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Image without active canvas");
+		auto canvas = i->m_canvas.top();
+
+		Img* image = new Img();
+		image->padding = i->m_padding;
+		image->root = Entity::CreateSprite(sprite);
+		auto render = image->root.GetComponent<SpriteRender>();
+		render->SetLayer(i->m_layer);
+		render->SetMaterial(i->m_material->GetID());
+		image->sprite = render->GetSprite();
+		image->size = image->sprite->GetDimensions() + image->padding * 2;
+		i->AddElem(image, canvas);
+		return image;
 	}
 
 	void Ui::EndCanvas()
@@ -267,7 +288,7 @@ namespace SandCastle
 		i->m_z += i->zStep;
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
-			canvas->frame = i->InstanceFrame(canvas->id, i->m_canvasFrame, canvas->size);
+			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, canvas->size);
 		}
 		auto tr = canvas->frame.GetComponent<Transform>();
 		auto pos = tr->GetPosition();

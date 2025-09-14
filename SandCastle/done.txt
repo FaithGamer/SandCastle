@@ -322,13 +322,21 @@ But I am very suspicious of that...
 -elem anchor automatic depending on layout dir & wrap
 -good progress on UI overall
 
->consider removing BotTop and RightLeft LayoutDir ??
-(because we can get the same result by inversing the insert direction + problem positioning)
+14
 
->Down top and Right left -> automatically align
+-removed inverse wrapping and just have TopDown or LeftRight layout dir.
+-alignement works.
+-frame Z based on elem Z
+-add Image
 
->canvas size must match frame size (especially with fixedstep)
+>to test better the layouts
+>anchor be canvas anchor (remove from uielem)
 >do we use Elem::root ?? Do we parent elem inside of canvas ???
+>move canvas
+
+
+>Any elem must be able to be hoverable/navigable/clickable (callbacks)
+>canvas size must match frame size (especially with fixedstep)
 >consider some context (padding, text align, etc...) be canvas dependent
 >rename Anchor to CanvasAnchor (for clarity)
 >Canvas SetPosition and anchoring (determine world ui pos from  anchored ui pos, only for canvas)
