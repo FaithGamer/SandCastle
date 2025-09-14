@@ -32,11 +32,18 @@ namespace SandCastle
 		//Inverse
 	};
 
-	enum class Ui::LayoutAlign : int
+	enum class Ui::LayoutAlignH : int
 	{
 		Left,
 		Center,
 		Right
+	};
+
+	enum class Ui::LayoutAlignV : int
+	{
+		Top,
+		Center,
+		Bot
 	};
 
 	enum class Ui::TexBorder : int

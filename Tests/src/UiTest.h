@@ -40,19 +40,60 @@ public:
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
-		auto canvas = Ui::BeginCanvas(Vec2f(150, 0));
-		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		//Top Down VCenter
+		/*auto canvas = Ui::BeginCanvas(Vec2f(0, 150));
+		canvas->layoutDir = Ui::LayoutDir::TopDown;
+		canvas->layoutAlignV = Ui::LayoutAlignV::Center;
 	
 		Ui::SetPadding(Vec2f(5, 5));
-		//Ui::SetTextAlign(TextAlign::Center);
 		Ui::Text("1\n2\n3");
 		Ui::Text("Hello");
 		Ui::Text("SALUT");
-		Ui::Text("oui j'adore les frites");
+		Ui::Text("oui");
+		Ui::Text("j'adore\ndes");
+		Ui::Text("les frites");
+		Ui::EndCanvas();*/
 
+		//Top Down VCenter HRight
+		/*auto canvas = Ui::BeginCanvas(Vec2f(300, 150));
+		canvas->layoutDir = Ui::LayoutDir::TopDown;
+		canvas->layoutAlignV = Ui::LayoutAlignV::Center;
+		canvas->layoutAlignH = Ui::LayoutAlignH::Right;
+		Ui::SetPadding(Vec2f(5, 5));
+		Ui::Text("1\n2\n3");
+		Ui::Text("Hello");
+		Ui::Text("SALUT");
+		Ui::Text("oui");
+		Ui::Text("j'adore\ndes");
+		Ui::Text("les frites");
+		Ui::EndCanvas();*/
 
+		//Left Right CenterV CenterH
+		/*auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->layoutAlignV = Ui::LayoutAlignV::Center;
+		canvas->layoutAlignH = Ui::LayoutAlignH::Center;
+		Ui::SetPadding(Vec2f(5, 5));
+		Ui::Text("1\n2\n3");
+		Ui::Text("Hello");
+		Ui::Text("SALUT");
+		Ui::Text("oui");
+		Ui::Text("j'adore\ndes");
+		Ui::Text("les frites");
+		Ui::EndCanvas();*/
 
-
+		auto canvas = Ui::BeginCanvas(Vec2f(150, 150));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->layoutAlignV = Ui::LayoutAlignV::Bot;
+		canvas->layoutAlignH = Ui::LayoutAlignH::Right;
+		Ui::SetTextAlign(TextAlign::Center);
+		Ui::SetPadding(Vec2f(5, 5));
+		Ui::Text("1\n2\n3");
+		Ui::Text("Hello");
+		Ui::Text("SALUT");
+		Ui::Text("oui");
+		Ui::Text("j'adore\ndes");
+		Ui::Text("les frites");
 		Ui::EndCanvas();
 
 	}

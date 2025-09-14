@@ -400,7 +400,7 @@ namespace SandCastle
 		{
 			for (int i = 0; i < lines.size(); i++)
 			{
-				Align(lines[i], maxWidth);
+				Align(lines[i], sent.size.x);
 			}
 		}
 

@@ -22,7 +22,8 @@ namespace SandCastle
 	public:
 		Ui::LayoutDir layoutDir = Ui::LayoutDir::TopDown;
 		Ui::LayoutWrap layoutWrap = Ui::LayoutWrap::Normal;
-		Ui::LayoutAlign layoutAlign = Ui::LayoutAlign::Left;
+		Ui::LayoutAlignH layoutAlignH = Ui::LayoutAlignH::Left;
+		Ui::LayoutAlignV layoutAlignV = Ui::LayoutAlignV::Top;
 		Ui::Anchor anchor = Ui::Anchor::TopLeft;
 	private:
 		friend Ui;

@@ -32,7 +32,8 @@ namespace SandCastle
 		enum class Anchor;
 		enum class LayoutDir; 
 		enum class LayoutWrap;
-		enum class LayoutAlign;
+		enum class LayoutAlignH;
+		enum class LayoutAlignV;
 		enum class TexBorder;
 		enum class SpriteCorner;
 

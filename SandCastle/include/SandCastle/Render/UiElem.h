@@ -18,8 +18,10 @@ namespace SandCastle
 		Elem();
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);
+		virtual void Move(Vec2f offset);
 		
 	protected:
+		friend Canvas;
 		friend Ui;
 		Ui::Canvas* parent;
 		Ui::ElemID id = 0;

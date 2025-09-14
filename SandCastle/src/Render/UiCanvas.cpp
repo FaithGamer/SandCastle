@@ -58,30 +58,35 @@ namespace SandCastle
 				cursor.y -= wrapSize;
 				cursor.x = 0;
 			};
-		auto WrapUp = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
-			{
-				cursor.y += wrapSize;
-				offset.y -= wrapSize;
-				cursor.x = 0;
-			};
-		auto WrapLeft = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
-			{
-				cursor.x -= wrapSize;
-				offset.x += wrapSize;
-				cursor.y = 0;
-			};
 		auto WrapRight = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
 				cursor.x += wrapSize;
 				cursor.y = 0;
 			};
+		/*	auto WrapUp = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
+				{
+					cursor.y += wrapSize;
+					offset.y -= wrapSize;
+					cursor.x = 0;
+				};
+			auto WrapLeft = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
+				{
+					cursor.x -= wrapSize;
+					offset.x += wrapSize;
+					cursor.y = 0;
+				};*/
 
-		//Cursor move
+
+				//Cursor move
 		auto MoveCursorDown = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
 				cursor.y -= childSize.y;
 			};
-		auto MoveCursorUp = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
+		auto MoveCursorRight = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
+			{
+				cursor.x += childSize.x;
+			};
+		/*auto MoveCursorUp = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
 			{
 				cursor.y += childSize.y;
 				offset.y = -childSize.y;
@@ -90,72 +95,181 @@ namespace SandCastle
 			{
 				cursor.x -= childSize.x;
 				offset.x = childSize.x;
-			};
-		auto MoveCursorRight = [](Vec2f childSize, Vec2f& cursor, Vec2f& offset) -> void
-			{
-				cursor.x += childSize.x;
-			};
+			};*/
 
 
-		//Use the right lambda depending on the layout
+
+			//Use the right lambda depending on the layout
 		Anchor elemAnchor;
 		switch (layoutDir)
 		{
 		case LayoutDir::TopDown:
 			WrapSize = HorizontalWrap;
 			MoveCursor = MoveCursorDown;
-			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
+			Wrapping = WrapRight;
+			//Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
+			//Removed because too complex
 			//elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::TopRight;
 			break;
 		case LayoutDir::LeftRight:
 			WrapSize = VerticalWrap;
 			MoveCursor = MoveCursorRight;
-			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
+			Wrapping = WrapDown;
+			//Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
+			//Removed because too complex
 			//elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::BotLeft;
 			break;
-		/*case LayoutDir::DownTop:
-			WrapSize = HorizontalWrap;
-			MoveCursor = MoveCursorUp;
-			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
-			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::BotLeft : Anchor::BotRight;
-			break;
-		case LayoutDir::RightLeft:
-			WrapSize = VerticalWrap;
-			MoveCursor = MoveCursorLeft;
-			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
-			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopRight : Anchor::BotRight;
-			break;
-		default:*/
+
+			//Removed because too complex
+
+			/*case LayoutDir::DownTop:
+				WrapSize = HorizontalWrap;
+				MoveCursor = MoveCursorUp;
+				Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
+				elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::BotLeft : Anchor::BotRight;
+				break;
+			case LayoutDir::RightLeft:
+				WrapSize = VerticalWrap;
+				MoveCursor = MoveCursorLeft;
+				Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
+				elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopRight : Anchor::BotRight;
+				break;
+			default:*/
 			LOG_ERROR("Ui::Canvas::MakeLayout, Unknown Layout dir!");
 			break;
 		}
 
+
+
+		void (*LineMove)(Ui::Elem * elem, float lineL, Vec2f canvas) = nullptr;
+		void (*AllMove)(Ui::Elem * elem, Vec2f stretch, Vec2f canvas) = nullptr;
+
+		switch (layoutDir)
+		{
+		case LayoutDir::LeftRight:
+
+			switch (layoutAlignH)
+			{
+			case LayoutAlignH::Left:
+				break;
+			case LayoutAlignH::Center:
+				LineMove = [](Ui::Elem* elem, float lineL, Vec2f canvas)
+					{
+						auto offset = Vec2f((canvas.x - lineL) * 0.5f, 0.f);
+						elem->Move(offset);
+					};
+				break;
+			case LayoutAlignH::Right:
+				LineMove = [](Ui::Elem* elem, float lineL, Vec2f canvas)
+					{
+						auto offset = Vec2f((canvas.x - lineL), 0.f);
+						elem->Move(offset);
+					};
+				break;
+			}
+
+			switch (layoutAlignV)
+			{
+			case LayoutAlignV::Top:
+				break;
+			case LayoutAlignV::Center:
+				AllMove = [](Ui::Elem* elem, Vec2f stretch, Vec2f canvas)
+					{
+						auto offset = Vec2f(0.f, -(canvas.y - stretch.y) * 0.5f);
+						elem->Move(offset);
+					};
+				break;
+			case LayoutAlignV::Bot:
+				AllMove = [](Ui::Elem* elem, Vec2f stretch, Vec2f canvas)
+					{
+						auto offset = Vec2f(0.f, -(canvas.y - stretch.y));
+						elem->Move(offset);
+					};
+				break;
+			}
+			break; //LeftRight
+
+		case LayoutDir::TopDown:
+
+			switch (layoutAlignH)
+			{
+			case LayoutAlignH::Left:
+				break;
+			case LayoutAlignH::Center:
+				AllMove = [](Ui::Elem* elem, Vec2f stretch, Vec2f canvas)
+					{
+						auto offset = Vec2f((canvas.x - stretch.x) * 0.5f, 0.f);
+						elem->Move(offset);
+					};
+				break;
+			case LayoutAlignH::Right:
+				AllMove = [](Ui::Elem* elem, Vec2f stretch, Vec2f canvas)
+					{
+						auto offset = Vec2f((canvas.x - stretch.x), 0.f);
+						elem->Move(offset);
+					};
+				break;
+			}
+
+			switch (layoutAlignV)
+			{
+			case LayoutAlignV::Top:
+				break;
+			case LayoutAlignV::Center:
+				LineMove = [](Ui::Elem* elem, float lineL, Vec2f canvas)
+					{
+						auto offset = Vec2f(0.f, -(canvas.y - lineL) * 0.5f);
+						elem->Move(offset);
+					};
+				break;
+			case LayoutAlignV::Bot:
+				LineMove = [](Ui::Elem* elem, float lineL, Vec2f canvas)
+					{
+						auto offset = Vec2f(0.f, -(canvas.y - lineL));
+						elem->Move(offset);
+					};
+				break;
+			}
+
+			break; //Top Down
+		}
+
+		struct Line
+		{
+			std::vector<Ui::Elem*> elems;
+			float length = 0.f;
+		};
+		std::vector<Line> wrapLines;
+		wrapLines.emplace_back(Line());
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto& child = children[i];
-			
-				if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
-					|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
-				{
-					//It's time to wrap!
-					Wrapping(wrapSize, cursor, offsetTotal);
-					wrapSize = 0;
-				}
-				else
-				{
-					offsetTotal += offset;
-				}
-			
+
+			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
+				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
+			{
+				//It's time to wrap!
+				Wrapping(wrapSize, cursor, offsetTotal);
+				wrapSize = 0;
+				wrapLines.emplace_back(Line());
+			}
+			else
+			{
+				offsetTotal += offset;
+			}
+
 			offset = Vec2f(0, 0);
 			child->SetPosition(cursor);
 			WrapSize(child->size, wrapSize);
+			wrapLines.back().elems.emplace_back(child);
+			wrapLines.back().length += layoutDir == LayoutDir::LeftRight ? child->size.x : child->size.y;
 
 			//Cursor moves
 			MoveCursor(child->size, cursor, offset);
 
 			Vec2f cAbs = Vec2f(0, 0);
 
-			if (Wrapping == WrapUp || Wrapping == WrapDown)
+			if (/*Wrapping == WrapUp ||*/ Wrapping == WrapDown)
 				cAbs = Vec2f(std::abs(cursor.x), std::abs(cursor.y) + wrapSize);
 			else
 				cAbs = Vec2f(std::abs(cursor.x) + wrapSize, std::abs(cursor.y));
@@ -175,11 +289,32 @@ namespace SandCastle
 			size.x = stretch.x;
 		}
 
+		//Apply alignement
+		if (LineMove != nullptr)
+		{
+			for (int i = 0; i < wrapLines.size(); i++)
+			{
+				auto& elems = wrapLines[i].elems;
+				for (int j = 0; j < elems.size(); j++)
+				{
+					LineMove(elems[j], wrapLines[i].length, size);
+				}
+			}
+		}
+
+		if (AllMove != nullptr)
+		{
+			for (int i = 0; i < children.size(); i++)
+			{
+				AllMove(children[i], stretch, size);
+			}
+		}
+
 		//Apply offset
-		if (offsetTotal.Magnitude() > 0.f)
+		/*if (offsetTotal.Magnitude() > 0.f)
 		{
 			OffsetRange(0, children.size(), offsetTotal);
-		}
+		}*/
 	}
 	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
 	{

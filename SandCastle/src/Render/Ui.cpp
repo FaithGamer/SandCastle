@@ -82,7 +82,7 @@ namespace SandCastle
 
 		//Create the sprites entities:
 		auto entt = Entity::Create();
-		auto rootTr  = entt.adc<Transform>();
+		auto rootTr = entt.adc<Transform>();
 		rootTr->SetPosition(0, 0, m_z);
 		Anchor anchor = Anchor::TopLeft;
 
@@ -232,9 +232,9 @@ namespace SandCastle
 	Ui::Txt* Ui::Text(std::string_view utf8, float maxWidth)
 	{
 		auto i = Instance();
-	
+
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create UI Text without active canvas");
-	
+
 		auto canvas = i->m_canvas.top();
 		if (canvas->fixedSize.Contains(Canvas::Horizontal))
 		{
@@ -245,8 +245,8 @@ namespace SandCastle
 		Txt* text = new Txt();
 		i->InstanceElem(text, canvas);
 		text->padding = i->m_padding;
-		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
-		text->size = text->sentence.size + i->m_padding*2;
+		text->sentence = i->m_writer->Write(utf8, maxWidth - i->m_padding.x * 2, i->m_textAlign);
+		text->size = text->sentence.size + i->m_padding * 2;
 		text->root = text->sentence.root;
 		canvas->children.emplace_back(text);
 		//canvas->root.AddChild(text->sentence.root);
@@ -269,7 +269,7 @@ namespace SandCastle
 		{
 			canvas->frame = i->InstanceFrame(canvas->id, i->m_canvasFrame, canvas->size);
 		}
-		auto tr =canvas->frame.GetComponent<Transform>();
+		auto tr = canvas->frame.GetComponent<Transform>();
 		auto pos = tr->GetPosition();
 	}
 
@@ -285,7 +285,7 @@ namespace SandCastle
 		{
 			elem->parent->children.remove(elem);
 		}*/
-		
+
 	}
 
 	/*---State---*/
