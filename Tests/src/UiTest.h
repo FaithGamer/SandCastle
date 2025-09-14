@@ -35,20 +35,23 @@ public:
 		Ui::Text("Hello World");
 		Ui::EndCanvas();*/
 
+		//Ui::GetWriter()->Write("Hello!");
+
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
-		Ui::BeginCanvas(Vec2f(0, 150));
+		auto canvas = Ui::BeginCanvas(Vec2f(150, 0));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+	
 		Ui::SetPadding(Vec2f(5, 5));
-	//	Ui::SetTextAlign(TextAlign::Center);
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
-		Ui::Text("Hello window");
+		//Ui::SetTextAlign(TextAlign::Center);
+		Ui::Text("1\n2\n3");
+		Ui::Text("Hello");
+		Ui::Text("SALUT");
+		Ui::Text("oui j'adore les frites");
+
+
+
 
 		Ui::EndCanvas();
 

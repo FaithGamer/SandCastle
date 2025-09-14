@@ -41,7 +41,6 @@ namespace SandCastle
 		bool (*WrapCondition)(Bitmask8 fixedSize, Vec2f childSize, Vec2f cursor, Vec2f size) = nullptr;
 		void (*Wrapping)(float wrapSize, Vec2f & cursor, Vec2f & offset) = nullptr;
 		void (*MoveCursor)(Vec2f childSize, Vec2f & cursor, Vec2f & offset) = nullptr;
-		Vec2f(*BonusOffset)(Vec2f childSize, Vec2f canvasSize) = nullptr;
 
 		//WrapSize
 		auto HorizontalWrap = [](Vec2f childSize, float& wrapSize) -> void
@@ -97,23 +96,6 @@ namespace SandCastle
 				cursor.x += childSize.x;
 			};
 
-		auto BonusOffsetX = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
-			{
-				return Vec2f(childSize.x, 0);
-			};
-		auto BonusOffsetY = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
-			{
-				return Vec2f(0, -childSize.y);
-			};
-		auto BonusOffsetXY = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
-			{
-				return Vec2f(childSize.x,
-					-childSize.y);
-			};
-		auto NoBonusOffset = [](Vec2f childSize, Vec2f canvasSize) -> Vec2f
-			{
-				return 0.f;
-			};
 
 		//Use the right lambda depending on the layout
 		Anchor elemAnchor;
@@ -123,15 +105,15 @@ namespace SandCastle
 			WrapSize = HorizontalWrap;
 			MoveCursor = MoveCursorDown;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
-			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::TopRight;
+			//elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::TopRight;
 			break;
 		case LayoutDir::LeftRight:
 			WrapSize = VerticalWrap;
 			MoveCursor = MoveCursorRight;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
-			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::BotLeft;
+			//elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopLeft : Anchor::BotLeft;
 			break;
-		case LayoutDir::DownTop:
+		/*case LayoutDir::DownTop:
 			WrapSize = HorizontalWrap;
 			MoveCursor = MoveCursorUp;
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapRight : WrapLeft;
@@ -143,29 +125,19 @@ namespace SandCastle
 			Wrapping = layoutWrap == LayoutWrap::Normal ? WrapDown : WrapUp;
 			elemAnchor = layoutWrap == LayoutWrap::Normal ? Anchor::TopRight : Anchor::BotRight;
 			break;
-		default:
+		default:*/
 			LOG_ERROR("Ui::Canvas::MakeLayout, Unknown Layout dir!");
 			break;
 		}
 
-		//>Current task, find how to compensate position when elem anchor is bot (and right aswell i guess ?)
-		//Solution, remove RightLeft and DownTop + add Bonus Offset for case whith inverse wrapping
-
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto& child = children[i];
-			child->anchor = elemAnchor;
-			if (i == 0)
-			{
-				//cursor += InverseOffset(child->size);
-			}
-			else
-			{
+			
 				if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
 					|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
 				{
 					//It's time to wrap!
-					//cursor += InverseOffset(child->size);
 					Wrapping(wrapSize, cursor, offsetTotal);
 					wrapSize = 0;
 				}
@@ -173,7 +145,7 @@ namespace SandCastle
 				{
 					offsetTotal += offset;
 				}
-			}
+			
 			offset = Vec2f(0, 0);
 			child->SetPosition(cursor);
 			WrapSize(child->size, wrapSize);
