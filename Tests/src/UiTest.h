@@ -162,6 +162,47 @@ public:
 
 
 	}
+	void CreateSquareWindow()
+	{
+		//The visual frame
+		Ui::SetCanvasFrame("frame.png");
+		//The margin between canvas and other stuff
+		//Margin won't add-up for two non-nested canvas (outside of any other canvas).
+		//Ui::SetCanvasMargin(4.f);
+		//Start a canvas, by setting a dimension to non-zero, this makes it unstretchable in this dimension.
+		auto root = Ui::BeginCanvas(Vec2f(200, 300));
+		//Elements inside this canvas will be added from top to bot and wrap from left to right.
+		root->layoutDir = Ui::LayoutDir::TopDown;
+		//The space between the canvas border and its content
+		root->SetBorder(20.f);
+		//Use the font for titles.
+		Ui::SetFont("title");
+		//Draw the text.
+		//root->layoutAlignH = Ui::LayoutAlignH::Center;
+		
+		//The space between elements inside the canvas.
+		//root->SetSpacing(6.f);
+		//Add a canvas for the title, by setting false, it won't have a frame (transparent canvas).
+		auto title = Ui::BeginCanvas(Vec2f(200, 0));
+		//The elements in this canvas will horizontally align to the center (for the title)
+		title->layoutAlignH = Ui::LayoutAlignH::Center;
+	Ui::Text("Some squares");
+		//End the title canvas
+		Ui::EndCanvas();
+		/*auto content = Ui::BeginCanvas(Vec2f(200, 0), false);
+		content->SetSpacing(3.f);
+		//Draw a bunch of images
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		//End the content canvas.
+		Ui::EndCanvas();*/
+		//End the root canvas
+		Ui::EndCanvas();
+
+	}
 	void Start() override
 	{
 		auto worldLayer = Renderer2D::AddLayer("world");
@@ -174,10 +215,12 @@ public:
 		//to be 1:1 for a specific screen resolution
 		Ui::GetWriter()->SetPPU(2.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
-		Ui::MakeFont("alata-regular.ttf", "alata", 14, .2f);
+		Ui::MakeFont("alata-regular.ttf", "content", 12, .2f);
+		Ui::MakeFont("alata-regular.ttf", "title", 20, .2f);
 
 		//Create ui stuff
-		CreateSomeUi();
+		//CreateSomeUi();
+		CreateSquareWindow();
 	}
 	void Update() override
 	{

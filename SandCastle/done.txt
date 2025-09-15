@@ -340,6 +340,10 @@ But I am very suspicious of that...
 -add Canvas spacing (between element, no matter the direction/wrapping)
 -Add canvas border
 -renamed padding margin for consistency between elemnt and canvas
+-limit nested canvas stretch to parent if fixed
+-root margin, elem margin (including nested canvas)
+
+>do some ui test
 
 
 >Any elem must be able to be hoverable/navigable/clickable (callbacks)

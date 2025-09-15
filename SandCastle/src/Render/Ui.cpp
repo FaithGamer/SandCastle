@@ -48,10 +48,11 @@ namespace SandCastle
 		elem->id = id;
 		elem->parent = canvas;
 		elem->z = -1.f;
-		elem->margin = elem->GetType() == Ui::Elem::Type::Canvas ? m_canvasMargin : m_margin;
+		elem->margin = m_rootMargin;
 		m_elems[id] = elem;
 		if (canvas != nullptr)
 		{
+			elem->margin = m_margin;
 			canvas->root.AddChild(elem->root);
 			canvas->children.emplace_back(elem);
 		}
@@ -225,15 +226,23 @@ namespace SandCastle
 		auto canvas = new Canvas();
 		canvas->root = Entity::Create();
 		canvas->root.AddComponent<Transform>();
-		canvas->size = size;
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (size.x > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Horizontal);
 		if (size.y > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Vertical);
+		if (parent)
+		{
+			Vec2f limit(
+				parent->size.x - parent->border.x * 2,
+				parent->size.y - parent->border.y * 2);
+
+			size.x = limit.x < size.x ? limit.x : size.x;
+			size.y = limit.y < size.y ? limit.y : size.y;
+		}
+		canvas->size = size;
 		canvas->hasFrame = frame;
 		i->m_canvas.push(canvas);
-		i->m_z -= i->zStep;
 		i->AddElem(canvas, parent);
 		return canvas;
 	}
@@ -287,7 +296,6 @@ namespace SandCastle
 		}
 		auto canvas = i->m_canvas.top();
 		canvas->MakeLayout();
-		i->m_z += i->zStep;
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
 			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, canvas->size);
@@ -359,9 +367,9 @@ namespace SandCastle
 	{
 		Instance()->m_margin = margin;
 	}
-	void Ui::SetCanvasMargin(Vec2f margin)
+	void Ui::SetRootMargin(Vec2f margin)
 	{
-		Instance()->m_canvasMargin = margin;
+		Instance()->m_rootMargin = margin;
 	}
 	Vec3f Ui::UiToWorld(Vec3f uiPos)
 	{
