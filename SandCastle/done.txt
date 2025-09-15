@@ -265,7 +265,7 @@ September
 02
 
 -test frame creation from template
--padding and edge extrude for frame borders seem unecessary atm with UiTest at least
+-margin and edge extrude for frame borders seem unecessary atm with UiTest at least
 -remove push/pop mat/layer/font, make it Set
 -StartCanvas
 -add a text inside
@@ -302,11 +302,11 @@ But I am very suspicious of that...
 -add render option into material
 -remove render option for layer then (because it would be doublon);
 -(set ui material render option depth test to false (to fix overlaping depth test fight)
--text padding
+-text margin
 -cursor of current element in the current canvas
 -element SetPosition
--text set position teke padding into account
--text size take padding into account
+-text set position teke margin into account
+-text size take margin into account
 
 
 13
@@ -334,17 +334,17 @@ But I am very suspicious of that...
 -nesting canvas
 -fixed z fighting in nested canvas
 
+15
 
 
->add Canvas spacing (between element, no matter the direction/wrapping)
->Add canvas border (inner margin) (and/or padding ?)
+-add Canvas spacing (between element, no matter the direction/wrapping)
+-Add canvas border
+-renamed padding margin for consistency between elemnt and canvas
 
 
 >Any elem must be able to be hoverable/navigable/clickable (callbacks)
 >canvas size must match frame size (especially with fixedstep)
->consider some context (padding, text align, etc...) be canvas dependent
->rename Anchor to CanvasAnchor (for clarity)
->Canvas SetPosition and anchoring (determine world ui pos from  anchored ui pos, only for canvas)
+>consider some context (margin, text align, etc...) be canvas dependent
 >frame moving can sometimes show 1px separation between top/mid, etc... -> apply extrude on textures, or sprites
 
 tasks:
@@ -354,7 +354,6 @@ tasks:
 no need plmp if data is in registry and communication is only through signal?
 >localization system built in the asset
 
->try use cereal for serialization
 >rename Filter to MaskFilter and use template
 >optimize transform memory layout (get rid of mat4 at all ?)
 >check renderer thread safety

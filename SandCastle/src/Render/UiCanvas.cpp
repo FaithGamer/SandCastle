@@ -27,7 +27,7 @@ namespace SandCastle
 		//Set the position of every children according to layout
 		//And stretch the canvas when needed
 
-		Vec2f cursor = Vec2f(0.f, 0.f);
+		Vec2f cursor = Vec2f(border.x, -border.y);
 		float wrapSize = 0.f;
 		Vec2f stretch = Vec2f(0.f, 0.f);
 		//for down-top/right-left direction, we will need to offset
@@ -39,7 +39,7 @@ namespace SandCastle
 
 		void (*WrapSize)(Vec2f childSize, float& wrapSize) = nullptr;
 		bool (*WrapCondition)(Bitmask8 fixedSize, Vec2f childSize, Vec2f cursor, Vec2f size) = nullptr;
-		void (*Wrapping)(float wrapSize, Vec2f & cursor, Vec2f & offset) = nullptr;
+		void (*Wrapping)(float wrapSize, Vec2f & cursor, Vec2f & offset, Vec2f border) = nullptr;
 		void (*MoveCursor)(Vec2f childSize, Vec2f & cursor, Vec2f & offset) = nullptr;
 
 		//WrapSize
@@ -53,15 +53,15 @@ namespace SandCastle
 			};
 
 		//Wrapping
-		auto WrapDown = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
+		auto WrapDown = [](float wrapSize, Vec2f& cursor, Vec2f& offset, Vec2f border) -> void
 			{
 				cursor.y -= wrapSize;
-				cursor.x = 0;
+				cursor.x = border.x;
 			};
-		auto WrapRight = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
+		auto WrapRight = [](float wrapSize, Vec2f& cursor, Vec2f& offset, Vec2f border) -> void
 			{
 				cursor.x += wrapSize;
-				cursor.y = 0;
+				cursor.y = -border.y;
 			};
 		/*	auto WrapUp = [](float wrapSize, Vec2f& cursor, Vec2f& offset) -> void
 				{
@@ -239,15 +239,20 @@ namespace SandCastle
 		};
 		std::vector<Line> wrapLines;
 		wrapLines.emplace_back(Line());
+
+		//Position children
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto& child = children[i];
-
-			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + child->size.y) > size.y)
-				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + child->size.x) > size.x)
+			auto margedSize = child->size + child->margin*2;
+			float width = margedSize.x + spacing.x + border.x;
+			float height = margedSize.y + spacing.y + border.y;
+			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + height) > size.y)
+				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + width) > size.x)
 			{
 				//It's time to wrap!
-				Wrapping(wrapSize, cursor, offsetTotal);
+				float space = Wrapping == WrapDown ? spacing.y : spacing.x;
+				Wrapping(wrapSize + space, cursor, offsetTotal, border);
 				wrapSize = 0;
 				wrapLines.emplace_back(Line());
 			}
@@ -258,19 +263,19 @@ namespace SandCastle
 
 			offset = Vec2f(0, 0);
 			child->SetPosition(cursor);
-			WrapSize(child->size, wrapSize);
+			WrapSize(margedSize, wrapSize);
 			wrapLines.back().elems.emplace_back(child);
-			wrapLines.back().length += layoutDir == LayoutDir::LeftRight ? child->size.x : child->size.y;
+			wrapLines.back().length += layoutDir == LayoutDir::LeftRight ? margedSize.x : margedSize.y;
 
 			//Cursor moves
-			MoveCursor(child->size, cursor, offset);
+			MoveCursor(margedSize + spacing, cursor, offset);
 
 			Vec2f cAbs = Vec2f(0, 0);
 
 			if (/*Wrapping == WrapUp ||*/ Wrapping == WrapDown)
-				cAbs = Vec2f(std::abs(cursor.x), std::abs(cursor.y) + wrapSize);
+				cAbs = Vec2f(std::abs(cursor.x), std::abs(cursor.y) + wrapSize + border.y);
 			else
-				cAbs = Vec2f(std::abs(cursor.x) + wrapSize, std::abs(cursor.y));
+				cAbs = Vec2f(std::abs(cursor.x) + wrapSize + border.x, std::abs(cursor.y));
 
 			//Update stretching
 			stretch.x = cAbs.x > stretch.x ? cAbs.x : stretch.x;
@@ -307,16 +312,22 @@ namespace SandCastle
 				AllMove(children[i], stretch, size);
 			}
 		}
-
-		//Apply offset
-		/*if (offsetTotal.Magnitude() > 0.f)
-		{
-			OffsetRange(0, children.size(), offsetTotal);
-		}*/
 	}
 	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
 	{
 		anchor = Anchor;
 		SetPosition(position);
+	}
+	void Ui::Canvas::SetSpacing(Vec2f Spacing)
+	{
+		spacing = Spacing;
+	}
+	void Ui::Canvas::SetBorder(Vec2f Border)
+	{
+		border = Border;
+	}
+	void Ui::Canvas::SetMargin(Vec2f Margin)
+	{
+		margin = Margin;
 	}
 }

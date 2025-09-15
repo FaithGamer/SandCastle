@@ -29,7 +29,7 @@ namespace SandCastle
 		Entity root;
 		float z = 0.f;
 		Vec2f size = Vec2f(0, 0);
-		Vec2f padding = Vec2f(0, 0);
+		Vec2f margin = Vec2f(0, 0);
 		Vec2f position = Vec2f(0, 0);
 		Ui::Anchor anchor;
 	};

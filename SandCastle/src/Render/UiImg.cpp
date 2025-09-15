@@ -20,8 +20,8 @@ namespace SandCastle
 		};
 		position = pos;
 		pos += offset;
-		pos.x += padding.x;
-		pos.y -= padding.y;
+		pos.x += margin.x;
+		pos.y -= margin.y;
 		root.gtr()->SetPosition(pos.x, pos.y, z);
 	}
 }

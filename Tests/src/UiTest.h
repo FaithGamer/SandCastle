@@ -40,12 +40,15 @@ public:
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("alata");
 
-		auto canvas = Ui::BeginCanvas(Vec2f(150.f, 0));
+		//Nested:
+
+		/*auto canvas = Ui::BeginCanvas(Vec2f(150.f, 0));
 		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->SetSpacing(2.f);
 		//canvas->SetAnchor(Ui::Anchor::TopRight);
 		//canvas->SetPosition(Vec2f(320, 180));
-		Ui::SetTextAlign(TextAlign::Center);
-		Ui::SetPadding(Vec2f(5, 5));
+		//Ui::SetTextAlign(TextAlign::Center);
+		//Ui::SetPadding(Vec2f(5, 5));
 		Ui::Image("blue40-20.png_0_0");
 		Ui::Image("green30.png_0_0");
 		Ui::Image("blue40-20.png_0_0");
@@ -62,7 +65,23 @@ public:
 		Ui::EndCanvas();
 		Ui::Image("blue40-20.png_0_0");
 		Ui::Image("yellow10-20.png_0_0");
-		
+		Ui::EndCanvas();*/
+
+		//Spacing:
+
+		//Ui::SetCanvasMargin(4.f);
+		auto canvas = Ui::BeginCanvas(Vec2f(150.f, 0));
+		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->SetSpacing(2.f);
+		canvas->SetMargin(4.f);
+		//canvas->SetBorder(2.f);
+		canvas->SetPosition({ -320.f, 180.f });
+		Ui::SetMargin(4.f);
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
 		Ui::EndCanvas();
 
 		//Top Down VCenter

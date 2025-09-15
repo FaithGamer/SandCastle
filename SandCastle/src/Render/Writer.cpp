@@ -793,7 +793,7 @@ namespace SandCastle
 				}
 			}
 
-			// 11) Atlas placement with padding (edge clamp)
+			// 11) Atlas placement with margin (edge clamp)
 			constexpr int kPad = 2;
 			const int reqW = std::max(1, w + 2 * kPad);
 			const int reqH = std::max(1, h + 2 * kPad);

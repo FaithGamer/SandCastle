@@ -14,23 +14,23 @@ namespace SandCastle
 		switch (anchor)
 		{
 		case Ui::Anchor::TopLeft:
-			pos.x += padding.x;
-			pos.y -= padding.y;
+			pos.x += margin.x;
+			pos.y -= margin.y;
 			root.gtr()->SetPosition(pos.x, pos.y, z);
 			break;
 		case Ui::Anchor::TopRight:
-			pos.x -= size.x - padding.x;
-			pos.y -= padding.y;
+			pos.x -= size.x + margin.x;
+			pos.y -= margin.y;
 			root.gtr()->SetPosition(pos.x, pos.y, z);
 			break;
 		case Ui::Anchor::BotLeft:
-			pos.x += padding.x;
-			pos.y += size.y - padding.y;
+			pos.x += margin.x;
+			pos.y += size.y + margin.y;
 			root.gtr()->SetPosition(pos.x, pos.y, z);
 			break;
 		case Ui::Anchor::BotRight:
-			pos.x -= size.x - padding.x;
-			pos.y += size.y - padding.y;
+			pos.x -= size.x + margin.x;
+			pos.y += size.y + margin.y;
 			root.gtr()->SetPosition(pos.x, pos.y, z);
 			break;
 		}

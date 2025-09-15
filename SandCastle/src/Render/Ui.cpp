@@ -48,6 +48,7 @@ namespace SandCastle
 		elem->id = id;
 		elem->parent = canvas;
 		elem->z = -1.f;
+		elem->margin = elem->GetType() == Ui::Elem::Type::Canvas ? m_canvasMargin : m_margin;
 		m_elems[id] = elem;
 		if (canvas != nullptr)
 		{
@@ -250,9 +251,8 @@ namespace SandCastle
 
 		//Instantiation
 		Txt* text = new Txt();
-		text->padding = i->m_padding;
-		text->sentence = i->m_writer->Write(utf8, maxWidth - i->m_padding.x * 2, i->m_textAlign);
-		text->size = text->sentence.size + i->m_padding * 2;
+		text->sentence = i->m_writer->Write(utf8, maxWidth - i->m_margin.x * 2, i->m_textAlign);
+		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		i->AddElem(text, canvas);
 
@@ -266,13 +266,13 @@ namespace SandCastle
 		auto canvas = i->m_canvas.top();
 
 		Img* image = new Img();
-		image->padding = i->m_padding;
+		image->margin = i->m_margin;
 		image->root = Entity::CreateSprite(sprite);
 		auto render = image->root.GetComponent<SpriteRender>();
 		render->SetLayer(i->m_layer);
 		render->SetMaterial(i->m_material->GetID());
 		image->sprite = render->GetSprite();
-		image->size = image->sprite->GetDimensions() + image->padding * 2;
+		image->size = image->sprite->GetDimensions();
 		i->AddElem(image, canvas);
 		return image;
 	}
@@ -355,9 +355,13 @@ namespace SandCastle
 	{
 		Instance()->m_textAlign = textAlign;
 	}
-	void Ui::SetPadding(Vec2f padding)
+	void Ui::SetMargin(Vec2f margin)
 	{
-		Instance()->m_padding = padding;
+		Instance()->m_margin = margin;
+	}
+	void Ui::SetCanvasMargin(Vec2f margin)
+	{
+		Instance()->m_canvasMargin = margin;
 	}
 	Vec3f Ui::UiToWorld(Vec3f uiPos)
 	{

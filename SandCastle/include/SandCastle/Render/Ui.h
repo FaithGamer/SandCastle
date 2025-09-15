@@ -86,8 +86,10 @@ namespace SandCastle
 		static void SetButtonFrame(String texture);
 		/// @brief Set the text alignement that will be used for every subsequent text creation
 		static void SetTextAlign(TextAlign textAlign);
-		/// @brief Set the padding that will be used for every subsequent element creation.
-		static void SetPadding(Vec2f padding);
+		/// @brief Set the margin that will be used for every subsequent element creation.
+		static void SetMargin(Vec2f margin);
+		/// @brief Set the margin that will be used for every subsequent canvas creation.
+		static void SetCanvasMargin(Vec2f margin);
 
 		/*---Utility---*/
 
@@ -155,7 +157,8 @@ namespace SandCastle
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
 		float m_z = 0.f;
-		Vec2f m_padding = 0.f;
+		Vec2f m_margin = 0.f;
+		Vec2f m_canvasMargin = 0.f;
 
 		static ElemID m_nextId;
 		const float zStep = 1.f;
