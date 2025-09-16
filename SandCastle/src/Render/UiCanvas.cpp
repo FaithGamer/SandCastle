@@ -27,8 +27,6 @@ namespace SandCastle
 		//Set the position of every children according to layout
 		//And contentSize the canvas when needed
 
-
-
 		/*- lambda definitions -*/
 
 		void (*WrapSize)(Vec2f childSize, float& wrapSize) = nullptr;
@@ -130,7 +128,7 @@ namespace SandCastle
 				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y) * 0.5f);
-						offset += Vec2f(0.f, - (canvas.y - contentSize.y) * 0.5f);
+						offset += Vec2f(0.f, -(canvas.y - contentSize.y) * 0.5f);
 						elem->Move(offset);
 					};
 				break;
@@ -138,7 +136,7 @@ namespace SandCastle
 				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y));
-						offset += Vec2f(0.f, - (canvas.y - contentSize.y));
+						offset += Vec2f(0.f, -(canvas.y - contentSize.y));
 						elem->Move(offset);
 					};
 				break;
@@ -209,8 +207,11 @@ namespace SandCastle
 			float width = margedSize.x + border.x;
 			float height = margedSize.y + border.y;
 
-			if ((fixedSize.Contains(Canvas::Vertical) && (std::abs(cursor.y) + height) > size.y)
-				|| fixedSize.Contains(Canvas::Horizontal) && (std::abs(cursor.x) + width) > size.x)
+			if (
+				(std::abs(cursor.y) + height > sizeLimit.y && Wrapping == WrapRight)
+				||
+				(std::abs(cursor.x) + width > sizeLimit.x && Wrapping == WrapDown)
+				)
 			{
 				//Finish current line.
 				totalWrap += wrapSize;
@@ -260,14 +261,17 @@ namespace SandCastle
 		}
 
 		//Stretch to fit content
-		if (!fixedSize.Contains(Canvas::Vertical) && size.y < contentSize.y + border.y)
+		if (!fixedSize.Contains(Canvas::Horizontal))
 		{
-			size.y = contentSize.y + border.y;
+			float stretchx = contentSize.x + border.x * 2;
+			size.x = stretchx < sizeLimit.x ? stretchx : sizeLimit.x;
 		}
-		if (!fixedSize.Contains(Canvas::Horizontal) && size.x < contentSize.x + border.x)
+		if (!fixedSize.Contains(Canvas::Vertical))
 		{
-			size.x = contentSize.x + border.x;
+			float stretchy = contentSize.y + border.y * 2;
+			size.y = stretchy < sizeLimit.y ? stretchy : sizeLimit.y;
 		}
+
 
 		//Apply alignement
 		if (LineMoveH != nullptr || LineMoveV != nullptr)
@@ -282,6 +286,8 @@ namespace SandCastle
 				}
 			}
 		}
+		//Update world position cause it may have changed with stretching
+		SetPosition(position);
 	}
 	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
 	{

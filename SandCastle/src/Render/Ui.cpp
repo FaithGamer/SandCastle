@@ -58,7 +58,7 @@ namespace SandCastle
 		}
 	}
 
-	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f size)
+	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f& size)
 	{
 		//Dimensions
 		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
@@ -227,20 +227,27 @@ namespace SandCastle
 		canvas->root = Entity::Create();
 		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
+
+		//Differentiante limit from size
 		if (size.x > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Horizontal);
 		if (size.y > 0.f)
 			canvas->fixedSize.AddFlag(Canvas::Vertical);
+		canvas->sizeLimit.x = size.x > 0.f ? size.x : canvas->sizeLimit.x;
+		canvas->sizeLimit.y = size.y > 0.f ? size.y : canvas->sizeLimit.y;
 		if (parent)
 		{
-			Vec2f limit(
-				parent->size.x - parent->border.x * 2,
-				parent->size.y - parent->border.y * 2);
+			auto parentLimit = Vec2f{
+				parent->sizeLimit.x - parent->border.x * 2,
+				parent->sizeLimit.y - parent->border.y * 2 };
 
-			size.x = limit.x < size.x ? limit.x : size.x;
-			size.y = limit.y < size.y ? limit.y : size.y;
+			canvas->sizeLimit.x = parentLimit.x < canvas->sizeLimit.x ? parentLimit.x : canvas->sizeLimit.x;
+			canvas->sizeLimit.y = parentLimit.y < canvas->sizeLimit.y ? parentLimit.y : canvas->sizeLimit.y;
 		}
+		size.x = size.x > canvas->sizeLimit.x ? canvas->sizeLimit.x : size.x;
+		size.y = size.y > canvas->sizeLimit.y ? canvas->sizeLimit.y : size.y;
 		canvas->size = size;
+
 		canvas->hasFrame = frame;
 		i->m_canvas.push(canvas);
 		i->AddElem(canvas, parent);
@@ -253,14 +260,12 @@ namespace SandCastle
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
 		auto canvas = i->m_canvas.top();
 
-		if (canvas->fixedSize.Contains(Canvas::Horizontal))
-		{
-			maxWidth = maxWidth > 0.f ? std::min(canvas->size.x, maxWidth) : canvas->size.x;
-		}
-
+		
+		maxWidth = maxWidth > 0.f ? std::min(canvas->sizeLimit.x, maxWidth) : canvas->sizeLimit.x;
+		
 		//Instantiation
 		Txt* text = new Txt();
-		text->sentence = i->m_writer->Write(utf8, maxWidth - i->m_margin.x * 2, i->m_textAlign);
+		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		i->AddElem(text, canvas);
@@ -298,6 +303,7 @@ namespace SandCastle
 		canvas->MakeLayout();
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
+			auto prevSize = canvas->size;
 			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, canvas->size);
 		}
 		i->m_canvas.pop();
@@ -332,6 +338,7 @@ namespace SandCastle
 	{
 		auto ins = Instance();
 		ins->m_font = ins->m_writer->GetFont(fancyName);
+		ins->m_writer->UseFont(ins->m_font);
 	}
 	void Ui::SetLayer(LayerID layer)
 	{

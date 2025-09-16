@@ -137,7 +137,7 @@ namespace SandCastle
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 		/*---Instantiation---*/
 		void AddElem(Elem* elem, Canvas* canvas);
-		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f size);
+		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f& size);
 
 	private:
 		//Helper

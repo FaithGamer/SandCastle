@@ -164,60 +164,97 @@ public:
 	}
 	void CreateSquareWindow()
 	{
-		//The visual frame
+		//The visual frame to use for every subsequent canvas
 		Ui::SetCanvasFrame("frame.png");
-		//The margin between canvas and other stuff
-		//Margin won't add-up for two non-nested canvas (outside of any other canvas).
-		//Ui::SetCanvasMargin(4.f);
-		//Start a canvas, by setting a dimension to non-zero, this makes it unstretchable in this dimension.
-		auto root = Ui::BeginCanvas(Vec2f(200, 120));
+
+		//Start a canvas:
+		//By setting a dimension to non-zero, this makes it unstretchable in this dimension.
+		//User must be aware that a canvas size that doesn't match the possible frame size (see fixedStep and minimumSize)
+		//May result in some unexpected visual result.
+		//Long story short: if you use a fixed step frame, use a canvas size that is a round multiple of that step.
+		//If not, use a canvas size that is a minimum of double the sprite corner size of the frame.
+		auto root = Ui::BeginCanvas(Vec2f(200, 0));
+		//Center the canvas on screen
+		root->SetPosition(Vec2f(0.f, 0.f));
+		root->SetAnchor(Ui::Anchor::MiddleCenter);
 		//Elements inside this canvas will be added from top to bot and wrap from left to right.
-		root->layoutDir = Ui::LayoutDir::LeftRight;
+		root->layoutDir = Ui::LayoutDir::TopDown;
 		//The elements in this canvas will horizontally align to the center 
-		root->layoutAlignV = Ui::LayoutAlignV::Center;
 		root->layoutAlignH = Ui::LayoutAlignH::Center;
 		//The space between the canvas border and its content
-		root->SetBorder(10.f);
+		root->SetBorder(5.f);
 		//The space between elements inside the canvas.
-		root->SetSpacing(7.f);
+		root->SetSpacing(20.f);
 		//Use the font for titles.
 		Ui::SetFont("title");
 		//Draw the text.
+		//Ui::Image("green30.png_0_0");
+		Ui::Text("Square window.");
+
+		//This canvas has no frame, only it's content is visible (false)
+		auto squares = Ui::BeginCanvas(Vec2f(0, 0), false);
+		squares->layoutDir = Ui::LayoutDir::LeftRight;
+		squares->SetSpacing(2.f);
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("green30.png_0_0");
+
+		Ui::Image("blue40-20.png_0_0");
+		Ui::EndCanvas();
+
 		//Ui::Image("blue40-20.png_0_0");
-		Ui::Image("yellow10-20.png_0_0");
-		Ui::Image("green30.png_0_0");
-		Ui::Image("green30.png_0_0");
-		Ui::Image("blue40-20.png_0_0");
-		Ui::Image("green30.png_0_0");
-		Ui::Image("green30.png_0_0");
-		Ui::Image("blue40-20.png_0_0");
-
-
-		/*Ui::Image("blue40-20.png_0_0");
-	
-		Ui::Image("yellow10-20.png_0_0");
-
-		Ui::Image("green30.png_0_0");
-		Ui::Image("yellow10-20.png_0_0");
-		Ui::Image("yellow10-20.png_0_0");*/
-		//Start a nested canvas, it's size won't be able to excess the parent size - borders
-		//false = no frame (transparent)
-		/*auto content = Ui::BeginCanvas(Vec2f(999, 0), true);
-		content->SetSpacing(3.f);
-		//Draw a bunch of images
-		Ui::Image("yellow10-20.png_0_0");
-		Ui::Image("blue40-20.png_0_0");
-		Ui::Image("green30.png_0_0");
-		Ui::Image("yellow10-20.png_0_0");
-		Ui::Image("green30.png_0_0");
-		//End the content canvas.
-		Ui::EndCanvas();*/
+		Ui::BeginCanvas(Vec2f(0.f), false);
+		Ui::SetFont("content");
+		Ui::Text("Thanks for watching ");
+		Ui::EndCanvas();
 		//End the root canvas
 		Ui::EndCanvas();
 
 	}
+	void MakeUpgradeUi()
+	{
+		Ui::SetCanvasFrame("frame.png");
+		auto root = Ui::BeginCanvas(Vec2f(0, 0));
+		root->SetSpacing(3.f);
+		root->SetBorder(5.f);
+		struct Upgrade
+		{
+			String name = "";
+		};
+		std::vector<Upgrade> upgrades;
+		upgrades.push_back(Upgrade("Boost"));
+		upgrades.push_back(Upgrade("Super boost"));
+		upgrades.push_back(Upgrade("Stuff"));
+		upgrades.push_back(Upgrade("Little stuff"));
+		for (int i = 0; i < upgrades.size(); i++)
+		{
+			auto upRoot = Ui::BeginCanvas(Vec2f(190, 0), true);
+
+			upRoot->layoutDir = Ui::LayoutDir::LeftRight;
+			upRoot->layoutAlignV = Ui::LayoutAlignV::Center;
+			auto upTitle = Ui::BeginCanvas(Vec2f(95, 0), false);
+			upTitle->layoutAlignH = Ui::LayoutAlignH::Left;
+			Ui::Text(upgrades[i].name);
+			Ui::EndCanvas();
+			auto upButton= Ui::BeginCanvas(Vec2f(95, 0), false);
+			upButton->layoutAlignH = Ui::LayoutAlignH::Right;
+			Ui::Image("blue40-20.png_0_0");
+			Ui::EndCanvas();
+
+			Ui::EndCanvas();
+		}
+
+		Ui::EndCanvas();
+	}
 	void Start() override
 	{
+
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
 
@@ -234,6 +271,7 @@ public:
 		//Create ui stuff
 		//CreateSomeUi();
 		CreateSquareWindow();
+		//MakeUpgradeUi();
 	}
 	void Update() override
 	{

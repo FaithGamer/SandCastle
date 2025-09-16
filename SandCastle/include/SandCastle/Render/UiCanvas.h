@@ -38,5 +38,6 @@ namespace SandCastle
 		std::vector<Ui::Elem*> children;
 		Vec2f spacing = Vec2f(0.f, 0.f);
 		Vec2f border = Vec2f(0.f, 0.f);
+		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);
 	};
 }

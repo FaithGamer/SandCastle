@@ -18,6 +18,7 @@ namespace SandCastle
 	public:
 		Elem();
 		virtual Type GetType() const = 0;
+		virtual Vec2f GetSize() const;
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
 		
