@@ -88,7 +88,7 @@ public:
 		/*auto canvas = Ui::BeginCanvas(Vec2f(0, 150));
 		canvas->layoutDir = Ui::LayoutDir::TopDown;
 		canvas->layoutAlignV = Ui::LayoutAlignV::Center;
-	
+
 		Ui::SetPadding(Vec2f(5, 5));
 		Ui::Text("1\n2\n3");
 		Ui::Text("Hello");
@@ -170,26 +170,39 @@ public:
 		//Margin won't add-up for two non-nested canvas (outside of any other canvas).
 		//Ui::SetCanvasMargin(4.f);
 		//Start a canvas, by setting a dimension to non-zero, this makes it unstretchable in this dimension.
-		auto root = Ui::BeginCanvas(Vec2f(200, 300));
+		auto root = Ui::BeginCanvas(Vec2f(200, 120));
 		//Elements inside this canvas will be added from top to bot and wrap from left to right.
-		root->layoutDir = Ui::LayoutDir::TopDown;
+		root->layoutDir = Ui::LayoutDir::LeftRight;
+		//The elements in this canvas will horizontally align to the center 
+		root->layoutAlignV = Ui::LayoutAlignV::Center;
+		root->layoutAlignH = Ui::LayoutAlignH::Center;
 		//The space between the canvas border and its content
-		root->SetBorder(20.f);
+		root->SetBorder(10.f);
+		//The space between elements inside the canvas.
+		root->SetSpacing(7.f);
 		//Use the font for titles.
 		Ui::SetFont("title");
 		//Draw the text.
-		//root->layoutAlignH = Ui::LayoutAlignH::Center;
-		
-		//The space between elements inside the canvas.
-		//root->SetSpacing(6.f);
-		//Add a canvas for the title, by setting false, it won't have a frame (transparent canvas).
-		auto title = Ui::BeginCanvas(Vec2f(200, 0));
-		//The elements in this canvas will horizontally align to the center (for the title)
-		title->layoutAlignH = Ui::LayoutAlignH::Center;
-	Ui::Text("Some squares");
-		//End the title canvas
-		Ui::EndCanvas();
-		/*auto content = Ui::BeginCanvas(Vec2f(200, 0), false);
+		//Ui::Image("blue40-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("green30.png_0_0");
+		Ui::Image("blue40-20.png_0_0");
+
+
+		/*Ui::Image("blue40-20.png_0_0");
+	
+		Ui::Image("yellow10-20.png_0_0");
+
+		Ui::Image("green30.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");
+		Ui::Image("yellow10-20.png_0_0");*/
+		//Start a nested canvas, it's size won't be able to excess the parent size - borders
+		//false = no frame (transparent)
+		/*auto content = Ui::BeginCanvas(Vec2f(999, 0), true);
 		content->SetSpacing(3.f);
 		//Draw a bunch of images
 		Ui::Image("yellow10-20.png_0_0");

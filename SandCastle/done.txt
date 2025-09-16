@@ -343,13 +343,25 @@ But I am very suspicious of that...
 -limit nested canvas stretch to parent if fixed
 -root margin, elem margin (including nested canvas)
 
+16
+
+-fixed
+-the
+-fucking
+-layout
+-one
+-more
+-time.
+
+
 >do some ui test
 
-
+>odd number window is fucking pixel art and fonts
 >Any elem must be able to be hoverable/navigable/clickable (callbacks)
 >canvas size must match frame size (especially with fixedstep)
 >consider some context (margin, text align, etc...) be canvas dependent
 >frame moving can sometimes show 1px separation between top/mid, etc... -> apply extrude on textures, or sprites
+>think about wrapping edge case were both conditions are met?
 
 tasks:
 
@@ -367,6 +379,7 @@ no need plmp if data is in registry and communication is only through signal?
 >math inverselerp
 >custom path for assets, fonts, and so on... Roaming system
 >versioning and app name
+>japanese breaking rules
 
 secondary tasks:
 
