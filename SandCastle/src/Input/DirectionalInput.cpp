@@ -52,6 +52,18 @@ namespace SandCastle
 		UpdateEventListened();
 	}
 
+	void DirectionalInput::BindWASD()
+	{
+		std::vector<DirectionalButton> buttons
+		{
+			DirectionalButton(Button(Key::Scancode::W), Vec2f(0.f, 1.f)),
+			DirectionalButton(Button(Key::Scancode::A), Vec2f(-1.f, 0.f)),
+			DirectionalButton(Button(Key::Scancode::S), Vec2f(0.f, -1.f)),
+			DirectionalButton(Button(Key::Scancode::D), Vec2f(1.f, 0.f))
+		};
+		BindButtons(buttons);
+	}
+
 	void DirectionalInput::SetMouseWheel(bool mouseWheel)
 	{
 		m_mouseWheel = mouseWheel;

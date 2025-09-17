@@ -40,6 +40,8 @@ namespace SandCastle
 		/// When multiple buttons are being pressed at the same time, the final state is the sum of all the pressed buttons
 	    /// and sticks direction vectors, where each axis (x, y) is clamped from 0 ot 1.
 		void BindButtons(std::vector<DirectionalButton> buttons);
+		/// @brief Helper to bind WASD
+		void BindWASD();
 		/// @brief Mouse wheel will trigger Y axis 1 or -1
 		/// @param mouseWheel set true to listen to mouse wheel, set to false by default.
 		void SetMouseWheel(bool mouseWheel);
