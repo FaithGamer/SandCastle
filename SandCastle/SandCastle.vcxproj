@@ -250,12 +250,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
-    <ClCompile Include="src\Render\UiImg.cpp" />
+    <ClCompile Include="src\UI\UiBtn.cpp" />
+    <ClCompile Include="src\UI\UiImg.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />
-    <ClCompile Include="src\Render\UiCanvas.cpp" />
-    <ClCompile Include="src\Render\UiElem.cpp" />
-    <ClCompile Include="src\Render\UiTxt.cpp" />
+    <ClCompile Include="src\UI\UiCanvas.cpp" />
+    <ClCompile Include="src\UI\UiElem.cpp" />
+    <ClCompile Include="src\UI\UiTxt.cpp" />
     <ClCompile Include="src\Render\Writer.cpp" />
     <ClCompile Include="src\Render\Material.cpp" />
     <ClCompile Include="src\Audio\Audio.cpp" />
@@ -322,7 +323,7 @@
     <ClCompile Include="src\Render\SpriteRender.cpp" />
     <ClCompile Include="src\Render\Texture.cpp" />
     <ClCompile Include="src\Render\Transform.cpp" />
-    <ClCompile Include="src\Render\Ui.cpp" />
+    <ClCompile Include="src\UI\Ui.cpp" />
     <ClCompile Include="src\Render\UniformBuffer.cpp" />
     <ClCompile Include="src\Render\VertexArray.cpp" />
     <ClCompile Include="src\Render\VertexBuffer.cpp" />
@@ -367,11 +368,13 @@
     <ClInclude Include="include\SandCastle\Render\SpriteRenderSystem.h" />
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
-    <ClInclude Include="include\SandCastle\Render\UiCanvas.h" />
-    <ClInclude Include="include\SandCastle\Render\UiElem.h" />
-    <ClInclude Include="include\SandCastle\Render\UiEnum.h" />
-    <ClInclude Include="include\SandCastle\Render\UiImg.h" />
-    <ClInclude Include="include\SandCastle\Render\UiTxt.h" />
+    <ClInclude Include="include\SandCastle\UI.h" />
+    <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
+    <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
+    <ClInclude Include="include\SandCastle\UI\UiElem.h" />
+    <ClInclude Include="include\SandCastle\UI\UiEnum.h" />
+    <ClInclude Include="include\SandCastle\UI\UiImg.h" />
+    <ClInclude Include="include\SandCastle\UI\UiTxt.h" />
     <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />
     <ClInclude Include="include\SandCastle\EngineParameters.h" />
@@ -417,7 +420,7 @@
     <ClInclude Include="include\SandCastle\Render\SpriteRender.h" />
     <ClInclude Include="include\SandCastle\Render\Texture.h" />
     <ClInclude Include="include\SandCastle\Render\Transform.h" />
-    <ClInclude Include="include\SandCastle\Render\Ui.h" />
+    <ClInclude Include="include\SandCastle\UI\Ui.h" />
     <ClInclude Include="include\SandCastle\Render\UniformBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\VertexArray.h" />
     <ClInclude Include="include\SandCastle\Render\VertexBuffer.h" />

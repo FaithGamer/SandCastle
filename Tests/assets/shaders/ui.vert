@@ -11,7 +11,7 @@ out vec2 vTexCoords;
 out vec4 vColor;
 out float vTexIndex;
 
-uniform float uDpi;
+uniform float uPpu;
 
 layout(std140) uniform scene
 {
@@ -30,7 +30,7 @@ void main()
     vTexCoords = iUv;
     vTexIndex = iTexIndex;
     
-    vec3 pos = iVertexPos.xyz * uReduction * uDpi;
+    vec3 pos = iVertexPos.xyz * uReduction * uPpu;
     pos.x /= uCamAspectRatio;
     gl_Position = vec4(pos, 1.0);
 }

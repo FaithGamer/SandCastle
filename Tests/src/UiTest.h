@@ -242,7 +242,7 @@ public:
 			upTitle->layoutAlignH = Ui::LayoutAlignH::Left;
 			Ui::Text(upgrades[i].name);
 			Ui::EndCanvas();
-			auto upButton= Ui::BeginCanvas(Vec2f(95, 0), false);
+			auto upButton = Ui::BeginCanvas(Vec2f(95, 0), false);
 			upButton->layoutAlignH = Ui::LayoutAlignH::Right;
 			Ui::Image("blue40-20.png_0_0");
 			Ui::EndCanvas();
@@ -293,6 +293,65 @@ public:
 	}
 };
 
+class PosSys : public System
+{
+public:
+	Vec2f dir;
+	void Start()
+	{
+		auto inputs = Inputs::CreateInputMap("Player");
+		auto cam = inputs->CreateDirectionalInput("Cam");
+		cam->BindWASD();
+		cam->signal.Listen(&PosSys::OnMoveCam, this);
+
+		auto entt = Entity::CreateSprite();
+		entt.gtr()->Move(-100, 100, 0);
+	}
+	void OnMoveCam(InputSignal* signal)
+	{
+		dir = signal->GetVec2f();
+
+	}
+	void Update()
+	{
+		float time = Time::Delta();
+		if (dir.Magnitude() > 0.01f)
+		{
+			Vec2f offset = dir * time * 10.f;
+			Camera::main->MoveWorld(offset);
+		}
+	}
+	void OnImGui()
+	{
+		auto mouseUi = Ui::MousePos();
+		auto mouseWorld = Mouse::GetWorldPos();
+		auto mouseScreen = Mouse::GetPosition();
+		auto camPos = Camera::main->GetPosition();
+		auto worldToUi = Ui::WorldToUi(mouseWorld);
+		auto uiToWorld = Ui::UiToWorld(mouseUi);
+		auto drawPos = [](String label, Vec2f pos)
+			{
+				ImGui::Text(label.c_str());
+				ImGui::Value("X", pos.x);
+				ImGui::SameLine();
+				ImGui::Text(" ");
+				ImGui::SameLine();
+				ImGui::Value("Y", pos.y);
+				ImGui::Spacing();
+			};
+
+		ImGui::Begin("Positions");
+		drawPos("Mouse Screen", mouseScreen);
+		drawPos("Mouse UI", mouseUi);
+		drawPos("Mouse World", mouseWorld);
+		drawPos("World to UI", worldToUi);
+		drawPos("UI to world", uiToWorld);
+		drawPos("Camera", camPos);
+		ImGui::End();
+	}
+
+};
+
 void UiTest()
 {
 	Engine::Init();
@@ -300,5 +359,6 @@ void UiTest()
 	cons.SetDefault();
 	Camera::main->SetConstraints(cons);
 	Systems::Push<UiSys>();
+	Systems::Push<PosSys>();
 	Engine::Launch();
 }

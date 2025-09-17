@@ -222,7 +222,7 @@
     <ClCompile Include="src\Core\Profiling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Ui.cpp">
+    <ClCompile Include="src\UI\Ui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\Color.cpp">
@@ -231,16 +231,19 @@
     <ClCompile Include="src\Render\Writer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\UiElem.cpp">
+    <ClCompile Include="src\UI\UiElem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\UiCanvas.cpp">
+    <ClCompile Include="src\UI\UiCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\UiTxt.cpp">
+    <ClCompile Include="src\UI\UiTxt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\UiImg.cpp">
+    <ClCompile Include="src\UI\UiImg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\UiBtn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -503,7 +506,7 @@
     <ClInclude Include="include\SandCastle\Core\Fancy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\Ui.h">
+    <ClInclude Include="include\SandCastle\UI\Ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Render\Layer.h">
@@ -515,19 +518,25 @@
     <ClInclude Include="include\SandCastle\Render\Writer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\UiCanvas.h">
+    <ClInclude Include="include\SandCastle\UI\UiCanvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\UiEnum.h">
+    <ClInclude Include="include\SandCastle\UI\UiEnum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\UiElem.h">
+    <ClInclude Include="include\SandCastle\UI\UiElem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\UiTxt.h">
+    <ClInclude Include="include\SandCastle\UI\UiTxt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Render\UiImg.h">
+    <ClInclude Include="include\SandCastle\UI\UiImg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\UI\UiBtn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
