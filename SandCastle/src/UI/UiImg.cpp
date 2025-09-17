@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SandCastle/Render/UiImg.h"
+#include "SandCastle/UI/UiImg.h"
 #include "SandCastle/Render/Sprite.h"
 
 namespace SandCastle

@@ -25,6 +25,7 @@ namespace SandCastle
 		class Txt;
 		/// @brief Image (sprite)
 		class Img;
+		class Btn;
 
 		/*--- Types ---*/
 		//definitions in UiEnum.h
@@ -61,6 +62,12 @@ namespace SandCastle
 			float uiSize,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
+		/// @brief Override the default material.
+		static void SetDefaultMaterial(Material* material);
+		/// @brief Set the ui dimension.
+		/// example, if ppu = 360 (default), an ui element of height 360 will fill up the screen.
+		static void SetPPU(float ppu);
+
 
 		/*---Ui creation---*/
 
@@ -90,19 +97,25 @@ namespace SandCastle
 		static void SetMargin(Vec2f margin);
 		/// @brief Set the margin that will be used for every root canvas (non nested canvas).
 		static void SetRootMargin(Vec2f margin);
+		/// @brief Set the material to default material.
+		static void ResetMaterial(Material* material);
 
 		/*---Utility---*/
 
 		/// @brief Convert UI position to world position
-		static Vec3f UiToWorld(Vec3f uiPos);
+		static Vec3f UiToWorld(Vec2f uiPos);
 		/// @brief Convert world position to UI position
-		static Vec3f WorldToUi(Vec3f uiPos);
+		static Vec2f WorldToUi(Vec3f worldPos);
+		/// @brief Convert a screen position to UI position
+		static Vec2f ScreenToUi(Vec2f screenPos);
+		/// @brief Get the mouse UI position
+		static Vec2f MousePos();
 
 		/*---Accessors---*/
 
 		/// @brief Get the object used to create fonts and write text.
 		static Writer* GetWriter();
-		/// @brief Get the material used (top of the stack)
+		/// @brief Get the material used
 		static Material* GetMaterial();
 		static FontID GetFont();
 		static LayerID GetLayer();
@@ -149,6 +162,7 @@ namespace SandCastle
 
 		//State (creation of new elements)
 		Material* m_material = nullptr;
+		Material* m_defaultMaterial = nullptr;
 		FontID m_font;
 		LayerID m_layer;
 		FrameTemplate* m_canvasFrame = nullptr;
@@ -159,6 +173,7 @@ namespace SandCastle
 		float m_z = 0.f;
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
+		float m_ppu = 1.f/360.f;
 
 		static ElemID m_nextId;
 		const float zStep = 1.f;

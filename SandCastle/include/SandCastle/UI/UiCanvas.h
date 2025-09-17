@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SandCastle/Render/Ui.h"
-#include "SandCastle/Render/UiElem.h"
-#include "SandCastle/Render/UiEnum.h"
+#include "SandCastle/UI/Ui.h"
+#include "SandCastle/UI/UiElem.h"
+#include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Core/Bitmask.h"
 
 namespace SandCastle

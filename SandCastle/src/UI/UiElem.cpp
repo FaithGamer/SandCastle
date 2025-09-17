@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "SandCastle/Render/UiElem.h"
-#include "SandCastle/Render/UiEnum.h"
+#include "SandCastle/UI/UiElem.h"
+#include "SandCastle/UI/UiEnum.h"
 
 namespace SandCastle
 {

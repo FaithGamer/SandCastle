@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "SandCastle/Render/Ui.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Math.h"
@@ -7,10 +6,14 @@
 #include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/Renderer2D.h"
-#include "SandCastle/Render/UiEnum.h"
-#include "SandCastle/Render/UiCanvas.h"
-#include "SandCastle/Render/UiTxt.h"
-#include "SandCastle/Render/UiImg.h"
+#include "SandCastle/UI/Ui.h"
+#include "SandCastle/UI/UiEnum.h"
+#include "SandCastle/UI/UiCanvas.h"
+#include "SandCastle/UI/UiTxt.h"
+#include "SandCastle/UI/UiImg.h"
+#include "SandCastle/Input/Mouse.h"
+#include "SandCastle/Render/Window.h"
+#include "SandCastle/Render/Camera.h"
 
 
 namespace SandCastle
@@ -30,7 +33,8 @@ namespace SandCastle
 		Renderer2D::SetLayerSortZ(uiLayer, true);
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
 		uiMat->GetRenderOptions()->SetDepthTest(false);
-		uiMat->SetFloat("uDpi", 1.f / 180.f);
+		uiMat->SetFloat("uPpu", m_ppu * 2.f);
+		m_defaultMaterial = uiMat;
 		m_material = uiMat;
 		m_layer = uiLayer;
 		m_writer = new Writer(m_material, m_layer);
@@ -220,6 +224,20 @@ namespace SandCastle
 		ins->m_writer->NameFont(font, fancyName);
 	}
 
+	void Ui::SetDefaultMaterial(Material* material)
+	{
+		Instance()->m_defaultMaterial = material;
+		Instance()->m_material = material;
+	}
+
+	void Ui::SetPPU(float ppu)
+	{
+		ppu = 1.f / ppu;
+		Instance()->m_ppu = ppu;
+		Instance()->m_defaultMaterial->SetFloat("uPPu", ppu * 2.f);
+		Instance()->m_material->SetFloat("uPPu", ppu * 2.f);
+	}
+
 	Ui::Canvas* Ui::BeginCanvas(Vec2f size, bool frame)
 	{
 		auto i = Instance();
@@ -260,9 +278,9 @@ namespace SandCastle
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
 		auto canvas = i->m_canvas.top();
 
-		
+
 		maxWidth = maxWidth > 0.f ? std::min(canvas->sizeLimit.x, maxWidth) : canvas->sizeLimit.x;
-		
+
 		//Instantiation
 		Txt* text = new Txt();
 		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
@@ -328,6 +346,7 @@ namespace SandCastle
 
 	void Ui::SetMaterial(Material* material)
 	{
+		material->SetFloat("uPpu", Instance()->m_ppu * 2.f);
 		Instance()->m_material = material;
 	}
 	void Ui::SetFont(FontID font)
@@ -378,13 +397,54 @@ namespace SandCastle
 	{
 		Instance()->m_rootMargin = margin;
 	}
-	Vec3f Ui::UiToWorld(Vec3f uiPos)
+	void Ui::ResetMaterial(Material* material)
 	{
-		return Vec3f();
+		Instance()->m_material = Instance()->m_defaultMaterial;
 	}
-	Vec3f Ui::WorldToUi(Vec3f uiPos)
+	Vec3f Ui::UiToWorld(Vec2f uiPos)
 	{
-		return Vec3f();
+		auto ppu = Instance()->m_ppu;
+		auto cam = Camera::main;
+		Vec2f screen = Window::GetSize();
+		Vec2f midScreen(screen.x * 0.5f, screen.y * 0.5f);
+		Vec3f mid = cam->ScreenToWorld(midScreen, screen);
+
+		Vec3f p;
+		float scale = ppu / cam->zoom;
+		p.z = 0.f;
+		p.x = mid.x + (uiPos.x * scale);
+		p.y = mid.y + (uiPos.y * scale);
+
+		return p;
+	}
+	Vec2f Ui::WorldToUi(Vec3f worldPos)
+	{
+		auto ppu = Instance()->m_ppu;
+		auto cam = Camera::main;
+		Vec2f screen = Window::GetSize();
+		Vec2f midScreen(screen.x * 0.5f, screen.y * 0.5f);
+		Vec3f mid = cam->ScreenToWorld(midScreen, screen);
+
+		Vec2f ui;
+		float scale = ppu / cam->zoom;
+		ui.x = (worldPos.x - mid.x) / scale;
+		ui.y = (worldPos.y - mid.y) / scale;
+
+		return ui;
+	}
+	Vec2f Ui::ScreenToUi(Vec2f pos)
+	{
+		auto ppu = Instance()->m_ppu;
+		Vec2f screen = Window::GetSize();
+		pos.x = pos.x / (screen.x - 1) - 0.5f;
+		pos.y = -(pos.y / (screen.y - 1) - 0.5f);
+		pos.y /= ppu;
+		pos.x = pos.x / ppu * (screen.x / screen.y);
+		return pos;
+	}
+	Vec2f Ui::MousePos()
+	{
+		return ScreenToUi(Mouse::GetPosition());
 	}
 	Writer* Ui::GetWriter()
 	{

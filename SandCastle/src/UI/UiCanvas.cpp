@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SandCastle/Render/UiCanvas.h"
+#include "SandCastle/UI/UiCanvas.h"
 
 namespace SandCastle
 {

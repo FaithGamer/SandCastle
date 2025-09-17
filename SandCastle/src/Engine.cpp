@@ -16,7 +16,7 @@
 #include "SandCastle/Physics/PhysicsSystem.h"
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"
-#include "SandCastle/Render/Ui.h"
+#include "SandCastle/UI/Ui.h"
 
 
 namespace SandCastle

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SandCastle/Render/Ui.h"
+#include "SandCastle/UI/Ui.h"
 
 namespace SandCastle
 {
