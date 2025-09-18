@@ -39,6 +39,8 @@ namespace SandCastle
 
 		void Send(T& signalData);
 		void Send(T&& signalData);
+
+		int GetListenerCount();
 	private:
 		struct OpaqueCallback
 		{

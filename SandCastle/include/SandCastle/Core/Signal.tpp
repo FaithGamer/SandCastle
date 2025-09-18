@@ -86,4 +86,9 @@ namespace SandCastle
 			listener->Call(std::forward<T>(signal));
 		}
 	}
+	template<typename T>
+	int Signal<T>::GetListenerCount()
+	{
+		return m_listeners.size();
+	}
 }
