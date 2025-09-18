@@ -13,10 +13,11 @@ namespace SandCastle
 	{
 	public:
 		//To do add pivot point
+		Sprite() {};
 		Sprite(const Texture* texture);
 		Sprite(const Texture* texture, Rect textureRect);
 		Sprite(const Texture* texture, Rect textureRect, numeric::float16_t ox, numeric::float16_t oy);
-	
+
 		void TextureCoordsRelative(Vec2f* coords, Rect rect, float resFactor = 1.f);
 		void ComputeDimensions();
 
@@ -56,11 +57,11 @@ namespace SandCastle
 		numeric::float16_t orgY = 0.f;
 	private:
 		Vec2f m_textureCoords[4];
-		Vec2f m_dimensions;
-		Rect m_textureRect;
-	
-		Vec4f m_uvs; //texture coord top left, and bottom right corners
-		const Texture* m_texture;
+		Vec2f m_dimensions = { 0.f, 0.f };
+		Rect m_textureRect = { 0.f, 0.f, 0.f, 0.f };
+
+		Vec4f m_uvs = { 0.f, 0.f, 0.f, 0.f }; //texture coord top left, and bottom right corners
+		const Texture* m_texture = nullptr;
 
 	};
 }
