@@ -365,8 +365,19 @@ But I am very suspicious of that...
 -ui ppu
 -positions conversion
 -added Bind WASD for dir input 
+-test positions conversions methods
 
->test positions conversions methods
+18
+
+-fixed pointer definition of frames
+-moved frames data to entity 
+-elem roots are default constructed
+-image root != image entity to ensure top left anchoring
+-txt override the root to avoid unecessary transform computation for each letter
+-count listener
+
+>make elem hoverable/clickable by adding a listener
+>ui elem hitbox and update with position
 
 >button
 
@@ -377,7 +388,9 @@ But I am very suspicious of that...
 
 tasks:
 
->maybe we need to round the position of quads in the renderer for pixel perfect and UI
+>have a default texture setting custom
+>get rid of inputs system: merge into inputs singleton
+>maybe we need to round the position of quads in the renderer for pixel perfect and UI?
 >fix ImGui random assert crash (probly bc of threading)
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?

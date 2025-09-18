@@ -11,9 +11,12 @@
 #include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiImg.h"
+#include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
+#include "SandCastle/Input/Inputs.h"
+#include "SandCastle/Input/ButtonInput.h"
 
 
 namespace SandCastle
@@ -39,11 +42,53 @@ namespace SandCastle
 		m_layer = uiLayer;
 		m_writer = new Writer(m_material, m_layer);
 		m_writer->SetPPU(3.f);
+
+		auto input = Inputs::CreateInputMap("UI");
+		auto click = input->CreateButtonInput("Click");
+		click->BindMouse(Mouse::Button::Left);
+		click->SetSignalOnRelease(true);
+		click->signal.Listen(&Ui::OnClick, this);
 	}
 
 	Ui::~Ui()
 	{
 		delete m_writer;
+	}
+
+	void Ui::Update()
+	{
+		HoverableUpdate();
+	}
+
+	void Ui::HoverableUpdate()
+	{
+		for (int i = 0; i < m_hoverables.size(); i++)
+		{
+			auto candidate = m_hoverables[i];
+			if (candidate->IsHovered())
+			{
+				m_hovered = candidate;
+				break;
+			}
+		}
+	}
+
+	void Ui::OnClick(InputSignal* signal)
+	{
+		bool pressed = signal->GetBool();
+		if (m_hovered != nullptr && m_hovered->clickable)
+		{
+			if (pressed)
+			{
+				m_pressed = m_hovered;
+				m_hovered->OnClickPressed();
+			}
+			else
+			{
+				m_pressed = nullptr;
+				m_hovered->OnClickReleased();
+			}
+		}
 	}
 
 	void Ui::AddElem(Elem* elem, Canvas* canvas)
@@ -62,27 +107,30 @@ namespace SandCastle
 		}
 	}
 
-	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f& size)
+	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, float z)
 	{
 		//Dimensions
 		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
-		float z = 1.f;
 
 		//Ensure frame size is at least the size of the four corners.
 		//Apply fixed step if relevant
-		if (frame->fixedStep || size.x < sDim.x * 2)
-			size.x = std::max(Math::CeilMultiple(size.x, sDim.x), sDim.x * 2.f);
-		if (frame->fixedStep || size.y < sDim.y * 2)
-			size.y = std::max(Math::CeilMultiple(size.y, sDim.y), sDim.y * 2.f);
+		if (frame->fixedStep || elem->size.x < sDim.x * 2)
+			elem->size.x = std::max(Math::CeilMultiple(elem->size.x, sDim.x), sDim.x * 2.f);
+		if (frame->fixedStep || elem->size.y < sDim.y * 2)
+			elem->size.y = std::max(Math::CeilMultiple(elem->size.y, sDim.y), sDim.y * 2.f);
 
 		float ppu = frame->repeatTex[0]->GetPixelPerUnit();
 		Vec2f pxDim = sDim / ppu;
-		Vec2f pxSize = size / ppu;
+		Vec2f pxSize = elem->size / ppu;
 		Vec2f hDim = sDim * 0.5f;
 
+		//Create the sprites entities:
+		auto entt = Entity::Create();
+		auto rootTr = entt.adc<Transform>();
+		rootTr->SetPosition(0, 0, z);
+
 		//Instance border sprites at the right dimensions
-		auto& borderSpr = m_borderSprites[elem->id];
-		borderSpr.clear();
+		auto borderSpr = entt.AddComponent<BorderSprites>();
 		for (int i = 0; i < 5; i++)
 		{
 			Vec2f wDim;
@@ -90,14 +138,8 @@ namespace SandCastle
 			rect.left = 0;
 			rect.top = 0;
 			BorderSize(i, rect, wDim, pxSize, pxDim, sDim, ppu);
-			borderSpr.emplace_back(BorderSprite(frame->repeatTex[i], rect, wDim));
+			borderSpr->sprites[i] = BorderSprite(frame->repeatTex[i], rect, wDim);
 		}
-
-		//Create the sprites entities:
-		auto entt = Entity::Create();
-		auto rootTr = entt.adc<Transform>();
-		rootTr->SetPosition(0, 0, z);
-		Anchor anchor = Anchor::TopLeft;
 
 		//Corners
 		for (int i = 0; i < 4; i++)
@@ -116,13 +158,13 @@ namespace SandCastle
 				tr->SetPosition(hDim.x, -hDim.y, 0);
 				break;
 			case SpriteCorner::TopRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -hDim.y, 0);
+				tr->SetPosition(hDim.x + (elem->size.x - sDim.x), -hDim.y, 0);
 				break;
 			case SpriteCorner::BotLeft:
-				tr->SetPosition(hDim.x, -size.y + hDim.y, 0);
+				tr->SetPosition(hDim.x, -elem->size.y + hDim.y, 0);
 				break;
 			case SpriteCorner::BotRight:
-				tr->SetPosition(hDim.x + (size.x - sDim.x), -size.y + hDim.y, 0);
+				tr->SetPosition(hDim.x + (elem->size.x - sDim.x), -elem->size.y + hDim.y, 0);
 				break;
 			default:
 				break;
@@ -134,7 +176,7 @@ namespace SandCastle
 		for (int i = 0; i < 5; i++)
 		{
 			//Top middle border
-			auto& sprite = borderSpr[i].sprite;
+			auto& sprite = borderSpr->sprites[i].sprite;
 			auto e = Entity::Create();
 			auto spr = e.adc<SpriteRender>();
 			spr->SetLayer(m_layer);
@@ -146,19 +188,19 @@ namespace SandCastle
 			switch (type)
 			{
 			case TexBorder::Top:
-				tr->SetPosition(size.x * 0.5f, -hDim.y, 0);
+				tr->SetPosition(elem->size.x * 0.5f, -hDim.y, 0);
 				break;
 			case TexBorder::Left:
-				tr->SetPosition(hDim.x, -size.y * 0.5f, 0);
+				tr->SetPosition(hDim.x, -elem->size.y * 0.5f, 0);
 				break;
 			case TexBorder::Mid:
-				tr->SetPosition(size.x * 0.5f, -size.y * 0.5f, 0);
+				tr->SetPosition(elem->size.x * 0.5f, -elem->size.y * 0.5f, 0);
 				break;
 			case TexBorder::Right:
-				tr->SetPosition(size.x - hDim.x, -size.y * 0.5f, 0);
+				tr->SetPosition(elem->size.x - hDim.x, -elem->size.y * 0.5f, 0);
 				break;
 			case TexBorder::Bot:
-				tr->SetPosition(size.x * 0.5f, -size.y + hDim.y, 0);
+				tr->SetPosition(elem->size.x * 0.5f, -elem->size.y + hDim.y, 0);
 				break;
 			default:
 				break;
@@ -242,8 +284,6 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new Canvas();
-		canvas->root = Entity::Create();
-		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 
 		//Differentiante limit from size
@@ -299,14 +339,48 @@ namespace SandCastle
 
 		Img* image = new Img();
 		image->margin = i->m_margin;
-		image->root = Entity::CreateSprite(sprite);
-		auto render = image->root.GetComponent<SpriteRender>();
+		image->entt = Entity::CreateSprite(sprite);
+		auto render = image->entt.GetComponent<SpriteRender>();
+
 		render->SetLayer(i->m_layer);
 		render->SetMaterial(i->m_material->GetID());
-		image->sprite = render->GetSprite();
+		auto spr = render->GetSprite();
+		image->sprite = spr;
 		image->size = image->sprite->GetDimensions();
-		i->AddElem(image, canvas);
+
+		//Offset sprite to make top left anchor no matter the sprite origin
+		auto dim = spr->GetDimensions();
+		Vec2f offset = {
+			((float)spr->orgX + 0.5f) * dim.x,
+			((float)spr->orgY - 0.5f) * dim.y
+		};
+		image->entt.GetComponent<Transform>()->Move(offset);
+		image->root.AddChild(image->entt);
+
+			i->AddElem(image, canvas);
 		return image;
+	}
+
+	Ui::Btn* Ui::Button(std::string_view utf8, Vec2f padding)
+	{
+		auto i = Instance();
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Button without active canvas");
+		auto canvas = i->m_canvas.top();
+
+		Btn* button = new Btn();
+		button->margin = i->m_margin;
+		auto font = i->m_writer->GetFont(i->m_font);
+		button->label = i->m_writer->Write(utf8, font->id, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label.root.GetComponent<Transform>()->Move(padding.x, -padding.y, -3.f);
+		button->root.AddChild(button->label.root);
+		button->size.x = button->label.size.x + padding.x * 2;
+		button->size.y = button->label.size.y + padding.y * 2;
+		button->frameIdle = i->InstanceFrame(button, i->m_buttonFrame, 0.f);
+		button->frameHover = i->InstanceFrame(button, i->m_buttonFrameHover, -1.f);
+		button->framePressed = i->InstanceFrame(button, i->m_buttonFramePressed, -2.f);
+		button->OnUnHover();
+		i->AddElem(button, canvas);
+		return button;
 	}
 
 	void Ui::EndCanvas()
@@ -321,8 +395,7 @@ namespace SandCastle
 		canvas->MakeLayout();
 		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
 		{
-			auto prevSize = canvas->size;
-			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, canvas->size);
+			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, 1.f);
 		}
 		i->m_canvas.pop();
 	}
@@ -356,7 +429,7 @@ namespace SandCastle
 	void Ui::SetFont(String fancyName)
 	{
 		auto ins = Instance();
-		ins->m_font = ins->m_writer->GetFont(fancyName);
+		ins->m_font = ins->m_writer->GetFont(fancyName)->id;
 		ins->m_writer->UseFont(ins->m_font);
 	}
 	void Ui::SetLayer(LayerID layer)
@@ -365,25 +438,20 @@ namespace SandCastle
 	}
 	void Ui::SetCanvasFrame(String texture)
 	{
-		auto ins = Instance();
-		auto it = ins->m_frameTemplates.find(texture);
-		if (it == ins->m_frameTemplates.end())
-		{
-			LOG_ERROR("Ui::SetCanvasFrame, the frame template {0}, doesn't exists.", texture);
-			return;
-		}
-		Instance()->m_canvasFrame = &it->second;
+		Instance()->SetFrame(&Instance()->m_canvasFrame, texture);
 	}
 	void Ui::SetButtonFrame(String texture)
 	{
-		auto ins = Instance();
-		auto it = ins->m_frameTemplates.find(texture);
-		if (it == ins->m_frameTemplates.end())
-		{
-			LOG_ERROR("Ui::SetCanvasFrame, the frame template {0}, doesn't exists.", texture);
-			return;
-		}
-		Instance()->m_buttonFrame = &it->second;
+		Instance()->SetFrame(&Instance()->m_buttonFrame, texture);
+	}
+	void Ui::SetButtonFrameHover(String texture)
+	{
+		///>FRAME IS NULL
+		Instance()->SetFrame(&Instance()->m_buttonFrameHover, texture);
+	}
+	void Ui::SetButtonFramePressed(String texture)
+	{
+		Instance()->SetFrame(&Instance()->m_buttonFramePressed, texture);
 	}
 	void Ui::SetTextAlign(TextAlign textAlign)
 	{
@@ -446,6 +514,25 @@ namespace SandCastle
 	{
 		return ScreenToUi(Mouse::GetPosition());
 	}
+	void Ui::MakeHoverable(Elem* elem)
+	{
+		auto i = Instance();
+		auto& h = i->m_hoverables;
+		elem->hoverable = true;
+		if (std::find(h.begin(), h.end(), elem) == h.end())
+		{
+			h.emplace_back(elem);
+			elem->hoverable = true;
+		}
+		else
+		{
+			LOG_WARN("Trying to make hoverable an elem that is already in the list.");
+		}
+	}
+	void Ui::MakeClickable(Elem* elem)
+	{
+		elem->clickable = true;
+	}
 	Writer* Ui::GetWriter()
 	{
 		return Instance()->m_writer;
@@ -464,6 +551,17 @@ namespace SandCastle
 	}
 
 	/*---Helpers---*/
+
+	void Ui::SetFrame(FrameTemplate** frame, String texture)
+	{
+		auto it = m_frameTemplates.find(texture);
+		if (it == m_frameTemplates.end())
+		{
+			LOG_ERROR("Ui::SetFrame, the frame template {0}, doesn't exists.", texture);
+			return;
+		}
+		*frame = &it->second;
+	}
 
 	void Ui::MakeBorderTex(String texture, std::vector<Texture*>& tex)
 	{

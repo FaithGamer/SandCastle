@@ -11,6 +11,9 @@
 
 namespace SandCastle
 {
+	class UiSystem;
+	struct InputSignal;
+
 	class Ui : public Singleton<Ui>
 	{
 	public:
@@ -32,7 +35,6 @@ namespace SandCastle
 
 		typedef uint32_t ElemID;
 		typedef uint32_t FrameID;
-		enum class Anchor;
 		enum class LayoutDir; 
 		enum class LayoutWrap;
 		enum class LayoutAlignH;
@@ -68,12 +70,12 @@ namespace SandCastle
 		/// example, if ppu = 360 (default), an ui element of height 360 will fill up the screen.
 		static void SetPPU(float ppu);
 
-
 		/*---Ui creation---*/
 
 		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
 		static Txt* Text(std::string_view utf8, float maxWidth = -1.f);
 		static Img* Image(String sprite);
+		static Btn* Button(std::string_view utf8, Vec2f padding);
 		static void EndCanvas();
 		static void Delete(ElemID uiElem);
 
@@ -91,6 +93,10 @@ namespace SandCastle
 		static void SetCanvasFrame(String texture);
 		/// @brief Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrame(String texture);
+		/// @brief Set the frame that will be used for every subsequent button creation
+		static void SetButtonFrameHover(String texture);
+		/// @brief Set the frame that will be used for every subsequent button creation
+		static void SetButtonFramePressed(String texture);
 		/// @brief Set the text alignement that will be used for every subsequent text creation
 		static void SetTextAlign(TextAlign textAlign);
 		/// @brief Set the margin that will be used for every subsequent element creation.
@@ -110,12 +116,14 @@ namespace SandCastle
 		static Vec2f ScreenToUi(Vec2f screenPos);
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
+		static void MakeHoverable(Elem* elem);
+		static void MakeClickable(Elem* elem);
 
 		/*---Accessors---*/
 
 		/// @brief Get the object used to create fonts and write text.
 		static Writer* GetWriter();
-		/// @brief Get the material used
+		/// @brief Get the material used 
 		static Material* GetMaterial();
 		static FontID GetFont();
 		static LayerID GetLayer();
@@ -131,9 +139,15 @@ namespace SandCastle
 
 		struct BorderSprite
 		{
+			BorderSprite(){}
 			BorderSprite(Texture* tex, Rect rect, Vec2f worldDim);
 			Sprite sprite;
 			Vec2f wDim;
+		};
+
+		struct BorderSprites
+		{
+			BorderSprite sprites[5];
 		};
 
 		struct FrameTemplate
@@ -146,19 +160,23 @@ namespace SandCastle
 		};
 
 		/*---Helpers---*/
+		void SetFrame(FrameTemplate** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 		/*---Instantiation---*/
 		void AddElem(Elem* elem, Canvas* canvas);
-		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, Vec2f& size);
+		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, float z);
 
 	private:
+		friend Systems;
+		void Update();
+		void HoverableUpdate();
+		void OnClick(InputSignal* signal);
 		//Helper
 		Writer* m_writer = nullptr;
 
 		//Data
 		std::unordered_map<String, FrameTemplate> m_frameTemplates;
-		std::unordered_map<ElemID, std::vector<BorderSprite>> m_borderSprites;
 
 		//State (creation of new elements)
 		Material* m_material = nullptr;
@@ -167,7 +185,14 @@ namespace SandCastle
 		LayerID m_layer;
 		FrameTemplate* m_canvasFrame = nullptr;
 		FrameTemplate* m_buttonFrame = nullptr;
+		FrameTemplate* m_buttonFrameHover = nullptr;
+		FrameTemplate* m_buttonFramePressed = nullptr;
 		TextAlign m_textAlign = TextAlign::Left;
+
+		//Runtime
+		std::vector<Elem*> m_hoverables;
+		Elem* m_hovered = nullptr;
+		Elem* m_pressed = nullptr;
 		std::stack<Canvas*> m_canvas;
 		std::unordered_map<ElemID, Elem*> m_elems;
 		float m_z = 0.f;

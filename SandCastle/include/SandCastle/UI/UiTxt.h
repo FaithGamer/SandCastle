@@ -8,8 +8,7 @@ namespace SandCastle
 	class Ui::Txt : public Ui::Elem
 	{
 	public:
-
-	public:
+		Ui::Txt();
 		Ui::Elem::Type GetType() const override;
 
 	public:

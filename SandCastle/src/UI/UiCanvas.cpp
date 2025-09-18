@@ -8,6 +8,36 @@ namespace SandCastle
 		return Ui::Elem::Type::Canvas;
 	}
 
+	void Ui::Canvas::SetPosition(Vec2f pos)
+	{
+		position = pos;
+		Vec2f wPos = pos;
+		switch (anchor)
+		{
+		case Anchor::TopLeft:
+			wPos.x += margin.x;
+			wPos.y -= margin.y;
+			break;
+		case Anchor::TopRight:
+			wPos.x -= size.x + margin.x;
+			wPos.y -= margin.y;
+			break;
+		case Anchor::BotLeft:
+			wPos.x += margin.x;
+			wPos.y += size.y + margin.y;
+			break;
+		case Anchor::BotRight:
+			wPos.x -= size.x + margin.x;
+			wPos.y += size.y + margin.y;
+			break;
+		case Anchor::MiddleCenter:
+			wPos.x -= size.x * 0.5f;
+			wPos.y += size.y * 0.5f;
+			break;
+		}
+		root.gtr()->SetPosition(wPos.x, wPos.y, z);
+	}
+
 	void Ui::Canvas::OffsetRange(int begin, int end, Vec2f offset)
 	{
 		for (int i = begin; i < end; i++)
@@ -289,7 +319,7 @@ namespace SandCastle
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
 	}
-	void Ui::Canvas::SetAnchor(Ui::Anchor Anchor)
+	void Ui::Canvas::SetAnchor(Anchor Anchor)
 	{
 		anchor = Anchor;
 		SetPosition(position);

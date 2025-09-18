@@ -15,10 +15,24 @@ namespace SandCastle
 			Horizontal = 1,
 			Vertical = 2
 		}SizeLimit;
+		enum class Anchor
+		{
+			TopLeft,
+			TopCenter,
+			TopRight,
+			MiddleLeft,
+			MiddleCenter,
+			MiddleRight,
+			BotLeft,
+			BotCenter,
+			BotRight
+		};
 	public:
 		Ui::Elem::Type GetType() const override;
+		void SetPosition(Vec2f pos) override;
+
 		void MakeLayout();
-		void SetAnchor(Ui::Anchor anchor);
+		void SetAnchor(Anchor anchor);
 		/// @brief Spacing between element inside the canvas
 		void SetSpacing(Vec2f spacing);
 		void SetBorder(Vec2f border);
@@ -39,5 +53,6 @@ namespace SandCastle
 		Vec2f spacing = Vec2f(0.f, 0.f);
 		Vec2f border = Vec2f(0.f, 0.f);
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);
+		Anchor anchor;
 	};
 }

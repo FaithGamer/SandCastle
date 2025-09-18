@@ -14,11 +14,12 @@ namespace SandCastle
 
 	public:
 		Ui::Elem::Type GetType() const override;
-		void SetPosition(Vec2f pos) override;
+	//	void SetPosition(Vec2f pos) override;
 
 	private:
 		friend Ui;
 		Sprite* sprite;
+		Entity entt;
 	};
 
 }

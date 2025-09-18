@@ -9,7 +9,7 @@ namespace SandCastle
 		return Ui::Elem::Type::Image;
 	}
 
-	void Ui::Img::SetPosition(Vec2f pos)
+	/*void Ui::Img::SetPosition(Vec2f pos)
 	{
 		//Making sure that no matter what is the sprite origin
 		//The origin point is always top left.
@@ -23,5 +23,5 @@ namespace SandCastle
 		pos.x += margin.x;
 		pos.y -= margin.y;
 		root.gtr()->SetPosition(pos.x, pos.y, z);
-	}
+	}*/
 }

@@ -5,19 +5,6 @@
 namespace SandCastle
 {
 	/// @brief What is the point of origin for the movement of a canvas.
-	enum class Ui::Anchor
-	{
-		TopLeft,
-		TopCenter,
-		TopRight,
-		MiddleLeft,
-		MiddleCenter,
-		MiddleRight,
-		BotLeft,
-		BotCenter,
-		BotRight
-	};
-
 	enum class Ui::LayoutDir : int
 	{
 		TopDown,
