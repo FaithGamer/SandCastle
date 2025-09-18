@@ -46,7 +46,6 @@ namespace SandCastle
 		friend Ui;
 		void OffsetRange(int begin, int end, Vec2f offset);
 	private:
-		bool hasFrame = false;
 		Entity frame;
 		Bitmask8 fixedSize = 0;
 		std::vector<Ui::Elem*> children;
@@ -54,5 +53,6 @@ namespace SandCastle
 		Vec2f border = Vec2f(0.f, 0.f);
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);
 		Anchor anchor;
+		FrameTemplate* frameTemplate = nullptr;
 	};
 }

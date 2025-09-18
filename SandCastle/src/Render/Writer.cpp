@@ -169,7 +169,7 @@ namespace SandCastle
 	}
 
 	Sentence Writer::Write(std::string_view utf8,
-		float maxWidth,
+		float width,
 		TextAlign textAlign,
 		float lineSpacing)
 	{
@@ -178,16 +178,16 @@ namespace SandCastle
 			LOG_ERROR("Writer::Write, invalid m_current (fontId out of range)");
 			return Sentence();
 		}
-		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, textAlign, lineSpacing);
+		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, width, textAlign, lineSpacing);
 	}
 
 	Sentence Writer::Write(
-		std::string_view utf8, 
-		const FontID fontId, 
-		const Material* material, 
-		const LayerID layer, 
-		float maxWidth, 
-		TextAlign textAlign, 
+		std::string_view utf8,
+		const FontID fontId,
+		const Material* material,
+		const LayerID layer,
+		float width,
+		TextAlign textAlign,
 		float lineSpacing)
 	{
 		if (m_fonts.size() <= (size_t)fontId)
@@ -246,16 +246,16 @@ namespace SandCastle
 			};
 		auto CheckLineBounds = [&](float adv) -> bool
 			{
-				if (maxWidth <= 0.f)
+				if (width <= 0.f)
 					return false;
-				if (adv > maxWidth)
+				if (adv > width)
 					return false;
-				if ((pen.x + adv) > maxWidth)
+				if ((pen.x + adv) > width)
 				{
 					NextLine();
 
 					if (currentWord.characters.empty()
-						|| currentWord.totalAdv + adv > maxWidth)
+						|| currentWord.totalAdv + adv > width)
 					{
 						return true;
 					}
@@ -372,7 +372,8 @@ namespace SandCastle
 			}
 			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}
-		sent.size.x = maxPenX;
+		sent.maxWidth = width;
+		sent.size.x = width > 0.f ? width : maxPenX;
 		sent.size.y = std::abs(pen.y) + ((float)font.size + font.outlineThickness) * ppu;
 
 		//Lines alignement
@@ -403,7 +404,7 @@ namespace SandCastle
 			break;
 		}
 
-		if (maxWidth > 0.f && Align != nullptr)
+		if (width > 0.f && Align != nullptr)
 		{
 			for (int i = 0; i < lines.size(); i++)
 			{

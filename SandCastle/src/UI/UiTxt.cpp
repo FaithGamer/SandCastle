@@ -10,4 +10,8 @@ namespace SandCastle
 	{
 		return Ui::Elem::Type::Text;
 	}
+	void Ui::Txt::Update(std::string_view utf8)
+	{
+
+	}
 }

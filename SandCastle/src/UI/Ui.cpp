@@ -313,30 +313,61 @@ namespace SandCastle
 		size.x = size.x > canvas->sizeLimit.x ? canvas->sizeLimit.x : size.x;
 		size.y = size.y > canvas->sizeLimit.y ? canvas->sizeLimit.y : size.y;
 		canvas->size = size;
-
-		canvas->hasFrame = frame;
+		canvas->frameTemplate = i->m_canvasFrame;
 		i->m_canvas.push(canvas);
 		i->AddElem(canvas, parent);
 		return canvas;
 	}
 
-	Ui::Txt* Ui::Text(std::string_view utf8, float maxWidth)
+	Ui::Txt* Ui::Text(std::string_view utf8, float width)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
 		auto canvas = i->m_canvas.top();
 
-
-		maxWidth = maxWidth > 0.f ? std::min(canvas->sizeLimit.x, maxWidth) : canvas->sizeLimit.x;
+		///> rethink about size.x and maxwidth.
+		///Maybe we want size.x to BE max width
+		///Both to use align right text
+		///and to not recompute layout when text change but respect size.
+		if (canvas->sizeLimit.x < 8888888.f)
+			//There is a size limit
+			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : canvas->sizeLimit.x;
+		else
+			//There is no size limit
+			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
 
 		//Instantiation
 		Txt* text = new Txt();
-		text->sentence = i->m_writer->Write(utf8, maxWidth, i->m_textAlign);
+		text->sentence = i->m_writer->Write(utf8, width, i->m_textAlign);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		i->AddElem(text, canvas);
 
 		return text;
+	}
+
+	void Ui::UpdateText(Ui::Txt* text, std::string_view utf8)
+	{
+		auto i = Instance();
+		text->sentence.root.Destroy();
+		auto canvas = text->parent;
+		float width = text->sentence.maxWidth;
+		if (canvas->sizeLimit.x < 8888888.f)
+			//There is a size limit
+			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : canvas->sizeLimit.x;
+		else
+			//There is no size limit
+			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
+		auto prevSize = text->sentence.size;
+		text->sentence = i->m_writer->Write(utf8, width, i->m_textAlign);
+		text->size = text->sentence.size;
+		text->root = text->sentence.root;
+		text->parent->root.AddChild(text->root);
+		if (std::abs(prevSize.x - text->size.x) > 0.01f 
+			|| std::abs(prevSize.y - text->size.y) > 0.01f)
+			UpdateCanvas(canvas);
+		else
+			text->SetPosition(text->position);
 	}
 
 	Ui::Img* Ui::Image(String sprite)
@@ -401,12 +432,18 @@ namespace SandCastle
 			return;
 		}
 		auto canvas = i->m_canvas.top();
-		canvas->MakeLayout();
-		if (canvas->hasFrame && i->m_canvasFrame != nullptr)
-		{
-			canvas->frame = i->InstanceFrame(canvas, i->m_canvasFrame, 1.f);
-		}
+		UpdateCanvas(canvas);
 		i->m_canvas.pop();
+	}
+
+	void Ui::UpdateCanvas(Canvas* canvas)
+	{
+		canvas->MakeLayout();
+		if (canvas->frameTemplate != nullptr)
+		{
+			canvas->frame.Destroy();
+			canvas->frame = Instance()->InstanceFrame(canvas, canvas->frameTemplate, 1.f);
+		}
 	}
 
 	void Ui::Delete(ElemID uiElem)

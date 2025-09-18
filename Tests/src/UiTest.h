@@ -123,6 +123,7 @@ public:
 		Ui::EndCanvas();
 	}
 	Ui::Canvas* btnCanvas;
+	Ui::Txt* updateText;
 	void CreateButtonWindow()
 	{
 		Ui::SetButtonFrame("btn.png");
@@ -135,7 +136,7 @@ public:
 		btnCanvas->SetSpacing(6.7f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
 		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
-		Ui::Text("There is a button");
+		updateText = Ui::Text("There is a button");
 		auto btn = Ui::Button("Ok", Vec2f(8.f));
 		btn->ListenClickReleased(&UiSys::OnClickBtn, this);
 		btn->SetColor(Color(50, 243, 60, 255));
@@ -143,10 +144,10 @@ public:
 	}
 	void OnClickBtn(Ui::Elem* signal)
 	{
-		LOG_INFO("You clicked the button");
-		auto y = Random::Range(-18, 18);
-		auto x = Random::Range(-32, 32);
-		btnCanvas->SetPosition(Vec2f(x, y));
+		if(Random::Range(0, 1)==0)
+		Ui::UpdateText(updateText, "You clicked.");
+		else
+		Ui::UpdateText(updateText, "There is a button");
 	}
 	void Start() override
 	{

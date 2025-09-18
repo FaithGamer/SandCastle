@@ -68,6 +68,7 @@ namespace SandCastle
 		Entity root;                           // parent entity for the sentence
 		std::vector<Entity> glyphEntities;     // child entities (one per glyph)
 		Vec2f size;
+		float maxWidth = 0.f;
 	};
 
 	// NEW: store each character's "normal" computed position so FX can move them later.
@@ -104,7 +105,7 @@ namespace SandCastle
 		void SetLayer(LayerID layer);
 
 		Sentence Write(std::string_view utf8,
-			float maxWidth = -1.f,
+			float width = -1.f,
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
@@ -112,7 +113,7 @@ namespace SandCastle
 			const FontID font,
 			const Material* material,
 			const LayerID layer,
-			float maxWidth = -1.f,
+			float width = -1.f,
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 

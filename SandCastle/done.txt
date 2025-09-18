@@ -380,8 +380,16 @@ But I am very suspicious of that...
 -make elem hoverable/clickable by adding a listener
 -interface over signal
 -button
+-text maxWidth => width
+-update text
+
+>hitbox are fucked when resizing window (mouse pos not consistent)
+>world entities moving after resizing window? Or camera moving???
+
 
 >text show values
+>clean destroy of elem pointers and entities
+>clean destroy of canvas children
 >update element must keep layout in check 
 >what condition may change layout ? If size changed.
 
@@ -411,6 +419,8 @@ no need plmp if data is in registry and communication is only through signal?
 
 secondary tasks:
 
+>text in UI could break out of the canvas frame if its positioned right of another element
+possible solution: realign text after Write bazed on new size at the end of MakeLayout
 >text input (SDL_StartTextInput...)
 >audio spacialization
 >Transform animation system

@@ -73,11 +73,15 @@ namespace SandCastle
 		/*---Ui creation---*/
 
 		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
-		static Txt* Text(std::string_view utf8, float maxWidth = -1.f);
+		static Txt* Text(std::string_view utf8, float width = -1.f);
 		static Img* Image(String sprite);
 		static Btn* Button(std::string_view utf8, Vec2f padding);
 		static void EndCanvas();
 		static void Delete(ElemID uiElem);
+
+		/*---Ui update---*/
+
+		static void UpdateText(Ui::Txt* text, std::string_view utf8);
 
 		/*---State---*/
 
@@ -165,6 +169,7 @@ namespace SandCastle
 		/*---Instantiation---*/
 		void AddElem(Elem* elem, Canvas* canvas);
 		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, float z);
+		static void UpdateCanvas(Canvas* canvas);
 
 	private:
 		friend Systems;

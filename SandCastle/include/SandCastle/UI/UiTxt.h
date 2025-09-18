@@ -10,7 +10,7 @@ namespace SandCastle
 	public:
 		Ui::Txt();
 		Ui::Elem::Type GetType() const override;
-
+		void Update(std::string_view utf8);
 	public:
 		Sentence sentence;
 
