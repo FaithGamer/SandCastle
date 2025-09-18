@@ -5,11 +5,11 @@
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 #include "SandCastle/Engine.h"
-#include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/Camera.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Core/Profiling.h"
+#include "SandCastle/UI/Ui.h"
 
 namespace SandCastle
 {
@@ -110,7 +110,7 @@ namespace SandCastle
 				break; //Simulation no longer accurate
 			}
 		}
-
+		Ui::Instance()->Update();
 		for (auto& system : m_updateSystems)
 		{
 			system.system->Update();
