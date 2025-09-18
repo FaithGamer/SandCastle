@@ -116,8 +116,7 @@ namespace SandCastle
 		static Vec2f ScreenToUi(Vec2f screenPos);
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
-		static void MakeHoverable(Elem* elem);
-		static void MakeClickable(Elem* elem);
+		static void RegisterHoverable(Elem* elem);
 
 		/*---Accessors---*/
 

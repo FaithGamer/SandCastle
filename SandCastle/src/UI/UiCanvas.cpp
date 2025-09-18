@@ -36,6 +36,17 @@ namespace SandCastle
 			break;
 		}
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
+		//update children hitboxes:
+		for (int i = 0; i < children.size(); i++)
+		{
+			auto child = children[i];
+			if (child->GetType() == Ui::Elem::Type::Canvas)
+			{
+				child->SetPosition(child->position);
+			}
+			child->ComputeHitbox();
+		}
+		ComputeHitbox();
 	}
 
 	void Ui::Canvas::OffsetRange(int begin, int end, Vec2f offset)

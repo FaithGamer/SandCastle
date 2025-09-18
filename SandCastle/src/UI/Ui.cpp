@@ -62,11 +62,19 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
+		if (m_hovered != nullptr && !m_hovered->IsInside(MousePos()))
+		{
+			m_hovered->UnHover();
+			m_hovered = nullptr;
+		}
+		if (m_hovered != nullptr)
+			return;
 		for (int i = 0; i < m_hoverables.size(); i++)
 		{
 			auto candidate = m_hoverables[i];
-			if (candidate->IsHovered())
+			if (candidate->IsInside(MousePos()))
 			{
+				candidate->Hover();
 				m_hovered = candidate;
 				break;
 			}
@@ -81,12 +89,12 @@ namespace SandCastle
 			if (pressed)
 			{
 				m_pressed = m_hovered;
-				m_hovered->OnClickPressed();
+				m_hovered->ClickPressed();
 			}
 			else
 			{
 				m_pressed = nullptr;
-				m_hovered->OnClickReleased();
+				m_hovered->ClickReleased();
 			}
 		}
 	}
@@ -357,7 +365,7 @@ namespace SandCastle
 		image->entt.GetComponent<Transform>()->Move(offset);
 		image->root.AddChild(image->entt);
 
-			i->AddElem(image, canvas);
+		i->AddElem(image, canvas);
 		return image;
 	}
 
@@ -379,6 +387,7 @@ namespace SandCastle
 		button->frameHover = i->InstanceFrame(button, i->m_buttonFrameHover, -1.f);
 		button->framePressed = i->InstanceFrame(button, i->m_buttonFramePressed, -2.f);
 		button->OnUnHover();
+		RegisterHoverable(button);
 		i->AddElem(button, canvas);
 		return button;
 	}
@@ -514,24 +523,21 @@ namespace SandCastle
 	{
 		return ScreenToUi(Mouse::GetPosition());
 	}
-	void Ui::MakeHoverable(Elem* elem)
+	void Ui::RegisterHoverable(Elem* elem)
 	{
+		if (elem->hoverable)
+			return;
 		auto i = Instance();
 		auto& h = i->m_hoverables;
-		elem->hoverable = true;
 		if (std::find(h.begin(), h.end(), elem) == h.end())
 		{
-			h.emplace_back(elem);
 			elem->hoverable = true;
+			h.emplace_back(elem);
 		}
 		else
 		{
 			LOG_WARN("Trying to make hoverable an elem that is already in the list.");
 		}
-	}
-	void Ui::MakeClickable(Elem* elem)
-	{
-		elem->clickable = true;
 	}
 	Writer* Ui::GetWriter()
 	{

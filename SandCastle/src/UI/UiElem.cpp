@@ -9,12 +9,10 @@ namespace SandCastle
 	{
 		root = Entity::Create();
 		root.AddComponent<Transform>();
-		LOG_INFO("elem default constructor");
 	}
 
 	Ui::Elem::Elem(Entity Root) : root(Root)
 	{
-		LOG_INFO("elem root constructor");
 	}
 
 	Ui::Elem::~Elem()
@@ -37,12 +35,45 @@ namespace SandCastle
 	{
 		return size;
 	}
+	void Ui::Elem::ComputeHitbox()
+	{
+		auto tr = root.GetComponent<Transform>();
+		auto pos = tr->GetPosition();
+		auto uiPos = Ui::WorldToUi(pos);
+		hitbox = Rect(uiPos.x, uiPos.y, size.x, size.y);
+	}
 	void Ui::Elem::Move(Vec2f offset)
 	{
 		SetPosition(position + offset);
 	}
-	bool Ui::Elem::IsHovered()
+	bool Ui::Elem::IsInside(Vec2f uiPos)
 	{
-		return hitbox.PointInside(Ui::MousePos());
+		return hitbox.PointInside(uiPos);
+	}
+	void Ui::Elem::Hover()
+	{
+		OnHover();
+		hoverSignal.Send(this);
+	}
+	void Ui::Elem::UnHover()
+	{
+		OnUnHover();
+		pressed = false;
+		unhoverSignal.Send(this);
+	}
+	void Ui::Elem::ClickPressed()
+	{
+		OnClickPressed();
+		pressed = true;
+		clickPressSignal.Send(this);
+	}
+	void Ui::Elem::ClickReleased()
+	{
+		if (pressed)
+		{
+			OnClickReleased();
+			clickReleasedSignal.Send(this);
+		}
+		pressed = false;
 	}
 }

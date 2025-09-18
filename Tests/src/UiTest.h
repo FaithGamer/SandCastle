@@ -122,6 +122,7 @@ public:
 
 		Ui::EndCanvas();
 	}
+	Ui::Canvas* btnCanvas;
 	void CreateButtonWindow()
 	{
 		Ui::SetButtonFrame("btn.png");
@@ -129,17 +130,23 @@ public:
 		Ui::SetButtonFramePressed("btn_pressed.png");
 		Ui::SetCanvasFrame("frame.png");
 
-		auto root = Ui::BeginCanvas(0, false);
-		root->SetSpacing(6.7f);
-		root->SetPosition(Vec2f(33, 70));
+		btnCanvas = Ui::BeginCanvas(0);
+		btnCanvas->SetBorder(5.f);
+		btnCanvas->SetSpacing(6.7f);
+		btnCanvas->SetPosition(Vec2f(33, 70));
+		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
 		Ui::Text("There is a button");
 		auto btn = Ui::Button("Ok", Vec2f(8.f));
-		btn->signal.Listen(&UiSys::OnClickBtn, this);
+		btn->ListenClickReleased(&UiSys::OnClickBtn, this);
+		btn->SetColor(Color(50, 243, 60, 255));
 		Ui::EndCanvas();
 	}
 	void OnClickBtn(Ui::Elem* signal)
 	{
 		LOG_INFO("You clicked the button");
+		auto y = Random::Range(-18, 18);
+		auto x = Random::Range(-32, 32);
+		btnCanvas->SetPosition(Vec2f(x, y));
 	}
 	void Start() override
 	{

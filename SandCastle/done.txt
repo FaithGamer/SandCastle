@@ -375,14 +375,16 @@ But I am very suspicious of that...
 -image root != image entity to ensure top left anchoring
 -txt override the root to avoid unecessary transform computation for each letter
 -count listener
+-Any elem is able to be hoverable/clickable (callbacks)
+-ui elem hitbox and update with position
+-make elem hoverable/clickable by adding a listener
+-interface over signal
+-button
 
->make elem hoverable/clickable by adding a listener
->ui elem hitbox and update with position
+>text show values
+>update element must keep layout in check 
+>what condition may change layout ? If size changed.
 
->button
-
-
->Any elem must be able to be hoverable/navigable/clickable (callbacks)
 >frame moving can sometimes show 1px separation between top/mid, etc... -> apply extrude on textures, or sprites
 >scroll?
 
