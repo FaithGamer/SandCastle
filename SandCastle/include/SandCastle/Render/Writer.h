@@ -109,16 +109,17 @@ namespace SandCastle
 			float lineSpacing = 1.0f);
 
 		Sentence Write(std::string_view utf8,
-			FontID font,
-			Material* material,
-			LayerID layer,
+			const FontID font,
+			const Material* material,
+			const LayerID layer,
 			float maxWidth = -1.f,
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
 		float GetFontWorldSize(FontID font);
 		float GetPPU() const;
-		FontID GetFont(String fancyName) const;
+		const Font* GetFont(String fancyName) const;
+		const Font* GetFont(FontID font) const;
 
 	private:
 		friend Ui;

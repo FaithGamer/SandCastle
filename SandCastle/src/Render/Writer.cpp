@@ -181,7 +181,14 @@ namespace SandCastle
 		return Write(utf8, m_current, m_fonts[m_current].material, m_fonts[m_current].layer, maxWidth, textAlign, lineSpacing);
 	}
 
-	Sentence Writer::Write(std::string_view utf8, FontID fontId, Material* material, LayerID layer, float maxWidth, TextAlign textAlign, float lineSpacing)
+	Sentence Writer::Write(
+		std::string_view utf8, 
+		const FontID fontId, 
+		const Material* material, 
+		const LayerID layer, 
+		float maxWidth, 
+		TextAlign textAlign, 
+		float lineSpacing)
 	{
 		if (m_fonts.size() <= (size_t)fontId)
 		{
@@ -424,7 +431,7 @@ namespace SandCastle
 		return m_ppu;
 	}
 
-	FontID Writer::GetFont(String fancyName) const
+	const Font* Writer::GetFont(String fancyName) const
 	{
 		auto font = m_fontFinder.find(fancyName);
 		if (font == m_fontFinder.end())
@@ -432,7 +439,18 @@ namespace SandCastle
 			LOG_ERROR("Writer::GetFont, the fancy name {0}, doesn't exists.", fancyName);
 			return 0;
 		}
-		return font->second;
+		return &m_fonts[font->second];
+	}
+
+	const Font* Writer::GetFont(FontID font) const
+	{
+		if (m_fonts.size() > font)
+			return &m_fonts[font];
+		else
+		{
+			LOG_ERROR("Trying to get a font but fond id is out of range.");
+			return nullptr;
+		}
 	}
 
 	static int NextPow2(int x) { int p = 1; while (p < x) p <<= 1; return p; }
