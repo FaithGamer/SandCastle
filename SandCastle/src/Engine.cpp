@@ -58,6 +58,7 @@ namespace SandCastle
 		LOG_INFO("Initializing Physics...");
 		Physics::Instance();
 		LOG_INFO("Loading UI...");
+		Inputs::Instance();
 		Ui::Instance();
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
