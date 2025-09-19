@@ -61,6 +61,7 @@ namespace SandCastle
 		float outlineThickness = 0.f;     // in pixels (stroke radius)
 		Vec4f outlineColor = { 0, 0, 0, 1 };
 		LayerID layer = 0;
+		TextureFiltering filtering = TextureFiltering::Nearest;
 	};
 
 	struct Sentence
@@ -96,6 +97,8 @@ namespace SandCastle
 		void UseFont(String name);
 		/// @brief Set the folder path for the font assets
 		void SetFontFolder(String path);
+		/// @brief Set atlas texture filtering (default is nearest)
+		void SetFiltering(TextureFiltering filtering);
 		/// @brief Set the PPU that will be used for every subsequent MakeFont
 		void SetPPU(float ppu);
 		/// @brief Set the material that will be used for every subsequent MakeFont
@@ -168,6 +171,7 @@ namespace SandCastle
 		float m_ppu = 1.f;
 		Material* m_material = nullptr;
 		LayerID m_layer = 0;
+		TextureFiltering m_filtering = TextureFiltering::Nearest;
 		String m_fontFolder = "assets/fonts/";
 	};
 }

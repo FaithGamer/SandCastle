@@ -388,6 +388,18 @@ But I am very suspicious of that...
 -fixed camera not recomputing view matrix on aspect ratio change
 -fixed ui hitbox computation
 -fixed ScreenToUi computation
+-round pos of ui elements (fixed the button deformation)
+-round pos of frame sprite
+-but the real deal is to not use floating point number for spacing, margin, positioning etc..
+-For pixel art it is NECESSARY to have the font matching the current dpi (so one font dpi for each step)
+-found all canvas deformations issues: font dpi included
+-Set filtering for writer
+
+>test LanaFont
+>find pixel art font with all languages
+>have one font for each zoom level OR use a pixel perfect font
+
+>text deformation ?
 
 >take into account camera constraints for screen to world/screen to UI and so on
 >hitbox are fucked when resizing window (mouse pos not consistent)
@@ -404,7 +416,7 @@ But I am very suspicious of that...
 >scroll?
 
 tasks:
-
+>shove transform from matrix and other useless stuff 
 >have a default texture setting custom
 >get rid of inputs system: merge into inputs singleton
 >maybe we need to round the position of quads in the renderer for pixel perfect and UI?

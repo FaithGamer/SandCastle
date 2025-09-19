@@ -105,6 +105,7 @@ namespace SandCastle
 		font.id = index;
 		font.size = size;
 		font.name = filename;
+		font.filtering = m_filtering;
 		//font.spacesAdv = SpaceAdv(font.face, 1.f / font.ppu, outlineThickness);
 		font.outlineThickness = std::max(0.f, outlineThickness);
 		font.outlineColor = outlineColor;
@@ -122,6 +123,11 @@ namespace SandCastle
 	void Writer::SetFontFolder(String path)
 	{
 		m_fontFolder = path;
+	}
+
+	void Writer::SetFiltering(TextureFiltering filtering)
+	{
+		m_filtering = filtering;
 	}
 
 	void Writer::NameFont(FontID font, String name)
@@ -464,7 +470,7 @@ namespace SandCastle
 		TextureImportSettings tis;
 		tis.keepData = false;
 		tis.useMipmaps = true;
-		tis.filtering = TextureFiltering::Linear;
+		tis.filtering = font.filtering;
 		tis.wrapping = TextureWrapping::Clamp;
 		tis.pixelPerUnit = font.ppu;
 
@@ -506,11 +512,12 @@ namespace SandCastle
 		const int side = std::min(m_maxAtlasSize, std::max(NextPow2(std::max(needW, needH)), 256));
 
 		TextureImportSettings tis;
+		auto font = m_fonts[id];
 		tis.keepData = false;
 		tis.useMipmaps = true;
-		tis.filtering = TextureFiltering::Nearest;
+		tis.filtering = font.filtering;
 		tis.wrapping = TextureWrapping::Clamp;
-		tis.pixelPerUnit = m_fonts[id].ppu;
+		tis.pixelPerUnit = font.ppu;
 
 		auto tex = makesptr<Texture>(side, side, tis);
 
