@@ -89,6 +89,7 @@ namespace SandCastle
 
 		}
 		m_aspectRatio = aspectRatio;
+		m_needComputeViewMatrix = true;
 		m_needComputeProjectionMatrix = true;
 	}
 
@@ -104,6 +105,7 @@ namespace SandCastle
 		//-96 to +96 = 0.2 min distance for Z buffer)
 		m_nearClippingPlane = nearClippingPlane;
 		m_needComputeProjectionMatrix = true;
+		m_needComputeViewMatrix = true;
 	}
 
 	void Camera::SetFarClippingPlane(float farClippingPlane)
@@ -112,6 +114,7 @@ namespace SandCastle
 		//-96 to +96 = 0.2 min distance for Z buffer)
 		m_farClippingPlane = farClippingPlane;
 		m_needComputeProjectionMatrix = true;
+		m_needComputeViewMatrix = true;
 	}
 
 	void Camera::SetPxZoom(float scale)
@@ -130,6 +133,7 @@ namespace SandCastle
 			z = std::round(z);
 
 		zoom = z / (float)m_px.pxStep;
+		m_needComputeViewMatrix = true;
 	}
 
 	float Camera::GetNearClippingPlane()
@@ -385,6 +389,7 @@ namespace SandCastle
 			}
 			if (m_px.pxStep > 0)
 				SetPxZoom(m_px.pxZoom);
+			m_needComputeViewMatrix = true;
 		}
 	}
 
