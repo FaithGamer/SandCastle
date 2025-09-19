@@ -363,7 +363,7 @@ namespace SandCastle
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		text->parent->root.AddChild(text->root);
-		if (std::abs(prevSize.x - text->size.x) > 0.01f 
+		if (std::abs(prevSize.x - text->size.x) > 0.01f
 			|| std::abs(prevSize.y - text->size.y) > 0.01f)
 			UpdateCanvas(canvas);
 		else
@@ -550,11 +550,15 @@ namespace SandCastle
 	{
 		auto ppu = Instance()->m_ppu;
 		Vec2f screen = Window::GetSize();
-		pos.x = pos.x / (screen.x - 1) - 0.5f;
-		pos.y = -(pos.y / (screen.y - 1) - 0.5f);
-		pos.y /= ppu;
-		pos.x = pos.x / ppu * (screen.x / screen.y);
-		return pos;
+		float ratio = (screen.x / screen.y);
+		Vec2f norm = { 
+			pos.x / screen.x - 0.5f, 
+			pos.y / screen.y - 0.5f
+		};
+		auto red = Camera::main->GetReduction();
+		return Vec2f{
+		norm.x * ratio / ppu / red,
+		-norm.y / ppu / red};
 	}
 	Vec2f Ui::MousePos()
 	{
