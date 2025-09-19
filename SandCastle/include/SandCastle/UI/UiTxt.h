@@ -18,6 +18,16 @@ namespace SandCastle
 			// replace any previous payload with the new one
 			data = std::make_unique<Specific<std::decay_t<Ts>...>>(std::forward<Ts>(t)...);
 		}
+		bool DataChanged()
+		{
+			return data->HasChanged();
+		}
+		String Format()
+		{
+			if (data != nullptr)
+				return data->Format(utf8);
+			return utf8;
+		}
 
 	protected:
 		class Data
@@ -43,7 +53,7 @@ namespace SandCastle
 			bool HasChanged() override
 			{
 				if (!tuple_equal_ptr_val(m_data, *m_last)) {
-					m_last = DerefTuple(m_data);
+					*m_last = DerefTuple(m_data);
 					return true;
 				}
 				return false;
@@ -66,7 +76,7 @@ namespace SandCastle
 					return std::make_tuple(*elems...); // dereference each pointer
 					}, t);
 			}
-			
+
 			// float-aware equality
 			double m_epsilon = 1e-6; // default, can be changed per instance if desired
 
@@ -104,8 +114,11 @@ namespace SandCastle
 			static String apply_format_impl(std::string_view fmt, Tuple&& tup, std::index_sequence<Is...>)
 			{
 				// This requires that your format string matches the argument order.
-				auto s = std::format(fmt, deref_or_forward(std::get<Is>(std::forward<Tuple>(tup)))...);
-				return String(s.c_str()); 
+				auto s = std::vformat(
+					fmt,
+					std::make_format_args(deref_or_forward(std::get<Is>(std::forward<Tuple>(tup)))...)
+				);
+				return String(s.c_str());
 			}
 			template <class Tuple>
 			static String apply_format(std::string_view fmt, Tuple&& tup)
@@ -136,6 +149,7 @@ namespace SandCastle
 		FontID               font;
 		Color                color;
 		TextAlign            align;
+		String				 utf8;
 		std::unique_ptr<Data> data;
 	};
 }

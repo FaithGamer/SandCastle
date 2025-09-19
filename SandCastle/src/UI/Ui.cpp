@@ -57,6 +57,7 @@ namespace SandCastle
 	void Ui::Update()
 	{
 		HoverableUpdate();
+		ValuesUpdate();
 	}
 
 	void Ui::HoverableUpdate()
@@ -80,9 +81,15 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::DataUpdate()
+	void Ui::ValuesUpdate()
 	{
-
+		for (int i = 0; i < m_values.size(); i++)
+		{
+			if (m_values[i]->DataChanged())
+			{
+				UpdateText(m_values[i], m_values[i]->Format(), false);
+			}
+		}
 	}
 
 	void Ui::OnClick(InputSignal* signal)
@@ -329,46 +336,32 @@ namespace SandCastle
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
 		auto canvas = i->m_canvas.top();
 
-		///> rethink about size.x and maxwidth.
-		///Maybe we want size.x to BE max width
-		///Both to use align right text
-		///and to not recompute layout when text change but respect size.
-		if (canvas->sizeLimit.x < 8888888.f)
-			//There is a size limit
-			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : canvas->sizeLimit.x;
-		else
-			//There is no size limit
-			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
-
 		//Instantiation
 		UiTxt* text = new UiTxt();
-		i->m_writer->UseFont(i->m_font);
-		text->sentence = i->m_writer->Write(utf8, width, i->m_txtColor, i->m_textAlign);
-		text->size = text->sentence.size;
-		text->root = text->sentence.root;
+		text->parent = canvas;
+		text->font = i->m_font;
 		text->align = i->m_textAlign;
 		text->color = i->m_txtColor;
-		text->font = i->m_font;
+		text->utf8 = utf8;
+		i->CreateText(text, utf8, width);
 		i->AddElem(text, canvas);
 
 		return text;
 	}
-
-	void Ui::UpdateText(UiTxt* text, std::string_view utf8)
+	void Ui::CreateText(UiTxt* text, std::string_view utf8, float width)
 	{
-		auto i = Instance();
-		text->sentence.root.Destroy();
+		if (text->sentence.root.Valid())
+			text->sentence.root.Destroy();
 		auto canvas = text->parent;
-		float width = text->sentence.maxWidth;
 		if (canvas->sizeLimit.x < 8888888.f)
 			//There is a size limit
 			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : canvas->sizeLimit.x;
 		else
 			//There is no size limit
 			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
-		auto prevSize = text->sentence.size;
-		auto font = i->m_writer->GetFont(text->font);
-		text->sentence = i->m_writer->Write
+
+		auto font = m_writer->GetFont(text->font);
+		text->sentence = m_writer->Write
 		(
 			utf8,
 			text->font,
@@ -379,12 +372,21 @@ namespace SandCastle
 			text->align,
 			1.f
 		);
+
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		text->parent->root.AddChild(text->root);
+
+	}
+	void Ui::UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8)
+	{
+		auto prevSize = text->sentence.size;
+		if(replaceUtf8)
+			text->utf8 = utf8;	
+		Instance()->CreateText(text, text->Format(), text->sentence.maxWidth);
 		if (std::abs(prevSize.x - text->size.x) > 0.01f
 			|| std::abs(prevSize.y - text->size.y) > 0.01f)
-			UpdateCanvas(canvas);
+			UpdateCanvas(text->parent);
 		else
 			text->SetPosition(text->position);
 	}

@@ -88,7 +88,7 @@ namespace SandCastle
 
 		/*---Ui update---*/
 
-		static void UpdateText(UiTxt* text, std::string_view utf8);
+		static void UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8 = true);
 
 		/*---State---*/
 
@@ -167,6 +167,7 @@ namespace SandCastle
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
+		void CreateText(UiTxt* text, std::string_view utf8, float width);
 		/*---Instantiation---*/
 		void AddElem(UiElem* elem, UiCanvas* canvas);
 		Entity InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z);
@@ -176,7 +177,7 @@ namespace SandCastle
 		friend Systems;
 		void Update();
 		void HoverableUpdate();
-		void DataUpdate();
+		void ValuesUpdate();
 		void OnClick(InputSignal* signal);
 		//Helper
 		Writer* m_writer = nullptr;
@@ -198,6 +199,7 @@ namespace SandCastle
 
 		//Runtime
 		std::vector<UiElem*> m_hoverables;
+		std::vector<UiTxt*> m_values;
 		UiElem* m_hovered = nullptr;
 		UiElem* m_pressed = nullptr;
 		std::stack<UiCanvas*> m_canvas;
@@ -214,8 +216,22 @@ namespace SandCastle
 	template<typename ...Ts>
 	inline UiTxt* Ui::Text(std::string_view utf8, float width, Ts ...args)
 	{
-		auto txt = Text(utf8, width);
-		txt->AddData(args...);
-		return txt;
+		auto i = Instance();
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+		auto canvas = i->m_canvas.top();
+
+		//Instantiation
+		UiTxt* text = new UiTxt();
+		text->AddData(args...);
+		text->parent = canvas;
+		text->font = i->m_font;
+		text->align = i->m_textAlign;
+		text->color = i->m_txtColor;
+		text->utf8 = utf8;
+		i->CreateText(text, text->Format(), width);
+		i->AddElem(text, canvas);
+		i->m_values.emplace_back(text);
+
+		return text;
 	}
 }

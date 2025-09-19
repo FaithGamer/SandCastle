@@ -399,8 +399,7 @@ But I am very suspicious of that...
 -so removed window size enforcing to even number
 -Writer custom color
 -Update text keep font
-
->field value
+-text value works
 
 >clean destroy of elem pointers and entities
 >clean destroy of canvas children

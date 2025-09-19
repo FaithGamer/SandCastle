@@ -160,7 +160,7 @@ public:
 		Ui::SetFont("p");
 		Ui::SetTextColor(Color::Black);
 		Ui::SetTextAlign(TextAlign::Center);
-		Ui::Text("And here is a paragraph of text with some incredible characters.", 100.f);
+		Ui::Text("And here is a paragraph of text with {0} incredible characters.", 100.f, &btnCounter);
 
 		Ui::EndCanvas();
 		btnCanvas->root.AddComponent<Control>();
