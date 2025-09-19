@@ -338,7 +338,7 @@ namespace SandCastle
 
 		//Instantiation
 		Txt* text = new Txt();
-		text->sentence = i->m_writer->Write(utf8, width, i->m_textAlign);
+		text->sentence = i->m_writer->Write(utf8, width, i->m_txtColor, i->m_textAlign);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		i->AddElem(text, canvas);
@@ -359,7 +359,7 @@ namespace SandCastle
 			//There is no size limit
 			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
 		auto prevSize = text->sentence.size;
-		text->sentence = i->m_writer->Write(utf8, width, i->m_textAlign);
+		text->sentence = i->m_writer->Write(utf8, width, text->color, i->m_textAlign);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		text->parent->root.AddChild(text->root);
@@ -409,8 +409,7 @@ namespace SandCastle
 		Btn* button = new Btn();
 		button->margin = i->m_margin;
 		auto font = i->m_writer->GetFont(i->m_font);
-		auto color = i->m_writer->GetColor();
-		button->label = i->m_writer->Write(utf8, font->id, color, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label = i->m_writer->Write(utf8, font->id, i->m_txtColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
 		button->label.root.GetComponent<Transform>()->Move(padding.x, -padding.y, -3.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + padding.x * 2;
@@ -478,6 +477,10 @@ namespace SandCastle
 		auto ins = Instance();
 		ins->m_font = ins->m_writer->GetFont(fancyName)->id;
 		ins->m_writer->UseFont(ins->m_font);
+	}
+	void Ui::SetTextColor(Color color)
+	{
+		Instance()->m_txtColor = color;
 	}
 	void Ui::SetLayer(LayerID layer)
 	{

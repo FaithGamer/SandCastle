@@ -393,7 +393,19 @@ But I am very suspicious of that...
 -but the real deal is to not use floating point number for spacing, margin, positioning etc..
 -For pixel art it is NECESSARY to have the font matching the current dpi (so one font dpi for each step)
 -found all canvas deformations issues: font dpi included
+-transform no longer compute matrix (useless atm)
 -Set filtering for writer
+-Floored to even number every viewports
+-so removed window size enforcing to even number
+-Writer custom color
+
+>text update must take into consideration font and color and everything actually
+
+>per canvas context + default context, or just global context ?
+>Save font color in UiTxt for later update
+>think about where to put the text color
+>I think we do: Ui::TextColor()//high level, global state
+Writer->Write(Color) // low level, per instance state
 
 >test LanaFont
 >find pixel art font with all languages

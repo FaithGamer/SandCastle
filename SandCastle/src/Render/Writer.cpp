@@ -155,12 +155,6 @@ namespace SandCastle
 		}
 		m_current = it->second;
 	}
-
-	void Writer::SetColor(Color color)
-	{
-		m_color = color;
-	}
-
 	void Writer::SetPPU(float ppu)
 	{
 		m_ppu = ppu;
@@ -181,6 +175,7 @@ namespace SandCastle
 
 	Sentence Writer::Write(std::string_view utf8,
 		float width,
+		const Color& color,
 		TextAlign textAlign,
 		float lineSpacing)
 	{
@@ -189,7 +184,7 @@ namespace SandCastle
 			LOG_ERROR("Writer::Write, invalid m_current (fontId out of range)");
 			return Sentence();
 		}
-		return Write(utf8, m_current, m_color, m_fonts[m_current].material, m_fonts[m_current].layer, width, textAlign, lineSpacing);
+		return Write(utf8, m_current, color, m_fonts[m_current].material, m_fonts[m_current].layer, width, textAlign, lineSpacing);
 	}
 
 	Sentence Writer::Write(
@@ -426,10 +421,6 @@ namespace SandCastle
 		}
 
 		return sent;
-	}
-	Color Writer::GetColor() const
-	{
-		return m_color;
 	}
 	float Writer::GetFontWorldSize(FontID font)
 	{

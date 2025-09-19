@@ -91,6 +91,8 @@ namespace SandCastle
 		static void SetFont(FontID font);
 		/// @brief Set the font that will be used for every subsequent ui creation
 		static void SetFont(String fancyName);
+		/// @brief Set the color that will be sued for every subsequent text creation (including buttons)
+		static void SetTextColor(Color color);
 		/// @brief Set the layer that will be used for every subsequent ui creation
 		static void SetLayer(LayerID layer);
 		/// @brief Set the frame that will be used for every subsequent canvas creation
@@ -192,6 +194,7 @@ namespace SandCastle
 		FrameTemplate* m_buttonFrameHover = nullptr;
 		FrameTemplate* m_buttonFramePressed = nullptr;
 		TextAlign m_textAlign = TextAlign::Left;
+		Color m_txtColor = Color(255, 255, 255, 255);
 
 		//Runtime
 		std::vector<Elem*> m_hoverables;

@@ -147,7 +147,11 @@ public:
 		btnCanvas->SetSpacing(6.f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
 		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
+		Ui::SetFont("title");
+		Ui::SetTextColor(Color::Black);
 		updateText = Ui::Text("There is a button");
+		Ui::SetTextColor(Color::White);
+		Ui::SetFont("content");
 		btn = Ui::Button("Ok", Vec2f(8.f));
 		btn->ListenClickReleased(&UiSys::OnClickBtn, this);
 		btn->SetColor(Color(50, 243, 60, 255));
@@ -177,19 +181,14 @@ public:
 		//to be 1:1 for a specific screen resolution
 		Ui::GetWriter()->SetPPU(1.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
-		Ui::MakeFont("alata-regular.ttf", "content", 12, .2f);
-		Ui::MakeFont("alata-regular.ttf", "title", 20, .2f);
-
+		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "content", 12, 0);
+		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "title", 24);
 		//Create ui stuff
 		//CreateSomeUi();
 		//CreateSquareWindow();
 		CreateButtonWindow();
 		//MakeUpgradeUi();
 
-
-	}
-	void OnDir(InputSignal* input)
-	{
 
 	}
 	void Update() override
