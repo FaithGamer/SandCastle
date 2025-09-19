@@ -134,6 +134,7 @@ public:
 	UiCanvas* btnCanvas;
 	UiTxt* updateText;
 	UiBtn* btn;
+	String someStr = "Wakanda!";
 	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
@@ -160,7 +161,7 @@ public:
 		Ui::SetFont("p");
 		Ui::SetTextColor(Color::Black);
 		Ui::SetTextAlign(TextAlign::Center);
-		Ui::Text("And here is a paragraph of text with {0} incredible characters.", 100.f, &btnCounter);
+		Ui::Text("{0}", 100.f, &someStr);
 
 		Ui::EndCanvas();
 		btnCanvas->root.AddComponent<Control>();
@@ -168,6 +169,19 @@ public:
 	void OnClickBtn(UiElem* signal)
 	{
 		btnCounter++;
+		int i = Random::Range(0, 3);
+		switch (i)
+		{
+		case 0:
+			someStr = "POPPOPOPOPOPOPO";
+			break;
+		case 1:
+			someStr = "lol";
+			break;
+		case 2:
+			someStr = "Mouem";
+			break;
+		}
 		Ui::UpdateText(updateText, "You clicked " + std::to_string(btnCounter) + " times.");
 	}
 	void Start() override
@@ -197,6 +211,24 @@ public:
 	void Update() override
 	{
 		OscillateUpdt();
+		TextUpdate();
+	}
+	void TextUpdate()
+	{
+		static float timer = 0.f;
+		static int T = 0;
+		timer += Time::Delta();
+		static String complete = "This is a long story that will unravel with the flow of life. Slowly, but surely, it tells you something you didn't expected.";
+		if (timer >= 0.1f)
+		{
+			timer -= 0.1f;
+			T++;
+			if (T >= complete.size())
+			{
+				T = 0;
+			}
+		}
+		someStr = complete.substr(0, T);
 	}
 	void OscillateUpdt()
 	{

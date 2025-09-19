@@ -403,6 +403,7 @@ But I am very suspicious of that...
 
 >clean destroy of elem pointers and entities
 >clean destroy of canvas children
+>think about what else for ui.
 
 >scroll? Nahhh
 
