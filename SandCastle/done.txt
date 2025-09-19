@@ -288,7 +288,7 @@ But I am very suspicious of that...
 
 12
 
--Ui::Txt know it's own size
+-UiTxt know it's own size
 -Text wrapping respect words
 -canvas Y stretch
 -fixed sentence y size.

@@ -4,24 +4,8 @@
 
 namespace SandCastle
 {
-	Ui::Elem::Type Ui::Img::GetType() const
+	UiElem::Type UiImg::GetType() const
 	{
-		return Ui::Elem::Type::Image;
+		return UiElem::Type::Image;
 	}
-
-	/*void Ui::Img::SetPosition(Vec2f pos)
-	{
-		//Making sure that no matter what is the sprite origin
-		//The origin point is always top left.
-		auto dim = sprite->GetDimensions();
-		Vec2f offset = {
-			((float)sprite->orgX + 0.5f) * dim.x,
-			((float)sprite->orgY - 0.5f) * dim.y
-		};
-		position = pos;
-		pos += offset;
-		pos.x += margin.x;
-		pos.y -= margin.y;
-		root.gtr()->SetPosition(pos.x, pos.y, z);
-	}*/
 }

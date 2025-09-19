@@ -21,18 +21,13 @@
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/ECS/System.h"
+#include "SandCastle/Render/Text.h"
 
 namespace SandCastle
 {
 	class Ui;
-	using FontID = uint32_t;
 	typedef std::pair<uint32_t, uint32_t> GlyphRange;
-	enum class TextAlign
-	{
-		Left,
-		Center,
-		Right
-	};
+	
 	struct Glyph
 	{
 		uint32_t codepoint = 0;
@@ -62,14 +57,6 @@ namespace SandCastle
 		Vec4f outlineColor = { 0, 0, 0, 1 };
 		LayerID layer = 0;
 		TextureFiltering filtering = TextureFiltering::Nearest;
-	};
-
-	struct Sentence
-	{
-		Entity root;                           // parent entity for the sentence
-		std::vector<Entity> glyphEntities;     // child entities (one per glyph)
-		Vec2f size;
-		float maxWidth = 0.f;
 	};
 
 	// NEW: store each character's "normal" computed position so FX can move them later.

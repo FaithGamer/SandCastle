@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/Render/SpriteRender.h"
+#include "SandCastle/UI/Ui.h"
 
 namespace SandCastle
 {
@@ -23,23 +24,23 @@ namespace SandCastle
 			spr->color.b = color.b;
 		}
 	};
-	Ui::Elem::Type Ui::Btn::GetType() const
+	UiElem::Type UiBtn::GetType() const
 	{
-		return Ui::Elem::Type::Button;
+		return UiElem::Type::Button;
 	}
-	void Ui::Btn::SetColor(const Color& color)
+	void UiBtn::SetColor(const Color& color)
 	{
 		Coloring(frameIdle, color);
 		Coloring(framePressed, color);
 		Coloring(frameHover, color);
 	}
-	void Ui::Btn::OnHover()
+	void UiBtn::OnHover()
 	{
 		Alpha(frameIdle, 0);
 		Alpha(framePressed, 0);
 		Alpha(frameHover, 255);
 	}
-	void Ui::Btn::OnUnHover()
+	void UiBtn::OnUnHover()
 	{
 		Alpha(frameIdle, 255);
 		Alpha(framePressed, 0);
@@ -47,7 +48,7 @@ namespace SandCastle
 		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
 		labelOffset = 0.f;
 	}
-	void Ui::Btn::OnClickPressed()
+	void UiBtn::OnClickPressed()
 	{
 		Alpha(frameIdle, 0);
 		Alpha(framePressed, 255);
@@ -55,7 +56,7 @@ namespace SandCastle
 		labelOffset += Vec2f(-1, -1);
 		label.root.gtr()->Move(labelOffset.x, labelOffset.y, 0.f);
 	}
-	void Ui::Btn::OnClickReleased()
+	void UiBtn::OnClickReleased()
 	{
 		Alpha(framePressed, 0);
 		if (IsInside(Ui::MousePos()))

@@ -1,13 +1,18 @@
 #pragma once
 
-#include "SandCastle/UI/Ui.h"
+
 #include "SandCastle/Render/Rect.h"
 #include "SandCastle/Core/Signal.h"
+#include "SandCastle/ECS/Entity.h"
+
 namespace SandCastle
 {
-	class Ui::Elem
+	class UiCanvas;
+	class Ui;
+	class UiElem
 	{
 	public:
+		typedef uint32_t ID;
 		enum class Type
 		{
 			Canvas,
@@ -17,9 +22,9 @@ namespace SandCastle
 		};
 
 	public:
-		Elem();
-		Elem(Entity root);
-		virtual ~Elem();
+		UiElem();
+		UiElem(Entity root);
+		virtual ~UiElem();
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
@@ -29,26 +34,26 @@ namespace SandCastle
 		void ComputeHitbox();
 
 		template<typename T>
-		void ListenHover(void(T::* listener)(Elem* signal), T* obj)
+		void ListenHover(void(T::* listener)(UiElem* signal), T* obj)
 		{
 			hoverSignal.Listen(listener, obj);
 			Ui::RegisterHoverable(this);
 		}
 		template<typename T>
-		void ListenUnhover(void(T::* listener)(Elem* signal), T* obj)
+		void ListenUnhover(void(T::* listener)(UiElem* signal), T* obj)
 		{
 			unhoverSignal.Listen(listener, obj);
 			Ui::RegisterHoverable(this);
 		}
 		template<typename T>
-		void ListenClickPressed(void(T::* listener)(Elem* signal), T* obj)
+		void ListenClickPressed(void(T::* listener)(UiElem* signal), T* obj)
 		{
 			clickPressSignal.Listen(listener, obj);
 			clickable = true;
 			Ui::RegisterHoverable(this);
 		}
 		template<typename T>
-		void ListenClickReleased(void(T::* listener)(Elem* signal), T* obj)
+		void ListenClickReleased(void(T::* listener)(UiElem* signal), T* obj)
 		{
 			clickReleasedSignal.Listen(listener, obj);
 			clickable = true;
@@ -63,7 +68,7 @@ namespace SandCastle
 		virtual void OnClickReleased() {};
 
 	private:
-		friend Canvas;
+		friend UiCanvas;
 		friend Ui;
 		void Hover();
 		void UnHover();
@@ -71,8 +76,8 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
-		Ui::Canvas* parent = nullptr;
-		Ui::ElemID id = 0;
+		UiCanvas* parent = nullptr;
+		UiElem::ID id = 0;
 		float z = 0.f;
 		Vec2f size = Vec2f(0, 0);
 		Vec2f margin = Vec2f(0, 0);
@@ -83,9 +88,9 @@ namespace SandCastle
 		bool clickable = false;
 		bool pressed = false;
 
-		Signal<Elem*> hoverSignal;
-		Signal<Elem*> unhoverSignal;
-		Signal<Elem*> clickPressSignal;
-		Signal<Elem*> clickReleasedSignal;
+		Signal<UiElem*> hoverSignal;
+		Signal<UiElem*> unhoverSignal;
+		Signal<UiElem*> clickPressSignal;
+		Signal<UiElem*> clickReleasedSignal;
 	};
 }

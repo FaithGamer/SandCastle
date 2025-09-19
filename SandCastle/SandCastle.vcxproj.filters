@@ -521,7 +521,7 @@
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\UI\UiEnum.h">
+    <ClInclude Include="include\SandCastle\UI\UiFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\UI\UiElem.h">
@@ -537,6 +537,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\UI\UiBtn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\Text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

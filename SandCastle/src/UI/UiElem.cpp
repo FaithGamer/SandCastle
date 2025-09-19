@@ -1,26 +1,25 @@
 #include "pch.h"
 #include "SandCastle/UI/UiElem.h"
-#include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
-	Ui::Elem::Elem()
+	UiElem::UiElem()
 	{
 		root = Entity::Create();
 		root.AddComponent<Transform>();
 	}
 
-	Ui::Elem::Elem(Entity Root) : root(Root)
+	UiElem::UiElem(Entity Root) : root(Root)
 	{
 	}
 
-	Ui::Elem::~Elem()
+	UiElem::~UiElem()
 	{
 		root.Destroy();
 	}
 
-	void Ui::Elem::SetPosition(Vec2f pos)
+	void UiElem::SetPosition(Vec2f pos)
 	{
 		position = pos;
 
@@ -31,46 +30,46 @@ namespace SandCastle
 		};
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
 	}
-	Vec2f Ui::Elem::GetSize() const
+	Vec2f UiElem::GetSize() const
 	{
 		return size;
 	}
-	Vec2f Ui::Elem::GetPosition() const
+	Vec2f UiElem::GetPosition() const
 	{
 		return position;
 	}
-	void Ui::Elem::ComputeHitbox()
+	void UiElem::ComputeHitbox()
 	{
 		auto tr = root.GetComponent<Transform>();
 		auto pos = tr->GetPosition();
 		hitbox = Rect(pos.x, pos.y, size.x, size.y);
 	}
-	void Ui::Elem::Move(Vec2f offset)
+	void UiElem::Move(Vec2f offset)
 	{
 		SetPosition(position + offset);
 	}
-	bool Ui::Elem::IsInside(Vec2f uiPos)
+	bool UiElem::IsInside(Vec2f uiPos)
 	{
 		return hitbox.PointInside(uiPos);
 	}
-	void Ui::Elem::Hover()
+	void UiElem::Hover()
 	{
 		OnHover();
 		hoverSignal.Send(this);
 	}
-	void Ui::Elem::UnHover()
+	void UiElem::UnHover()
 	{
 		OnUnHover();
 		pressed = false;
 		unhoverSignal.Send(this);
 	}
-	void Ui::Elem::ClickPressed()
+	void UiElem::ClickPressed()
 	{
 		OnClickPressed();
 		pressed = true;
 		clickPressSignal.Send(this);
 	}
-	void Ui::Elem::ClickReleased()
+	void UiElem::ClickReleased()
 	{
 		if (pressed)
 		{

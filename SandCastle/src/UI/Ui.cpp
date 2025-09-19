@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Math.h"
@@ -6,8 +7,6 @@
 #include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/Renderer2D.h"
-#include "SandCastle/UI/Ui.h"
-#include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiImg.h"
@@ -28,7 +27,7 @@ namespace SandCastle
 
 	}
 
-	Ui::ElemID Ui::m_nextId = 0;
+	UiElem::ID Ui::m_nextId = 0;
 
 	Ui::Ui()
 	{
@@ -104,7 +103,7 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::AddElem(Elem* elem, Canvas* canvas)
+	void Ui::AddElem(UiElem* elem, UiCanvas* canvas)
 	{
 		auto id = m_nextId++;
 		elem->id = id;
@@ -120,7 +119,7 @@ namespace SandCastle
 		}
 	}
 
-	Entity Ui::InstanceFrame(Elem* elem, FrameTemplate* frame, float z)
+	Entity Ui::InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z)
 	{
 		//Dimensions
 		Vec2f sDim = frame->cornerSpr[0]->GetDimensions();
@@ -164,19 +163,19 @@ namespace SandCastle
 			spr->SetMaterial(m_material->GetID());
 			auto tr = e.adc<Transform>();
 			spr->SetSprite(sprite);
-			auto type = (SpriteCorner)i;
+			auto type = (UiFrame::SpriteCorner)i;
 			switch (type)
 			{
-			case SpriteCorner::TopLeft:
+			case UiFrame::SpriteCorner::TopLeft:
 				tr->SetPosition(hDim.x, -hDim.y, 0);
 				break;
-			case SpriteCorner::TopRight:
+			case UiFrame::SpriteCorner::TopRight:
 				tr->SetPosition(hDim.x + (elem->size.x - sDim.x), -hDim.y, 0);
 				break;
-			case SpriteCorner::BotLeft:
+			case UiFrame::SpriteCorner::BotLeft:
 				tr->SetPosition(hDim.x, -elem->size.y + hDim.y, 0);
 				break;
-			case SpriteCorner::BotRight:
+			case UiFrame::SpriteCorner::BotRight:
 				tr->SetPosition(hDim.x + (elem->size.x - sDim.x), -elem->size.y + hDim.y, 0);
 				break;
 			default:
@@ -197,22 +196,22 @@ namespace SandCastle
 			auto tr = e.adc<Transform>();
 			spr->SetSprite(&sprite);
 			auto re = sprite.GetTextureRect();
-			auto type = (TexBorder)i;
+			auto type = (UiFrame::TexBorder)i;
 			switch (type)
 			{
-			case TexBorder::Top:
+			case UiFrame::TexBorder::Top:
 				tr->SetPosition(elem->size.x * 0.5f, -hDim.y, 0);
 				break;
-			case TexBorder::Left:
+			case UiFrame::TexBorder::Left:
 				tr->SetPosition(hDim.x, -elem->size.y * 0.5f, 0);
 				break;
-			case TexBorder::Mid:
+			case UiFrame::TexBorder::Mid:
 				tr->SetPosition(elem->size.x * 0.5f, -elem->size.y * 0.5f, 0);
 				break;
-			case TexBorder::Right:
+			case UiFrame::TexBorder::Right:
 				tr->SetPosition(elem->size.x - hDim.x, -elem->size.y * 0.5f, 0);
 				break;
-			case TexBorder::Bot:
+			case UiFrame::TexBorder::Bot:
 				tr->SetPosition(elem->size.x * 0.5f, -elem->size.y + hDim.y, 0);
 				break;
 			default:
@@ -244,22 +243,22 @@ namespace SandCastle
 		{
 			String x = "_";
 			String y = "_";
-			auto type = (SpriteCorner)i;
+			auto type = (UiFrame::SpriteCorner)i;
 			switch (type)
 			{
-			case SpriteCorner::TopLeft:
+			case UiFrame::SpriteCorner::TopLeft:
 				x += "0";
 				y += "0";
 				break;
-			case SpriteCorner::TopRight:
+			case UiFrame::SpriteCorner::TopRight:
 				x += "2";
 				y += "0";
 				break;
-			case SpriteCorner::BotLeft:
+			case UiFrame::SpriteCorner::BotLeft:
 				x += "0";
 				y += "2";
 				break;
-			case SpriteCorner::BotRight:
+			case UiFrame::SpriteCorner::BotRight:
 				x += "2";
 				y += "2";
 				break;
@@ -293,17 +292,17 @@ namespace SandCastle
 		Instance()->m_material->SetFloat("uPPu", ppu * 2.f);
 	}
 
-	Ui::Canvas* Ui::BeginCanvas(Vec2f size, bool frame)
+	UiCanvas* Ui::BeginCanvas(Vec2f size, bool frame)
 	{
 		auto i = Instance();
-		auto canvas = new Canvas();
+		auto canvas = new UiCanvas();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 
 		//Differentiante limit from size
 		if (size.x > 0.f)
-			canvas->fixedSize.AddFlag(Canvas::Horizontal);
+			canvas->fixedSize.AddFlag(UiCanvas::Horizontal);
 		if (size.y > 0.f)
-			canvas->fixedSize.AddFlag(Canvas::Vertical);
+			canvas->fixedSize.AddFlag(UiCanvas::Vertical);
 		canvas->sizeLimit.x = size.x > 0.f ? size.x : canvas->sizeLimit.x;
 		canvas->sizeLimit.y = size.y > 0.f ? size.y : canvas->sizeLimit.y;
 		if (parent)
@@ -324,7 +323,7 @@ namespace SandCastle
 		return canvas;
 	}
 
-	Ui::Txt* Ui::Text(std::string_view utf8, float width)
+	UiTxt* Ui::Text(std::string_view utf8, float width)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
@@ -342,7 +341,7 @@ namespace SandCastle
 			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
 
 		//Instantiation
-		Txt* text = new Txt();
+		UiTxt* text = new UiTxt();
 		i->m_writer->UseFont(i->m_font);
 		text->sentence = i->m_writer->Write(utf8, width, i->m_txtColor, i->m_textAlign);
 		text->size = text->sentence.size;
@@ -355,7 +354,7 @@ namespace SandCastle
 		return text;
 	}
 
-	void Ui::UpdateText(Ui::Txt* text, std::string_view utf8)
+	void Ui::UpdateText(UiTxt* text, std::string_view utf8)
 	{
 		auto i = Instance();
 		text->sentence.root.Destroy();
@@ -390,13 +389,13 @@ namespace SandCastle
 			text->SetPosition(text->position);
 	}
 
-	Ui::Img* Ui::Image(String sprite)
+	UiImg* Ui::Image(String sprite)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Image without active canvas");
 		auto canvas = i->m_canvas.top();
 
-		Img* image = new Img();
+		UiImg* image = new UiImg();
 		image->margin = i->m_margin;
 		image->entt = Entity::CreateSprite(sprite);
 		auto render = image->entt.GetComponent<SpriteRender>();
@@ -420,13 +419,13 @@ namespace SandCastle
 		return image;
 	}
 
-	Ui::Btn* Ui::Button(std::string_view utf8, Vec2f padding)
+	UiBtn* Ui::Button(std::string_view utf8, Vec2f padding)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Button without active canvas");
 		auto canvas = i->m_canvas.top();
 
-		Btn* button = new Btn();
+		UiBtn* button = new UiBtn();
 		button->margin = i->m_margin;
 		auto font = i->m_writer->GetFont(i->m_font);
 		button->label = i->m_writer->Write(utf8, font->id, i->m_txtColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
@@ -456,7 +455,7 @@ namespace SandCastle
 		i->m_canvas.pop();
 	}
 
-	void Ui::UpdateCanvas(Canvas* canvas)
+	void Ui::UpdateCanvas(UiCanvas* canvas)
 	{
 		canvas->MakeLayout();
 		if (canvas->frameTemplate != nullptr)
@@ -466,12 +465,13 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::Delete(ElemID uiElem)
+	void Ui::Delete(UiElem::ID uiElem)
 	{
 		auto i = Instance();
 		auto it = i->m_elems.find(uiElem);
 		if (it == i->m_elems.end())
 			return;
+		//to do, remove from hoverable, and data update
 
 		/*auto elem = it->second;
 		if (elem->parent)
@@ -588,7 +588,7 @@ namespace SandCastle
 	{
 		return ScreenToUi(Mouse::GetPosition());
 	}
-	void Ui::RegisterHoverable(Elem* elem)
+	void Ui::RegisterHoverable(UiElem* elem)
 	{
 		if (elem->hoverable)
 			return;
@@ -623,7 +623,7 @@ namespace SandCastle
 
 	/*---Helpers---*/
 
-	void Ui::SetFrame(FrameTemplate** frame, String texture)
+	void Ui::SetFrame(UiFrame::Template** frame, String texture)
 	{
 		auto it = m_frameTemplates.find(texture);
 		if (it == m_frameTemplates.end())
@@ -642,26 +642,26 @@ namespace SandCastle
 		{
 			String x = "_";
 			String y = "_";
-			auto type = (TexBorder)i;
+			auto type = (UiFrame::TexBorder)i;
 			switch (type)
 			{
-			case TexBorder::Top:
+			case UiFrame::TexBorder::Top:
 				x += "1";
 				y += "0";
 				break;
-			case TexBorder::Left:
+			case UiFrame::TexBorder::Left:
 				x += "0";
 				y += "1";
 				break;
-			case TexBorder::Mid:
+			case UiFrame::TexBorder::Mid:
 				x += "1";
 				y += "1";
 				break;
-			case TexBorder::Right:
+			case UiFrame::TexBorder::Right:
 				x += "2";
 				y += "1";
 				break;
-			case TexBorder::Bot:
+			case UiFrame::TexBorder::Bot:
 				x += "1";
 				y += "2";
 				break;
@@ -680,15 +680,15 @@ namespace SandCastle
 	void Ui::BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu)
 	{
 		//Calculate the sprite rect and world size of a sprite border (with texture repeat)
-		auto type = (TexBorder)i;
-		if (type == TexBorder::Top || type == TexBorder::Bot)
+		auto type = (UiFrame::TexBorder)i;
+		if (type == UiFrame::TexBorder::Top || type == UiFrame::TexBorder::Bot)
 		{
 			rect.width = pxSize.x - pxDim.x * 2; //pixel length
 			rect.height = pxDim.y; //pixel length
 			wDim.x = rect.width * ppu; //world length
 			wDim.y = sDim.y;
 		}
-		else if (type == TexBorder::Left || type == TexBorder::Right)
+		else if (type == UiFrame::TexBorder::Left || type == UiFrame::TexBorder::Right)
 		{
 			rect.width = pxDim.x; //pixel length
 			rect.height = pxSize.y - pxDim.y * 2; //pixel length

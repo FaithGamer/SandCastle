@@ -7,11 +7,16 @@
 #include "SandCastle/Render/Sprite.h"
 #include "SandCastle/Internal/Singleton.h"
 #include "SandCastle/Render/Writer.h"
-
+#include "SandCastle/UI/UiTxt.h"
+#include "SandCastle/UI/UiFrame.h"
 
 namespace SandCastle
 {
 	class UiSystem;
+	class UiCanvas;
+	class UiElem;
+	class UiImg;
+	class UiBtn;
 	struct InputSignal;
 
 	class Ui : public Singleton<Ui>
@@ -20,7 +25,7 @@ namespace SandCastle
 
 		/*---Elements---*/
 
-		/// @brief base class of every Ui objects.
+		/*/// @brief base class of every Ui objects.
 		class Elem;
 		/// @brief Container for every Ui objects, can contain other canvas.
 		class Canvas;
@@ -28,12 +33,12 @@ namespace SandCastle
 		class Txt;
 		/// @brief Image (sprite)
 		class Img;
-		class Btn;
+		class Btn;*/
 
 		/*--- Types ---*/
 		//definitions in UiEnum.h
 
-		typedef uint32_t ElemID;
+
 		typedef uint32_t FrameID;
 		enum class LayoutDir; 
 		enum class LayoutWrap;
@@ -72,18 +77,18 @@ namespace SandCastle
 
 		/*---Ui creation---*/
 
-		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
-		static Txt* Text(std::string_view utf8, float width = -1.f);
+		static UiCanvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
+		static UiTxt* Text(std::string_view utf8, float width = -1.f);
 		template <typename... Ts>
-		static Txt* Text(std::string_view utf8, float width = -1.f, Ts... args);
-		static Img* Image(String sprite);
-		static Btn* Button(std::string_view utf8, Vec2f padding);
+		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
+		static UiImg* Image(String sprite);
+		static UiBtn* Button(std::string_view utf8, Vec2f padding);
 		static void EndCanvas();
-		static void Delete(ElemID uiElem);
+		static void Delete(UiElem::ID uiElem);
 
 		/*---Ui update---*/
 
-		static void UpdateText(Ui::Txt* text, std::string_view utf8);
+		static void UpdateText(UiTxt* text, std::string_view utf8);
 
 		/*---State---*/
 
@@ -124,7 +129,7 @@ namespace SandCastle
 		static Vec2f ScreenToUi(Vec2f screenPos);
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
-		static void RegisterHoverable(Elem* elem);
+		static void RegisterHoverable(UiElem* elem);
 
 		/*---Accessors---*/
 
@@ -157,23 +162,15 @@ namespace SandCastle
 			BorderSprite sprites[5];
 		};
 
-		struct FrameTemplate
-		{
-			//3x3 stretchable sprites.
-			//Used for buttons or frames.
-			bool fixedStep = false;
-			std::vector<Sprite*> cornerSpr;
-			std::vector<Texture*> repeatTex;
-		};
 
 		/*---Helpers---*/
-		void SetFrame(FrameTemplate** frame, String texture);
+		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 		/*---Instantiation---*/
-		void AddElem(Elem* elem, Canvas* canvas);
-		Entity InstanceFrame(Elem* elem, FrameTemplate* frame, float z);
-		static void UpdateCanvas(Canvas* canvas);
+		void AddElem(UiElem* elem, UiCanvas* canvas);
+		Entity InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z);
+		static void UpdateCanvas(UiCanvas* canvas);
 
 	private:
 		friend Systems;
@@ -185,40 +182,40 @@ namespace SandCastle
 		Writer* m_writer = nullptr;
 
 		//Data
-		std::unordered_map<String, FrameTemplate> m_frameTemplates;
+		std::unordered_map<String, UiFrame::Template> m_frameTemplates;
 
 		//State (creation of new elements)
 		Material* m_material = nullptr;
 		Material* m_defaultMaterial = nullptr;
 		FontID m_font;
 		LayerID m_layer;
-		FrameTemplate* m_canvasFrame = nullptr;
-		FrameTemplate* m_buttonFrame = nullptr;
-		FrameTemplate* m_buttonFrameHover = nullptr;
-		FrameTemplate* m_buttonFramePressed = nullptr;
+		UiFrame::Template* m_canvasFrame = nullptr;
+		UiFrame::Template* m_buttonFrame = nullptr;
+		UiFrame::Template* m_buttonFrameHover = nullptr;
+		UiFrame::Template* m_buttonFramePressed = nullptr;
 		TextAlign m_textAlign = TextAlign::Left;
 		Color m_txtColor = Color(255, 255, 255, 255);
 
 		//Runtime
-		std::vector<Elem*> m_hoverables;
-		Elem* m_hovered = nullptr;
-		Elem* m_pressed = nullptr;
-		std::stack<Canvas*> m_canvas;
-		std::unordered_map<ElemID, Elem*> m_elems;
+		std::vector<UiElem*> m_hoverables;
+		UiElem* m_hovered = nullptr;
+		UiElem* m_pressed = nullptr;
+		std::stack<UiCanvas*> m_canvas;
+		std::unordered_map<UiElem::ID, UiElem*> m_elems;
 		float m_z = 0.f;
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
 		float m_ppu = 1.f/360.f;
 
-		static ElemID m_nextId;
+		static UiElem::ID m_nextId;
 		const float zStep = 1.f;
 
 	};
-	/*template<typename ...Ts>
-	inline Ui::Txt* Ui::Text(std::string_view utf8, float width, Ts ...args)
+	template<typename ...Ts>
+	inline UiTxt* Ui::Text(std::string_view utf8, float width, Ts ...args)
 	{
 		auto txt = Text(utf8, width);
 		txt->AddData(args...);
 		return txt;
-	}*/
+	}
 }

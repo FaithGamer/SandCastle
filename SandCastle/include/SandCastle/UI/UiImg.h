@@ -2,18 +2,17 @@
 
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/UI/UiElem.h"
-#include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Core/Bitmask.h"
 
 
 namespace SandCastle
 {
 	class Sprite;
-	class Ui::Img : public Ui::Elem
+	class UiImg : public UiElem
 	{
 
 	public:
-		Ui::Elem::Type GetType() const override;
+		UiElem::Type GetType() const override;
 	//	void SetPosition(Vec2f pos) override;
 
 	private:

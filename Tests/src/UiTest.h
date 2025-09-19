@@ -28,7 +28,7 @@ public:
 
 		//Ui::SetCanvasMargin(4.f);
 		auto canvas = Ui::BeginCanvas(Vec2f(150.f, 0));
-		canvas->layoutDir = Ui::LayoutDir::LeftRight;
+		canvas->layoutDir = UiCanvas::LayoutDir::LeftRight;
 		canvas->SetSpacing(2.f);
 		canvas->SetMargin(4.f);
 		//canvas->SetBorder(2.f);
@@ -56,11 +56,11 @@ public:
 		auto root = Ui::BeginCanvas(Vec2f(200, 0));
 		//Center the canvas on screen
 		root->SetPosition(Vec2f(0.f, 0.f));
-		root->SetAnchor(Ui::Canvas::Anchor::MiddleCenter);
+		root->SetAnchor(UiCanvas::Anchor::MiddleCenter);
 		//Elements inside this canvas will be added from top to bot and wrap from left to right.
-		root->layoutDir = Ui::LayoutDir::TopDown;
+		root->layoutDir = UiCanvas::LayoutDir::TopDown;
 		//The elements in this canvas will horizontally align to the center 
-		root->layoutAlignH = Ui::LayoutAlignH::Center;
+		root->layoutAlignH = UiCanvas::LayoutAlignH::Center;
 		//The space between the canvas border and its content
 		root->SetBorder(5.f);
 		//The space between elements inside the canvas.
@@ -73,7 +73,7 @@ public:
 
 		//This canvas has no frame, only it's content is visible (false)
 		auto squares = Ui::BeginCanvas(Vec2f(0, 0), false);
-		squares->layoutDir = Ui::LayoutDir::LeftRight;
+		squares->layoutDir = UiCanvas::LayoutDir::LeftRight;
 		squares->SetSpacing(2.f);
 		Ui::Image("yellow10-20.png_0_0");
 		Ui::Image("green30.png_0_0");
@@ -115,14 +115,14 @@ public:
 		{
 			auto upRoot = Ui::BeginCanvas(Vec2f(190, 0), true);
 
-			upRoot->layoutDir = Ui::LayoutDir::LeftRight;
-			upRoot->layoutAlignV = Ui::LayoutAlignV::Center;
+			upRoot->layoutDir = UiCanvas::LayoutDir::LeftRight;
+			upRoot->layoutAlignV = UiCanvas::LayoutAlignV::Center;
 			auto upTitle = Ui::BeginCanvas(Vec2f(95, 0), false);
-			upTitle->layoutAlignH = Ui::LayoutAlignH::Left;
+			upTitle->layoutAlignH = UiCanvas::LayoutAlignH::Left;
 			Ui::Text(upgrades[i].name);
 			Ui::EndCanvas();
 			auto upButton = Ui::BeginCanvas(Vec2f(95, 0), false);
-			upButton->layoutAlignH = Ui::LayoutAlignH::Right;
+			upButton->layoutAlignH = UiCanvas::LayoutAlignH::Right;
 			Ui::Image("blue40-20.png_0_0");
 			Ui::EndCanvas();
 
@@ -131,9 +131,9 @@ public:
 
 		Ui::EndCanvas();
 	}
-	Ui::Canvas* btnCanvas;
-	Ui::Txt* updateText;
-	Ui::Btn* btn;
+	UiCanvas* btnCanvas;
+	UiTxt* updateText;
+	UiBtn* btn;
 	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
@@ -146,9 +146,9 @@ public:
 		btnCanvas->SetBorder(5.f);
 		btnCanvas->SetSpacing(6.f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
-		btnCanvas->SetAnchor(Ui::Canvas::Anchor::MiddleCenter);
+		btnCanvas->SetAnchor(UiCanvas::Anchor::MiddleCenter);
 		btnCanvas->SetPosition(Vec2f(0, 0));
-		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
+		btnCanvas->layoutAlignH = UiCanvas::LayoutAlignH::Center;
 		Ui::SetFont("h1");
 		Ui::SetTextColor(Color::Black);
 		updateText = Ui::Text("There is a button");
@@ -165,7 +165,7 @@ public:
 		Ui::EndCanvas();
 		btnCanvas->root.AddComponent<Control>();
 	}
-	void OnClickBtn(Ui::Elem* signal)
+	void OnClickBtn(UiElem* signal)
 	{
 		btnCounter++;
 		Ui::UpdateText(updateText, "You clicked " + std::to_string(btnCounter) + " times.");
@@ -252,6 +252,7 @@ public:
 	}
 	void OnImGui()
 	{
+		return;
 		auto mouseUi = Ui::MousePos();
 		auto mouseWorld = Mouse::GetWorldPos();
 		auto mouseScreen = Mouse::GetPosition();

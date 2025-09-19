@@ -2,17 +2,18 @@
 
 #include "SandCastle/UI/UiElem.h"
 #include "SandCastle/Core/Signal.h"
+#include "SandCastle/Render/Text.h"
 #include "SandCastle/Render/Color.h"
 
 namespace SandCastle
 {
 	class Ui;
-	class Ui::Btn : public Ui::Elem
+	class UiBtn : public UiElem
 	{
 	public:
 
 	public:
-		Ui::Elem::Type GetType() const override;
+		UiElem::Type GetType() const override;
 		void SetColor(const Color& color);
 	protected:
 		void OnHover() override;

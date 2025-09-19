@@ -3,12 +3,12 @@
 
 namespace SandCastle
 {
-	Ui::Txt::Txt() : Ui::Elem(sentence.root)
+	UiTxt::UiTxt() : UiElem(sentence.root)
 	{
 	}
-	Ui::Elem::Type Ui::Txt::GetType() const
+	UiElem::Type UiTxt::GetType() const
 	{
-		return Ui::Elem::Type::Text;
+		return UiElem::Type::Text;
 	}
 
 }

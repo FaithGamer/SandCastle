@@ -1,15 +1,16 @@
 #pragma once
 
 #include "SandCastle/UI/UiElem.h"
-
+#include "SandCastle/Render/Text.h"
+#include "SandCastle/Render/Color.h"
 
 namespace SandCastle
 {
-	class Ui::Txt : public Ui::Elem
+	class UiTxt : public UiElem
 	{
 	public:
-		Txt();
-		Ui::Elem::Type GetType() const override;
+		UiTxt();
+		UiElem::Type GetType() const override;
 
 		template<typename... Ts>
 		void AddData(Ts&&... t)
@@ -32,7 +33,7 @@ namespace SandCastle
 		{
 		public:
 			static_assert((std::is_pointer_v<Ts> && ...),
-				"Ui::Txt::Specific expects pointer types (e.g., int*, float*, std::string*).");
+				"UiTxt::Specific expects pointer types (e.g., int*, float*, std::string*).");
 
 			explicit Specific(Ts... t) :
 				m_data(std::move(t)...)

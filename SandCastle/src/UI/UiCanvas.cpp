@@ -3,12 +3,12 @@
 
 namespace SandCastle
 {
-	Ui::Elem::Type Ui::Canvas::GetType() const
+	UiElem::Type UiCanvas::GetType() const
 	{
-		return Ui::Elem::Type::Canvas;
+		return UiElem::Type::Canvas;
 	}
 
-	void Ui::Canvas::SetPosition(Vec2f pos)
+	void UiCanvas::SetPosition(Vec2f pos)
 	{
 		position = pos;
 		Vec2f wPos = pos;
@@ -41,7 +41,7 @@ namespace SandCastle
 		for (int i = 0; i < children.size(); i++)
 		{
 			auto child = children[i];
-			if (child->GetType() == Ui::Elem::Type::Canvas)
+			if (child->GetType() == UiElem::Type::Canvas)
 			{
 				child->SetPosition(child->position);
 			}
@@ -50,7 +50,7 @@ namespace SandCastle
 		ComputeHitbox();
 	}
 
-	void Ui::Canvas::OffsetRange(int begin, int end, Vec2f offset)
+	void UiCanvas::OffsetRange(int begin, int end, Vec2f offset)
 	{
 		for (int i = begin; i < end; i++)
 		{
@@ -64,7 +64,7 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::Canvas::MakeLayout()
+	void UiCanvas::MakeLayout()
 	{
 		//Set the position of every children according to layout
 		//And contentSize the canvas when needed
@@ -121,20 +121,20 @@ namespace SandCastle
 			MoveCursor = MoveCursorRight;
 			Wrapping = WrapDown;
 			break;
-			LOG_ERROR("Ui::Canvas::MakeLayout, Unknown Layout dir!");
+			LOG_ERROR("UiCanvas::MakeLayout, Unknown Layout dir!");
 			break;
 		}
 		struct Line
 		{
-			std::vector<Ui::Elem*> elems;
+			std::vector<UiElem*> elems;
 			//float start = 0.f;
 			//float end = 0.f;
 			float wrapSize = 0.f;
 			float length = 0.f;
 			float center = 0.f;
 		};
-		void (*LineMoveH)(Ui::Elem * elem, const Line & line, Vec2f contentSize, Vec2f canvas) = nullptr;
-		void (*LineMoveV)(Ui::Elem * elem, const Line & line, Vec2f contentSize, Vec2f canvas) = nullptr;
+		void (*LineMoveH)(UiElem * elem, const Line & line, Vec2f contentSize, Vec2f canvas) = nullptr;
+		void (*LineMoveV)(UiElem * elem, const Line & line, Vec2f contentSize, Vec2f canvas) = nullptr;
 
 
 		switch (layoutDir)
@@ -146,7 +146,7 @@ namespace SandCastle
 			case LayoutAlignH::Left:
 				break;
 			case LayoutAlignH::Center:
-				LineMoveH = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((canvas.x - line.length) * 0.5f, 0.f);
 						elem->Move(offset);
@@ -154,7 +154,7 @@ namespace SandCastle
 
 				break;
 			case LayoutAlignH::Right:
-				LineMoveH = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((canvas.x - line.length), 0.f);
 						elem->Move(offset);
@@ -167,7 +167,7 @@ namespace SandCastle
 			case LayoutAlignV::Top:
 				break;
 			case LayoutAlignV::Center:
-				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y) * 0.5f);
 						offset += Vec2f(0.f, -(canvas.y - contentSize.y) * 0.5f);
@@ -175,7 +175,7 @@ namespace SandCastle
 					};
 				break;
 			case LayoutAlignV::Bot:
-				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y));
 						offset += Vec2f(0.f, -(canvas.y - contentSize.y));
@@ -192,7 +192,7 @@ namespace SandCastle
 			case LayoutAlignH::Left:
 				break;
 			case LayoutAlignH::Center:
-				LineMoveH = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((line.wrapSize - elem->size.x) * 0.5f, 0.f);
 						offset += Vec2f((canvas.x - contentSize.x) * 0.5f, 0.f);
@@ -200,7 +200,7 @@ namespace SandCastle
 					};
 				break;
 			case LayoutAlignH::Right:
-				LineMoveH = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((line.wrapSize - elem->size.x), 0.f);
 						offset += Vec2f((canvas.x - contentSize.x), 0.f);
@@ -214,14 +214,14 @@ namespace SandCastle
 			case LayoutAlignV::Top:
 				break;
 			case LayoutAlignV::Center:
-				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(canvas.y - line.length) * 0.5f);
 						elem->Move(offset);
 					};
 				break;
 			case LayoutAlignV::Bot:
-				LineMoveV = [](Ui::Elem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
+				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(canvas.y - line.length));
 						elem->Move(offset);
@@ -303,12 +303,12 @@ namespace SandCastle
 		}
 
 		//Stretch to fit content
-		if (!fixedSize.Contains(Canvas::Horizontal))
+		if (!fixedSize.Contains(UiCanvas::Horizontal))
 		{
 			float stretchx = contentSize.x + border.x * 2;
 			size.x = stretchx < sizeLimit.x ? stretchx : sizeLimit.x;
 		}
-		if (!fixedSize.Contains(Canvas::Vertical))
+		if (!fixedSize.Contains(UiCanvas::Vertical))
 		{
 			float stretchy = contentSize.y + border.y * 2;
 			size.y = stretchy < sizeLimit.y ? stretchy : sizeLimit.y;
@@ -331,20 +331,20 @@ namespace SandCastle
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
 	}
-	void Ui::Canvas::SetAnchor(Anchor Anchor)
+	void UiCanvas::SetAnchor(Anchor Anchor)
 	{
 		anchor = Anchor;
 		SetPosition(position);
 	}
-	void Ui::Canvas::SetSpacing(Vec2f Spacing)
+	void UiCanvas::SetSpacing(Vec2f Spacing)
 	{
 		spacing = Spacing;
 	}
-	void Ui::Canvas::SetBorder(Vec2f Border)
+	void UiCanvas::SetBorder(Vec2f Border)
 	{
 		border = Border;
 	}
-	void Ui::Canvas::SetMargin(Vec2f Margin)
+	void UiCanvas::SetMargin(Vec2f Margin)
 	{
 		margin = Margin;
 	}
