@@ -227,6 +227,13 @@ namespace SandCastle
 
 			return result;
 		}
+		template <typename T>
+		T FloorToEven(T value)
+		{
+			if (value % 2 > 0)
+				return value - 1;
+			return value;
+		}
 	}
 }
 
