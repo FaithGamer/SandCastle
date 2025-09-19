@@ -74,6 +74,8 @@ namespace SandCastle
 
 		static Canvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
 		static Txt* Text(std::string_view utf8, float width = -1.f);
+		template <typename... Ts>
+		static Txt* Text(std::string_view utf8, float width = -1.f, Ts... args);
 		static Img* Image(String sprite);
 		static Btn* Button(std::string_view utf8, Vec2f padding);
 		static void EndCanvas();
@@ -177,6 +179,7 @@ namespace SandCastle
 		friend Systems;
 		void Update();
 		void HoverableUpdate();
+		void DataUpdate();
 		void OnClick(InputSignal* signal);
 		//Helper
 		Writer* m_writer = nullptr;
@@ -211,4 +214,11 @@ namespace SandCastle
 		const float zStep = 1.f;
 
 	};
+	/*template<typename ...Ts>
+	inline Ui::Txt* Ui::Text(std::string_view utf8, float width, Ts ...args)
+	{
+		auto txt = Text(utf8, width);
+		txt->AddData(args...);
+		return txt;
+	}*/
 }

@@ -22,7 +22,7 @@ public:
 	void CreateSomeUi()
 	{
 		Ui::SetCanvasFrame("frame.png");
-		Ui::SetFont("alata");
+		Ui::SetFont("p");
 
 		//Spacing:
 
@@ -66,7 +66,7 @@ public:
 		//The space between elements inside the canvas.
 		root->SetSpacing(20.f);
 		//Use the font for titles.
-		Ui::SetFont("title");
+		Ui::SetFont("h1");
 		//Draw the text.
 		//Ui::Image("green30.png_0_0");
 		Ui::Text("Square window.");
@@ -90,7 +90,7 @@ public:
 
 		//Ui::Image("blue40-20.png_0_0");
 		Ui::BeginCanvas(Vec2f(0.f), false);
-		Ui::SetFont("content");
+		Ui::SetFont("p");
 		Ui::Text("Thanks for watching ");
 		Ui::EndCanvas();
 		//End the root canvas
@@ -146,15 +146,22 @@ public:
 		btnCanvas->SetBorder(5.f);
 		btnCanvas->SetSpacing(6.f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
+		btnCanvas->SetAnchor(Ui::Canvas::Anchor::MiddleCenter);
+		btnCanvas->SetPosition(Vec2f(0, 0));
 		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
-		Ui::SetFont("title");
+		Ui::SetFont("h1");
 		Ui::SetTextColor(Color::Black);
 		updateText = Ui::Text("There is a button");
 		Ui::SetTextColor(Color::White);
-		Ui::SetFont("content");
+		Ui::SetFont("h2");
 		btn = Ui::Button("Ok", Vec2f(8.f));
 		btn->ListenClickReleased(&UiSys::OnClickBtn, this);
 		btn->SetColor(Color(50, 243, 60, 255));
+		Ui::SetFont("p");
+		Ui::SetTextColor(Color::Black);
+		Ui::SetTextAlign(TextAlign::Center);
+		Ui::Text("And here is a paragraph of text with some incredible characters.", 100.f);
+
 		Ui::EndCanvas();
 		btnCanvas->root.AddComponent<Control>();
 	}
@@ -162,14 +169,11 @@ public:
 	{
 		btnCounter++;
 		Ui::UpdateText(updateText, "You clicked " + std::to_string(btnCounter) + " times.");
-		LOG_INFO("btn pos.x = {0}", btn->GetPosition().x);
 	}
 	void Start() override
 	{
-
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
-
 
 		//Init UI
 		Ui::MakeFrameTemplate("frame.png", false);
@@ -181,15 +185,14 @@ public:
 		//to be 1:1 for a specific screen resolution
 		Ui::GetWriter()->SetPPU(1.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
-		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "content", 12, 0);
-		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "title", 24);
+		Ui::MakeFont("ark-pixel-10px-proportional-latin.ttf", "p", 10, 0);
+		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, 0);
+		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
 		//CreateSomeUi();
 		//CreateSquareWindow();
 		CreateButtonWindow();
 		//MakeUpgradeUi();
-
-
 	}
 	void Update() override
 	{
@@ -275,7 +278,6 @@ public:
 		drawPos("Camera", camPos);
 		ImGui::End();
 	}
-
 };
 
 void UiTest()

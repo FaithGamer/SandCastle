@@ -400,33 +400,12 @@ But I am very suspicious of that...
 -Writer custom color
 -Update text keep font
 
->text update must take into consideration font and color and everything actually
+>field value
 
->per canvas context + default context, or just global context ?
->Save font color in UiTxt for later update
->think about where to put the text color
->I think we do: Ui::TextColor()//high level, global state
-Writer->Write(Color) // low level, per instance state
-
->test LanaFont
->find pixel art font with all languages
->have one font for each zoom level OR use a pixel perfect font
-
->text deformation ?
-
->take into account camera constraints for screen to world/screen to UI and so on
->hitbox are fucked when resizing window (mouse pos not consistent)
->world entities moving after resizing window? Or camera moving???
-
-
->text show values
 >clean destroy of elem pointers and entities
 >clean destroy of canvas children
->update element must keep layout in check 
->what condition may change layout ? If size changed.
 
->frame moving can sometimes show 1px separation between top/mid, etc... -> apply extrude on textures, or sprites
->scroll?
+>scroll? Nahhh
 
 tasks:
 >shove transform from matrix and other useless stuff 

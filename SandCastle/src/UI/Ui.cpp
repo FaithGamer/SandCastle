@@ -81,6 +81,11 @@ namespace SandCastle
 		}
 	}
 
+	void Ui::DataUpdate()
+	{
+
+	}
+
 	void Ui::OnClick(InputSignal* signal)
 	{
 		bool pressed = signal->GetBool();
