@@ -7,9 +7,18 @@ struct Txt
 {
 	int tag;
 };
+struct Control
+{
+	int tag;
+};
 class UiSys : public System
 {
 public:
+	struct Oscillate
+	{
+		int tag;
+	};
+
 	void CreateSomeUi()
 	{
 		Ui::SetCanvasFrame("frame.png");
@@ -124,6 +133,8 @@ public:
 	}
 	Ui::Canvas* btnCanvas;
 	Ui::Txt* updateText;
+	Ui::Btn* btn;
+	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
 		Ui::SetButtonFrame("btn.png");
@@ -133,27 +144,28 @@ public:
 
 		btnCanvas = Ui::BeginCanvas(0);
 		btnCanvas->SetBorder(5.f);
-		btnCanvas->SetSpacing(6.7f);
+		btnCanvas->SetSpacing(6.f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
 		btnCanvas->layoutAlignH = Ui::LayoutAlignH::Center;
 		updateText = Ui::Text("There is a button");
-		auto btn = Ui::Button("Ok", Vec2f(8.f));
+		btn = Ui::Button("Ok", Vec2f(8.f));
 		btn->ListenClickReleased(&UiSys::OnClickBtn, this);
 		btn->SetColor(Color(50, 243, 60, 255));
 		Ui::EndCanvas();
+		btnCanvas->root.AddComponent<Control>();
 	}
 	void OnClickBtn(Ui::Elem* signal)
 	{
-		if(Random::Range(0, 1)==0)
-		Ui::UpdateText(updateText, "You clicked.");
-		else
-		Ui::UpdateText(updateText, "There is a button");
+		btnCounter++;
+		Ui::UpdateText(updateText, "You clicked " + std::to_string(btnCounter) + " times.");
+		LOG_INFO("btn pos.x = {0}", btn->GetPosition().x);
 	}
 	void Start() override
 	{
 
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
+
 
 		//Init UI
 		Ui::MakeFrameTemplate("frame.png", false);
@@ -163,7 +175,7 @@ public:
 		//Optionally change the ppu before making font
 		//This can help to make the font px size 
 		//to be 1:1 for a specific screen resolution
-		Ui::GetWriter()->SetPPU(2.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
+		Ui::GetWriter()->SetPPU(1.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		Ui::MakeFont("alata-regular.ttf", "content", 12, .2f);
 		Ui::MakeFont("alata-regular.ttf", "title", 20, .2f);
@@ -173,12 +185,18 @@ public:
 		//CreateSquareWindow();
 		CreateButtonWindow();
 		//MakeUpgradeUi();
+
+
+	}
+	void OnDir(InputSignal* input)
+	{
+
 	}
 	void Update() override
 	{
-		TextOscillate();
+		OscillateUpdt();
 	}
-	void TextOscillate()
+	void OscillateUpdt()
 	{
 		static float timer = 0.f;
 		auto delta = Time::Delta();
@@ -186,10 +204,10 @@ public:
 		float ypos = std::sin(timer) * 100.f;
 		float xpos = ypos;
 
-		auto view = Entity::View<Txt, Transform>();
-		view.each([&](Txt& t, Transform& tr)
+		auto view = Entity::View<Oscillate, Transform>();
+		view.each([&](Oscillate& t, Transform& tr)
 			{
-				tr.SetPosition(0, xpos, 0);
+				tr.SetPosition(xpos, 0, 0);
 			});
 	}
 };
@@ -215,12 +233,20 @@ public:
 	}
 	void Update()
 	{
-		float time = Time::Delta();
+		/*float time = Time::Delta();
 		if (dir.Magnitude() > 0.01f)
 		{
 			Vec2f offset = dir * time * 10.f;
 			Camera::main->MoveWorld(offset);
-		}
+		}*/
+		float speed = 10.f;
+		auto view = Entity::View<Transform, Control>();
+		view.each([&](Transform& tr, Control& cn)
+			{
+				Vec2f offset = dir * Time::Delta() * speed;
+				tr.Move(offset);
+			});
+
 	}
 	void OnImGui()
 	{

@@ -35,6 +35,7 @@ namespace SandCastle
 			wPos.y += size.y * 0.5f;
 			break;
 		}
+		wPos = Vec2f(std::round(wPos.x), std::round(wPos.y));
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
 		//update children hitboxes:
 		for (int i = 0; i < children.size(); i++)

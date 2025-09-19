@@ -24,6 +24,7 @@ namespace SandCastle
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
 		Vec2f GetSize() const;
+		Vec2f GetPosition() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
 
@@ -53,6 +54,8 @@ namespace SandCastle
 			clickable = true;
 			Ui::RegisterHoverable(this);
 		}
+		/// @brief Use at your own risk
+		Entity root;
 	protected:
 		virtual void OnHover() {};
 		virtual void OnUnHover() {};
@@ -70,7 +73,6 @@ namespace SandCastle
 	protected:
 		Ui::Canvas* parent = nullptr;
 		Ui::ElemID id = 0;
-		Entity root;
 		float z = 0.f;
 		Vec2f size = Vec2f(0, 0);
 		Vec2f margin = Vec2f(0, 0);

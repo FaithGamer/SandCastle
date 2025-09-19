@@ -26,14 +26,18 @@ namespace SandCastle
 
 		//All elem anchor are top left (except canvas)
 		Vec2f wPos = {
-		pos.x + margin.x,
-		pos.y - margin.y
+		std::round(pos.x + margin.x),
+		std::round(pos.y - margin.y)
 		};
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
 	}
 	Vec2f Ui::Elem::GetSize() const
 	{
 		return size;
+	}
+	Vec2f Ui::Elem::GetPosition() const
+	{
+		return position;
 	}
 	void Ui::Elem::ComputeHitbox()
 	{
