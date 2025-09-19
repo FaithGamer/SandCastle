@@ -216,8 +216,8 @@ namespace SandCastle
 				ComputeMatrix();
 			}
 			auto parent = Entity(m_parent).GetComponent<Transform>();
-			Mat4 mat = parent->GetTransformMatrix() * m_transformMatrix;
-			return Vec3f(mat[3]);
+			//Mat4 mat = parent->GetTransformMatrix() * m_transformMatrix;
+			return m_localPosition + parent->GetPosition();
 		}
 		return m_localPosition;
 	}
