@@ -95,6 +95,8 @@ namespace SandCastle
 		void UseFont(FontID id);
 		/// @brief Set the font that will be used for every subsequent Write, using its fancy name
 		void UseFont(String name);
+		/// @brief The color used for every subsequent write
+		void SetColor(Color color);
 		/// @brief Set the folder path for the font assets
 		void SetFontFolder(String path);
 		/// @brief Set atlas texture filtering (default is nearest)
@@ -106,6 +108,7 @@ namespace SandCastle
 		void SetMaxAtlasSize(int pixels);
 		/// @brief Set the Layer that will be used for every subsequent MakeFont
 		void SetLayer(LayerID layer);
+		
 
 		Sentence Write(std::string_view utf8,
 			float width = -1.f,
@@ -114,12 +117,14 @@ namespace SandCastle
 
 		Sentence Write(std::string_view utf8,
 			const FontID font,
+			const Color& color,
 			const Material* material,
 			const LayerID layer,
 			float width = -1.f,
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
+		Color GetColor() const;
 		float GetFontWorldSize(FontID font);
 		float GetPPU() const;
 		const Font* GetFont(String fancyName) const;
@@ -170,6 +175,7 @@ namespace SandCastle
 		int m_maxAtlasSize = 4096;
 		float m_ppu = 1.f;
 		Material* m_material = nullptr;
+		Color m_color = Color(255, 255, 255, 255);
 		LayerID m_layer = 0;
 		TextureFiltering m_filtering = TextureFiltering::Nearest;
 		String m_fontFolder = "assets/fonts/";
