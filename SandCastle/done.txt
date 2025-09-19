@@ -398,6 +398,7 @@ But I am very suspicious of that...
 -Floored to even number every viewports
 -so removed window size enforcing to even number
 -Writer custom color
+-Update text keep font
 
 >text update must take into consideration font and color and everything actually
 

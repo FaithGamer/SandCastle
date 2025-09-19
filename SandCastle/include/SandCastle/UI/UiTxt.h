@@ -10,11 +10,12 @@ namespace SandCastle
 	public:
 		Ui::Txt();
 		Ui::Elem::Type GetType() const override;
-		void Update(std::string_view utf8);
 	protected:
 		friend Ui;
 		Sentence sentence;
+		FontID font;
 		Color color;
+		TextAlign align;
 
 	};
 }

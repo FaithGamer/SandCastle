@@ -338,9 +338,13 @@ namespace SandCastle
 
 		//Instantiation
 		Txt* text = new Txt();
+		i->m_writer->UseFont(i->m_font);
 		text->sentence = i->m_writer->Write(utf8, width, i->m_txtColor, i->m_textAlign);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
+		text->align = i->m_textAlign;
+		text->color = i->m_txtColor;
+		text->font = i->m_font;
 		i->AddElem(text, canvas);
 
 		return text;
@@ -359,7 +363,18 @@ namespace SandCastle
 			//There is no size limit
 			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
 		auto prevSize = text->sentence.size;
-		text->sentence = i->m_writer->Write(utf8, width, text->color, i->m_textAlign);
+		auto font = i->m_writer->GetFont(text->font);
+		text->sentence = i->m_writer->Write
+		(
+			utf8,
+			text->font,
+			text->color,
+			font->material,
+			font->layer,
+			width,
+			text->align,
+			1.f
+		);
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 		text->parent->root.AddChild(text->root);
@@ -555,14 +570,14 @@ namespace SandCastle
 		auto ppu = Instance()->m_ppu;
 		Vec2f screen = Window::GetSize();
 		float ratio = (screen.x / screen.y);
-		Vec2f norm = { 
-			pos.x / screen.x - 0.5f, 
+		Vec2f norm = {
+			pos.x / screen.x - 0.5f,
 			pos.y / screen.y - 0.5f
 		};
 		auto red = Camera::main->GetReduction();
 		return Vec2f{
 		norm.x * ratio / ppu / red,
-		-norm.y / ppu / red};
+		-norm.y / ppu / red };
 	}
 	Vec2f Ui::MousePos()
 	{
