@@ -409,7 +409,8 @@ namespace SandCastle
 		Btn* button = new Btn();
 		button->margin = i->m_margin;
 		auto font = i->m_writer->GetFont(i->m_font);
-		button->label = i->m_writer->Write(utf8, font->id, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		auto color = i->m_writer->GetColor();
+		button->label = i->m_writer->Write(utf8, font->id, color, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
 		button->label.root.GetComponent<Transform>()->Move(padding.x, -padding.y, -3.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + padding.x * 2;
