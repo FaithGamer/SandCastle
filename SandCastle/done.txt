@@ -383,6 +383,13 @@ But I am very suspicious of that...
 -text maxWidth => width
 -update text
 
+19
+
+-fixed camera not recomputing view matrix on aspect ratio change
+-fixed ui hitbox computation
+-fixed ScreenToUi computation
+
+>take into account camera constraints for screen to world/screen to UI and so on
 >hitbox are fucked when resizing window (mouse pos not consistent)
 >world entities moving after resizing window? Or camera moving???
 

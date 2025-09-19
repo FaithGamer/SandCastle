@@ -39,8 +39,7 @@ namespace SandCastle
 	{
 		auto tr = root.GetComponent<Transform>();
 		auto pos = tr->GetPosition();
-		auto uiPos = Ui::WorldToUi(pos);
-		hitbox = Rect(uiPos.x, uiPos.y, size.x, size.y);
+		hitbox = Rect(pos.x, pos.y, size.x, size.y);
 	}
 	void Ui::Elem::Move(Vec2f offset)
 	{
