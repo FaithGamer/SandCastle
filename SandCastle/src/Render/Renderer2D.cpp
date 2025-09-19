@@ -75,7 +75,8 @@ namespace SandCastle
 
 		//Viewport size and clear color
 		auto size = Window::GetSize();
-		glViewport(0, 0, size.x, size.y);
+		glViewport(0, 0, Math::FloorToEven(size.x), Math::FloorToEven(size.y));
+		//glViewport(0, 0, size.x, size.y);
 
 		//Globally enabling blending
 		glEnable(GL_BLEND);

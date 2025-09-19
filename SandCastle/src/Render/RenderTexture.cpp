@@ -3,6 +3,7 @@
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Render/RenderTexture.h"
 #include "SandCastle/Render/Texture.h"
+#include "SandCastle/Core/Math.h"
 #include "stb/stb_image_write.h"
 
 namespace SandCastle
@@ -45,7 +46,8 @@ namespace SandCastle
 	void RenderTexture::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
-		glViewport(0, 0, m_size.x, m_size.y);
+		glViewport(0, 0, Math::FloorToEven(m_size.x), Math::FloorToEven(m_size.y));
+		//glViewport(0, 0, m_size.x, m_size.y);
 	}
 
 	void RenderTexture::Clear()

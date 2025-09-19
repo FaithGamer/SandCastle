@@ -2,7 +2,7 @@
 
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Render/Window.h"
-
+#include "SandCastle/Core/Math.h"
 
 namespace SandCastle
 {
@@ -238,28 +238,7 @@ namespace SandCastle
 		static bool recursive = false;
 		m_pixelSize.x = (unsigned int)event.window.data1;
 		m_pixelSize.y = (unsigned int)event.window.data2;
-		bool resize = false;
-		if (m_pixelSize.x % 2 > 0)
-		{
-			m_pixelSize.x -= 1;
-			resize = true;
-		}
-		if (m_pixelSize.y % 2 > 0)
-		{
-			m_pixelSize.y -= 1;
-			resize = true;
-		}
-		if (resize && !recursive)
-		{
-			recursive = true;
-			SDL_SetWindowSize(m_window, (int)m_pixelSize.x, (int)m_pixelSize.y);
-		}
-		else
-		{
-			recursive = false;
-		}
 		ResizeSignal.Send(m_pixelSize);
-		//LOG_INFO("pixelizes. [{0}, {1}]", m_pixelSize.x, m_pixelSize.y);
 	}
 
 	void Window::OnSDLWindowResized(SDL_Event& event)
@@ -270,6 +249,6 @@ namespace SandCastle
 	void Window::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, m_pixelSize.x, m_pixelSize.y);
+		glViewport(0, 0, Math::FloorToEven(m_pixelSize.x), Math::FloorToEven(m_pixelSize.y));
 	}
 }
