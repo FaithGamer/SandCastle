@@ -1,12 +1,12 @@
 #pragma once
 
-#include "SandCastle/UI/Ui.h"
 #include "SandCastle/UI/UiElem.h"
+#include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/Core/Bitmask.h"
 
 namespace SandCastle
 {
-	class UiFrame::Template;
+	class Ui;
 	class UiCanvas : public UiElem
 	{
 	public:
@@ -50,10 +50,11 @@ namespace SandCastle
 			BotRight
 		};
 	public:
+		~UiCanvas();
 		UiElem::Type GetType() const override;
 		void SetPosition(Vec2f pos) override;
+		void AddElem(UiElem* elem);
 
-		void MakeLayout();
 		void SetAnchor(Anchor anchor);
 		/// @brief Spacing between element inside the canvas
 		void SetSpacing(Vec2f spacing);
@@ -65,11 +66,11 @@ namespace SandCastle
 		LayoutAlignV layoutAlignV = LayoutAlignV::Top;
 	private:
 		friend Ui;
-		void OffsetRange(int begin, int end, Vec2f offset);
+		void UpdateLayout();
 	private:
 		Entity frame;
 		Bitmask8 fixedSize = 0;
-		std::vector<UiElem*> children;
+		std::list<UiElem*> children;
 		Vec2f spacing = Vec2f(0.f, 0.f);
 		Vec2f border = Vec2f(0.f, 0.f);
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);

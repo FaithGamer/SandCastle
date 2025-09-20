@@ -40,7 +40,7 @@ namespace SandCastle
 
 
 		typedef uint32_t FrameID;
-		enum class LayoutDir; 
+		enum class LayoutDir;
 		enum class LayoutWrap;
 		enum class LayoutAlignH;
 		enum class LayoutAlignV;
@@ -130,6 +130,8 @@ namespace SandCastle
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
 		static void RegisterHoverable(UiElem* elem);
+		/*--- should be moved in UiFrame ---*/
+		Entity InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z);
 
 		/*---Accessors---*/
 
@@ -151,7 +153,7 @@ namespace SandCastle
 
 		struct BorderSprite
 		{
-			BorderSprite(){}
+			BorderSprite() {}
 			BorderSprite(Texture* tex, Rect rect, Vec2f worldDim);
 			Sprite sprite;
 			Vec2f wDim;
@@ -169,9 +171,7 @@ namespace SandCastle
 		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
 		void CreateText(UiTxt* text, std::string_view utf8, float width);
 		/*---Instantiation---*/
-		void AddElem(UiElem* elem, UiCanvas* canvas);
-		Entity InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z);
-		static void UpdateCanvas(UiCanvas* canvas);
+		void NewElem(UiElem* elem, UiCanvas* canvas);
 
 	private:
 		friend Systems;
@@ -188,8 +188,8 @@ namespace SandCastle
 		//State (creation of new elements)
 		Material* m_material = nullptr;
 		Material* m_defaultMaterial = nullptr;
-		FontID m_font;
-		LayerID m_layer;
+		FontID m_font = 0;
+		LayerID m_layer = 0;
 		UiFrame::Template* m_canvasFrame = nullptr;
 		UiFrame::Template* m_buttonFrame = nullptr;
 		UiFrame::Template* m_buttonFrameHover = nullptr;
@@ -200,14 +200,14 @@ namespace SandCastle
 		//Runtime
 		std::vector<UiElem*> m_hoverables;
 		std::vector<UiTxt*> m_values;
+		std::unordered_map<UiElem::ID, UiCanvas*> m_roots;
 		UiElem* m_hovered = nullptr;
 		UiElem* m_pressed = nullptr;
 		std::stack<UiCanvas*> m_canvas;
-		std::unordered_map<UiElem::ID, UiElem*> m_elems;
 		float m_z = 0.f;
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
-		float m_ppu = 1.f/360.f;
+		float m_ppu = 1.f / 360.f;
 
 		static UiElem::ID m_nextId;
 		const float zStep = 1.f;
@@ -229,7 +229,7 @@ namespace SandCastle
 		text->color = i->m_txtColor;
 		text->utf8 = utf8;
 		i->CreateText(text, text->Format(), width);
-		i->AddElem(text, canvas);
+		i->NewElem(text, canvas);
 		i->m_values.emplace_back(text);
 
 		return text;

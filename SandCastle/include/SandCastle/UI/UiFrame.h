@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SandCastle/UI/Ui.h"
-
 namespace SandCastle
 {
 	class Sprite;

@@ -401,7 +401,33 @@ But I am very suspicious of that...
 -Update text keep font
 -text value works
 
+20
+
+-Canvas elem vector->list
+-
+
+>Move frame stuff to UiFrame
+>Move create/Update Text to UiTxt
+>when UiElem is deleted, remove it from parent, and Update canvas layout.
+>Canvas children must be a list for easy deletion while keeping in place
+>when Canvas is deleted, delete every children -> must not update layout
+>keep a pointer of every canvas in Ui, to ensure being able to delete them, or to access them.
+>when canvas is deleted, remove it from Ui
+>so, no longer have all elem in Ui
+>only have a unordered map of root canvases
+>Add a DeleteAll
+>think about having frame method (instance notably) in the UiFrame class ?
+
+advanced ui:
+
+>UiElem have a specific layout order (by default order of creation)
+>Can add and remove UiElem from canvas, at layout order
+>UiElem can be floating: have the same position of the last elem, or custom...
+>UiElem can change parent
+
 >clean destroy of elem pointers and entities
+>clean m_hoverables
+>clean m_values
 >clean destroy of canvas children
 >think about what else for ui.
 

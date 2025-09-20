@@ -1,8 +1,15 @@
 #include "pch.h"
 #include "SandCastle/UI/UiCanvas.h"
+#include "SandCastle/UI/UiFrame.h"
+#include "SandCastle/UI/Ui.h"
 
 namespace SandCastle
 {
+	UiCanvas::~UiCanvas()
+	{
+		
+
+	}
 	UiElem::Type UiCanvas::GetType() const
 	{
 		return UiElem::Type::Canvas;
@@ -38,9 +45,8 @@ namespace SandCastle
 		wPos = Vec2f(std::round(wPos.x), std::round(wPos.y));
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
 		//update children hitboxes:
-		for (int i = 0; i < children.size(); i++)
+		for (auto child : children)
 		{
-			auto child = children[i];
 			if (child->GetType() == UiElem::Type::Canvas)
 			{
 				child->SetPosition(child->position);
@@ -50,21 +56,13 @@ namespace SandCastle
 		ComputeHitbox();
 	}
 
-	void UiCanvas::OffsetRange(int begin, int end, Vec2f offset)
+	void UiCanvas::AddElem(UiElem* elem)
 	{
-		for (int i = begin; i < end; i++)
-		{
-			if (children.size() <= i)
-			{
-				LOG_ERROR("Canvas::OffsetRange, out of range.");
-				return;
-			}
-			auto& child = children[i];
-			child->root.gtr()->Move(offset);
-		}
+		root.AddChild(elem->root);
+		children.emplace_back(elem);
 	}
 
-	void UiCanvas::MakeLayout()
+	void UiCanvas::UpdateLayout()
 	{
 		//Set the position of every children according to layout
 		//And contentSize the canvas when needed
@@ -242,9 +240,8 @@ namespace SandCastle
 		Vec2f contentSize = Vec2f(0.f, 0.f);
 		float totalWrap = 0.f;
 
-		for (int i = 0; i < children.size(); i++)
+		for (auto child : children)
 		{
-			auto& child = children[i];
 			auto margedSize = child->size + child->margin * 2;
 			float width = margedSize.x + border.x;
 			float height = margedSize.y + border.y;
@@ -330,6 +327,12 @@ namespace SandCastle
 		}
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
+
+		if (frameTemplate != nullptr)
+		{
+			frame.Destroy();
+			frame = Ui::Instance()->InstanceFrame(this, frameTemplate, 1.f);
+		}
 	}
 	void UiCanvas::SetAnchor(Anchor Anchor)
 	{

@@ -17,6 +17,10 @@ namespace SandCastle
 	UiElem::~UiElem()
 	{
 		root.Destroy();
+		/*if (parent != nullptr)
+		{
+			parent->
+		}*/
 	}
 
 	void UiElem::SetPosition(Vec2f pos)

@@ -110,19 +110,17 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::AddElem(UiElem* elem, UiCanvas* canvas)
+	void Ui::NewElem(UiElem* elem, UiCanvas* canvas)
 	{
 		auto id = m_nextId++;
 		elem->id = id;
 		elem->parent = canvas;
 		elem->z = -1.f;
 		elem->margin = m_rootMargin;
-		m_elems[id] = elem;
 		if (canvas != nullptr)
 		{
 			elem->margin = m_margin;
-			canvas->root.AddChild(elem->root);
-			canvas->children.emplace_back(elem);
+			canvas->AddElem(elem);
 		}
 	}
 
@@ -326,7 +324,7 @@ namespace SandCastle
 		canvas->size = size;
 		canvas->frameTemplate = i->m_canvasFrame;
 		i->m_canvas.push(canvas);
-		i->AddElem(canvas, parent);
+		i->NewElem(canvas, parent);
 		return canvas;
 	}
 
@@ -344,7 +342,7 @@ namespace SandCastle
 		text->color = i->m_txtColor;
 		text->utf8 = utf8;
 		i->CreateText(text, utf8, width);
-		i->AddElem(text, canvas);
+		i->NewElem(text, canvas);
 
 		return text;
 	}
@@ -386,7 +384,7 @@ namespace SandCastle
 		Instance()->CreateText(text, text->Format(), text->sentence.maxWidth);
 		if (std::abs(prevSize.x - text->size.x) > 0.01f
 			|| std::abs(prevSize.y - text->size.y) > 0.01f)
-			UpdateCanvas(text->parent);
+			text->parent->UpdateLayout();
 		else
 			text->SetPosition(text->position);
 	}
@@ -417,7 +415,7 @@ namespace SandCastle
 		image->entt.GetComponent<Transform>()->Move(offset);
 		image->root.AddChild(image->entt);
 
-		i->AddElem(image, canvas);
+		i->NewElem(image, canvas);
 		return image;
 	}
 
@@ -440,7 +438,7 @@ namespace SandCastle
 		button->framePressed = i->InstanceFrame(button, i->m_buttonFramePressed, -2.f);
 		button->OnUnHover();
 		RegisterHoverable(button);
-		i->AddElem(button, canvas);
+		i->NewElem(button, canvas);
 		return button;
 	}
 
@@ -453,33 +451,13 @@ namespace SandCastle
 			return;
 		}
 		auto canvas = i->m_canvas.top();
-		UpdateCanvas(canvas);
+		canvas->UpdateLayout();
 		i->m_canvas.pop();
-	}
-
-	void Ui::UpdateCanvas(UiCanvas* canvas)
-	{
-		canvas->MakeLayout();
-		if (canvas->frameTemplate != nullptr)
-		{
-			canvas->frame.Destroy();
-			canvas->frame = Instance()->InstanceFrame(canvas, canvas->frameTemplate, 1.f);
-		}
 	}
 
 	void Ui::Delete(UiElem::ID uiElem)
 	{
-		auto i = Instance();
-		auto it = i->m_elems.find(uiElem);
-		if (it == i->m_elems.end())
-			return;
-		//to do, remove from hoverable, and data update
 
-		/*auto elem = it->second;
-		if (elem->parent)
-		{
-			elem->parent->children.remove(elem);
-		}*/
 
 	}
 
