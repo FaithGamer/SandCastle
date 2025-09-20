@@ -404,9 +404,10 @@ But I am very suspicious of that...
 20
 
 -Canvas elem vector->list
--
+-moved frame into UiFrame
+-UiElem state (hover, pressed...)
 
->Move frame stuff to UiFrame
+>don't forget to remove uselss headers in ui.cpp
 >Move create/Update Text to UiTxt
 >when UiElem is deleted, remove it from parent, and Update canvas layout.
 >Canvas children must be a list for easy deletion while keeping in place

@@ -251,6 +251,7 @@
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\UI\UiBtn.cpp" />
+    <ClCompile Include="src\UI\UiFrame.cpp" />
     <ClCompile Include="src\UI\UiImg.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />

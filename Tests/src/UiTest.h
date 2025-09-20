@@ -54,6 +54,7 @@ public:
 		//Long story short: if you use a fixed step frame, use a canvas size that is a round multiple of that step.
 		//If not, use a canvas size that is a minimum of double the sprite corner size of the frame.
 		auto root = Ui::BeginCanvas(Vec2f(200, 0));
+		Ui::SetTextAlign(TextAlign::Center);
 		//Center the canvas on screen
 		root->SetPosition(Vec2f(0.f, 0.f));
 		root->SetAnchor(UiCanvas::Anchor::MiddleCenter);
@@ -203,10 +204,10 @@ public:
 		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, 0);
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
-		//CreateSomeUi();
-		//CreateSquareWindow();
-		CreateButtonWindow();
-		//MakeUpgradeUi();
+		CreateSomeUi();
+		CreateSquareWindow();
+		//CreateButtonWindow();
+		MakeUpgradeUi();
 	}
 	void Update() override
 	{

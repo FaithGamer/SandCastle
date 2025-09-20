@@ -17,6 +17,7 @@ namespace SandCastle
 	UiElem::~UiElem()
 	{
 		root.Destroy();
+		//Would be nice not to rely on Ui.h
 		/*if (parent != nullptr)
 		{
 			parent->
@@ -41,6 +42,10 @@ namespace SandCastle
 	Vec2f UiElem::GetPosition() const
 	{
 		return position;
+	}
+	UiElem::State UiElem::GetState() const
+	{
+		return state;
 	}
 	void UiElem::ComputeHitbox()
 	{

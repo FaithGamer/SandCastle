@@ -1,13 +1,48 @@
 #pragma once
+#include "SandCastle/Render/Layer.h"
+#include "SandCastle/Render/Sprite.h"
+#include "SandCastle/Render/Rect.h"
+#include "SandCastle/Render/Color.h"
+#include "SandCastle/ECS/Entity.h"
+
 
 namespace SandCastle
 {
 	class Sprite;
 	class Texture;
+	class Material;
+	class Ui;
+	class UiElem;
 
 	class UiFrame
 	{
 	public:
+
+		struct BorderSprite
+		{
+			BorderSprite() {}
+			BorderSprite(Texture* tex, Rect rect, Vec2f worldDim);
+			Sprite sprite;
+			Vec2f wDim;
+		};
+
+		struct BorderSprites
+		{
+			BorderSprite sprites[5];
+		};
+
+		struct Template
+		{
+			//3x3 stretchable sprites.
+			//Used for buttons or frames.
+			bool fixedStep = false;
+			std::vector<Sprite*> cornerSpr;
+			std::vector<Texture*> repeatTex;
+		};
+
+	public:
+		UiFrame();
+		UiFrame(UiFrame::Template* templ, Material* material, LayerID layer);
 		enum class TexBorder : int
 		{
 			Top,
@@ -25,13 +60,16 @@ namespace SandCastle
 			BotRight
 		};
 
-		struct Template
-		{
-			//3x3 stretchable sprites.
-			//Used for buttons or frames.
-			bool fixedStep = false;
-			std::vector<Sprite*> cornerSpr;
-			std::vector<Texture*> repeatTex;
-		};
+		static void MakeTemplate(Template& frame, const std::string& texture, bool fixedStep);
+		void SetColor(Color color);
+		void SetAlpha(unsigned int alpha);
+		void Update(UiElem* elem, float z);
+	private:
+		friend Ui;
+		Entity root;
+		Vec2f size;
+		UiFrame::Template* templ = nullptr;
+		Material* material = nullptr;
+		LayerID layer = 0;
 	};
 }

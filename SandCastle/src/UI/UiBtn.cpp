@@ -5,71 +5,77 @@
 
 namespace SandCastle
 {
-	void Alpha(Entity& entity, unsigned char alpha)
-	{
-		auto children = entity.GetComponent<Children>();
-		for (auto& child : children->children)
-		{
-			Entity(child).GetComponent<SpriteRender>()->color.a = alpha;
-		}
-	};
-	void Coloring(Entity& entity, const Color& color)
-	{
-		auto children = entity.GetComponent<Children>();
-		for (auto& child : children->children)
-		{
-			auto spr = Entity(child).GetComponent<SpriteRender>();
-			spr->color.r = color.r;
-			spr->color.g = color.g;
-			spr->color.b = color.b;
-		}
-	};
+
 	UiElem::Type UiBtn::GetType() const
 	{
 		return UiElem::Type::Button;
 	}
 	void UiBtn::SetColor(const Color& color)
 	{
-		Coloring(frameIdle, color);
-		Coloring(framePressed, color);
-		Coloring(frameHover, color);
+		frameIdle.SetColor(color);
+		framePressed.SetColor(color);
+		frameHover.SetColor(color);
+	}
+	void UiBtn::UpdateFrames()
+	{
+		frameIdle.Update(this, 0.f);
+		framePressed.Update(this, -1.f);
+		frameHover.Update(this, -2.f);
+		ShowHideFrame();
 	}
 	void UiBtn::OnHover()
 	{
-		Alpha(frameIdle, 0);
-		Alpha(framePressed, 0);
-		Alpha(frameHover, 255);
+		ShowHideFrame();
 	}
 	void UiBtn::OnUnHover()
 	{
-		Alpha(frameIdle, 255);
-		Alpha(framePressed, 0);
-		Alpha(frameHover, 0);
+		ShowHideFrame();
 		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
 		labelOffset = 0.f;
 	}
 	void UiBtn::OnClickPressed()
 	{
-		Alpha(frameIdle, 0);
-		Alpha(framePressed, 255);
-		Alpha(frameHover, 0);
+		ShowHideFrame();
 		labelOffset += Vec2f(-1, -1);
 		label.root.gtr()->Move(labelOffset.x, labelOffset.y, 0.f);
 	}
 	void UiBtn::OnClickReleased()
 	{
-		Alpha(framePressed, 0);
+		framePressed.SetAlpha(0);
 		if (IsInside(Ui::MousePos()))
 		{
-			Alpha(frameHover, 255);
-			Alpha(frameIdle, 0);
+			frameHover.SetAlpha(255);
+			frameIdle.SetAlpha(0);
 		}
 		else
 		{
-			Alpha(frameHover, 0);
-			Alpha(frameIdle, 255);
+			frameHover.SetAlpha(0);
+			frameIdle.SetAlpha(255);
 		}
 		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
 		labelOffset = 0.f;
+	}
+	void UiBtn::ShowHideFrame()
+	{
+		switch (state)
+		{
+		case UiElem::State::Idle:
+			frameIdle.SetAlpha(255);
+			framePressed.SetAlpha(0);
+			frameHover.SetAlpha(0);
+			break;
+		case UiElem::State::Hovered:
+			frameIdle.SetAlpha(0);
+			framePressed.SetAlpha(0);
+			frameHover.SetAlpha(255);
+			break;
+		case UiElem::State::Pressed:
+			frameIdle.SetAlpha(0);
+			framePressed.SetAlpha(255);
+			frameHover.SetAlpha(0);
+			break;
+		default:
+			break;
+		}
 	}
 }

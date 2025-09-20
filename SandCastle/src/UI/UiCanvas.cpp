@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/UI/UiFrame.h"
-#include "SandCastle/UI/Ui.h"
+#include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
@@ -327,12 +327,8 @@ namespace SandCastle
 		}
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
-
-		if (frameTemplate != nullptr)
-		{
-			frame.Destroy();
-			frame = Ui::Instance()->InstanceFrame(this, frameTemplate, 1.f);
-		}
+		if(frame)
+			frame->Update(this, 1.f);
 	}
 	void UiCanvas::SetAnchor(Anchor Anchor)
 	{

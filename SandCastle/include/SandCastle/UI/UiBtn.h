@@ -4,6 +4,7 @@
 #include "SandCastle/Core/Signal.h"
 #include "SandCastle/Render/Text.h"
 #include "SandCastle/Render/Color.h"
+#include "SandCastle/UI/UiFrame.h"
 
 namespace SandCastle
 {
@@ -11,21 +12,22 @@ namespace SandCastle
 	class UiBtn : public UiElem
 	{
 	public:
-
-	public:
+		
 		UiElem::Type GetType() const override;
 		void SetColor(const Color& color);
+		void UpdateFrames();
 	protected:
 		void OnHover() override;
 		void OnUnHover() override;
 		void OnClickPressed() override;
 		void OnClickReleased() override;
+		void ShowHideFrame();
 	protected:
 		friend Ui;
 		Sentence label;
-		Entity frameIdle;
-		Entity frameHover;
-		Entity framePressed;
+		UiFrame frameIdle;
+		UiFrame frameHover;
+		UiFrame framePressed;
 		Vec2f labelOffset = 0.f;
 	};
 }

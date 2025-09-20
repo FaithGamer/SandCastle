@@ -13,6 +13,12 @@ namespace SandCastle
 	{
 	public:
 		typedef uint32_t ID;
+		enum class State
+		{
+			Idle,
+			Hovered,
+			Pressed
+		};
 		enum class Type
 		{
 			Canvas,
@@ -30,6 +36,7 @@ namespace SandCastle
 		virtual void Move(Vec2f offset);
 		Vec2f GetSize() const;
 		Vec2f GetPosition() const;
+		State GetState() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
 
@@ -76,6 +83,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		State state = State::Idle;
 		UiCanvas* parent = nullptr;
 		UiElem::ID id = 0;
 		float z = 0.f;

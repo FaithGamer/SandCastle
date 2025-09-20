@@ -57,7 +57,7 @@ namespace SandCastle
 		/// The texture MUST already have 3x3 sprites (use the .texture file to set up properly).
 		/// @param fixedStep Set true if your texture has a repeating pattern that must be consistent.
 		/// The frame size will be constrainted to increase/decrease by stepped increment, according to the sprites size.
-		static void MakeFrameTemplate(String texture, bool fixedStep);
+		static void MakeFrameTemplate(const String& texture, bool fixedStep);
 		/// @brief Create a font that will be available for usage later at any time.
 		/// @param filename font filename
 		/// @param fancyName identification name of easy usage
@@ -130,8 +130,6 @@ namespace SandCastle
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
 		static void RegisterHoverable(UiElem* elem);
-		/*--- should be moved in UiFrame ---*/
-		Entity InstanceFrame(UiElem* elem, UiFrame::Template* frame, float z);
 
 		/*---Accessors---*/
 
@@ -145,30 +143,10 @@ namespace SandCastle
 		//Public only for test
 	private:
 
-		/*---Structs---*/
-		struct RepeatTextures
-		{
-
-		};
-
-		struct BorderSprite
-		{
-			BorderSprite() {}
-			BorderSprite(Texture* tex, Rect rect, Vec2f worldDim);
-			Sprite sprite;
-			Vec2f wDim;
-		};
-
-		struct BorderSprites
-		{
-			BorderSprite sprites[5];
-		};
-
-
 		/*---Helpers---*/
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
-		static void BorderSize(int i, Rect& rect, Vec2f& wDim, Vec2f pxSize, Vec2f pxDim, Vec2f sDim, float ppu);
+		
 		void CreateText(UiTxt* text, std::string_view utf8, float width);
 		/*---Instantiation---*/
 		void NewElem(UiElem* elem, UiCanvas* canvas);
