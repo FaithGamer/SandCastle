@@ -7,9 +7,22 @@ namespace SandCastle
 {
 	UiCanvas::~UiCanvas()
 	{
-		
-
+		destroyed = true;
+		for (auto child : children)
+		{
+			delete child;
+		}
 	}
+
+	void UiCanvas::MustUpdate()
+	{
+		if (!mustUpdate)
+		{
+			mustUpdate = true;
+			mustUpdateSignal.Send(this);
+		}
+	}
+
 	UiElem::Type UiCanvas::GetType() const
 	{
 		return UiElem::Type::Canvas;
@@ -60,6 +73,23 @@ namespace SandCastle
 	{
 		root.AddChild(elem->root);
 		children.emplace_back(elem);
+		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
+		if (elem->GetType() == UiElem::Type::Canvas)
+		{
+			static_cast<UiCanvas*>(elem)->mustUpdateSignal.Listen(&UiCanvas::OnChildMustUpdate, this);
+		}
+	}
+	void UiCanvas::OnChildMustUpdate(UiCanvas* child)
+	{
+		MustUpdate();
+	}
+	void UiCanvas::OnDestroy(UiElem* elem)
+	{
+		//When a children gets destroyed
+		if (destroyed)
+			return;
+		children.remove(elem);
+		MustUpdate();
 	}
 
 	void UiCanvas::UpdateLayout()
@@ -325,9 +355,10 @@ namespace SandCastle
 				}
 			}
 		}
+		mustUpdate = false;
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
-		if(frame)
+		if (frame)
 			frame->Update(this, 1.f);
 	}
 	void UiCanvas::SetAnchor(Anchor Anchor)

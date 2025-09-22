@@ -139,10 +139,6 @@ public:
 	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
-		Ui::SetButtonFrame("btn.png");
-		Ui::SetButtonFrameHover("btn_hover.png");
-		Ui::SetButtonFramePressed("btn_pressed.png");
-		Ui::SetCanvasFrame("frame.png");
 
 		btnCanvas = Ui::BeginCanvas(0);
 		btnCanvas->SetBorder(5.f);
@@ -195,6 +191,12 @@ public:
 		Ui::MakeFrameTemplate("btn.png", false);
 		Ui::MakeFrameTemplate("btn_pressed.png", false);
 		Ui::MakeFrameTemplate("btn_hover.png", false);
+
+		Ui::SetButtonFrame("btn.png");
+		Ui::SetButtonFrameHover("btn_hover.png");
+		Ui::SetButtonFramePressed("btn_pressed.png");
+		Ui::SetCanvasFrame("frame.png");
+
 		//Optionally change the ppu before making font
 		//This can help to make the font px size 
 		//to be 1:1 for a specific screen resolution
@@ -204,15 +206,70 @@ public:
 		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, 0);
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
-		CreateSomeUi();
-		CreateSquareWindow();
-		//CreateButtonWindow();
-		MakeUpgradeUi();
+		//CreateSomeUi();
+		//CreateSquareWindow();
+	//	CreateButtonWindow();
+	//	MakeUpgradeUi();
+	DeleteUi();
+	}
+	void DeleteUi()
+	{
+		auto root = Ui::BeginCanvas();
+		root->layoutAlignH = UiCanvas::LayoutAlignH::Center;
+		root->SetPosition(Vec2f(-320, 180));
+		root->SetBorder(5.f);
+		Ui::SetTextColor(Color::Black);
+		Ui::Text("Click the buttons.");
+		auto btnCan = Ui::BeginCanvas();
+		btnCan->layoutDir = UiCanvas::LayoutDir::LeftRight;
+		Ui::SetTextColor(Color::White);
+		auto btn1 = Ui::Button("Create", Vec2f(5, 5));
+		btn1->ListenClickReleased(&UiSys::OnClickCreate, this);
+		auto btn2 = Ui::Button("Delete", Vec2f(5, 5));
+		btn2->ListenClickReleased(&UiSys::OnClickDelete, this);
+		Ui::EndCanvas();
+		Ui::EndCanvas();
+	}
+	void OnClickDelete(UiElem* signal)
+	{
+		for (auto& created : createds)
+		{
+			auto elem = (UiElem*)created;
+			Ui::Destroy(elem);
+		}
+		createds.clear();
+	}
+	std::list<UiCanvas*> createds;
+	void OnClickCreate(UiElem* signal)
+	{
+		auto created = Ui::BeginCanvas();
+		Ui::SetTextColor(Color::Black);
+		created->SetPosition(Vec2f(Random::Range(-200, 200), Random::Range(-100, 100)));
+		Ui::Text("This canvas was created!");
+		auto btn = Ui::Button("Delete This", Vec2f(5));
+		btn->ListenClickReleased(&UiSys::DeleteThis, this);
+		Ui::EndCanvas();
+
+		createds.emplace_back(created);
+	}
+	void DeleteThis(UiElem* elem)
+	{
+		Ui::Destroy(elem);
 	}
 	void Update() override
 	{
 		OscillateUpdt();
 		TextUpdate();
+		CreateDelete();
+	}
+	void CreateDelete()
+	{
+		//No memory leak has been reported with this test
+		auto c = Ui::BeginCanvas();
+		Ui::Text("Salutations dceci va disparaître aussi tôt qu'apparut");
+		Ui::EndCanvas();
+		//createds.emplace_back(c);
+		Ui::Destroy(c);
 	}
 	void TextUpdate()
 	{

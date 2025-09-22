@@ -16,12 +16,18 @@ namespace SandCastle
 
 	UiElem::~UiElem()
 	{
+		destroySignal.Send(this);
 		root.Destroy();
-		//Would be nice not to rely on Ui.h
-		/*if (parent != nullptr)
-		{
-			parent->
-		}*/
+	}
+
+	UiElem::ID UiElem::GetID() const
+	{
+		return id;
+	}
+
+	UiCanvas* UiElem::GetParent() const
+	{
+		return parent;
 	}
 
 	void UiElem::SetPosition(Vec2f pos)
@@ -63,23 +69,27 @@ namespace SandCastle
 	}
 	void UiElem::Hover()
 	{
+		state = State::Hovered;
 		OnHover();
 		hoverSignal.Send(this);
 	}
 	void UiElem::UnHover()
 	{
+		state = State::Idle;
 		OnUnHover();
 		pressed = false;
 		unhoverSignal.Send(this);
 	}
 	void UiElem::ClickPressed()
 	{
+		state = State::Pressed;
 		OnClickPressed();
 		pressed = true;
 		clickPressSignal.Send(this);
 	}
 	void UiElem::ClickReleased()
 	{
+		state = State::Hovered;
 		if (pressed)
 		{
 			OnClickReleased();

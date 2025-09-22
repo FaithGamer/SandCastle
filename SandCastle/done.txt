@@ -407,18 +407,29 @@ But I am very suspicious of that...
 -moved frame into UiFrame
 -UiElem state (hover, pressed...)
 
->don't forget to remove uselss headers in ui.cpp
->Move create/Update Text to UiTxt
->when UiElem is deleted, remove it from parent, and Update canvas layout.
->Canvas children must be a list for easy deletion while keeping in place
->when Canvas is deleted, delete every children -> must not update layout
->keep a pointer of every canvas in Ui, to ensure being able to delete them, or to access them.
->when canvas is deleted, remove it from Ui
->so, no longer have all elem in Ui
->only have a unordered map of root canvases
->Add a DeleteAll
->think about having frame method (instance notably) in the UiFrame class ?
+21
 
+
+-Canvas have authority to delete children
+-Ui has authority to delete root canvases
+-Clean deletion of pointed objects
+-basic test for memory leaks
+-elem delete: must be removed from m_hoverable, hovered, m_values..
+-fixed button frames not right
+
+22
+
+
+>weird stuff happening when deleting buttons
+>looks like deleting one button change the idle frame of another
+
+>differentiate Canvas->RemoveElem,
+and delete elem (canvas listen to signal)
+
+>Add a DeleteAll
+
+>think of how to handle overlapping cnavas (z fighting)
+>test pixel art rotations
 advanced ui:
 
 >UiElem have a specific layout order (by default order of creation)
@@ -431,6 +442,9 @@ advanced ui:
 >clean m_values
 >clean destroy of canvas children
 >think about what else for ui.
+
+>UiElem floating (superposed)
+>UiElem checkbox (floating necessary)
 
 >scroll? Nahhh
 
@@ -464,6 +478,7 @@ possible solution: realign text after Write bazed on new size at the end of Make
 >Transform animation system
 >fix window layer being behind other layers
 >fnv1a for strings like sounds
+>check for useless headers
 
 bugs:
 

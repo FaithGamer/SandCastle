@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <unordered_set>
 
 namespace SandCastle
 {
@@ -33,6 +34,35 @@ namespace SandCastle
         /// @return Index of the value, -1 if vector doesn't contain the value.
         template <typename T, typename V>
         int64_t FindIndex(std::vector<T>& container, const V& value);
+
+
+        template <typename T>
+        class OrderedSet {
+        public:
+            bool Insert(const T& value) 
+            {
+                if (m_set.find(value) != m_set.end())
+                    return false;
+                m_set.insert(value);
+                m_vec.emplace_back(value);
+                return true;
+            }
+
+            const std::vector<T>& Data() const 
+            { 
+                return m_vec; 
+            }
+
+            void Clear()
+            {
+                m_set.clear();
+                m_vec.clear();
+            }
+
+        private:
+            std::vector<T> m_vec;
+            std::unordered_set<T> m_set;
+        };
        
     }
 }

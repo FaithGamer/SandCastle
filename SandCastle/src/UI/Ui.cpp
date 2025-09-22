@@ -16,6 +16,7 @@
 #include "SandCastle/Render/Camera.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Input/ButtonInput.h"
+#include "SandCastle/Core/Container.h"
 
 namespace SandCastle
 {
@@ -48,8 +49,78 @@ namespace SandCastle
 
 	void Ui::Update()
 	{
+		LayoutUpdate();
 		HoverableUpdate();
 		ValuesUpdate();
+		DestroyUpdate();
+	}
+
+	void Ui::LayoutUpdate()
+	{
+		for (auto& canvas : m_layoutUpdate.Data())
+		{
+			canvas->UpdateLayout();
+		}
+		m_layoutUpdate.Clear();
+	}
+	void Ui::DestroyUpdate()
+	{
+		auto ins = Instance();
+		for (int i = 0; i < m_destroy.size(); i++)
+		{	
+			delete m_destroy[i];
+		}
+		m_destroy.clear();
+	}
+	void RemoveHelper(std::vector<UiElem*>& container, UiElem::ID id)
+	{
+		int remH = -1;
+		for (int j = 0; j < container.size(); j++)
+		{
+			if (container[j]->GetID() == id)
+			{
+				remH = j;
+				break;
+			}
+		}
+		if (remH != -1)
+		{
+			container[remH] = container.back();
+			container.pop_back();
+		}
+	}
+	void RemoveHelper(std::vector<UiTxt*>& container, UiElem::ID id)
+	{
+		int remH = -1;
+		for (int j = 0; j < container.size(); j++)
+		{
+			if (container[j]->GetID() == id)
+			{
+				remH = j;
+				break;
+			}
+		}
+		if (remH != -1)
+		{
+			container[remH] = container.back();
+			container.pop_back();
+		}
+	}
+	void Ui::OnDestroy(UiElem* elem)
+	{
+		auto id = elem->id;
+		auto it = m_roots.find(id);
+		if (it != m_roots.end())
+		{
+			m_roots.erase(it);
+		}
+		if (m_hovered && m_hovered->id == id)
+			m_hovered = nullptr;
+		if (m_pressed && m_pressed->id == id)
+			m_pressed = nullptr;
+
+		RemoveHelper(m_hoverables, id);
+		RemoveHelper(m_values, id);
 	}
 
 	void Ui::HoverableUpdate()
@@ -102,6 +173,11 @@ namespace SandCastle
 		}
 	}
 
+	void Ui::OnCanvasMustUpdate(UiCanvas* canvas)
+	{
+		Instance()->m_layoutUpdate.Insert(canvas);
+	}
+
 	void Ui::NewElem(UiElem* elem, UiCanvas* canvas)
 	{
 		auto id = m_nextId++;
@@ -114,6 +190,7 @@ namespace SandCastle
 			elem->margin = m_margin;
 			canvas->AddElem(elem);
 		}
+		elem->destroySignal.Listen(&Ui::OnDestroy, this);
 	}
 
 	/*---Initialization---*/
@@ -183,6 +260,12 @@ namespace SandCastle
 		canvas->size = size;
 		i->m_canvas.push(canvas);
 		i->NewElem(canvas, parent);
+		canvas->mustUpdateSignal.Listen(&Ui::OnCanvasMustUpdate, i.get(), SignalPriority::high);
+		if (parent == nullptr)
+		{
+			//root
+			i->m_roots.insert(std::make_pair(canvas->id, canvas));
+		}
 		return canvas;
 	}
 
@@ -313,10 +396,9 @@ namespace SandCastle
 		i->m_canvas.pop();
 	}
 
-	void Ui::Delete(UiElem::ID uiElem)
+	void Ui::Destroy(UiElem* elem)
 	{
-
-
+		Instance()->m_destroy.emplace_back(elem);
 	}
 
 	/*---State---*/
@@ -456,6 +538,11 @@ namespace SandCastle
 	LayerID Ui::GetLayer()
 	{
 		return Instance()->m_layer;
+	}
+
+	std::unordered_map<UiElem::ID, UiCanvas*> Ui::GetCanvases()
+	{
+		return Instance()->m_roots;
 	}
 
 	/*---Helpers---*/

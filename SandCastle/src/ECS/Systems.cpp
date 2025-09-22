@@ -110,15 +110,16 @@ namespace SandCastle
 				break; //Simulation no longer accurate
 			}
 		}
-		Ui::Instance()->Update();
 		for (auto& system : m_updateSystems)
 		{
 			system.system->Update();
 		}
+		Ui::Instance()->Update();
 		for (auto& system : m_lateUpdateSystems)
 		{
 			system.system->LateUpdate();
 		}
+	
 		//End CPU Time
 		STOP_PROFILING("cpu_main");
 		Renderer2D::Instance()->Process();

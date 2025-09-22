@@ -37,6 +37,8 @@ namespace SandCastle
 		Vec2f GetSize() const;
 		Vec2f GetPosition() const;
 		State GetState() const;
+		UiElem::ID GetID() const;
+		UiCanvas* GetParent() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
 
@@ -66,6 +68,7 @@ namespace SandCastle
 			clickable = true;
 			Ui::RegisterHoverable(this);
 		}
+		Signal<UiElem*> destroySignal;
 		/// @brief Use at your own risk
 		Entity root;
 	protected:

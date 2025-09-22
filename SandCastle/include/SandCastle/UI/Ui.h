@@ -9,6 +9,7 @@
 #include "SandCastle/Render/Writer.h"
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiFrame.h"
+#include "SandCastle/Core/Container.h"
 
 namespace SandCastle
 {
@@ -84,7 +85,8 @@ namespace SandCastle
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8, Vec2f padding);
 		static void EndCanvas();
-		static void Delete(UiElem::ID uiElem);
+		/// @brief Only root canvas can be deleted.
+		static void Destroy(UiElem* elem);
 
 		/*---Ui update---*/
 
@@ -134,13 +136,16 @@ namespace SandCastle
 		/*---Accessors---*/
 
 		/// @brief Get the object used to create fonts and write text.
+		/// It could be used for non UI stuff.
 		static Writer* GetWriter();
-		/// @brief Get the material used 
+		/// @brief Get the material currently used 
 		static Material* GetMaterial();
+		/// @brief Get the font currently used
 		static FontID GetFont();
+		/// @brief Get the layer currently used
 		static LayerID GetLayer();
-
-		//Public only for test
+		/// @brief Get all the root canvases.
+		static std::unordered_map<UiElem::ID, UiCanvas*> GetCanvases();
 	private:
 
 		/*---Helpers---*/
@@ -154,9 +159,13 @@ namespace SandCastle
 	private:
 		friend Systems;
 		void Update();
+		void LayoutUpdate();
+		void DestroyUpdate();
 		void HoverableUpdate();
 		void ValuesUpdate();
 		void OnClick(InputSignal* signal);
+		void OnCanvasMustUpdate(UiCanvas* canvas);
+		void OnDestroy(UiElem* elem);
 		//Helper
 		Writer* m_writer = nullptr;
 
@@ -178,7 +187,9 @@ namespace SandCastle
 		//Runtime
 		std::vector<UiElem*> m_hoverables;
 		std::vector<UiTxt*> m_values;
+		std::vector<UiElem*> m_destroy;
 		std::unordered_map<UiElem::ID, UiCanvas*> m_roots;
+		Container::OrderedSet<UiCanvas*> m_layoutUpdate;
 		UiElem* m_hovered = nullptr;
 		UiElem* m_pressed = nullptr;
 		std::stack<UiCanvas*> m_canvas;
