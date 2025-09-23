@@ -29,7 +29,12 @@ namespace SandCastle
 		Entity(EntityId entityId);
 		/// @brief Create an entity in the main world
 		static Entity Create();
-
+		static size_t Count();
+		template<typename ...Component>
+		inline size_t CountOf()
+		{
+			return registry.storage<Component...>().free_list();
+		}
 		/// @brief Destroy all entities having the mentioned components
 		template <typename... Component>
 		static void DestroyAll()
