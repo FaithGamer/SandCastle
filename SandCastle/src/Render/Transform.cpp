@@ -211,13 +211,7 @@ namespace SandCastle
 	{
 		if (m_haveParent)
 		{
-			if (needCompute)
-			{
-				ComputeMatrix();
-			}
-			auto parent = Entity(m_parent).GetComponent<Transform>();
-			//Mat4 mat = parent->GetTransformMatrix() * m_transformMatrix;
-			return m_localPosition + parent->GetPosition();
+			return Entity::registry.get<Transform>(m_parent).GetPosition() + m_localPosition;
 		}
 		return m_localPosition;
 	}
@@ -231,8 +225,7 @@ namespace SandCastle
 	{
 		if (m_haveParent)
 		{
-			auto parent = Entity(m_parent).GetComponent<Transform>();
-			return parent->GetScale() * m_localScale;
+			return Entity::registry.get<Transform>(m_parent).GetScale() * m_localScale;
 		}
 		return m_localScale;
 	}
@@ -246,8 +239,7 @@ namespace SandCastle
 	{
 		if (m_haveParent)
 		{
-			auto parent = Entity(m_parent).GetComponent<Transform>();
-			return parent->GetRotation() + m_localRotation;
+			return Entity::registry.get<Transform>(m_parent).GetRotation() + m_localRotation;
 		}
 		return m_localRotation;
 	}
@@ -265,8 +257,7 @@ namespace SandCastle
 		}
 		if (m_haveParent)
 		{
-			auto parent = Entity(m_parent).GetComponent<Transform>();
-			return parent->GetTransformMatrix() * m_transformMatrix;
+			return Entity::registry.get<Transform>(m_parent).GetTransformMatrix() * m_transformMatrix;
 		}
 		return m_transformMatrix;
 	}
