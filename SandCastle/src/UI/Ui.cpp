@@ -68,6 +68,7 @@ namespace SandCastle
 		auto ins = Instance();
 		for (int i = 0; i < m_destroy.size(); i++)
 		{	
+			LOG_INFO("delete");
 			delete m_destroy[i];
 		}
 		m_destroy.clear();
@@ -377,9 +378,9 @@ namespace SandCastle
 		button->frameIdle = UiFrame(i->m_buttonFrame, i->m_material, i->m_layer);
 		button->frameHover = UiFrame(i->m_buttonFrameHover, i->m_material, i->m_layer);
 		button->framePressed = UiFrame(i->m_buttonFramePressed, i->m_material, i->m_layer);
+		i->NewElem(button, canvas);
 		button->UpdateFrames();
 		RegisterHoverable(button);
-		i->NewElem(button, canvas);
 		return button;
 	}
 
@@ -392,7 +393,7 @@ namespace SandCastle
 			return;
 		}
 		auto canvas = i->m_canvas.top();
-		canvas->UpdateLayout();
+		canvas->MustUpdate();
 		i->m_canvas.pop();
 	}
 

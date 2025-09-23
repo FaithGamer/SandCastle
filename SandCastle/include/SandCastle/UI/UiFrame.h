@@ -28,7 +28,11 @@ namespace SandCastle
 
 		struct BorderSprites
 		{
-			BorderSprite sprites[5];
+			BorderSprites()
+			{
+				sprites.reserve(5);
+			}
+			std::vector<BorderSprite> sprites;
 		};
 
 		struct Template
@@ -42,6 +46,7 @@ namespace SandCastle
 
 	public:
 		UiFrame();
+		~UiFrame();
 		UiFrame(UiFrame::Template* templ, Material* material, LayerID layer);
 		enum class TexBorder : int
 		{
@@ -60,7 +65,7 @@ namespace SandCastle
 			BotRight
 		};
 
-		static void MakeTemplate(Template& frame, const std::string& texture, bool fixedStep);
+		static void MakeTemplate(Template& templ, const std::string& texture, bool fixedStep);
 		void SetColor(Color color);
 		void SetAlpha(unsigned int alpha);
 		void Update(UiElem* elem, float z);

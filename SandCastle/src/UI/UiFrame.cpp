@@ -91,10 +91,16 @@ namespace SandCastle
 
 	/*--- UiFrame ---*/
 
-
 	UiFrame::UiFrame()
 	{
 	}
+
+	UiFrame::~UiFrame()
+	{
+		if (root.Valid())
+			root.Destroy();
+	}
+
 	UiFrame::UiFrame(UiFrame::Template* Templ, Material* Material, LayerID Layer)
 		: templ(Templ), material(Material), layer(Layer)
 	{
@@ -117,14 +123,15 @@ namespace SandCastle
 		auto children = root.GetComponent<Children>();
 		for (auto& child : children->children)
 		{
-			Entity(child).GetComponent<SpriteRender>()->color.a = alpha;
+			auto spr = Entity(child).GetComponent<SpriteRender>();
+			spr->color.a = alpha;
 		}
 	}
 
-	void UiFrame::MakeTemplate(Template& frame, const std::string& texture, bool fixedStep)
+	void UiFrame::MakeTemplate(Template& templ, const std::string& texture, bool fixedStep)
 	{
-		frame.fixedStep = fixedStep;
-		MakeBorderTex(texture, frame.repeatTex);
+		templ.fixedStep = fixedStep;
+		MakeBorderTex(texture, templ.repeatTex);
 
 		//Load the corner sprites
 		for (int i = 0; i < 4; i++)
@@ -152,10 +159,9 @@ namespace SandCastle
 				break;
 			}
 			String spriteName = texture + y + x;
-			frame.cornerSpr.emplace_back(Assets::Get<Sprite>(spriteName));
+			templ.cornerSpr.emplace_back(Assets::Get<Sprite>(spriteName));
 		}
 	}
-
 	void UiFrame::Update(UiElem* elem, float z)
 	{
 		//Dimensions
@@ -181,7 +187,8 @@ namespace SandCastle
 		rootTr->SetPosition(0, 0, z);
 
 		//Instance border sprites at the right dimensions
-		auto borderSpr = root.AddComponent<BorderSprites>();
+		BorderSprites* borderSpr = nullptr;
+		borderSpr = root.AddComponent<BorderSprites>();
 		for (int i = 0; i < 5; i++)
 		{
 			Vec2f wDim;
@@ -189,7 +196,7 @@ namespace SandCastle
 			rect.left = 0;
 			rect.top = 0;
 			BorderSize(i, rect, wDim, pxSize, pxDim, sDim, ppu);
-			borderSpr->sprites[i] = BorderSprite(templ->repeatTex[i], rect, wDim);
+			borderSpr->sprites.emplace_back(BorderSprite(templ->repeatTex[i], rect, wDim));
 		}
 
 		//Corners
@@ -258,6 +265,7 @@ namespace SandCastle
 			}
 			root.AddChild(e);
 		}
+
 		elem->root.AddChild(root);
 	}
 }

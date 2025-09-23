@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <SandCastle.h>
 using namespace SandCastle;
@@ -202,6 +202,9 @@ public:
 		//to be 1:1 for a specific screen resolution
 		Ui::GetWriter()->SetPPU(1.f); //Will be native at 1080p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
 		//Ui::GetWriter()->SetPPU(1.f); //Will be native at 360p with the default settings (ui dpi 1.f/360.f for pixel perfect game)
+		/*Ui::MakeFont("NotoSansJP-Regular.ttf", "p", 10, 0);
+		Ui::MakeFont("NotoSansJP-Regular.ttf", "h2", 12, 0);
+		Ui::MakeFont("NotoSansJP-Regular.ttf", "h1", 16, 0);*/
 		Ui::MakeFont("ark-pixel-10px-proportional-latin.ttf", "p", 10, 0);
 		Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, 0);
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
@@ -210,7 +213,20 @@ public:
 		//CreateSquareWindow();
 	//	CreateButtonWindow();
 	//	MakeUpgradeUi();
-	DeleteUi();
+		//DeleteUi();
+		BenchmarkUi();
+	}
+	void BenchmarkUi()
+	{
+		int count = 30;
+		for (int i = 0; i < count; i++)
+		{
+			Ui::BeginCanvas();
+			Ui::BeginCanvas();
+			Ui::Text("This is an average UI with a couple stuff inside.Some text of course, this is the most important, because there will be quite a lot of text in most of UI.", 200.f);
+			Ui::EndCanvas();
+			Ui::EndCanvas();
+		}
 	}
 	void DeleteUi()
 	{
@@ -245,8 +261,8 @@ public:
 		auto created = Ui::BeginCanvas();
 		Ui::SetTextColor(Color::Black);
 		created->SetPosition(Vec2f(Random::Range(-200, 200), Random::Range(-100, 100)));
-		Ui::Text("This canvas was created!");
-		auto btn = Ui::Button("Delete This", Vec2f(5));
+		Ui::Text((const char*)u8"This canvas ô was created!");
+		auto btn = Ui::Button((const char*)u8"無量大数 Delete This", Vec2f(5));
 		btn->ListenClickReleased(&UiSys::DeleteThis, this);
 		Ui::EndCanvas();
 
@@ -260,13 +276,13 @@ public:
 	{
 		OscillateUpdt();
 		TextUpdate();
-		CreateDelete();
+		//CreateDelete();
 	}
 	void CreateDelete()
 	{
 		//No memory leak has been reported with this test
 		auto c = Ui::BeginCanvas();
-		Ui::Text("Salutations dceci va dispara�tre aussi t�t qu'apparut");
+		Ui::Text("Salutations dceci va disparaître aussi tôt qu'apparut");
 		Ui::EndCanvas();
 		//createds.emplace_back(c);
 		Ui::Destroy(c);
@@ -310,6 +326,11 @@ public:
 	Vec2f dir;
 	void Start()
 	{
+		for (int i = 0; i < 10; i++)
+		{
+			Entity::Create();
+		}
+		LOG_INFO("entity count = {0}", Entity::Count());
 		auto inputs = Inputs::CreateInputMap("Player");
 		auto cam = inputs->CreateDirectionalInput("Cam");
 		cam->BindWASD();
@@ -342,6 +363,7 @@ public:
 	}
 	void OnImGui()
 	{
+
 		return;
 		auto mouseUi = Ui::MousePos();
 		auto mouseWorld = Mouse::GetWorldPos();

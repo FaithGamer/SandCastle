@@ -6,3 +6,4 @@
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiImg.h"
 #include "SandCastle/UI/UiBtn.h"
+#include "SandCastle/UI/UiFrame.h"

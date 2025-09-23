@@ -78,7 +78,7 @@ namespace SandCastle
 	private:
 		std::optional<UiFrame> frame;
 		Bitmask8 fixedSize = 0;
-		std::list<UiElem*> children;
+		std::unordered_map<UiElem::ID, UiElem*> children;
 		Vec2f spacing = Vec2f(0.f, 0.f);
 		Vec2f border = Vec2f(0.f, 0.f);
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);

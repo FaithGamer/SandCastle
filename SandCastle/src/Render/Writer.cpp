@@ -45,25 +45,88 @@ namespace SandCastle
 			return false;
 		}
 	}
+	static inline bool is_cont(uint8_t b) { return (b & 0xC0) == 0x80; }
+
+	// Portable, table-less length decoder
+	static inline uint8_t expected_len(uint8_t c) {
+		if (c < 0x80) return 1;
+		if (c < 0xC0) return 0;          // continuation as lead → invalid
+		if (c < 0xE0) return 2;
+		if (c < 0xF0) return 3;
+		if (c <= 0xF4) return 4;         // F5..FF invalid in UTF-8
+		return 0;
+	}
+
 	std::vector<uint32_t> Writer::Utf8ToCodepoints(std::string_view s)
 	{
-		std::vector<uint32_t> cps;
-		size_t i = 0, n = s.size();
-		while (i < n) {
-			uint8_t c = (uint8_t)s[i++];
-			if ((c & 0x80) == 0) { cps.push_back(c); continue; }
-			if ((c & 0xE0) == 0xC0 && i < n) { cps.push_back(((c & 0x1F) << 6) | (s[i++] & 0x3F)); continue; }
-			if ((c & 0xF0) == 0xE0 && i + 1 < n) {
-				uint32_t cp = ((c & 0x0F) << 12) | ((s[i] & 0x3F) << 6) | (s[i + 1] & 0x3F);
-				i += 2; cps.push_back(cp); continue;
+		const uint8_t* p = reinterpret_cast<const uint8_t*>(s.data());
+		const uint8_t* end = p + s.size();
+
+		std::vector<uint32_t> out;
+		out.reserve(s.size()); // worst case: all ASCII
+
+		bool truncated = false;
+
+		while (p < end) {
+			// Fast path: ASCII run
+			while (p < end && *p < 0x80) out.push_back(*p++);
+
+			if (p >= end) break;
+
+			uint8_t c = *p++;
+			uint8_t L = expected_len(c);
+			if (L == 0) { out.push_back(0xFFFD); continue; }
+			if (L == 1) { out.push_back(c); continue; }
+
+			if (end - p < static_cast<std::ptrdiff_t>(L - 1)) {
+				// truncated multibyte sequence at end of string
+				out.push_back(0xFFFD);
+				truncated = true;
+				break;
 			}
-			if ((c & 0xF8) == 0xF0 && i + 2 < n) {
-				uint32_t cp = ((c & 0x07) << 18) | ((s[i] & 0x3F) << 12) | ((s[i + 1] & 0x3F) << 6) | (s[i + 2] & 0x3F);
-				i += 3; cps.push_back(cp); continue;
+
+			uint8_t b1 = p[0];
+			if (!is_cont(b1)) { out.push_back(0xFFFD); continue; }
+
+			if (L == 2) {
+				if (c < 0xC2) { out.push_back(0xFFFD); continue; } // overlong
+				out.push_back(((c & 0x1F) << 6) | (b1 & 0x3F));
+				p += 1;
+				continue;
 			}
-			cps.push_back(0xFFFD);
+
+			uint8_t b2 = p[1];
+			if (!is_cont(b2)) { out.push_back(0xFFFD); continue; }
+
+			if (L == 3) {
+				// E0: b1 >= A0 to avoid overlongs; ED: b1 < A0 to avoid surrogates
+				if ((c == 0xE0 && b1 < 0xA0) || (c == 0xED && b1 >= 0xA0)) {
+					out.push_back(0xFFFD); continue;
+				}
+				out.push_back(((c & 0x0F) << 12) | ((b1 & 0x3F) << 6) | (b2 & 0x3F));
+				p += 2;
+				continue;
+			}
+
+			// L == 4
+			uint8_t b3 = p[2];
+			if (!is_cont(b3)) { out.push_back(0xFFFD); continue; }
+			if ((c == 0xF0 && b1 < 0x90) || (c == 0xF4 && b1 > 0x8F)) { // over/under long
+				out.push_back(0xFFFD); continue;
+			}
+			uint32_t cp = ((c & 0x07) << 18) | ((b1 & 0x3F) << 12) |
+				((b2 & 0x3F) << 6) | (b3 & 0x3F);
+			if (cp > 0x10FFFF) { out.push_back(0xFFFD); continue; }
+
+			out.push_back(cp);
+			p += 3;
 		}
-		return cps;
+
+		if (truncated)
+			LOG_WARN("input string truncated in middle of UTF-8 sequence\n{0}", s);
+
+
+		return out;
 	}
 
 	// ---------- Lifecycle ----------
@@ -97,7 +160,11 @@ namespace SandCastle
 			FT_Error err = FT_New_Face(m_ft, path.c_str(), 0, &font.face);
 			ASSERT_LOG_ERROR(err == 0, std::string("Failed to load font: ") + path);
 		}
-		FT_Select_Charmap(font.face, FT_ENCODING_UNICODE);
+		auto err = FT_Select_Charmap(font.face, FT_ENCODING_UNICODE);
+		if (err) 
+		{
+			LOG_ERROR("No Unicode charmap in {0} (err={1})", path.c_str(), (int)err);
+		}
 		FT_Set_Pixel_Sizes(font.face, 0, size);
 
 		auto index = (FontID)m_fonts.size();
@@ -908,7 +975,13 @@ namespace SandCastle
 			if (cp == (uint32_t)'\n') continue;
 			if (font.glyphs.find(cp) != font.glyphs.end()) continue;
 			if (FT_Get_Char_Index(font.face, cp) != 0)
+			{
 				missing.insert(cp);
+			}
+			else
+			{
+				LOG_WARN("Missing char index, codepoint: {0}", cp);
+			}
 		}
 
 		for (uint32_t cp : missing)

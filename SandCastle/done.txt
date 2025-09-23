@@ -419,36 +419,45 @@ But I am very suspicious of that...
 
 22
 
+-destroy clean refacto
 
->weird stuff happening when deleting buttons
->looks like deleting one button change the idle frame of another
+23
 
+-seems like ark pixel isn't the good font maybe, missing important ja character
+-fixed the sprite* problem: the fact is that I was pointing to a component and the component can change place..
+std::vector avoid this problem.
+
+change position in memory. By using a vector, this solve the problem, let's try pointable component
+>Updating a frame changes the sprite (SpriteRenderer component) of other frames
+
+>deleting one button change the idle frame of another
+>check for utftocodepoint optimization
 >differentiate Canvas->RemoveElem,
 and delete elem (canvas listen to signal)
 
 >Add a DeleteAll
 
 >think of how to handle overlapping cnavas (z fighting)
->test pixel art rotations
+
 advanced ui:
 
 >UiElem have a specific layout order (by default order of creation)
->Can add and remove UiElem from canvas, at layout order
->UiElem can be floating: have the same position of the last elem, or custom...
+
 >UiElem can change parent
 
->clean destroy of elem pointers and entities
->clean m_hoverables
->clean m_values
->clean destroy of canvas children
->think about what else for ui.
 
->UiElem floating (superposed)
+
+>UiElem can be floating: have the same position of the last elem, or custom...
 >UiElem checkbox (floating necessary)
+>Can add and remove UiElem from canvas, at layout order
 
->scroll? Nahhh
+FrameTemplate clean delete
+
+>scroll?
 
 tasks:
+>optimize nested transform
+>test pixel art rotations
 >shove transform from matrix and other useless stuff 
 >have a default texture setting custom
 >get rid of inputs system: merge into inputs singleton

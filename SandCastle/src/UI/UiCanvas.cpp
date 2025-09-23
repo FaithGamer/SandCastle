@@ -8,9 +8,9 @@ namespace SandCastle
 	UiCanvas::~UiCanvas()
 	{
 		destroyed = true;
-		for (auto child : children)
+		for (auto& child : children)
 		{
-			delete child;
+			delete child.second;
 		}
 	}
 
@@ -58,8 +58,9 @@ namespace SandCastle
 		wPos = Vec2f(std::round(wPos.x), std::round(wPos.y));
 		root.gtr()->SetPosition(wPos.x, wPos.y, z);
 		//update children hitboxes:
-		for (auto child : children)
+		for (auto& child_kvp : children)
 		{
+			auto child = child_kvp.second;
 			if (child->GetType() == UiElem::Type::Canvas)
 			{
 				child->SetPosition(child->position);
@@ -72,23 +73,30 @@ namespace SandCastle
 	void UiCanvas::AddElem(UiElem* elem)
 	{
 		root.AddChild(elem->root);
-		children.emplace_back(elem);
+		children.insert(std::make_pair(elem->id, elem));
 		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
 		if (elem->GetType() == UiElem::Type::Canvas)
 		{
 			static_cast<UiCanvas*>(elem)->mustUpdateSignal.Listen(&UiCanvas::OnChildMustUpdate, this);
 		}
 	}
+
+	void UiCanvas::RemoveElem(UiElem* elem)
+	{
+
+	}
+
 	void UiCanvas::OnChildMustUpdate(UiCanvas* child)
 	{
 		MustUpdate();
 	}
+
 	void UiCanvas::OnDestroy(UiElem* elem)
 	{
 		//When a children gets destroyed
 		if (destroyed)
 			return;
-		children.remove(elem);
+		children.erase(elem->id);
 		MustUpdate();
 	}
 
@@ -260,7 +268,6 @@ namespace SandCastle
 			break; //Top Down
 		}
 
-
 		std::vector<Line> wrapLines;
 		wrapLines.emplace_back(Line());
 
@@ -270,8 +277,9 @@ namespace SandCastle
 		Vec2f contentSize = Vec2f(0.f, 0.f);
 		float totalWrap = 0.f;
 
-		for (auto child : children)
+		for (auto& child_kvp : children)
 		{
+			auto child = child_kvp.second;
 			auto margedSize = child->size + child->margin * 2;
 			float width = margedSize.x + border.x;
 			float height = margedSize.y + border.y;
@@ -340,7 +348,6 @@ namespace SandCastle
 			float stretchy = contentSize.y + border.y * 2;
 			size.y = stretchy < sizeLimit.y ? stretchy : sizeLimit.y;
 		}
-
 
 		//Apply alignement
 		if (LineMoveH != nullptr || LineMoveV != nullptr)

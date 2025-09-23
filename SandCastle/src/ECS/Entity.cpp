@@ -17,6 +17,7 @@ namespace SandCastle
 		Entity entity;
 		entity.m_id = registry.create();
 		entity.m_valid = true;
+		LOG_INFO("created {0}", (int)entity.m_id);
 		return entity;
 	}
 

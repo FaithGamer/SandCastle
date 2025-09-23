@@ -40,7 +40,7 @@ namespace SandCastle
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		auto group = Entity::registry.group<SpriteRender, Transform>();
 
-		group.each([&](SpriteRender& sprite, Transform& tr)
+		group.each([&](Entity e, SpriteRender& sprite, Transform& tr)
 			{
 				if (sprite.GetSprite() == nullptr)
 					return;
