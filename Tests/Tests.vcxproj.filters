@@ -74,6 +74,9 @@
     <ClInclude Include="src\DepthBlendTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\UiTest2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />

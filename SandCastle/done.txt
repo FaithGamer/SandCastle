@@ -437,6 +437,8 @@ std::vector avoid this problem.
 -img remove entt and override SetPosition/GetPosition
 -uDiscardAlpha default value is 0.05f
 -canvas padding
+-no writer ppu = 3 in ui.cpp
+-test hover create a canvas
 
 >not setting writer ppu to one makes blurry font, even tho ppu was 1 alreay....
 
