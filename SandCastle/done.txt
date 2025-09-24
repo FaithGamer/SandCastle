@@ -426,23 +426,24 @@ But I am very suspicious of that...
 -seems like ark pixel isn't the good font maybe, missing important ja character
 -fixed the sprite* problem: the fact is that I was pointing to a component and the component can change place..
 std::vector avoid this problem.
+-simplified transform implementation trying to optimize
 
-change position in memory. By using a vector, this solve the problem, let's try pointable component
->Updating a frame changes the sprite (SpriteRenderer component) of other frames
+24
 
->deleting one button change the idle frame of another
->check for utftocodepoint optimization
+
+-dont parent ui element, but move them with SetPosition:
+-UiElem have a children<entity> list for movement
+
+>
+ 
 >differentiate Canvas->RemoveElem,
 and delete elem (canvas listen to signal)
-
 >Add a DeleteAll
-
 >think of how to handle overlapping cnavas (z fighting)
 
 advanced ui:
 
 >UiElem have a specific layout order (by default order of creation)
-
 >UiElem can change parent
 
 
@@ -480,6 +481,7 @@ no need plmp if data is in registry and communication is only through signal?
 
 secondary tasks:
 
+>bake sentence into one texture. have two type of text: dynamic (single entity character), static (baked)
 >text in UI could break out of the canvas frame if its positioned right of another element
 possible solution: realign text after Write bazed on new size at the end of MakeLayout
 >text input (SDL_StartTextInput...)

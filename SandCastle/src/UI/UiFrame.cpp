@@ -162,7 +162,7 @@ namespace SandCastle
 			templ.cornerSpr.emplace_back(Assets::Get<Sprite>(spriteName));
 		}
 	}
-	void UiFrame::Update(UiElem* elem, float z)
+	Vec2f UiFrame::Update(UiElem* elem, float z)
 	{
 		//Dimensions
 		Vec2f sDim = templ->cornerSpr[0]->GetDimensions();
@@ -176,7 +176,6 @@ namespace SandCastle
 			size.x = std::max(Math::CeilMultiple(size.x, sDim.x), sDim.x * 2.f);
 		if (templ->fixedStep || size.y < sDim.y * 2)
 			size.y = std::max(Math::CeilMultiple(size.y, sDim.y), sDim.y * 2.f);
-
 		float ppu = templ->repeatTex[0]->GetPixelPerUnit();
 		Vec2f pxDim = sDim / ppu;
 		Vec2f pxSize = size / ppu;
@@ -267,5 +266,6 @@ namespace SandCastle
 		}
 
 		elem->root.AddChild(root);
+		return size;
 	}
 }

@@ -26,6 +26,10 @@ namespace SandCastle
 			Button,
 			Image
 		};
+		struct Component
+		{
+			UiElem* t;
+		};
 
 	public:
 		UiElem();
@@ -34,8 +38,9 @@ namespace SandCastle
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
+		virtual Vec2f GetPosition() const;
 		Vec2f GetSize() const;
-		Vec2f GetPosition() const;
+		Vec2f GetLocalPosition() const;
 		State GetState() const;
 		UiElem::ID GetID() const;
 		UiCanvas* GetParent() const;
@@ -98,6 +103,8 @@ namespace SandCastle
 		bool hoverable = false;
 		bool clickable = false;
 		bool pressed = false;
+
+		std::list<Entity> childrenEntities;
 
 		Signal<UiElem*> hoverSignal;
 		Signal<UiElem*> unhoverSignal;

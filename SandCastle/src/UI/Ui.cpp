@@ -290,8 +290,8 @@ namespace SandCastle
 	}
 	void Ui::CreateText(UiTxt* text, std::string_view utf8, float width)
 	{
-		if (text->sentence.root.Valid())
-			text->sentence.root.Destroy();
+		if (text->root.Valid())
+			text->root.Destroy();
 		auto canvas = text->parent;
 		if (canvas->sizeLimit.x < 8888888.f)
 			//There is a size limit
@@ -315,7 +315,7 @@ namespace SandCastle
 
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
-		text->parent->root.AddChild(text->root);
+		//text->parent->root.AddChild(text->root);
 
 	}
 	void Ui::UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8)

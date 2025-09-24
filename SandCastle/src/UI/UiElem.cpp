@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SandCastle/UI/UiElem.h"
 #include "SandCastle/Render/Transform.h"
-
+#include "SandCastle/UI/UiCanvas.h"
 namespace SandCastle
 {
 	UiElem::UiElem()
@@ -34,6 +34,11 @@ namespace SandCastle
 	{
 		position = pos;
 
+		if (parent != nullptr)
+		{
+			pos += parent->GetPosition();
+		}
+
 		//All elem anchor are top left (except canvas)
 		Vec2f wPos = {
 		std::round(pos.x + margin.x),
@@ -46,6 +51,13 @@ namespace SandCastle
 		return size;
 	}
 	Vec2f UiElem::GetPosition() const
+	{
+		if (parent != nullptr)
+			return position + parent->GetPosition();
+		else
+			return position;
+	}
+	Vec2f UiElem::GetLocalPosition() const
 	{
 		return position;
 	}

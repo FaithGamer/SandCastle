@@ -27,44 +27,55 @@ namespace SandCastle
 	{
 		return UiElem::Type::Canvas;
 	}
+	Vec2f UiCanvas::AnchorOffset() const
+	{
+		Vec2f offset(0, 0);
+		switch (anchor)
+		{
+		case Anchor::TopLeft:
+			offset.x += margin.x;
+			offset.y -= margin.y;
+			break;
+		case Anchor::TopRight:
+			offset.x -= size.x + margin.x;
+			offset.y -= margin.y;
+			break;
+		case Anchor::BotLeft:
+			offset.x += margin.x;
+			offset.y += size.y + margin.y;
+			break;
+		case Anchor::BotRight:
+			offset.x -= size.x + margin.x;
+			offset.y += size.y + margin.y;
+			break;
+		case Anchor::MiddleCenter:
+			offset.x -= size.x * 0.5f;
+			offset.y += size.y * 0.5f;
+			break;
+		}
+		return offset;
+	}
+	Vec2f UiCanvas::GetPosition() const
+	{
+		auto pos = position + AnchorOffset();
+		if (parent != nullptr)
+			return parent->GetPosition() + pos;
+		return pos;
+	}
 
 	void UiCanvas::SetPosition(Vec2f pos)
 	{
 		position = pos;
-		Vec2f wPos = pos;
-		switch (anchor)
-		{
-		case Anchor::TopLeft:
-			wPos.x += margin.x;
-			wPos.y -= margin.y;
-			break;
-		case Anchor::TopRight:
-			wPos.x -= size.x + margin.x;
-			wPos.y -= margin.y;
-			break;
-		case Anchor::BotLeft:
-			wPos.x += margin.x;
-			wPos.y += size.y + margin.y;
-			break;
-		case Anchor::BotRight:
-			wPos.x -= size.x + margin.x;
-			wPos.y += size.y + margin.y;
-			break;
-		case Anchor::MiddleCenter:
-			wPos.x -= size.x * 0.5f;
-			wPos.y += size.y * 0.5f;
-			break;
-		}
-		wPos = Vec2f(std::round(wPos.x), std::round(wPos.y));
-		root.gtr()->SetPosition(wPos.x, wPos.y, z);
+		if (parent != nullptr)
+			pos += parent->GetPosition();
+		pos += AnchorOffset();
+		pos = Vec2f(std::round(pos.x), std::round(pos.y));
+		root.gtr()->SetPosition(pos.x, pos.y, z);
 		//update children hitboxes:
 		for (auto& child_kvp : children)
 		{
 			auto child = child_kvp.second;
-			if (child->GetType() == UiElem::Type::Canvas)
-			{
-				child->SetPosition(child->position);
-			}
+			child->SetPosition(child->position);
 			child->ComputeHitbox();
 		}
 		ComputeHitbox();
@@ -72,7 +83,7 @@ namespace SandCastle
 
 	void UiCanvas::AddElem(UiElem* elem)
 	{
-		root.AddChild(elem->root);
+		//root.AddChild(elem->root);
 		children.insert(std::make_pair(elem->id, elem));
 		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
 		if (elem->GetType() == UiElem::Type::Canvas)
@@ -366,7 +377,14 @@ namespace SandCastle
 		//Update world position cause it may have changed with stretching
 		SetPosition(position);
 		if (frame)
-			frame->Update(this, 1.f);
+		{
+			auto frameSize = frame->Update(this, 1.f);
+			if (std::abs(frameSize.x - size.x) > 0.5f
+				|| std::abs(frameSize.y - size.y) > 0.5f)
+			{
+				size = frameSize;
+			}
+		}
 	}
 	void UiCanvas::SetAnchor(Anchor Anchor)
 	{

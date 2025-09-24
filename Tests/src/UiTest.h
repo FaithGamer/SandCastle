@@ -66,13 +66,13 @@ public:
 		//The space between the canvas border and its content
 		root->SetBorder(5.f);
 		//The space between elements inside the canvas.
-		root->SetSpacing(20.f);
+		//root->SetSpacing(20.f);
 		//Use the font for titles.
 		Ui::SetFont("h1");
 		//Draw the text.
 		//Ui::Image("green30.png_0_0");
 		Ui::Text("Square window.");
-
+		Ui::SetMargin(0.f);
 		//This canvas has no frame, only it's content is visible (false)
 		auto squares = Ui::BeginCanvas(Vec2f(0, 0), false);
 		squares->layoutDir = UiCanvas::LayoutDir::LeftRight;
@@ -91,7 +91,7 @@ public:
 		Ui::EndCanvas();
 
 		//Ui::Image("blue40-20.png_0_0");
-		Ui::BeginCanvas(Vec2f(0.f), false);
+		Ui::BeginCanvas(Vec2f(150.f, 0), true);
 		Ui::SetFont("p");
 		Ui::Text("Thanks for watching ");
 		Ui::EndCanvas();
@@ -166,20 +166,8 @@ public:
 	void OnClickBtn(UiElem* signal)
 	{
 		btnCounter++;
-		int i = Random::Range(0, 3);
-		switch (i)
-		{
-		case 0:
-			someStr = "POPPOPOPOPOPOPO";
-			break;
-		case 1:
-			someStr = "lol";
-			break;
-		case 2:
-			someStr = "Mouem";
-			break;
-		}
 		Ui::UpdateText(updateText, "You clicked " + std::to_string(btnCounter) + " times.");
+		btnCanvas->SetPosition(Vec2f(Random::Range(-200, 200), Random::Range(-100, 100)));
 	}
 	void Start() override
 	{
@@ -211,13 +199,13 @@ public:
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
 		//CreateSomeUi();
-		//CreateSquareWindow();
-	//	CreateButtonWindow();
+		CreateSquareWindow();
+		//CreateButtonWindow();
 	//	MakeUpgradeUi();
 		//DeleteUi();
 		//BenchmarkUi();
 		//BenchmarkUi2();
-		SpriteBenchmark();
+		//SpriteBenchmark();
 	}
 	void BenchmarkUi()
 	{

@@ -9,7 +9,6 @@ namespace SandCastle
 	class UiTxt : public UiElem
 	{
 	public:
-		UiTxt();
 		UiElem::Type GetType() const override;
 
 		template<typename... Ts>

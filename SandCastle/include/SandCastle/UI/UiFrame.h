@@ -68,7 +68,7 @@ namespace SandCastle
 		static void MakeTemplate(Template& templ, const std::string& texture, bool fixedStep);
 		void SetColor(Color color);
 		void SetAlpha(unsigned int alpha);
-		void Update(UiElem* elem, float z);
+		Vec2f Update(UiElem* elem, float z);
 	private:
 		friend Ui;
 		Entity root;
