@@ -127,6 +127,7 @@ namespace SandCastle
 		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size(), false));
 		m_defaultBatchMaterial = m_materials.back();
 		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"), true);
+		m_defaultBatchMaterial->SetFloat("uDiscardAlpha", 0.05f);
 		m_defaultLayerMaterial->GetRenderOptions()->SetDepthTest(false);
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
 		m_defaultWireShader = Assets::Get<Shader>("wire.shader");
