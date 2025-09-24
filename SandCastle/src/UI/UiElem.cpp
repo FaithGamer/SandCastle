@@ -4,19 +4,11 @@
 #include "SandCastle/UI/UiCanvas.h"
 namespace SandCastle
 {
-	UiElem::UiElem()
-	{
-		root = Entity::Create();
-		root.AddComponent<Transform>();
-	}
-
-	UiElem::UiElem(Entity Root) : root(Root)
-	{
-	}
 
 	UiElem::~UiElem()
 	{
 		destroySignal.Send(this);
+		if(root.Valid())
 		root.Destroy();
 	}
 

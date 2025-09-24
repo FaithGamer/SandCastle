@@ -32,8 +32,6 @@ namespace SandCastle
 		};
 
 	public:
-		UiElem();
-		UiElem(Entity root);
 		virtual ~UiElem();
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);

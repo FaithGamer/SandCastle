@@ -433,6 +433,8 @@ std::vector avoid this problem.
 -dont parent ui element, but move them with SetPosition:
 -UiElem have a children<entity> list for movement
 -update canvas depending on parent count to update children size before parent
+-removed UiElem root constructor
+-img remove entt and override SetPosition/GetPosition
 
  
 >differentiate Canvas->RemoveElem,
@@ -456,6 +458,7 @@ FrameTemplate clean delete
 >scroll?
 
 tasks:
+>discard 0 alpha for same Z pos entities ?
 >optimize nested transform
 >test pixel art rotations
 >shove transform from matrix and other useless stuff 

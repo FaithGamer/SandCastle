@@ -242,6 +242,8 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new UiCanvas();
+		canvas->root = Entity::Create();
+		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (frame)
 			canvas->frame = UiFrame(i->m_canvasFrame, i->m_material, i->m_layer);
@@ -344,23 +346,14 @@ namespace SandCastle
 
 		UiImg* image = new UiImg();
 		image->margin = i->m_margin;
-		image->entt = Entity::CreateSprite(sprite);
-		auto render = image->entt.GetComponent<SpriteRender>();
+		image->root = Entity::CreateSprite(sprite);
+		auto render = image->root.GetComponent<SpriteRender>();
 
 		render->SetLayer(i->m_layer);
 		render->SetMaterial(i->m_material->GetID());
 		auto spr = render->GetSprite();
 		image->sprite = spr;
 		image->size = image->sprite->GetDimensions();
-
-		//Offset sprite to make top left anchor no matter the sprite origin
-		auto dim = spr->GetDimensions();
-		Vec2f offset = {
-			((float)spr->orgX + 0.5f) * dim.x,
-			((float)spr->orgY - 0.5f) * dim.y
-		};
-		image->entt.GetComponent<Transform>()->Move(offset);
-		image->root.AddChild(image->entt);
 
 		i->NewElem(image, canvas);
 		return image;
@@ -373,6 +366,8 @@ namespace SandCastle
 		auto canvas = i->m_canvas.top();
 
 		UiBtn* button = new UiBtn();
+		button->root = Entity::Create();
+		button->root.AddComponent<Transform>();
 		button->margin = i->m_margin;
 		auto font = i->m_writer->GetFont(i->m_font);
 		button->label = i->m_writer->Write(utf8, font->id, i->m_txtColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);

@@ -199,7 +199,7 @@ public:
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
 		//CreateSomeUi();
-		CreateSquareWindow();
+		//CreateSquareWindow();
 		//CreateButtonWindow();
 	//	MakeUpgradeUi();
 		//DeleteUi();
