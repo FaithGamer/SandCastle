@@ -57,11 +57,16 @@ namespace SandCastle
 
 	void Ui::LayoutUpdate()
 	{
-		for (auto& canvas : m_layoutUpdate.Data())
+		std::sort(m_layoutUpdate.begin(), m_layoutUpdate.end(),
+			[](UiCanvas* a, UiCanvas* b)->bool
+			{
+				return a->GetParentCount() > b->GetParentCount();
+			});
+		for (auto canvas : m_layoutUpdate)
 		{
 			canvas->UpdateLayout();
 		}
-		m_layoutUpdate.Clear();
+		m_layoutUpdate.clear();
 	}
 	void Ui::DestroyUpdate()
 	{
@@ -176,7 +181,7 @@ namespace SandCastle
 
 	void Ui::OnCanvasMustUpdate(UiCanvas* canvas)
 	{
-		Instance()->m_layoutUpdate.Insert(canvas);
+		Instance()->m_layoutUpdate.emplace_back(canvas);
 	}
 
 	void Ui::NewElem(UiElem* elem, UiCanvas* canvas)

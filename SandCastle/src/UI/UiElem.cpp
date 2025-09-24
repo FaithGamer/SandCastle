@@ -30,6 +30,20 @@ namespace SandCastle
 		return parent;
 	}
 
+	int UiElem::GetParentCount() const
+	{
+		if(parent == nullptr)
+		return 0;
+		int count = 1;
+		UiCanvas* p = parent->GetParent();
+		while (p != nullptr)
+		{
+			count++;
+			p = p->GetParent();
+		}
+		return count;
+	}
+
 	void UiElem::SetPosition(Vec2f pos)
 	{
 		position = pos;

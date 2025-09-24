@@ -430,11 +430,10 @@ std::vector avoid this problem.
 
 24
 
-
 -dont parent ui element, but move them with SetPosition:
 -UiElem have a children<entity> list for movement
+-update canvas depending on parent count to update children size before parent
 
->
  
 >differentiate Canvas->RemoveElem,
 and delete elem (canvas listen to signal)

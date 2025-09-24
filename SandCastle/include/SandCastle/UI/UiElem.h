@@ -44,6 +44,7 @@ namespace SandCastle
 		State GetState() const;
 		UiElem::ID GetID() const;
 		UiCanvas* GetParent() const;
+		int GetParentCount() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
 
