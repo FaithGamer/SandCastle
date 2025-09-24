@@ -300,12 +300,13 @@ namespace SandCastle
 		if (text->root.Valid())
 			text->root.Destroy();
 		auto canvas = text->parent;
-		if (canvas->sizeLimit.x < 8888888.f)
+		float limit = canvas->sizeLimit.x - canvas->border.x * 2;
+		if (limit < 8888888.f)
 			//There is a size limit
-			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : canvas->sizeLimit.x;
+			width = width > 0.f ? std::min(limit, width) : limit;
 		else
 			//There is no size limit
-			width = width > 0.f ? std::min(canvas->sizeLimit.x, width) : 0.f;
+			width = width > 0.f ? std::min(limit, width) : 0.f;
 
 		auto font = m_writer->GetFont(text->font);
 		text->sentence = m_writer->Write
