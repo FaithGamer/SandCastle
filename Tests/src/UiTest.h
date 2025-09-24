@@ -43,6 +43,7 @@ public:
 		Ui::EndCanvas();
 
 	}
+	UiCanvas* squareCanvas = nullptr;
 	void CreateSquareWindow()
 	{
 		//The visual frame to use for every subsequent canvas
@@ -54,17 +55,17 @@ public:
 		//May result in some unexpected visual result.
 		//Long story short: if you use a fixed step frame, use a canvas size that is a round multiple of that step.
 		//If not, use a canvas size that is a minimum of double the sprite corner size of the frame.
-		auto root = Ui::BeginCanvas(Vec2f(200, 0));
+		squareCanvas = Ui::BeginCanvas(Vec2f(200, 0));
 		Ui::SetTextAlign(TextAlign::Center);
 		//Center the canvas on screen
-		root->SetPosition(Vec2f(0.f, 0.f));
-		root->SetAnchor(UiCanvas::Anchor::MiddleCenter);
+		squareCanvas->SetPosition(Vec2f(0.f, 0.f));
+		squareCanvas->SetAnchor(UiCanvas::Anchor::MiddleCenter);
 		//Elements inside this canvas will be added from top to bot and wrap from left to right.
-		root->layoutDir = UiCanvas::LayoutDir::TopDown;
+		squareCanvas->layoutDir = UiCanvas::LayoutDir::TopDown;
 		//The elements in this canvas will horizontally align to the center 
-		root->layoutAlignH = UiCanvas::LayoutAlignH::Center;
+		squareCanvas->layoutAlignH = UiCanvas::LayoutAlignH::Center;
 		//The space between the canvas border and its content
-		root->SetBorder(5.f);
+		squareCanvas->SetBorder(5.f);
 		//The space between elements inside the canvas.
 		//root->SetSpacing(20.f);
 		//Use the font for titles.
@@ -199,7 +200,7 @@ public:
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
 		//CreateSomeUi();
-		//CreateSquareWindow();
+		CreateSquareWindow();
 		//CreateButtonWindow();
 	//	MakeUpgradeUi();
 		//DeleteUi();
@@ -336,14 +337,13 @@ public:
 		static float timer = 0.f;
 		auto delta = Time::Delta();
 		timer += delta;
-		float ypos = std::sin(timer) * 100.f;
-		float xpos = ypos;
-
-		auto view = Entity::View<Oscillate, Transform>();
-		view.each([&](Oscillate& t, Transform& tr)
-			{
-				tr.SetPosition(xpos, 0, 0);
-			});
+		float pos = std::sin(timer) * 100.f;
+		
+		if (squareCanvas != nullptr)
+		{
+			squareCanvas->SetPosition(Vec2f(0.f, pos));
+		}
+		
 	}
 };
 
