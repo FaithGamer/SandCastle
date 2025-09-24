@@ -21,6 +21,7 @@ public:
 
 	void CreateSomeUi()
 	{
+
 		Ui::SetCanvasFrame("frame.png");
 		Ui::SetFont("p");
 
@@ -139,7 +140,6 @@ public:
 	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
-
 		btnCanvas = Ui::BeginCanvas(0);
 		btnCanvas->SetBorder(5.f);
 		btnCanvas->SetSpacing(6.f);
@@ -183,6 +183,7 @@ public:
 	}
 	void Start() override
 	{
+
 		auto worldLayer = Renderer2D::AddLayer("world");
 		SpriteRender::defaultLayer = worldLayer;
 
@@ -214,18 +215,56 @@ public:
 	//	CreateButtonWindow();
 	//	MakeUpgradeUi();
 		//DeleteUi();
-		BenchmarkUi();
+		//BenchmarkUi();
+		//BenchmarkUi2();
+		SpriteBenchmark();
 	}
 	void BenchmarkUi()
 	{
 		int count = 30;
 		for (int i = 0; i < count; i++)
 		{
-			Ui::BeginCanvas();
+			Vec2f p;
+			p.x = Random::Range(-320, 320);
+			p.y = Random::Range(-180, 180);
+			auto r = Ui::BeginCanvas();
+			r->SetPosition(p);
+			Ui::Text("This is an average UI with a couple stuff inside.Some text of course, this is the most important, because there will be quite a lot of text in most of UI.", 200.f);
+			Ui::EndCanvas();
+		}
+		LOG_INFO("entities: {0}", Entity::Count());
+	}
+	void BenchmarkUi2()
+	{
+		int count = 30;
+		for (int i = 0; i < count; i++)
+		{
+			Vec2f p;
+			p.x = Random::Range(-320, 320);
+			p.y = Random::Range(-180, 180);
+			auto r = Ui::BeginCanvas();
+			r->SetPosition(p);
 			Ui::BeginCanvas();
 			Ui::Text("This is an average UI with a couple stuff inside.Some text of course, this is the most important, because there will be quite a lot of text in most of UI.", 200.f);
 			Ui::EndCanvas();
 			Ui::EndCanvas();
+		}
+		LOG_INFO("entities: {0}", Entity::Count());
+	}
+	void SpriteBenchmark()
+	{
+		int count = 3800;
+		for (int i = 0; i < count; i++)
+		{
+			Vec3f p;
+			p.x = Random::Range(-320, 320);
+			p.y = Random::Range(-180, 180);
+			auto parent = Entity::Create();
+			auto tr = parent.AddComponent<Transform>();
+			tr->Move(p);
+			auto e = Entity::CreateSprite("trollface.png_0_0");
+			parent.AddChild(e);
+			//e.gtr()->SetPosition(p);
 		}
 	}
 	void DeleteUi()
@@ -326,11 +365,7 @@ public:
 	Vec2f dir;
 	void Start()
 	{
-		for (int i = 0; i < 10; i++)
-		{
-			Entity::Create();
-		}
-		LOG_INFO("entity count = {0}", Entity::Count());
+	
 		auto inputs = Inputs::CreateInputMap("Player");
 		auto cam = inputs->CreateDirectionalInput("Cam");
 		cam->BindWASD();
