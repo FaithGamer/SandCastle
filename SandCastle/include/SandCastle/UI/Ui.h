@@ -58,7 +58,7 @@ namespace SandCastle
 		/// The texture MUST already have 3x3 sprites (use the .texture file to set up properly).
 		/// @param fixedStep Set true if your texture has a repeating pattern that must be consistent.
 		/// The frame size will be constrainted to increase/decrease by stepped increment, according to the sprites size.
-		static void MakeFrameTemplate(const String& texture, bool fixedStep);
+		static void MakeFrameTemplate(const String& texture, bool fixedStep = false);
 		/// @brief Create a font that will be available for usage later at any time.
 		/// @param filename font filename
 		/// @param fancyName identification name of easy usage
