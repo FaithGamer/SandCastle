@@ -33,7 +33,6 @@ namespace SandCastle
 		m_material = uiMat;
 		m_layer = uiLayer;
 		m_writer = new Writer(m_material, m_layer);
-		m_writer->SetPPU(3.f);
 
 		auto input = Inputs::CreateInputMap("UI");
 		auto click = input->CreateButtonInput("Click");
@@ -73,7 +72,6 @@ namespace SandCastle
 		auto ins = Instance();
 		for (int i = 0; i < m_destroy.size(); i++)
 		{	
-			LOG_INFO("delete");
 			delete m_destroy[i];
 		}
 		m_destroy.clear();
@@ -242,6 +240,7 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new UiCanvas();
+		canvas->border = i->m_canvasPadding;
 		canvas->root = Entity::Create();
 		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
@@ -431,6 +430,10 @@ namespace SandCastle
 	void Ui::SetCanvasFrame(String texture)
 	{
 		Instance()->SetFrame(&Instance()->m_canvasFrame, texture);
+	}
+	void Ui::SetCanvasPadding(Vec2f border)
+	{
+		Instance()->m_canvasPadding = border;
 	}
 	void Ui::SetButtonFrame(String texture)
 	{

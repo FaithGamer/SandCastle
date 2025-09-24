@@ -435,8 +435,13 @@ std::vector avoid this problem.
 -update canvas depending on parent count to update children size before parent
 -removed UiElem root constructor
 -img remove entt and override SetPosition/GetPosition
+-uDiscardAlpha default value is 0.05f
+-canvas padding
 
- 
+>not setting writer ppu to one makes blurry font, even tho ppu was 1 alreay....
+
+>make a hint (on hover open a new canvas)
+>canvas border should be global
 >differentiate Canvas->RemoveElem,
 and delete elem (canvas listen to signal)
 >Add a DeleteAll

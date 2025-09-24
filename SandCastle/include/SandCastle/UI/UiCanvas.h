@@ -61,7 +61,6 @@ namespace SandCastle
 		void SetAnchor(Anchor anchor);
 		/// @brief Spacing between element inside the canvas
 		void SetSpacing(Vec2f spacing);
-		void SetBorder(Vec2f border);
 		void SetMargin(Vec2f margin);
 		
 	public:

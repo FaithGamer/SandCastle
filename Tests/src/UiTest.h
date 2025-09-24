@@ -55,6 +55,7 @@ public:
 		//May result in some unexpected visual result.
 		//Long story short: if you use a fixed step frame, use a canvas size that is a round multiple of that step.
 		//If not, use a canvas size that is a minimum of double the sprite corner size of the frame.
+		Ui::SetCanvasPadding(5.f);
 		squareCanvas = Ui::BeginCanvas(Vec2f(200, 0));
 		Ui::SetTextAlign(TextAlign::Center);
 		//Center the canvas on screen
@@ -65,7 +66,6 @@ public:
 		//The elements in this canvas will horizontally align to the center 
 		squareCanvas->layoutAlignH = UiCanvas::LayoutAlignH::Center;
 		//The space between the canvas border and its content
-		squareCanvas->SetBorder(5.f);
 		//The space between elements inside the canvas.
 		//root->SetSpacing(20.f);
 		//Use the font for titles.
@@ -101,10 +101,10 @@ public:
 	}
 	void MakeUpgradeUi()
 	{
+		Ui::SetCanvasPadding(5.f);
 		Ui::SetCanvasFrame("frame.png");
 		auto root = Ui::BeginCanvas(Vec2f(0, 0));
 		root->SetSpacing(3.f);
-		root->SetBorder(5.f);
 		struct Upgrade
 		{
 			String name = "";
@@ -141,8 +141,8 @@ public:
 	int btnCounter = 0;
 	void CreateButtonWindow()
 	{
+		Ui::SetCanvasPadding(5.f);
 		btnCanvas = Ui::BeginCanvas(0);
-		btnCanvas->SetBorder(5.f);
 		btnCanvas->SetSpacing(6.f);
 		btnCanvas->SetPosition(Vec2f(33, 70));
 		btnCanvas->SetAnchor(UiCanvas::Anchor::MiddleCenter);
@@ -200,11 +200,11 @@ public:
 		Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
 		//Create ui stuff
 		//CreateSomeUi();
-		CreateSquareWindow();
+		//CreateSquareWindow();
 		//CreateButtonWindow();
-	//	MakeUpgradeUi();
+		//MakeUpgradeUi();
 		//DeleteUi();
-		//BenchmarkUi();
+		BenchmarkUi();
 		//BenchmarkUi2();
 		//SpriteBenchmark();
 	}
@@ -218,7 +218,7 @@ public:
 			p.y = Random::Range(-180, 180);
 			auto r = Ui::BeginCanvas();
 			r->SetPosition(p);
-			Ui::Text("This is an average UI with a couple stuff inside.Some text of course, this is the most important, because there will be quite a lot of text in most of UI.", 200.f);
+			Ui::Text("This is an average UI with a couple stuff inside. Some text of course, this is the most important, because there will be quite a lot of text in most of UI.", 200.f);
 			Ui::EndCanvas();
 		}
 		LOG_INFO("entities: {0}", Entity::Count());
@@ -258,10 +258,10 @@ public:
 	}
 	void DeleteUi()
 	{
+		Ui::SetCanvasPadding(5.f);
 		auto root = Ui::BeginCanvas();
 		root->layoutAlignH = UiCanvas::LayoutAlignH::Center;
 		root->SetPosition(Vec2f(-320, 180));
-		root->SetBorder(5.f);
 		Ui::SetTextColor(Color::Black);
 		Ui::Text("Click the buttons.");
 		auto btnCan = Ui::BeginCanvas();

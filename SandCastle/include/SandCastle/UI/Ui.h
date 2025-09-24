@@ -106,6 +106,8 @@ namespace SandCastle
 		static void SetLayer(LayerID layer);
 		/// @brief Set the frame that will be used for every subsequent canvas creation
 		static void SetCanvasFrame(String texture);
+		/// @brief Set the padding for every subsequent canvas creation
+		static void SetCanvasPadding(Vec2f padding);
 		/// @brief Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrame(String texture);
 		/// @brief Set the frame that will be used for every subsequent button creation
@@ -196,6 +198,7 @@ namespace SandCastle
 		float m_z = 0.f;
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
+		Vec2f m_canvasPadding = 0.f;
 		float m_ppu = 1.f / 360.f;
 
 		static UiElem::ID m_nextId;

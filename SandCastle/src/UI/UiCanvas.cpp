@@ -394,13 +394,11 @@ namespace SandCastle
 	void UiCanvas::SetSpacing(Vec2f Spacing)
 	{
 		spacing = Spacing;
-	}
-	void UiCanvas::SetBorder(Vec2f Border)
-	{
-		border = Border;
+		MustUpdate();
 	}
 	void UiCanvas::SetMargin(Vec2f Margin)
 	{
 		margin = Margin;
+		SetPosition(position);
 	}
 }
