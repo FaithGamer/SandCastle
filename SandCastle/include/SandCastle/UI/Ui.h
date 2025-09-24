@@ -18,6 +18,7 @@ namespace SandCastle
 	class UiElem;
 	class UiImg;
 	class UiBtn;
+	class UiCheckbox;
 	struct InputSignal;
 
 	class Ui : public Singleton<Ui>
@@ -84,6 +85,7 @@ namespace SandCastle
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8, Vec2f padding);
+		static UiCheckbox* Checkbox();
 		static void EndCanvas();
 		/// @brief Only root canvas can be deleted.
 		static void Destroy(UiElem* elem);
@@ -114,6 +116,9 @@ namespace SandCastle
 		static void SetButtonFrameHover(String texture);
 		/// @brief Set the frame that will be used for every subsequent button creation
 		static void SetButtonFramePressed(String texture);
+		/// @brief The texture must have 3 horizontal sprites.
+		/// respecting this order: unchecked, hovered, checked
+		static void SetCheckboxSprites(String texture);
 		/// @brief Set the text alignement that will be used for every subsequent text creation
 		static void SetTextAlign(TextAlign textAlign);
 		/// @brief Set the margin that will be used for every subsequent element creation.
@@ -199,6 +204,7 @@ namespace SandCastle
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
 		Vec2f m_canvasPadding = 0.f;
+		String m_checkBoxSprites;
 		float m_ppu = 1.f / 360.f;
 
 		static UiElem::ID m_nextId;

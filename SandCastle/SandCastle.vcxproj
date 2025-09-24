@@ -251,6 +251,7 @@
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="src\UI\UiBtn.cpp" />
+    <ClCompile Include="src\UI\UiCheckbox.cpp" />
     <ClCompile Include="src\UI\UiFrame.cpp" />
     <ClCompile Include="src\UI\UiImg.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="include\SandCastle\UI.h" />
     <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
+    <ClInclude Include="include\SandCastle\UI\UiCheckbox.h" />
     <ClInclude Include="include\SandCastle\UI\UiElem.h" />
     <ClInclude Include="include\SandCastle\UI\UiFrame.h" />
     <ClInclude Include="include\SandCastle\UI\UiImg.h" />

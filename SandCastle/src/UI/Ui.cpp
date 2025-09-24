@@ -11,6 +11,7 @@
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiImg.h"
 #include "SandCastle/UI/UiBtn.h"
+#include "SandCastle/UI/UiCheckbox.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
@@ -71,7 +72,7 @@ namespace SandCastle
 	{
 		auto ins = Instance();
 		for (int i = 0; i < m_destroy.size(); i++)
-		{	
+		{
 			delete m_destroy[i];
 		}
 		m_destroy.clear();
@@ -187,7 +188,7 @@ namespace SandCastle
 		auto id = m_nextId++;
 		elem->id = id;
 		elem->parent = canvas;
-		elem->z = -1.f;
+		elem->z = -(float)m_canvas.size();
 		elem->margin = m_rootMargin;
 		if (canvas != nullptr)
 		{
@@ -265,8 +266,8 @@ namespace SandCastle
 		size.x = size.x > canvas->sizeLimit.x ? canvas->sizeLimit.x : size.x;
 		size.y = size.y > canvas->sizeLimit.y ? canvas->sizeLimit.y : size.y;
 		canvas->size = size;
-		i->m_canvas.push(canvas);
 		i->NewElem(canvas, parent);
+		i->m_canvas.push(canvas);
 		canvas->mustUpdateSignal.Listen(&Ui::OnCanvasMustUpdate, i.get(), SignalPriority::high);
 		if (parent == nullptr)
 		{
@@ -384,6 +385,46 @@ namespace SandCastle
 		return button;
 	}
 
+	UiCheckbox* Ui::Checkbox()
+	{
+		auto i = Instance();
+		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Checkbox without active canvas");
+		auto canvas = i->m_canvas.top();
+		ASSERT_LOG_ERROR((i->m_checkBoxSprites != ""), "Trying to create Checkbox without checkbox sprite");
+
+		auto checkbox = new UiCheckbox();
+		checkbox->root = Entity::Create();
+		auto tr = checkbox->root.AddComponent<Transform>();
+		for (int j = 0; j < 3; j++)
+		{
+			String spriteName = i->m_checkBoxSprites + "_0_" + std::to_string(j);
+			auto entt = Entity::CreateSprite(spriteName);
+			auto rd = entt.GetComponent<SpriteRender>();
+			rd->SetLayer(i->m_layer);
+			rd->SetMaterial(i->m_material->GetID());
+			auto spr = rd->GetSprite();
+			auto dim = spr->GetDimensions();
+			Vec3f offset = {
+			((float)spr->orgX + 0.5f) * dim.x,
+			((float)spr->orgY - 0.5f) * dim.y,
+			0.f
+			};
+			entt.gtr()->Move(offset);
+			checkbox->sprites.emplace_back(entt);
+			checkbox->root.AddChild(entt);
+		}
+		auto rd = checkbox->sprites[0].GetComponent<SpriteRender>();
+		auto spr = rd->GetSprite();
+		checkbox->size = spr->GetDimensions();
+		checkbox->margin = i->m_margin;
+		checkbox->clickable = true;
+		i->NewElem(checkbox, canvas);
+		checkbox->UpdateVisual();
+		RegisterHoverable(checkbox);
+		return checkbox;
+
+	}
+
 	void Ui::EndCanvas()
 	{
 		auto i = Instance();
@@ -446,6 +487,10 @@ namespace SandCastle
 	void Ui::SetButtonFramePressed(String texture)
 	{
 		Instance()->SetFrame(&Instance()->m_buttonFramePressed, texture);
+	}
+	void Ui::SetCheckboxSprites(String texture)
+	{
+		Instance()->m_checkBoxSprites = texture;
 	}
 	void Ui::SetTextAlign(TextAlign textAlign)
 	{

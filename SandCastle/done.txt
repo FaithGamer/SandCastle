@@ -436,50 +436,35 @@ std::vector avoid this problem.
 -removed UiElem root constructor
 -img remove entt and override SetPosition/GetPosition
 -uDiscardAlpha default value is 0.05f
--canvas padding
+-canvas padding (global state)
 -no writer ppu = 3 in ui.cpp
 -test hover create a canvas
+-elem->z must reflect the current canvas layer
+-checkbox
 
->not setting writer ppu to one makes blurry font, even tho ppu was 1 alreay....
-
->make a hint (on hover open a new canvas)
->canvas border should be global
->differentiate Canvas->RemoveElem,
-and delete elem (canvas listen to signal)
->Add a DeleteAll
->think of how to handle overlapping cnavas (z fighting)
 
 advanced ui:
 
 >UiElem have a specific layout order (by default order of creation)
 >UiElem can change parent
-
-
-
+>overlapp canvases without z fighting
+>scrolling
 >UiElem can be floating: have the same position of the last elem, or custom...
->UiElem checkbox (floating necessary)
->Can add and remove UiElem from canvas, at layout order
 
-FrameTemplate clean delete
 
->scroll?
 
 tasks:
->discard 0 alpha for same Z pos entities ?
->optimize nested transform
+
 >test pixel art rotations
 >shove transform from matrix and other useless stuff 
 >have a default texture setting custom
 >get rid of inputs system: merge into inputs singleton
->maybe we need to round the position of quads in the renderer for pixel perfect and UI?
 >fix ImGui random assert crash (probly bc of threading)
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?
 >localization system built in the asset
 
 >rename Filter to MaskFilter and use template
->optimize transform memory layout (get rid of mat4 at all ?)
->check renderer thread safety
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony
@@ -496,9 +481,9 @@ possible solution: realign text after Write bazed on new size at the end of Make
 >text input (SDL_StartTextInput...)
 >audio spacialization
 >Transform animation system
->fix window layer being behind other layers
 >fnv1a for strings like sounds
 >check for useless headers
+>optimize nested transform?
 
 bugs:
 
@@ -506,11 +491,10 @@ bugs:
 
 render:
 
->check and fix transparency between layers
+
 >quad render camera culling
->add render option to material
 >reintegrate wire and lines (or think about it)
->Particle system
+>Particle system?
 
 physics:
 
@@ -524,7 +508,3 @@ thoughts:
 >Serialized, Get error must propagate to all parents?
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
-
-minor stuff:
-
->camera pixel perfect zoom can result in jittery sprites.

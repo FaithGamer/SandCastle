@@ -24,7 +24,8 @@ namespace SandCastle
 			Canvas,
 			Text,
 			Button,
-			Image
+			Image,
+			Checkbox
 		};
 		struct Component
 		{

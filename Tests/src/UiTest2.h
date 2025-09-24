@@ -15,7 +15,26 @@ public:
 	Uis uis;
 	void Start()
 	{
-		MakeMain();
+		//MakeMain();
+		MakeCheckbox();
+	}
+	bool ch = false;
+	void MakeCheckbox()
+	{
+		Ui::SetTextColor(Color::Black);
+		Ui::SetFont("p");
+		auto c = Ui::BeginCanvas();
+		c->layoutDir = UiCanvas::LayoutDir::LeftRight;
+		c->SetSpacing(4.f);
+		auto check = Ui::Checkbox();
+		check->SetChecked(ch);
+		check->checkSignal.Listen(&TestSys::OnCheck, this);
+		Ui::Text("Checked: {0}", 0.f, &ch);
+		Ui::EndCanvas();
+	}
+	void OnCheck(bool checked)
+	{
+		ch = checked;
 	}
 	void MakeMain()
 	{
@@ -77,5 +96,6 @@ void UiTest2()
 	Ui::SetButtonFrameHover("btn_hover.png");
 	Ui::SetButtonFramePressed("btn_pressed.png");
 
+	Ui::SetCheckboxSprites("checkbox.png");
 	Engine::Launch();
 }

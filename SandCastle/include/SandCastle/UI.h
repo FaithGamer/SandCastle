@@ -7,3 +7,4 @@
 #include "SandCastle/UI/UiImg.h"
 #include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/UI/UiFrame.h"
+#include "SandCastle/UI/UiCheckbox.h"
