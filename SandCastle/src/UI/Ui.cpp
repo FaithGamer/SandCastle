@@ -223,6 +223,18 @@ namespace SandCastle
 		ins->m_writer->NameFont(font, fancyName);
 	}
 
+	void Ui::SnapshotCanvasContext(String name)
+	{
+		auto i = Instance();
+		auto it = i->m_contextSnapshots.find(name);
+		if (it != i->m_contextSnapshots.end())
+		{
+			LOG_ERROR("Canvas context snapshot with the name {0}, already exists.");
+			return;
+		}
+		i->m_contextSnapshots[name] = i->m_canvasContext;
+	}
+
 	void Ui::SetDefaultMaterial(Material* material)
 	{
 		Instance()->m_defaultMaterial = material;
@@ -241,13 +253,15 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		auto canvas = new UiCanvas();
-		canvas->border = i->m_canvasPadding;
+		canvas->context = i->m_canvasContext;
 		canvas->root = Entity::Create();
 		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (frame)
-			canvas->frame = UiFrame(i->m_canvasFrame, i->m_material, i->m_layer);
-		//Differentiante limit from size
+			canvas->frame = UiFrame(canvas->context.frame, i->m_material, i->m_layer);
+		else
+			canvas->context.frame = nullptr;
+		//Differentiate limit from size
 		if (size.x > 0.f)
 			canvas->fixedSize.AddFlag(UiCanvas::Horizontal);
 		if (size.y > 0.f)
@@ -257,8 +271,8 @@ namespace SandCastle
 		if (parent)
 		{
 			auto parentLimit = Vec2f{
-				parent->sizeLimit.x - parent->border.x * 2,
-				parent->sizeLimit.y - parent->border.y * 2 };
+				parent->sizeLimit.x - parent->context.padding.x * 2,
+				parent->sizeLimit.y - parent->context.padding.y * 2 };
 
 			canvas->sizeLimit.x = parentLimit.x < canvas->sizeLimit.x ? parentLimit.x : canvas->sizeLimit.x;
 			canvas->sizeLimit.y = parentLimit.y < canvas->sizeLimit.y ? parentLimit.y : canvas->sizeLimit.y;
@@ -300,7 +314,7 @@ namespace SandCastle
 		if (text->root.Valid())
 			text->root.Destroy();
 		auto canvas = text->parent;
-		float limit = canvas->sizeLimit.x - canvas->border.x * 2;
+		float limit = canvas->sizeLimit.x - canvas->context.padding.x * 2;
 		if (limit < 8888888.f)
 			//There is a size limit
 			width = width > 0.f ? std::min(limit, width) : limit;
@@ -468,13 +482,40 @@ namespace SandCastle
 	{
 		Instance()->m_layer = layer;
 	}
+	void Ui::SetCanvasContext(String name)
+	{
+		auto i = Instance();
+		auto it = i->m_contextSnapshots.find(name);
+		if (it == i->m_contextSnapshots.end())
+		{
+			LOG_ERROR("The following canvas context doesnt exists: {0}", name);
+			return;
+		}
+		i->m_canvasContext = it->second;
+	}
 	void Ui::SetCanvasFrame(String texture)
 	{
-		Instance()->SetFrame(&Instance()->m_canvasFrame, texture);
+		Instance()->SetFrame(&Instance()->m_canvasContext.frame, texture);
 	}
-	void Ui::SetCanvasPadding(Vec2f border)
+	void Ui::SetCanvasPadding(Vec2f padding)
 	{
-		Instance()->m_canvasPadding = border;
+		Instance()->m_canvasContext.padding = padding;
+	}
+	void Ui::SetCanvasSpacing(Vec2f spacing)
+	{
+		Instance()->m_canvasContext.spacing = spacing;
+	}
+	void Ui::SetCanvasLayoutDir(LayoutDir dir)
+	{
+		Instance()->m_canvasContext.layoutDir = dir;
+	}
+	void Ui::SetCanvasLayoutAlignH(LayoutAlign alignH)
+	{
+		Instance()->m_canvasContext.layoutAlignH = alignH;
+	}
+	void Ui::SetCanvasLayoutAlignV(LayoutAlign alignV)
+	{
+		Instance()->m_canvasContext.layoutAlignV = alignV;
 	}
 	void Ui::SetButtonFrame(String texture)
 	{

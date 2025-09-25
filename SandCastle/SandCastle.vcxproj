@@ -374,8 +374,10 @@
     <ClInclude Include="include\SandCastle\UI.h" />
     <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
+    <ClInclude Include="include\SandCastle\UI\UiCanvasContext.h" />
     <ClInclude Include="include\SandCastle\UI\UiCheckbox.h" />
     <ClInclude Include="include\SandCastle\UI\UiElem.h" />
+    <ClInclude Include="include\SandCastle\UI\UiEnum.h" />
     <ClInclude Include="include\SandCastle\UI\UiFrame.h" />
     <ClInclude Include="include\SandCastle\UI\UiImg.h" />
     <ClInclude Include="include\SandCastle\UI\UiTxt.h" />

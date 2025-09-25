@@ -551,6 +551,12 @@
     <ClInclude Include="include\SandCastle\UI\UiCheckbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\UI\UiEnum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\UI\UiCanvasContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Signal.tpp" />

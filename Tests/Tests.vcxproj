@@ -51,7 +51,7 @@
     <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\Signals.h" />
     <ClInclude Include="src\SubTexture.h" />
-    <ClInclude Include="src\UiTest.h" />
+    <ClInclude Include="src\UiPosTest.h" />
     <ClInclude Include="src\UiTest2.h" />
     <ClInclude Include="src\WindowEvents.h" />
   </ItemGroup>

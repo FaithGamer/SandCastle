@@ -15,7 +15,7 @@
 #include "SubTexture.h"
 #include "FrameTest.h"
 #include "DepthBlendTest.h"
-#include "UiTest.h"
+#include "UiPosTest.h"
 #include "UiTest2.h"
 
 using namespace SandCastle;

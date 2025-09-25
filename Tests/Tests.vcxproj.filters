@@ -68,7 +68,7 @@
     <ClInclude Include="src\FrameTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\UiTest.h">
+    <ClInclude Include="src\UiPosTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\DepthBlendTest.h">

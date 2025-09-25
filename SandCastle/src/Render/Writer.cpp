@@ -161,7 +161,7 @@ namespace SandCastle
 			ASSERT_LOG_ERROR(err == 0, std::string("Failed to load font: ") + path);
 		}
 		auto err = FT_Select_Charmap(font.face, FT_ENCODING_UNICODE);
-		if (err) 
+		if (err)
 		{
 			LOG_ERROR("No Unicode charmap in {0} (err={1})", path.c_str(), (int)err);
 		}
@@ -233,6 +233,11 @@ namespace SandCastle
 	void Writer::SetMaxAtlasSize(int pixels)
 	{
 		m_maxAtlasSize = pixels;
+	}
+
+	void Writer::SetLineAdjustement(float adjustement)
+	{
+		m_adjustLine = adjustement;
 	}
 
 	void Writer::SetLayer(LayerID layer)
@@ -360,6 +365,7 @@ namespace SandCastle
 					pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
 					0
 				);
+				pos.y += (float)font.size * ppu * m_adjustLine;
 				Entity e = Entity::Create();
 				auto tr = e.AddComponent<Transform>();
 				tr->SetPosition(pos);

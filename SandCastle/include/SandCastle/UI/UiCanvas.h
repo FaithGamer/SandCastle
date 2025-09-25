@@ -2,7 +2,9 @@
 
 #include "SandCastle/UI/UiElem.h"
 #include "SandCastle/UI/UiFrame.h"
+#include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Core/Bitmask.h"
+#include "SandCastle/UI/UiCanvasContext.h"
 
 namespace SandCastle
 {
@@ -11,27 +13,6 @@ namespace SandCastle
 	{
 	public:
 		/// @brief What is the point of origin for the movement of a canvas.
-		enum class LayoutDir : int
-		{
-			TopDown,
-			//DownTop,
-			LeftRight
-			//RightLeft
-		};
-
-		enum class LayoutAlignH : int
-		{
-			Left,
-			Center,
-			Right
-		};
-
-		enum class LayoutAlignV : int
-		{
-			Top,
-			Center,
-			Bot
-		};
 		typedef enum : uint8_t
 		{
 			Horizontal = 1,
@@ -64,10 +45,6 @@ namespace SandCastle
 		void SetMargin(Vec2f margin);
 		
 	public:
-		LayoutDir layoutDir = LayoutDir::TopDown;
-		LayoutAlignH layoutAlignH = LayoutAlignH::Left;
-		LayoutAlignV layoutAlignV = LayoutAlignV::Top;
-
 		Signal<UiCanvas*> mustUpdateSignal;
 	private:
 		friend Ui;
@@ -77,11 +54,10 @@ namespace SandCastle
 		void UpdateLayout();
 		Vec2f AnchorOffset() const;
 	private:
+		CanvasContext context;
 		std::optional<UiFrame> frame;
 		Bitmask8 fixedSize = 0;
 		std::unordered_map<UiElem::ID, UiElem*> children;
-		Vec2f spacing = Vec2f(0.f, 0.f);
-		Vec2f border = Vec2f(0.f, 0.f);
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);
 		Anchor anchor;
 		bool mustUpdate = false;

@@ -442,6 +442,15 @@ std::vector avoid this problem.
 -elem->z must reflect the current canvas layer
 -checkbox
 
+25
+
+-added line adjustement
+-canvas context
+-removed old UiTest (only uipostest)
+
+>further test canvas context:
+>create a complete test for UI with multiple canvases showcasing all  features
+>text width takes all the width of the canvas, and trigger leftRight wrapping when unecessary
 
 advanced ui:
 

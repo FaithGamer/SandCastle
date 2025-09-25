@@ -23,13 +23,22 @@ public:
 	{
 		Ui::SetTextColor(Color::Black);
 		Ui::SetFont("p");
-		auto c = Ui::BeginCanvas();
-		c->layoutDir = UiCanvas::LayoutDir::LeftRight;
-		c->SetSpacing(4.f);
+		auto r = Ui::BeginCanvas();
+
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
+		Ui::SetCanvasSpacing(4.f);
+		Ui::BeginCanvas(Vec2f(140.f, 0), false);
 		auto check = Ui::Checkbox();
 		check->SetChecked(ch);
 		check->checkSignal.Listen(&TestSys::OnCheck, this);
-		Ui::Text("Checked: {0}", 0.f, &ch);
+		Ui::Text("Checked: {0}", 100.f, &ch);
+		Ui::EndCanvas();
+
+		Ui::BeginCanvas(Vec2f(140.f, 0), false);
+		Ui::Checkbox();
+		Ui::Text("Normal");
+		Ui::EndCanvas();
+
 		Ui::EndCanvas();
 	}
 	void OnCheck(bool checked)
@@ -95,6 +104,8 @@ void UiTest2()
 	Ui::SetButtonFrame("btn.png");
 	Ui::SetButtonFrameHover("btn_hover.png");
 	Ui::SetButtonFramePressed("btn_pressed.png");
+
+	//Ui::GetWriter()->SetLineAdjustement(0.15f);
 
 	Ui::SetCheckboxSprites("checkbox.png");
 	Engine::Launch();
