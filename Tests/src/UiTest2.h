@@ -18,64 +18,7 @@ public:
 		Popup();
 		Checkbox();
 		Images();
-	}
-	bool ch = false;
-	void Checkbox()
-	{
-		Ui::Context("title");
-		Ui::SetRootAnchor(CanvasAnchor::TopRight);
-
-		auto r = Ui::Begin();//Begin root
-		r->SetPosition(Vec2f(320, 180));
-		Ui::Text("Checkboxes");
-		Ui::Context("base");
-		Ui::SetCanvasSpacing(2.f);
-		Ui::SetCanvasPadding(0.f);
-
-		Ui::Begin(0.f, false);//Begin checkboxes
-		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
-
-		Ui::Begin(Vec2f(140.f, 0), false); //Checkbox1
-		auto check = Ui::Checkbox();
-		check->SetChecked(ch);
-		check->checkSignal.Listen(&TestSys::OnCheck, this);
-		Ui::Text("Checked: {0}", 0.f, &ch);
-		Ui::End(); //End checkbox1
-
-		Ui::Begin(Vec2f(140.f, 0), false);//Checkbox 2
-		Ui::Checkbox();
-		Ui::Text("Normal");
-		Ui::End();//End checkbox 2
-
-		Ui::End();//End checkboxes
-
-		Ui::End();//End root
-	}
-	void OnCheck(bool checked)
-	{
-		ch = checked;
-	}
-	void Images()
-	{
-		Ui::Context("title");
-		auto c = Ui::Begin(Vec2f(200, 0));
-		c->SetPosition(Vec2f(0, 0));
-		Ui::Text("Square canvas.");
-		Ui::Context("base");
-		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
-		Ui::Begin(0.f, false);
-		Ui::Image("blue.png_0_0");
-		Ui::Image("yellow.png_0_0");
-		Ui::Image("green.png_0_0");
-		Ui::Image("yellow.png_0_0");
-		Ui::Image("green.png_0_0");
-		Ui::Image("blue.png_0_0");
-		Ui::Image("yellow.png_0_0");
-		Ui::Image("blue.png_0_0");
-		Ui::Image("green.png_0_0");
-		Ui::End();
-		Ui::Text("I hope you enjoyed.");
-		Ui::End();
+		Right();
 	}
 	void Popup()
 	{
@@ -117,6 +60,79 @@ public:
 		Ui::Destroy(uis.popup);
 		uis.popup = nullptr;
 	}
+	bool ch = false;
+	void Checkbox()
+	{
+		Ui::Context("title");
+		Ui::SetRootAnchor(CanvasAnchor::TopRight);
+
+		auto r = Ui::Begin();//Begin root
+		r->SetPosition(Vec2f(320, 180));
+		Ui::Text("Checkboxes");
+		Ui::Context("base");
+		Ui::SetCanvasSpacing(2.f);
+		Ui::SetCanvasPadding(0.f);
+
+		Ui::Begin(0.f, false);//Begin checkboxes
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
+
+		Ui::Begin(Vec2f(140.f, 0), false); //Checkbox1
+		auto check = Ui::Checkbox();
+		check->SetChecked(ch);
+		check->checkSignal.Listen(&TestSys::OnCheck, this);
+		Ui::Text("Checked: {0}", 0.f, &ch);
+		Ui::End(); //End checkbox1
+
+		Ui::Begin(Vec2f(140.f, 0), false);//Checkbox 2
+		Ui::Checkbox();
+		Ui::Text("Normal");
+		Ui::End();//End checkbox 2
+
+		Ui::End();//End checkboxes
+
+		Ui::End();//End root
+	}
+	void OnCheck(bool checked)
+	{
+		ch = checked;
+	}
+	void Images()
+	{
+		Ui::Context("title");
+		Ui::SetRootAnchor(CanvasAnchor::MiddleCenter);
+		auto c = Ui::Begin(Vec2f(200, 0));
+		c->SetPosition(Vec2f(0, 0));
+		Ui::Text("Square canvas.");
+		Ui::Context("base");
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
+		Ui::Begin(0.f, false);
+		Ui::Image("blue.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::Image("blue.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("blue.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::End();
+		Ui::Text("I hope you enjoyed.");
+		Ui::End();
+	}
+	void Right()
+	{
+		Ui::Context("right");
+		Ui::SetRootAnchor(CanvasAnchor::MiddleRight);
+		auto r = Ui::Begin(Vec2f(150, 0));
+		r->SetPosition(Vec2f(320, 0));
+		Ui::Text("This canvas has everything right align", 100.f);
+		Ui::Context("base");
+		Ui::Begin();
+		Ui::Text("But inside this nested canvas, it's aligned left again. Isn't that cool ?", 100.f);
+		Ui::Image("blue.png_0_0");
+		Ui::End();
+		Ui::End();
+	}
 };
 void UiTest2()
 {
@@ -154,6 +170,7 @@ void UiTest2()
 
 	Ui::SetCanvasFrame("frame_black.png");
 	Ui::SetTextColor(Color::White);
+	Ui::SetRootAnchor(CanvasAnchor::TopLeft);
 	Ui::SnapshotContext("popup");
 
 	Ui::SetTextColor(Color::Black);
@@ -164,8 +181,11 @@ void UiTest2()
 	Ui::SetCanvasLayoutAlignH(LayoutAlign::Middle);
 	Ui::SnapshotContext("title");
 
-
-
+	Ui::SetTextColor(Color::Black);
+	Ui::SetTextFont("p");
+	Ui::SetTextAlign(TextAlign::Right);
+	Ui::SetCanvasLayoutAlignH(LayoutAlign::End);
+	Ui::SnapshotContext("right");
 
 	Engine::Launch();
 }
