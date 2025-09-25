@@ -131,6 +131,11 @@ namespace SandCastle
 		/// @brief Context setting.
 		// Set the margin that will be used for every root canvas (non nested canvas).
 		static void SetRootMargin(Vec2f margin);
+		/// @brief Context setting.
+		/// Set the anchor for the root canvases.
+		/// The anchor of every other UiElem including UiCanvas is always top left.
+		/// This applies only for non-nested canvases (canvases without parent).
+		static void SetRootAnchor(CanvasAnchor anchor);
 		/// @brief Set the material to default material.
 		static void ResetMaterial(Material* material);
 

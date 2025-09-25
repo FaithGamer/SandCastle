@@ -264,6 +264,11 @@ namespace SandCastle
 
 			canvas->sizeLimit.x = parentLimit.x < canvas->sizeLimit.x ? parentLimit.x : canvas->sizeLimit.x;
 			canvas->sizeLimit.y = parentLimit.y < canvas->sizeLimit.y ? parentLimit.y : canvas->sizeLimit.y;
+			canvas->anchor = CanvasAnchor::TopLeft;
+		}
+		else
+		{
+			canvas->anchor = i->m_context.rootAnchor;
 		}
 		size.x = size.x > canvas->sizeLimit.x ? canvas->sizeLimit.x : size.x;
 		size.y = size.y > canvas->sizeLimit.y ? canvas->sizeLimit.y : size.y;
@@ -551,6 +556,10 @@ namespace SandCastle
 	void Ui::SetRootMargin(Vec2f margin)
 	{
 		Instance()->m_context.rootMargin = margin;
+	}
+	void Ui::SetRootAnchor(CanvasAnchor anchor)
+	{
+		Instance()->m_context.rootAnchor = anchor;
 	}
 	void Ui::ResetMaterial(Material* material)
 	{

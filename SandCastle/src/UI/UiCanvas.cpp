@@ -32,23 +32,23 @@ namespace SandCastle
 		Vec2f offset(0, 0);
 		switch (anchor)
 		{
-		case Anchor::TopLeft:
+		case CanvasAnchor::TopLeft:
 			offset.x += margin.x;
 			offset.y -= margin.y;
 			break;
-		case Anchor::TopRight:
+		case CanvasAnchor::TopRight:
 			offset.x -= size.x + margin.x;
 			offset.y -= margin.y;
 			break;
-		case Anchor::BotLeft:
+		case CanvasAnchor::BotLeft:
 			offset.x += margin.x;
 			offset.y += size.y + margin.y;
 			break;
-		case Anchor::BotRight:
+		case CanvasAnchor::BotRight:
 			offset.x -= size.x + margin.x;
 			offset.y += size.y + margin.y;
 			break;
-		case Anchor::MiddleCenter:
+		case CanvasAnchor::MiddleCenter:
 			offset.x -= size.x * 0.5f;
 			offset.y += size.y * 0.5f;
 			break;
@@ -196,6 +196,7 @@ namespace SandCastle
 				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((canvas.x - line.length) * 0.5f, 0.f);
+						offset.x = std::round(offset.x);
 						elem->Move(offset);
 					};
 
@@ -204,6 +205,7 @@ namespace SandCastle
 				LineMoveH = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f((canvas.x - line.length), 0.f);
+						offset.x = std::round(offset.x);
 						elem->Move(offset);
 					};
 				break;
@@ -218,6 +220,7 @@ namespace SandCastle
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y) * 0.5f);
 						offset += Vec2f(0.f, -(canvas.y - contentSize.y) * 0.5f);
+						offset.y = std::round(offset.y);
 						elem->Move(offset);
 					};
 				break;
@@ -226,6 +229,7 @@ namespace SandCastle
 					{
 						auto offset = Vec2f(0.f, -(line.wrapSize - elem->size.y));
 						offset += Vec2f(0.f, -(canvas.y - contentSize.y));
+						offset.y = std::round(offset.y);
 						elem->Move(offset);
 					};
 				break;
@@ -243,6 +247,7 @@ namespace SandCastle
 					{
 						auto offset = Vec2f((line.wrapSize - elem->size.x) * 0.5f, 0.f);
 						offset += Vec2f((canvas.x - contentSize.x) * 0.5f, 0.f);
+						offset.x = std::round(offset.x);
 						elem->Move(offset);
 					};
 				break;
@@ -251,6 +256,7 @@ namespace SandCastle
 					{
 						auto offset = Vec2f((line.wrapSize - elem->size.x), 0.f);
 						offset += Vec2f((canvas.x - contentSize.x), 0.f);
+						offset.x = std::round(offset.x);
 						elem->Move(offset);
 					};
 				break;
@@ -264,6 +270,7 @@ namespace SandCastle
 				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(canvas.y - line.length) * 0.5f);
+						offset.y = std::round(offset.y);
 						elem->Move(offset);
 					};
 				break;
@@ -271,6 +278,7 @@ namespace SandCastle
 				LineMoveV = [](UiElem* elem, const Line& line, Vec2f contentSize, Vec2f canvas)
 					{
 						auto offset = Vec2f(0.f, -(canvas.y - line.length));
+						offset.y = std::round(offset.y);
 						elem->Move(offset);
 					};
 				break;
@@ -385,11 +393,6 @@ namespace SandCastle
 				size = frameSize;
 			}
 		}
-	}
-	void UiCanvas::SetAnchor(Anchor Anchor)
-	{
-		anchor = Anchor;
-		SetPosition(position);
 	}
 	void UiCanvas::SetSpacing(Vec2f Spacing)
 	{

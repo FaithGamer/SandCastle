@@ -17,35 +17,70 @@ public:
 	{
 		Popup();
 		Checkbox();
+		Images();
 	}
 	bool ch = false;
 	void Checkbox()
 	{
+		Ui::Context("title");
+		Ui::SetRootAnchor(CanvasAnchor::TopRight);
 
-		auto r = Ui::Begin();
+		auto r = Ui::Begin();//Begin root
+		r->SetPosition(Vec2f(320, 180));
+		Ui::Text("Checkboxes");
+		Ui::Context("base");
+		Ui::SetCanvasSpacing(2.f);
+		Ui::SetCanvasPadding(0.f);
 
+		Ui::Begin(0.f, false);//Begin checkboxes
 		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
-		Ui::Begin(Vec2f(140.f, 0), false);
+
+		Ui::Begin(Vec2f(140.f, 0), false); //Checkbox1
 		auto check = Ui::Checkbox();
 		check->SetChecked(ch);
 		check->checkSignal.Listen(&TestSys::OnCheck, this);
 		Ui::Text("Checked: {0}", 0.f, &ch);
-		Ui::End();
+		Ui::End(); //End checkbox1
 
-		Ui::Begin(Vec2f(140.f, 0), false);
+		Ui::Begin(Vec2f(140.f, 0), false);//Checkbox 2
 		Ui::Checkbox();
 		Ui::Text("Normal");
-		Ui::End();
+		Ui::End();//End checkbox 2
 
-		Ui::End();
+		Ui::End();//End checkboxes
+
+		Ui::End();//End root
 	}
 	void OnCheck(bool checked)
 	{
 		ch = checked;
 	}
+	void Images()
+	{
+		Ui::Context("title");
+		auto c = Ui::Begin(Vec2f(200, 0));
+		c->SetPosition(Vec2f(0, 0));
+		Ui::Text("Square canvas.");
+		Ui::Context("base");
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
+		Ui::Begin(0.f, false);
+		Ui::Image("blue.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::Image("blue.png_0_0");
+		Ui::Image("yellow.png_0_0");
+		Ui::Image("blue.png_0_0");
+		Ui::Image("green.png_0_0");
+		Ui::End();
+		Ui::Text("I hope you enjoyed.");
+		Ui::End();
+	}
 	void Popup()
 	{
 		Ui::Context("base");
+		Ui::SetRootAnchor(CanvasAnchor::TopLeft);
 		uis.hoverable = Ui::Begin(Vec2f(100.f, 0.f));
 		uis.hoverable->ListenHover(&TestSys::OnHoverHoverable, this);
 		uis.hoverable->ListenUnhover(&TestSys::OnUnhoverHoverable, this);
@@ -104,7 +139,7 @@ void UiTest2()
 	Ui::MakeFrameTemplate("btn_pressed.png");
 
 	//Context
-	Ui::SetCanvasPadding(5.f);
+	Ui::SetCanvasPadding(6.f);
 	Ui::SetRootMargin(2.f);
 	Ui::SetCanvasFrame("frame.png");
 	Ui::SetCanvasLayoutDir(LayoutDir::TopDown);

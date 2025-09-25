@@ -48,5 +48,6 @@ namespace SandCastle
 		Vec2f rootMargin = Vec2f(0.f, 0.f);
 		LayerID layer;
 		Material* material;
+		CanvasAnchor rootAnchor = CanvasAnchor::MiddleCenter;
 	};
 }

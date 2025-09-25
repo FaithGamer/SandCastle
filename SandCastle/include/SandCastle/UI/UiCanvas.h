@@ -18,18 +18,7 @@ namespace SandCastle
 			Horizontal = 1,
 			Vertical = 2
 		}SizeLimit;
-		enum class Anchor
-		{
-			TopLeft,
-			TopCenter,
-			TopRight,
-			MiddleLeft,
-			MiddleCenter,
-			MiddleRight,
-			BotLeft,
-			BotCenter,
-			BotRight
-		};
+		
 	public:
 		~UiCanvas();
 		/// @brief Will Update layout and parent layout on the next Ui::Update
@@ -39,7 +28,6 @@ namespace SandCastle
 		void SetPosition(Vec2f pos) override;
 		void AddElem(UiElem* elem);
 		void RemoveElem(UiElem* elem);
-		void SetAnchor(Anchor anchor);
 		/// @brief Spacing between element inside the canvas
 		void SetSpacing(Vec2f spacing);
 		void SetMargin(Vec2f margin);
@@ -59,7 +47,7 @@ namespace SandCastle
 		Bitmask8 fixedSize = 0;
 		std::unordered_map<UiElem::ID, UiElem*> children;
 		Vec2f sizeLimit = Vec2f(9999999.f, 9999999.f);
-		Anchor anchor;
+		CanvasAnchor anchor;
 		bool mustUpdate = false;
 	};
 }
