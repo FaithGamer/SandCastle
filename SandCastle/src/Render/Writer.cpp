@@ -454,7 +454,7 @@ namespace SandCastle
 			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}
 		sent.maxWidth = width;
-		sent.size.x = width > 0.f ? width : maxPenX;
+		sent.size.x = maxPenX;// width > 0.f ? width : maxPenX;
 		sent.size.y = std::abs(pen.y) + ((float)font.size + font.outlineThickness) * ppu;
 
 		//Lines alignement

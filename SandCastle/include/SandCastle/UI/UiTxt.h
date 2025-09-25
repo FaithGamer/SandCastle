@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandCastle/UI/UiElem.h"
+#include "SandCastle/UI/UiContext.h"
 #include "SandCastle/Render/Text.h"
 #include "SandCastle/Render/Color.h"
 
@@ -145,9 +146,7 @@ namespace SandCastle
 	protected:
 		friend Ui;
 		Sentence             sentence;
-		FontID               font;
-		Color                color;
-		TextAlign            align;
+		TextContext			 context;
 		String				 utf8;
 		std::unique_ptr<Data> data;
 	};

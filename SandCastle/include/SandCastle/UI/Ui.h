@@ -10,8 +10,8 @@
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/UI/UiEnum.h"
-#include "SandCastle/UI/UiCanvasContext.h"
 #include "SandCastle/Core/Container.h"
+#include "SandCastle/UI/UiContext.h"
 
 namespace SandCastle
 {
@@ -47,18 +47,15 @@ namespace SandCastle
 			float uiSize,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
-		/// @brief 
-		/// @param name 
-		static void SnapshotCanvasContext(String name);
 		/// @brief Override the default material.
-		static void SetDefaultMaterial(Material* material);
+		static void DefaultMaterial(Material* material);
 		/// @brief Set the ui dimension.
 		/// example, if ppu = 360 (default), an ui element of height 360 will fill up the screen.
-		static void SetPPU(float ppu);
+		static void PPU(float ppu);
 
 		/*---Ui creation---*/
 
-		static UiCanvas* BeginCanvas(Vec2f size = { 0, 0 }, bool frame = true);
+		static UiCanvas* Begin(Vec2f size = { 0, 0 }, bool frame = true);
 		static UiTxt* Text(std::string_view utf8, float width = -1.f);
 		template <typename... Ts>
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
@@ -73,47 +70,66 @@ namespace SandCastle
 
 		static void UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8 = true);
 
-		/*---State---*/
-
-		/// @brief Set the material that will be used for every subsequent ui creation
+		/*---Context---*/
+		/// @brief Create a snapshot of the current context for later usage.
+		static void SnapshotContext(String name);
+		/// @brief Set the context for every subsequent canvas/element creation.
+		/// The context must have been snapshoted with SnapshotContext.
+		static void Context(String name);
+		/// @brief Context setting.
+		/// Set the material that will be used for every subsequent ui creation
 		static void SetMaterial(Material* material);
-		/// @brief Set the font that will be used for every subsequent ui creation
-		static void SetFont(FontID font);
-		/// @brief Set the font that will be used for every subsequent ui creation
-		static void SetFont(String fancyName);
-		/// @brief Set the color that will be sued for every subsequent text creation (including buttons)
+		/// @brief Context setting.
+		/// Set the font that will be used for every subsequent ui creation
+		static void SetTextFont(FontID font);
+		/// @brief Context setting.
+		/// Set the font that will be used for every subsequent ui creation
+		static void SetTextFont(String fancyName);
+		/// @brief Context setting.
+		/// Set the color that will be sued for every subsequent text creation (including buttons)
 		static void SetTextColor(Color color);
-		/// @brief Set the layer that will be used for every subsequent ui creation
+		/// @brief Context setting.
+		/// Set the layer that will be used for every subsequent ui creation
 		static void SetLayer(LayerID layer);
-		/// @brief Set the canvas context for every subsequent canvas creation.
-		/// The context must have been snapshoted with SnapshotCanvasContext.
-		static void SetCanvasContext(String name);
-		/// @brief Set the frame that will be used for every subsequent canvas creation
+		/// @brief Context setting.
+		/// Set the frame that will be used for every subsequent canvas creation
 		static void SetCanvasFrame(String texture);
-		/// @brief Set the padding for every subsequent canvas creation
+		/// @brief Context setting.
+		/// Set the padding for every subsequent canvas creation
 		static void SetCanvasPadding(Vec2f padding);
-		/// @brief Set spacing between element inside every subsequent canvases.
+		/// @brief Context setting.
+		/// Set spacing between element inside every subsequent canvases.
 		static void SetCanvasSpacing(Vec2f spacing);
-		/// @brief Set the layout direction for every subsequent canvas creation
+		/// @brief Context setting.
+		/// Set the layout direction for every subsequent canvas creation
 		static void SetCanvasLayoutDir(LayoutDir dir);
-		/// @brief Set the horizontal alignement of element inside every subsequent canvases
+		/// @brief Context setting.
+		/// Set the horizontal alignement of element inside every subsequent canvases
 		static void SetCanvasLayoutAlignH(LayoutAlign alignH);
-		/// @brief Set the vertical alignement of element inside every subsequent canvases
+		/// @brief Context setting.
+		/// Set the vertical alignement of element inside every subsequent canvases
 		static void SetCanvasLayoutAlignV(LayoutAlign alignV);
-		/// @brief Set the frame that will be used for every subsequent button creation
+		/// @brief Context setting.
+		/// Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrame(String texture);
-		/// @brief Set the frame that will be used for every subsequent button creation
+		/// @brief Context setting.
+		/// Set the frame that will be used for every subsequent button creation
 		static void SetButtonFrameHover(String texture);
-		/// @brief Set the frame that will be used for every subsequent button creation
+		/// @brief Context setting.
+		/// Set the frame that will be used for every subsequent button creation
 		static void SetButtonFramePressed(String texture);
-		/// @brief The texture must have 3 horizontal sprites.
+		/// @brief Context setting.
+		/// The texture must have 3 horizontal sprites.
 		/// respecting this order: unchecked, hovered, checked
 		static void SetCheckboxSprites(String texture);
-		/// @brief Set the text alignement that will be used for every subsequent text creation
+		/// @brief Context setting.
+		/// Set the text alignement that will be used for every subsequent text creation
 		static void SetTextAlign(TextAlign textAlign);
-		/// @brief Set the margin that will be used for every subsequent element creation.
+		/// @brief Context setting.
+		/// Set the margin that will be used for every subsequent element creation.
 		static void SetMargin(Vec2f margin);
-		/// @brief Set the margin that will be used for every root canvas (non nested canvas).
+		/// @brief Context setting.
+		// Set the margin that will be used for every root canvas (non nested canvas).
 		static void SetRootMargin(Vec2f margin);
 		/// @brief Set the material to default material.
 		static void ResetMaterial(Material* material);
@@ -168,22 +184,22 @@ namespace SandCastle
 
 		//Data
 		std::unordered_map<String, UiFrame::Template> m_frameTemplates;
-		std::unordered_map<String, CanvasContext> m_contextSnapshots;
+		std::unordered_map<String, UiContext> m_contextSnapshots;
 
 		//State (creation of new elements)
-		Material* m_material = nullptr;
 		Material* m_defaultMaterial = nullptr;
+		/*Material m_material = nullptr;
+		String m_checkBoxSprites;
+		Color m_txtColor = Color(255, 255, 255, 255);
 		FontID m_font = 0;
 		LayerID m_layer = 0;
-		CanvasContext m_canvasContext;
 		Vec2f m_margin = 0.f;
 		Vec2f m_rootMargin = 0.f;
 		UiFrame::Template* m_buttonFrame = nullptr;
 		UiFrame::Template* m_buttonFrameHover = nullptr;
-		UiFrame::Template* m_buttonFramePressed = nullptr;
 		TextAlign m_textAlign = TextAlign::Left;
-		Color m_txtColor = Color(255, 255, 255, 255);
-		String m_checkBoxSprites;
+		UiFrame::Template* m_buttonFramePressed = nullptr;*/
+		UiContext m_context;
 
 		//Runtime
 		std::vector<UiElem*> m_hoverables;
@@ -210,9 +226,7 @@ namespace SandCastle
 		UiTxt* text = new UiTxt();
 		text->AddData(args...);
 		text->parent = canvas;
-		text->font = i->m_font;
-		text->align = i->m_textAlign;
-		text->color = i->m_txtColor;
+		text->context = i->m_context.text;
 		text->utf8 = utf8;
 		i->CreateText(text, text->Format(), width);
 		i->NewElem(text, canvas);

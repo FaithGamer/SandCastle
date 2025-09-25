@@ -4,7 +4,7 @@
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Core/Bitmask.h"
-#include "SandCastle/UI/UiCanvasContext.h"
+#include "SandCastle/UI/UiContext.h"
 
 namespace SandCastle
 {

@@ -447,10 +447,16 @@ std::vector avoid this problem.
 -added line adjustement
 -canvas context
 -removed old UiTest (only uipostest)
+-text width is maxPen
+-only one big ui context
+
+> issue with deformation ui on some text (std::round pen ?):
+	rounding adv.x doesn't fix the problem.
+	>I think limiting the window size to even number is the fix
 
 >further test canvas context:
 >create a complete test for UI with multiple canvases showcasing all  features
->text width takes all the width of the canvas, and trigger leftRight wrapping when unecessary
+>clamp position of (root) canvases to ui border? or have an option to
 
 advanced ui:
 

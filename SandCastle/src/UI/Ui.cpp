@@ -31,9 +31,9 @@ namespace SandCastle
 		uiMat->GetRenderOptions()->SetDepthTest(false);
 		uiMat->SetFloat("uPpu", m_ppu * 2.f);
 		m_defaultMaterial = uiMat;
-		m_material = uiMat;
-		m_layer = uiLayer;
-		m_writer = new Writer(m_material, m_layer);
+		m_context.material = uiMat;
+		m_context.layer = uiLayer;
+		m_writer = new Writer(m_context.material, m_context.layer);
 
 		auto input = Inputs::CreateInputMap("UI");
 		auto click = input->CreateButtonInput("Click");
@@ -49,9 +49,9 @@ namespace SandCastle
 
 	void Ui::Update()
 	{
-		LayoutUpdate();
 		HoverableUpdate();
 		ValuesUpdate();
+		LayoutUpdate();
 		DestroyUpdate();
 	}
 
@@ -189,10 +189,10 @@ namespace SandCastle
 		elem->id = id;
 		elem->parent = canvas;
 		elem->z = -(float)m_canvas.size();
-		elem->margin = m_rootMargin;
+		elem->margin = m_context.rootMargin;
 		if (canvas != nullptr)
 		{
-			elem->margin = m_margin;
+			elem->margin = m_context.margin;
 			canvas->AddElem(elem);
 		}
 		elem->destroySignal.Listen(&Ui::OnDestroy, this);
@@ -218,47 +218,35 @@ namespace SandCastle
 		float ppu = ins->m_writer->GetPPU();
 		int pxSize = (int)std::round(uiSize * ppu);
 		int pxOutline = outlineThickness > 0.f ? (int)std::max(1, (int)std::round(outlineThickness * ppu)) : 0;
-		ins->m_writer->SetLayer(ins->m_layer);
+		ins->m_writer->SetLayer(ins->m_context.layer);
 		auto font = ins->m_writer->MakeFont(filename, pxSize, pxOutline, outlineColor);
 		ins->m_writer->NameFont(font, fancyName);
 	}
 
-	void Ui::SnapshotCanvasContext(String name)
-	{
-		auto i = Instance();
-		auto it = i->m_contextSnapshots.find(name);
-		if (it != i->m_contextSnapshots.end())
-		{
-			LOG_ERROR("Canvas context snapshot with the name {0}, already exists.");
-			return;
-		}
-		i->m_contextSnapshots[name] = i->m_canvasContext;
-	}
-
-	void Ui::SetDefaultMaterial(Material* material)
+	void Ui::DefaultMaterial(Material* material)
 	{
 		Instance()->m_defaultMaterial = material;
-		Instance()->m_material = material;
+		Instance()->m_context.material = material;
 	}
 
-	void Ui::SetPPU(float ppu)
+	void Ui::PPU(float ppu)
 	{
 		ppu = 1.f / ppu;
 		Instance()->m_ppu = ppu;
 		Instance()->m_defaultMaterial->SetFloat("uPPu", ppu * 2.f);
-		Instance()->m_material->SetFloat("uPPu", ppu * 2.f);
+		Instance()->m_context.material->SetFloat("uPPu", ppu * 2.f);
 	}
 
-	UiCanvas* Ui::BeginCanvas(Vec2f size, bool frame)
+	UiCanvas* Ui::Begin(Vec2f size, bool frame)
 	{
 		auto i = Instance();
 		auto canvas = new UiCanvas();
-		canvas->context = i->m_canvasContext;
+		canvas->context = i->m_context.canvas;
 		canvas->root = Entity::Create();
 		canvas->root.AddComponent<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (frame)
-			canvas->frame = UiFrame(canvas->context.frame, i->m_material, i->m_layer);
+			canvas->frame = UiFrame(canvas->context.frame, i->m_context.material, i->m_context.layer);
 		else
 			canvas->context.frame = nullptr;
 		//Differentiate limit from size
@@ -300,9 +288,7 @@ namespace SandCastle
 		//Instantiation
 		UiTxt* text = new UiTxt();
 		text->parent = canvas;
-		text->font = i->m_font;
-		text->align = i->m_textAlign;
-		text->color = i->m_txtColor;
+		text->context = i->m_context.text;
 		text->utf8 = utf8;
 		i->CreateText(text, utf8, width);
 		i->NewElem(text, canvas);
@@ -322,16 +308,16 @@ namespace SandCastle
 			//There is no size limit
 			width = width > 0.f ? std::min(limit, width) : 0.f;
 
-		auto font = m_writer->GetFont(text->font);
+		auto font = m_writer->GetFont(text->context.font);
 		text->sentence = m_writer->Write
 		(
 			utf8,
-			text->font,
-			text->color,
+			text->context.font,
+			text->context.color,
 			font->material,
 			font->layer,
 			width,
-			text->align,
+			text->context.align,
 			1.f
 		);
 
@@ -360,12 +346,12 @@ namespace SandCastle
 		auto canvas = i->m_canvas.top();
 
 		UiImg* image = new UiImg();
-		image->margin = i->m_margin;
+		image->margin = i->m_context.margin;
 		image->root = Entity::CreateSprite(sprite);
 		auto render = image->root.GetComponent<SpriteRender>();
 
-		render->SetLayer(i->m_layer);
-		render->SetMaterial(i->m_material->GetID());
+		render->SetLayer(i->m_context.layer);
+		render->SetMaterial(i->m_context.material->GetID());
 		auto spr = render->GetSprite();
 		image->sprite = spr;
 		image->size = image->sprite->GetDimensions();
@@ -383,16 +369,25 @@ namespace SandCastle
 		UiBtn* button = new UiBtn();
 		button->root = Entity::Create();
 		button->root.AddComponent<Transform>();
-		button->margin = i->m_margin;
-		auto font = i->m_writer->GetFont(i->m_font);
-		button->label = i->m_writer->Write(utf8, font->id, i->m_txtColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->margin = i->m_context.margin;
+		auto font = i->m_writer->GetFont(i->m_context.text.font);
+		button->label = i->m_writer->Write(utf8, font->id, i->m_context.text.color, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
 		button->label.root.GetComponent<Transform>()->Move(padding.x, -padding.y, -3.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + padding.x * 2;
 		button->size.y = button->label.size.y + padding.y * 2;
-		button->frameIdle = UiFrame(i->m_buttonFrame, i->m_material, i->m_layer);
-		button->frameHover = UiFrame(i->m_buttonFrameHover, i->m_material, i->m_layer);
-		button->framePressed = UiFrame(i->m_buttonFramePressed, i->m_material, i->m_layer);
+		button->frameIdle = UiFrame(
+			i->m_context.button.frameIdle,
+			i->m_context.material,
+			i->m_context.layer);
+		button->frameHover = UiFrame(
+			i->m_context.button.frameHover,
+			i->m_context.material,
+			i->m_context.layer);
+		button->framePressed = UiFrame(
+			i->m_context.button.framePressed,
+			i->m_context.material,
+			i->m_context.layer);
 		i->NewElem(button, canvas);
 		button->UpdateFrames();
 		RegisterHoverable(button);
@@ -404,18 +399,18 @@ namespace SandCastle
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Checkbox without active canvas");
 		auto canvas = i->m_canvas.top();
-		ASSERT_LOG_ERROR((i->m_checkBoxSprites != ""), "Trying to create Checkbox without checkbox sprite");
+		ASSERT_LOG_ERROR((i->m_context.checkbox.texture != ""), "Trying to create Checkbox without checkbox sprite");
 
 		auto checkbox = new UiCheckbox();
 		checkbox->root = Entity::Create();
 		auto tr = checkbox->root.AddComponent<Transform>();
 		for (int j = 0; j < 3; j++)
 		{
-			String spriteName = i->m_checkBoxSprites + "_0_" + std::to_string(j);
+			String spriteName = i->m_context.checkbox.texture + "_0_" + std::to_string(j);
 			auto entt = Entity::CreateSprite(spriteName);
 			auto rd = entt.GetComponent<SpriteRender>();
-			rd->SetLayer(i->m_layer);
-			rd->SetMaterial(i->m_material->GetID());
+			rd->SetLayer(i->m_context.layer);
+			rd->SetMaterial(i->m_context.material->GetID());
 			auto spr = rd->GetSprite();
 			auto dim = spr->GetDimensions();
 			Vec3f offset = {
@@ -430,7 +425,7 @@ namespace SandCastle
 		auto rd = checkbox->sprites[0].GetComponent<SpriteRender>();
 		auto spr = rd->GetSprite();
 		checkbox->size = spr->GetDimensions();
-		checkbox->margin = i->m_margin;
+		checkbox->margin = i->m_context.margin;
 		checkbox->clickable = true;
 		i->NewElem(checkbox, canvas);
 		checkbox->UpdateVisual();
@@ -457,32 +452,20 @@ namespace SandCastle
 		Instance()->m_destroy.emplace_back(elem);
 	}
 
-	/*---State---*/
+	/*---Contect---*/
 
-	void Ui::SetMaterial(Material* material)
+	void Ui::SnapshotContext(String name)
 	{
-		material->SetFloat("uPpu", Instance()->m_ppu * 2.f);
-		Instance()->m_material = material;
+		auto i = Instance();
+		auto it = i->m_contextSnapshots.find(name);
+		if (it != i->m_contextSnapshots.end())
+		{
+			LOG_ERROR("Canvas context snapshot with the name {0}, already exists.");
+			return;
+		}
+		i->m_contextSnapshots[name] = i->m_context;
 	}
-	void Ui::SetFont(FontID font)
-	{
-		Instance()->m_font = font;
-	}
-	void Ui::SetFont(String fancyName)
-	{
-		auto ins = Instance();
-		ins->m_font = ins->m_writer->GetFont(fancyName)->id;
-		ins->m_writer->UseFont(ins->m_font);
-	}
-	void Ui::SetTextColor(Color color)
-	{
-		Instance()->m_txtColor = color;
-	}
-	void Ui::SetLayer(LayerID layer)
-	{
-		Instance()->m_layer = layer;
-	}
-	void Ui::SetCanvasContext(String name)
+	void Ui::Context(String name)
 	{
 		auto i = Instance();
 		auto it = i->m_contextSnapshots.find(name);
@@ -491,63 +474,87 @@ namespace SandCastle
 			LOG_ERROR("The following canvas context doesnt exists: {0}", name);
 			return;
 		}
-		i->m_canvasContext = it->second;
+		i->m_context = it->second;
 	}
+	void Ui::SetMaterial(Material* material)
+	{
+		material->SetFloat("uPpu", Instance()->m_ppu * 2.f);
+		Instance()->m_context.material = material;
+	}
+	void Ui::SetTextFont(FontID font)
+	{
+		Instance()->m_context.text.font = font;
+	}
+	void Ui::SetTextFont(String fancyName)
+	{
+		auto ins = Instance();
+		ins->m_context.text.font = ins->m_writer->GetFont(fancyName)->id;
+		ins->m_writer->UseFont(ins->m_context.text.font);
+	}
+	void Ui::SetTextColor(Color color)
+	{
+		Instance()->m_context.text.color = color;
+	}
+	void Ui::SetLayer(LayerID layer)
+	{
+		Instance()->m_context.layer = layer;
+	}
+
 	void Ui::SetCanvasFrame(String texture)
 	{
-		Instance()->SetFrame(&Instance()->m_canvasContext.frame, texture);
+		Instance()->SetFrame(&Instance()->m_context.canvas.frame, texture);
 	}
 	void Ui::SetCanvasPadding(Vec2f padding)
 	{
-		Instance()->m_canvasContext.padding = padding;
+		Instance()->m_context.canvas.padding = padding;
 	}
 	void Ui::SetCanvasSpacing(Vec2f spacing)
 	{
-		Instance()->m_canvasContext.spacing = spacing;
+		Instance()->m_context.canvas.spacing = spacing;
 	}
 	void Ui::SetCanvasLayoutDir(LayoutDir dir)
 	{
-		Instance()->m_canvasContext.layoutDir = dir;
+		Instance()->m_context.canvas.layoutDir = dir;
 	}
 	void Ui::SetCanvasLayoutAlignH(LayoutAlign alignH)
 	{
-		Instance()->m_canvasContext.layoutAlignH = alignH;
+		Instance()->m_context.canvas.layoutAlignH = alignH;
 	}
 	void Ui::SetCanvasLayoutAlignV(LayoutAlign alignV)
 	{
-		Instance()->m_canvasContext.layoutAlignV = alignV;
+		Instance()->m_context.canvas.layoutAlignV = alignV;
 	}
 	void Ui::SetButtonFrame(String texture)
 	{
-		Instance()->SetFrame(&Instance()->m_buttonFrame, texture);
+		Instance()->SetFrame(&Instance()->m_context.button.frameIdle, texture);
 	}
 	void Ui::SetButtonFrameHover(String texture)
 	{
-		Instance()->SetFrame(&Instance()->m_buttonFrameHover, texture);
+		Instance()->SetFrame(&Instance()->m_context.button.frameHover, texture);
 	}
 	void Ui::SetButtonFramePressed(String texture)
 	{
-		Instance()->SetFrame(&Instance()->m_buttonFramePressed, texture);
+		Instance()->SetFrame(&Instance()->m_context.button.framePressed, texture);
 	}
 	void Ui::SetCheckboxSprites(String texture)
 	{
-		Instance()->m_checkBoxSprites = texture;
+		Instance()->m_context.checkbox.texture = texture;
 	}
 	void Ui::SetTextAlign(TextAlign textAlign)
 	{
-		Instance()->m_textAlign = textAlign;
+		Instance()->m_context.text.align = textAlign;
 	}
 	void Ui::SetMargin(Vec2f margin)
 	{
-		Instance()->m_margin = margin;
+		Instance()->m_context.margin = margin;
 	}
 	void Ui::SetRootMargin(Vec2f margin)
 	{
-		Instance()->m_rootMargin = margin;
+		Instance()->m_context.rootMargin = margin;
 	}
 	void Ui::ResetMaterial(Material* material)
 	{
-		Instance()->m_material = Instance()->m_defaultMaterial;
+		Instance()->m_context.material = Instance()->m_defaultMaterial;
 	}
 	Vec3f Ui::UiToWorld(Vec2f uiPos)
 	{
@@ -620,15 +627,15 @@ namespace SandCastle
 	}
 	Material* Ui::GetMaterial()
 	{
-		return Instance()->m_material;
+		return Instance()->m_context.material;
 	}
 	FontID Ui::GetFont()
 	{
-		return Instance()->m_font;
+		return Instance()->m_context.text.font;
 	}
 	LayerID Ui::GetLayer()
 	{
-		return Instance()->m_layer;
+		return Instance()->m_context.layer;
 	}
 
 	std::unordered_map<UiElem::ID, UiCanvas*> Ui::GetCanvases()

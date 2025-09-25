@@ -371,10 +371,10 @@
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
     <ClInclude Include="include\SandCastle\Render\Text.h" />
-    <ClInclude Include="include\SandCastle\UI.h" />
+    <ClInclude Include="include\SandCastle\UIheader.h" />
     <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
-    <ClInclude Include="include\SandCastle\UI\UiCanvasContext.h" />
+    <ClInclude Include="include\SandCastle\UI\UiContext.h" />
     <ClInclude Include="include\SandCastle\UI\UiCheckbox.h" />
     <ClInclude Include="include\SandCastle\UI\UiElem.h" />
     <ClInclude Include="include\SandCastle\UI\UiEnum.h" />
