@@ -19,6 +19,7 @@ public:
 		Checkbox();
 		Images();
 		Right();
+		Button();
 	}
 	void Popup()
 	{
@@ -131,7 +132,24 @@ public:
 		Ui::Text("But inside this nested canvas, it's aligned left again. Isn't that cool ?", 100.f);
 		Ui::Image("blue.png_0_0");
 		Ui::End();
+		Ui::Image("green.png_0_0");
 		Ui::End();
+	}
+	int clicked = 0;
+	void Button()
+	{
+		
+		Ui::Context("title");
+		Ui::SetRootAnchor(CanvasAnchor::BotLeft);
+		auto r = Ui::Begin(Vec2f(150, 0));
+		r->SetPosition(Vec2f(-320.f, -180.f));
+		Ui::Text("You clicked {0} times", 0.f, &clicked);
+		Ui::Button("Ok")->ListenClickReleased(&TestSys::OnClickOk, this);
+		Ui::End();
+	}
+	void OnClickOk(UiElem* signal)
+	{
+		clicked++;
 	}
 };
 void UiTest2()
@@ -162,6 +180,9 @@ void UiTest2()
 	Ui::SetCanvasSpacing(3.f);
 	Ui::SetTextColor(Color::Black);
 	Ui::SetTextFont("p");
+	Ui::SetButtonFont("h2");
+	Ui::SetButtonPadding(5.f);
+	Ui::SetButtonTextColor(Color::White);
 	Ui::SetButtonFrame("btn.png");
 	Ui::SetButtonFrameHover("btn_hover.png");
 	Ui::SetButtonFramePressed("btn_pressed.png");

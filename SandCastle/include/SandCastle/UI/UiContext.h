@@ -9,6 +9,8 @@ namespace SandCastle
 {	
 	struct ButtonContext
 	{
+		FontID font;
+		Color textColor;
 		Vec2f padding = Vec2f(0.f, 0.f);
 		UiFrame::Template* frameIdle = nullptr;
 		UiFrame::Template* frameHover = nullptr;
@@ -33,7 +35,6 @@ namespace SandCastle
 	struct TextContext
 	{
 		FontID font;
-		Material* material;
 		Color color;
 		TextAlign align = TextAlign::Left;
 	};

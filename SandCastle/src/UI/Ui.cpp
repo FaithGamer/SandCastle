@@ -328,8 +328,6 @@ namespace SandCastle
 
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
-		//text->parent->root.AddChild(text->root);
-
 	}
 	void Ui::UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8)
 	{
@@ -365,7 +363,7 @@ namespace SandCastle
 		return image;
 	}
 
-	UiBtn* Ui::Button(std::string_view utf8, Vec2f padding)
+	UiBtn* Ui::Button(std::string_view utf8)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Button without active canvas");
@@ -375,12 +373,12 @@ namespace SandCastle
 		button->root = Entity::Create();
 		button->root.AddComponent<Transform>();
 		button->margin = i->m_context.margin;
-		auto font = i->m_writer->GetFont(i->m_context.text.font);
-		button->label = i->m_writer->Write(utf8, font->id, i->m_context.text.color, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.GetComponent<Transform>()->Move(padding.x, -padding.y, -3.f);
+		auto font = i->m_writer->GetFont(i->m_context.button.font);
+		button->label = i->m_writer->Write(utf8, font->id, i->m_context.button.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label.root.GetComponent<Transform>()->Move(i->m_context.button.padding.x, -i->m_context.button.padding.y, -3.f);
 		button->root.AddChild(button->label.root);
-		button->size.x = button->label.size.x + padding.x * 2;
-		button->size.y = button->label.size.y + padding.y * 2;
+		button->size.x = button->label.size.x + i->m_context.button.padding.x * 2;
+		button->size.y = button->label.size.y + i->m_context.button.padding.y * 2;
 		button->frameIdle = UiFrame(
 			i->m_context.button.frameIdle,
 			i->m_context.material,
@@ -494,11 +492,27 @@ namespace SandCastle
 	{
 		auto ins = Instance();
 		ins->m_context.text.font = ins->m_writer->GetFont(fancyName)->id;
-		ins->m_writer->UseFont(ins->m_context.text.font);
+	}
+	void Ui::SetButtonFont(FontID font)
+	{
+		Instance()->m_context.button.font = font;
+	}
+	void Ui::SetButtonFont(String fancyName)
+	{
+		auto ins = Instance();
+		ins->m_context.button.font = ins->m_writer->GetFont(fancyName)->id;
 	}
 	void Ui::SetTextColor(Color color)
 	{
 		Instance()->m_context.text.color = color;
+	}
+	void Ui::SetButtonTextColor(Color color)
+	{
+		Instance()->m_context.button.textColor = color;
+	}
+	void Ui::SetButtonPadding(Vec2f padding)
+	{
+		Instance()->m_context.button.padding = padding;
 	}
 	void Ui::SetLayer(LayerID layer)
 	{

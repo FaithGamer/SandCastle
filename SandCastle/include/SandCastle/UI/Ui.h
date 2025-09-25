@@ -60,7 +60,7 @@ namespace SandCastle
 		template <typename... Ts>
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
 		static UiImg* Image(String sprite);
-		static UiBtn* Button(std::string_view utf8, Vec2f padding);
+		static UiBtn* Button(std::string_view utf8);
 		static UiCheckbox* Checkbox();
 		static void End();
 		/// @brief Only root canvas can be deleted.
@@ -80,14 +80,27 @@ namespace SandCastle
 		/// Set the material that will be used for every subsequent ui creation
 		static void SetMaterial(Material* material);
 		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent ui creation
+		/// Set the font that will be used for every subsequent text creation
 		static void SetTextFont(FontID font);
 		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent ui creation
+		/// Set the font that will be used for every subsequent text creation
 		static void SetTextFont(String fancyName);
 		/// @brief Context setting.
-		/// Set the color that will be sued for every subsequent text creation (including buttons)
+		/// Set the font that will be used for every subsequent button creation
+		static void SetButtonFont(FontID font);
+		/// @brief Context setting.
+		/// Set the font that will be used for every subsequent button creation
+		static void SetButtonFont(String fancyName);
+		/// @brief Context setting.
+		/// Set the color that will be sued for every subsequent text creation
 		static void SetTextColor(Color color);
+		/// @brief Context setting.
+		/// Set the text color that will be used for every subsequent button creation 
+		static void SetButtonTextColor(Color color);
+		/// @brief Context setting.
+		/// Set the padding (space between button text, and button edges)
+		/// that will be used for every subsequent button creation.
+		static void SetButtonPadding(Vec2f padding);
 		/// @brief Context setting.
 		/// Set the layer that will be used for every subsequent ui creation
 		static void SetLayer(LayerID layer);
