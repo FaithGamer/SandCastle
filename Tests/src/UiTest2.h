@@ -30,14 +30,14 @@ public:
 		check->SetChecked(ch);
 		check->checkSignal.Listen(&TestSys::OnCheck, this);
 		Ui::Text("Checked: {0}", 0.f, &ch);
-		Ui::EndCanvas();
+		Ui::End();
 
 		Ui::Begin(Vec2f(140.f, 0), false);
 		Ui::Checkbox();
 		Ui::Text("Normal");
-		Ui::EndCanvas();
+		Ui::End();
 
-		Ui::EndCanvas();
+		Ui::End();
 	}
 	void OnCheck(bool checked)
 	{
@@ -55,7 +55,7 @@ public:
 		Ui::Text("Title on multiple lines");
 		Ui::Context("base");
 		Ui::Text("Hover this canvas to show a popup. Do it.");
-		Ui::EndCanvas();
+		Ui::End();
 	}
 	void MakePopup()
 	{
@@ -67,7 +67,7 @@ public:
 		);
 		uis.popup->SetPosition(pos);
 		Ui::Text("This window has a popup appearing when you hover it.");
-		Ui::EndCanvas();
+		Ui::End();
 	}
 	void OnHoverHoverable(UiElem* signal)
 	{
@@ -123,7 +123,7 @@ void UiTest2()
 
 	Ui::SetTextColor(Color::Black);
 	Ui::SetCanvasFrame("frame.png");
-	Ui::SetTextFont("h2");
+	Ui::SetTextFont("h1");
 	Ui::SetTextColor(Color::Red);
 	Ui::SetTextAlign(TextAlign::Center);
 	Ui::SetCanvasLayoutAlignH(LayoutAlign::Middle);

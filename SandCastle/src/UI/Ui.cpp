@@ -434,7 +434,7 @@ namespace SandCastle
 
 	}
 
-	void Ui::EndCanvas()
+	void Ui::End()
 	{
 		auto i = Instance();
 		if (i->m_canvas.empty())

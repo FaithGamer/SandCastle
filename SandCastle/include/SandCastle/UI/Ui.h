@@ -62,7 +62,7 @@ namespace SandCastle
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8, Vec2f padding);
 		static UiCheckbox* Checkbox();
-		static void EndCanvas();
+		static void End();
 		/// @brief Only root canvas can be deleted.
 		static void Destroy(UiElem* elem);
 
