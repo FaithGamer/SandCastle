@@ -36,12 +36,20 @@ namespace SandCastle
 			offset.x += margin.x;
 			offset.y -= margin.y;
 			break;
+		case CanvasAnchor::TopCenter:
+			offset.x -= size.x * 0.5f;
+			offset.y -= margin.y;
+			break;
 		case CanvasAnchor::TopRight:
 			offset.x -= size.x + margin.x;
 			offset.y -= margin.y;
 			break;
 		case CanvasAnchor::BotLeft:
 			offset.x += margin.x;
+			offset.y += size.y + margin.y;
+			break;
+		case CanvasAnchor::BotCenter:
+			offset.x -= size.x * 0.5f;
 			offset.y += size.y + margin.y;
 			break;
 		case CanvasAnchor::BotRight:
@@ -52,9 +60,20 @@ namespace SandCastle
 			offset.x -= size.x * 0.5f;
 			offset.y += size.y * 0.5f;
 			break;
+		case CanvasAnchor::MiddleRight:
+			offset.x -= size.x + margin.x;
+			offset.y += size.y * 0.5f;
+			break;
+		case CanvasAnchor::MiddleLeft:
+			offset.x += margin.x;
+			offset.y += size.y * 0.5f;
+			break;
+		default:
+			break;
 		}
 		return offset;
 	}
+
 	Vec2f UiCanvas::GetPosition() const
 	{
 		auto pos = position + AnchorOffset();
