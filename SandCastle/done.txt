@@ -449,10 +449,7 @@ std::vector avoid this problem.
 -removed old UiTest (only uipostest)
 -text width is maxPen
 -only one big ui context
-
-> issue with deformation ui on some text (std::round pen ?):
-	rounding adv.x doesn't fix the problem.
-	>I think limiting the window size to even number is the fix
+-rounded alignement of text to fix a deformed pixel art text issue
 
 >further test canvas context:
 >create a complete test for UI with multiple canvases showcasing all  features

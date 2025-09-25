@@ -464,7 +464,7 @@ namespace SandCastle
 		case TextAlign::Center:
 			Align = [](Line& line, float w) -> void
 				{
-					float offset = (w - line.totalAdv) * 0.5f;
+					float offset = std::round((w - line.totalAdv) * 0.5f);
 					for (int i = 0; i < line.chars.size(); i++)
 					{
 						line.chars[i].entt.gtr()->Move(offset, 0.f, 0.f);
@@ -474,7 +474,7 @@ namespace SandCastle
 		case TextAlign::Right:
 			Align = [](Line& line, float w) -> void
 				{
-					float offset = w - line.totalAdv;
+					float offset = std::round(w - line.totalAdv);
 					for (int i = 0; i < line.chars.size(); i++)
 					{
 						line.chars[i].entt.gtr()->Move(offset, 0.f, 0.f);
