@@ -457,16 +457,17 @@ std::vector avoid this problem.
 
 -shove transform from matrix and other useless stuff and benchmark
 -Ui bool OnEvents, remove the Inputs from UI
+-check if UI blocking event works
 
+>get rid of inputs system: merge into inputs singleton
 >check destroy from fast roots
->check if UI blocking event works
 
 tasks:
 
 
 >test pixel art rotations
 >have a default texture setting custom
->get rid of inputs system: merge into inputs singleton
+
 >fix ImGui random assert crash (probly bc of threading)
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?

@@ -12,6 +12,10 @@ public:
 		UiCanvas* hoverable = nullptr;
 		UiCanvas* popup = nullptr;
 	};
+	void OnClick(InputSignal* signal)
+	{
+		LOG_INFO("Non UI click");
+	}
 	Uis uis;
 	void Start()
 	{
@@ -20,6 +24,11 @@ public:
 		Images();
 		Right();
 		Button();
+
+		auto map = Inputs::CreateInputMap();
+		auto button = map->CreateButtonInput("Button");
+		button->BindMouse(Mouse::Button::Left);
+		button->signal.Listen(&TestSys::OnClick, this);
 	}
 	void Popup()
 	{
