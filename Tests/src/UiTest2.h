@@ -31,6 +31,10 @@ public:
 		button->BindMouse(Mouse::Button::Left);
 		button->signal.Listen(&TestSys::OnClick, this);
 	}
+	void Update()
+	{
+		MemoryUpdt();
+	}
 	void Popup()
 	{
 		Ui::Context("base");
@@ -71,41 +75,109 @@ public:
 		Ui::Destroy(uis.popup);
 		uis.popup = nullptr;
 	}
-	bool ch = false;
+	bool memoryLeakTest = false;
 	void Checkbox()
 	{
 		Ui::Context("title");
 		Ui::SetRootAnchor(CanvasAnchor::TopRight);
 
-		auto r = Ui::Begin();//Begin root
+		auto r = Ui::Begin();//root
 		r->SetPosition(Vec2f(320, 180));
 		Ui::Text("Checkboxes");
 		Ui::Context("base");
 		Ui::SetCanvasSpacing(2.f);
 		Ui::SetCanvasPadding(0.f);
 
-		Ui::Begin(0.f, false);//Begin checkboxes
+		Ui::Begin(0.f, false);//checkboxes
 		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
 
 		Ui::Begin(Vec2f(140.f, 0), false); //Checkbox1
-		auto check = Ui::Checkbox();
-		check->SetChecked(ch);
-		check->checkSignal.Listen(&TestSys::OnCheck, this);
-		Ui::Text("Checked: {0}", 0.f, &ch);
-		Ui::End(); //End checkbox1
+		auto popupCheck = Ui::Checkbox();
+		popupCheck->checkSignal.Listen(&TestSys::OnCheck, this);
+		Ui::Text("Popup");
+		Ui::End(); //checkbox1
 
 		Ui::Begin(Vec2f(140.f, 0), false);//Checkbox 2
-		Ui::Checkbox();
-		Ui::Text("Normal");
-		Ui::End();//End checkbox 2
+		Ui::Checkbox(&memoryLeakTest);
+		Ui::Text("Memory leak test");
+		Ui::End();//checkbox 2
 
-		Ui::End();//End checkboxes
+		Ui::Begin(Vec2f(140.f, 0), false);//Checkbox 3
+		static bool ch = true;
+		Ui::Checkbox(&ch);
+		Ui::Text("Value: {0}", 0.f, &ch);
+		Ui::End();//checkbox 3
 
-		Ui::End();//End root
+		Ui::End();//checkboxes
+
+		Ui::End();//root
 	}
-	void OnCheck(bool checked)
+	void MemoryUpdt()
 	{
-		ch = checked;
+		if (!memoryLeakTest)
+			return;
+
+		static int counter = 0;
+		static UiCanvas* r = nullptr;
+
+		if (counter == 0)
+		{
+			static int k = 42;
+			Ui::Context("popup");
+			r = Ui::Begin();
+			r->SetPosition(Vec2f(-100, 180));
+			Ui::Text("Bonjour {0}", 0.f, &k);
+			Ui::Begin();
+			auto b = Ui::Button("Ok");
+			b->ListenClickReleased(&TestSys::DummyCallback, this);
+			Ui::Image("yellow.png_0_0");
+			static bool c = false;
+			Ui::End();
+			auto check = Ui::Checkbox(&c);
+			check->checkSignal.Listen(&TestSys::DummyCallback2, this);
+			Ui::End();
+			counter++;
+		}
+		else if (r != nullptr)
+		{
+			counter = 0;
+			Ui::Destroy(r);
+			r = nullptr;
+		}
+		
+	}
+	void DummyCallback(UiElem* signal)
+	{
+		//nothing
+	}
+	void DummyCallback2(UiCheckbox* signal)
+	{
+		//nothing
+	}
+	UiCanvas* popupChecked = nullptr;
+	void OnCheck(UiCheckbox* checkbox)
+	{
+		if (checkbox->IsChecked() && popupChecked == nullptr)
+		{
+			Ui::Context("popup");
+			Ui::SetRootAnchor(CanvasAnchor::TopRight);
+			popupChecked = Ui::Begin(Vec2f(50, 50));
+			auto parent = checkbox->GetParent();
+			auto ppos = parent->GetPosition();
+			auto psize = parent->GetSize();
+			popupChecked->SetPosition(Vec2f(
+				ppos.x - psize.x,
+				ppos.y
+			));
+			Ui::Text("Pop!");
+			Ui::End();
+
+		}
+		else if (popupChecked != nullptr)
+		{
+			Ui::Destroy(popupChecked);
+			popupChecked = nullptr;
+		}
 	}
 	void Images()
 	{
@@ -166,6 +238,7 @@ public:
 		Ui::Context("base");
 		Ui::SetRootAnchor(CanvasAnchor::BotRight);
 		Ui::SetCanvasLayoutAlignV(LayoutAlign::End);
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
 		auto r = Ui::Begin(Vec2f(0, 100));
 		r->SetPosition(Vec2f(320, -180));
 		auto cbtn = Ui::Button("Create");

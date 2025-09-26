@@ -28,7 +28,9 @@ namespace SandCastle
 	void UiCheckbox::OnClickReleased()
 	{
 		checked = !checked;
-		checkSignal.Send(checked);
+		if (value != nullptr)
+			*value = checked;
+		checkSignal.Send(this);
 		if (checked)
 		{
 			Show(sprites[Checked], true);

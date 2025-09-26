@@ -26,6 +26,10 @@ namespace SandCastle
 		UiElem::Type GetType() const override;
 		Vec2f GetPosition() const override;
 		void SetPosition(Vec2f pos) override;
+		inline CanvasAnchor GetAnchor() const
+		{
+			return anchor;
+		}
 		void AddElem(UiElem* elem);
 		void RemoveElem(UiElem* elem);
 		/// @brief Spacing between element inside the canvas

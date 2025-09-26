@@ -462,8 +462,9 @@ std::vector avoid this problem.
 -get rid of inputs system: merge into inputs singleton
 -destroy test
 -removed fast roots
-
->create memory leak test
+-improved checkbox with bool pointer
+-create memory leak test
+>Ui::Destroy(all kind of elem&*) to nullptr the pointer
 
 tasks:
 

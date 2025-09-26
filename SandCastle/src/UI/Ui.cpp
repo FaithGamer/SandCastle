@@ -432,7 +432,7 @@ namespace SandCastle
 		return button;
 	}
 
-	UiCheckbox* Ui::Checkbox()
+	UiCheckbox* Ui::Checkbox(bool* value)
 	{
 		auto i = Instance();
 		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Checkbox without active canvas");
@@ -441,6 +441,7 @@ namespace SandCastle
 
 		auto checkbox = new UiCheckbox();
 		checkbox->root = Entity::Create();
+		checkbox->value = value;
 		auto tr = checkbox->root.AddComponent<Transform>();
 		for (int j = 0; j < 3; j++)
 		{
@@ -468,6 +469,10 @@ namespace SandCastle
 		i->NewElem(checkbox, canvas);
 		checkbox->UpdateVisual();
 		RegisterHoverable(checkbox);
+		if (value != nullptr)
+		{
+			checkbox->SetChecked(*value);
+		}
 		return checkbox;
 
 	}

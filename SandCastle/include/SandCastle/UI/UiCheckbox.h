@@ -10,8 +10,11 @@ namespace SandCastle
 	{
 	public:
 		UiElem::Type GetType() const override;
-		void SetChecked(bool checked);
-		Signal<bool> checkSignal;
+		inline bool IsChecked() const
+		{
+			return checked;
+		}
+		Signal<UiCheckbox*> checkSignal;
 	protected:
 		typedef enum
 		{
@@ -25,9 +28,12 @@ namespace SandCastle
 		void OnClickReleased() override;
 		void UpdateVisual();
 		void Show(Entity& entt, bool show);
+		void SetChecked(bool checked);
+		
 	protected:
 		friend Ui;
 		std::vector<Entity> sprites;
 		bool checked = false;
+		bool* value = nullptr;
 	};
 }
