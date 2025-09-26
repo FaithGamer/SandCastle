@@ -25,6 +25,7 @@ public:
 		Right();
 		Button();
 		Destroy();
+		Loca();
 
 		auto map = Inputs::CreateInputMap();
 		auto button = map->CreateButtonInput("Button");
@@ -142,7 +143,7 @@ public:
 			counter = 0;
 			Ui::Destroy(r);
 		}
-		
+
 	}
 	void DummyCallback(UiElem* signal)
 	{
@@ -263,6 +264,28 @@ public:
 			Ui::Destroy(c);
 		}
 		createds.clear();
+	}
+	void Loca()
+	{
+		Ui::Context("base");
+		Ui::SetRootAnchor(CanvasAnchor::BotCenter);
+		auto r = Ui::Begin();
+		r->SetPosition(Vec2f(0, -180));
+		Ui::Image("flag.png_0_0");
+		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
+		Ui::Begin();
+		Ui::Button("FR")->ListenClickReleased(&TestSys::OnFR, this);
+		Ui::Button("JA")->ListenClickReleased(&TestSys::OnJA, this);
+		Ui::End();
+		Ui::End();
+	}
+	void OnFR(UiElem* signal)
+	{
+		Assets::SetLang("fr");
+	}
+	void OnJA(UiElem* signal)
+	{
+		Assets::SetLang("ja");
 	}
 };
 void UiTest2()

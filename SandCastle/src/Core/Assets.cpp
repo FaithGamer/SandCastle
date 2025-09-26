@@ -11,9 +11,6 @@
 #include "SandCastle/Audio/Audio.h"
 #include "SandCastle/Render/Renderer2D.h"
 
-#define TEXTURE_IMPORT_SETTING_IS_ERROR
-#define SPRITESHEET_IS_ERROR
-
 namespace SandCastle
 {
 	void Assets::CreateAnimations()
@@ -24,6 +21,14 @@ namespace SandCastle
 		}
 		m_animations.clear();
 	}
+
+	void Assets::ChangeLocaTexture(sptr<OpaqueAsset>& prev, sptr<OpaqueAsset>& next)
+	{
+		auto Prev = static_pointer_cast<Asset<Texture>>(prev);
+		auto Next = static_pointer_cast<Asset<Texture>>(next);
+		Prev->Ptr()->Copy(*Next->Ptr());
+	}
+
 	void Assets::GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture)
 	{
 		int w = (int)spritesheet.GetInt("Width");
@@ -65,11 +70,11 @@ namespace SandCastle
 				texRect.width = (float)width;
 				texRect.height = (float)height;
 
-				String spriteName = filename + "_" + std::to_string((rows-1)-y) + "_" + std::to_string(x);
+				String spriteName = filename + "_" + std::to_string((rows - 1) - y) + "_" + std::to_string(x);
 				InsertAsset(spriteName, MakeAsset<Sprite>(
-					texture, 
-					texRect, 
-					(numeric::float16_t)origin.x, 
+					texture,
+					texRect,
+					(numeric::float16_t)origin.x,
 					(numeric::float16_t)origin.y));
 			}
 		}
@@ -92,11 +97,12 @@ namespace SandCastle
 
 		return spritesheet;
 	}
-	void Assets::AddAnimation(String filename, String path)
+	void Assets::AddAnimation(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Animation cannot be localized.");
 		m_animations.emplace_back(std::make_pair(filename, Serialized(path)));
 	}
-	void Assets::AddTexture(String filename, String path)
+	void Assets::AddTexture(const String& filename, const String& path, bool localized, const String& lang)
 	{
 		String settingsPath = path.substr(0, path.find_last_of("/") + 1);
 		String nameNoExtension = filename.substr(0, filename.find_last_of("."));
@@ -122,19 +128,7 @@ namespace SandCastle
 		TextureImportSettings importSettings(importSettingsCfg);
 
 		//Check if the texture setting is valid (no deserializationError)
-		if (importSettings.DeserializationError())
-		{
-#ifdef TEXTURE_IMPORT_SETTING_IS_ERROR
-			ASSERT_LOG_ERROR(false, "Ill formed texture import settings: " + path);
-#else
-			LOG_WARN("Ill formed texture import settings, creating default texture settings for " + filename);
-			importSettingsCfg = CreateDefaultTextureSettings(settingsPath);
-			settings["ImportSettings"] = importSettingsCfg;
-			settings.WriteOnDisk(settingsPath);
-			importSettings.Deserialize(importSettingsCfg);
-#endif
-
-		}
+		ASSERT_LOG_ERROR(!importSettings.DeserializationError(), "Ill formed texture import settings: " + path);
 
 		if (m_reloading)
 		{
@@ -143,11 +137,9 @@ namespace SandCastle
 			//Do not generate sprites
 			return;
 		}
-
+		
 		//Create the texture with the import settings
 		auto texture = MakeAsset<Texture>(path, importSettings);
-		InsertAsset(filename, texture);
-
 		//Load sprite sheet from settings
 		auto spritesheet = settings.GetObj("Spritesheet");
 		if (spritesheet.HadGetError())
@@ -157,49 +149,55 @@ namespace SandCastle
 			settings["Spritesheet"] = spritesheet;
 			settings.WriteOnDisk(settingsPath);
 		}
-
-		//Create all the sprites asset based on texture and sprite sheet
-		GenerateSprites(filename, spritesheet, texture->Ptr());
+		if (localized)
+		{
+			InsertLocalizedAsset(filename, lang, texture);
+			if (lang == GetLang())
+			{
+				GenerateSprites(filename, spritesheet, texture->Ptr());
+				InsertAsset(filename, texture);
+			}
+		}
+		else
+		{
+			GenerateSprites(filename, spritesheet, texture->Ptr());
+			InsertAsset(filename, texture);
+		}
 
 		//Check if the sprites generated are correct
-		if (spritesheet.HadGetError())
-		{
-#ifdef SPRITESHEET_IS_ERROR
-			ASSERT_LOG_ERROR(false, "Ill formed spritesheet: " + path);
-#else
-			LOG_WARN("Ill formed spritesheet, creating default spritesheet for " + filename);
-			spritesheet = CreateDefaultSpritesheet(texture->Ptr());
-			settings["Spritesheet"] = spritesheet;
-			settings.WriteOnDisk();
-#endif
+		ASSERT_LOG_ERROR(!spritesheet.HadGetError(), "Ill formed spritesheet: " + path);
 
-		}
 	}
-	void Assets::AddConfig(String filename, String path)
+	void Assets::AddConfig(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Config cannot be localized.");
 		InsertAsset(filename, MakeAsset<Serialized>(path));
 	}
-	void Assets::AddFragmentShader(String filename, String path)
+	void Assets::AddFragmentShader(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Shader cannot be localized.");
 		auto length = filename.size() - (filename.size() - filename.find_last_of("."));
 		String shadername = filename.substr(0, length);
 		m_shadersPath[shadername].fragment = path;
 	}
-	void Assets::AddVertexShader(String filename, String path)
+	void Assets::AddVertexShader(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Shader cannot be localized.");
 		auto length = filename.size() - (filename.size() - filename.find_last_of("."));
 		String shadername = filename.substr(0, length);
 		m_shadersPath[shadername].vertex = path;
 	}
-	void Assets::AddGeometryShader(String filename, String path)
+	void Assets::AddGeometryShader(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Shader cannot be localized.");
 		auto length = filename.size() - (filename.size() - filename.find_last_of("."));
 		String shadername = filename.substr(0, length);
 		m_shadersPath[shadername].geometry = path;
 	}
 
-	void Assets::AddAudio(String filename, String path)
+	void Assets::AddAudio(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		ASSERT_LOG_ERROR(!localized, "Audio cannot be localized. (Yeah haha!)");
 		Audio::Instance()->LoadSound(path);
 	}
 
@@ -212,7 +210,7 @@ namespace SandCastle
 	{
 		//Can't be done in constructor because of recursion
 		stbi_set_flip_vertically_on_load(true);
-		InitAddAssetFunctions();
+		InitFunctions();
 		LoadAssets();
 		CompileShaders();
 		CreateAnimations();
@@ -224,8 +222,33 @@ namespace SandCastle
 		LoadAssets();
 		m_reloading = false;
 	}
-	void Assets::InitAddAssetFunctions()
+	void Assets::SetLang(const String& lang)
 	{
+		auto i = Instance();
+		auto it = i->m_localized.find(lang);
+		if (it == i->m_localized.end())
+		{
+			LOG_ERROR("The following localization key doesn't exist: {0}", lang);
+			return;
+		}
+		i->m_lang = lang;
+		for (auto& loca : it->second.assets)
+		{
+			auto& newAsset = loca.second;
+			auto& assetKey = loca.first;
+			auto& currentAsset = i->m_assets.at(assetKey);
+			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
+			it_fun->second.Call(currentAsset, newAsset);
+		}
+		i->langSignal.Send(LangSignal(lang));
+	}
+	String Assets::GetLang()
+	{
+		return Instance()->m_lang;
+	}
+	void Assets::InitFunctions()
+	{
+		//Add assets
 		m_addAssetFunctions.insert(std::make_pair(".anim", Delegate(&Assets::AddAnimation, this)));
 		m_addAssetFunctions.insert(std::make_pair(".png", Delegate(&Assets::AddTexture, this)));
 		m_addAssetFunctions.insert(std::make_pair(".config", Delegate(&Assets::AddConfig, this)));
@@ -234,23 +257,34 @@ namespace SandCastle
 		m_addAssetFunctions.insert(std::make_pair(".geom", Delegate(&Assets::AddGeometryShader, this)));
 		m_addAssetFunctions.insert(std::make_pair(".mp3", Delegate(&Assets::AddAudio, this)));
 		m_addAssetFunctions.insert(std::make_pair(".wav", Delegate(&Assets::AddAudio, this)));
+
+		//Change loca 
+		m_changeLocaFunctions.insert(MakePair(TypeId::GetId<Texture>(), Delegate(&Assets::ChangeLocaTexture, this)));
 	}
 
 	void Assets::LoadAssets()
 	{
 		//Iterate every subfolders in assets and load every file into the asset map
-		std::filesystem::path root = "assets/";
+		String root = "assets/";
+		String localized = root + "localized/";
 
-		std::list<std::filesystem::path> folders;
+		struct Folder
+		{
+			bool localized = false;
+			String lang = "";
+			std::filesystem::path path;
+		};
+		std::list<Folder> folders;
 		if (!std::filesystem::exists(root))
 		{
 			LOG_ERROR("No assets folder found.");
 		}
-		folders.push_front(root);
+		folders.push_front(Folder(false, "", root));
 
 		while (!folders.empty())
 		{
-			std::filesystem::directory_iterator folder_it(folders.front());
+			auto& folder = folders.front();
+			std::filesystem::directory_iterator folder_it(folder.path);
 			while (folder_it != std::filesystem::directory_iterator())
 			{
 				if (std::filesystem::is_regular_file(*folder_it))
@@ -261,11 +295,22 @@ namespace SandCastle
 						folder_it++;
 						continue;
 					}
-					AddAsset(path);
+					AddAsset(path, folder.localized, folder.lang);
 				}
 				else
 				{
-					folders.push_back(folder_it->path());
+					String pstr = folder_it->path().generic_string();
+					String sub = pstr.substr(0, localized.size());
+					bool loca = pstr.size() > localized.size() ?  sub == localized : false;
+					String lang = "";
+					if (loca)
+					{
+						lang = pstr.substr(localized.size(), pstr.size() - localized.size());
+						lang = lang.substr(0, lang.find_first_of('/'));
+						m_availableLangs.emplace_back(lang);
+					}
+					
+					folders.push_back(Folder(loca, lang, folder_it->path()));
 				}
 				folder_it++;
 			}
@@ -303,7 +348,7 @@ namespace SandCastle
 		}
 	}
 
-	void Assets::AddAsset(String path)
+	void Assets::AddAsset(const String& path, bool localized, const String& lang)
 	{
 		size_t i = path.find_last_of(".");
 		if (i >= path.size())
@@ -318,17 +363,25 @@ namespace SandCastle
 			return;
 
 		auto find_it = m_addAssetFunctions.find(extension);
-
 		if (find_it == m_addAssetFunctions.end())
 		{
 			//LOG_WARN("Asset file extension not supported, " + path);
 			return;
 		}
 
-		String pathtmp = path;
 		i = path.find_last_of("/") + 1;
 		String filename = path.substr(i, path.size() - i);
-		find_it->second.Call(filename, pathtmp);
+		if (localized)
+		{
+			//Check that the file lang matches the folder lang
+			auto flang = filename.substr(0, filename.find_first_of('_'));
+			auto f_it = std::find(m_availableLangs.begin(), m_availableLangs.end(), lang);
+			ASSERT_LOG_ERROR((f_it != m_availableLangs.end()), "Localized asset with a non-available lang: {0}", path);
+			ASSERT_LOG_ERROR((flang == lang), "Localized asset in the wrong folder: {0}", path);
+			//Remove the lang from the filename
+			filename = filename.substr(flang.size() + 1, filename.size() - flang.size());
+		}
+		find_it->second.Call(filename, path, localized, lang);
 		//LOG_INFO("Asset loaded " + path);
 	}
 }

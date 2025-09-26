@@ -9,7 +9,7 @@ namespace SandCastle
 {
 
 	class RenderTexture;
-
+    class Assets;
     class Texture
     {
     public:
@@ -24,6 +24,7 @@ namespace SandCastle
         Texture(int width, int height, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
 
         void Reload(std::string path, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
+ 
         ~Texture();
 
         void Bind(uint32_t textureUnit = 0) const;
@@ -39,6 +40,8 @@ namespace SandCastle
         void UpdateRegion(int x, int y, int w, int h, const void* rgba8);
 
     private:
+        friend Assets;
+        void Copy(Texture& texture);
         inline void LoadFromMemory(unsigned char* buffer, int size);
         inline void LoadFromFile(std::string paths);
         inline void Generate(TextureImportSettings importSettings);

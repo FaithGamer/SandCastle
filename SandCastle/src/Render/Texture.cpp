@@ -253,6 +253,21 @@ namespace SandCastle
 		Generate(importSettings);
 	}
 
+	void Texture::Copy(Texture& texture)
+	{
+		m_importSettings = texture.m_importSettings;
+		m_ppu = texture.m_ppu;
+		m_size = texture.m_size;
+		m_nbChannels = texture.m_nbChannels;
+		m_id = texture.m_id;
+		m_pbos[0] = 0;
+		m_pbos[1] = 0;
+		m_currentPBO = 0;
+		m_pboSize = 0;
+		m_pboEnabled = false;
+		m_pendingFence = { 0 };
+	}
+
 	Texture::~Texture()
 	{
 		glDeleteTextures(1, &m_id);
