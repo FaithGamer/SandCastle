@@ -154,8 +154,9 @@ namespace SandCastle
 			InsertLocalizedAsset(filename, lang, texture);
 			if (lang == GetLang())
 			{
-				GenerateSprites(filename, spritesheet, texture->Ptr());
-				//InsertAsset(filename, texture);
+				InsertAsset(filename, texture);
+				auto textureInPlace = static_pointer_cast<Asset<Texture>>(m_assets[filename]);
+				GenerateSprites(filename, spritesheet, &textureInPlace->m_ptr);
 			}
 		}
 		else
@@ -215,6 +216,12 @@ namespace SandCastle
 		CompileShaders();
 		CreateAnimations();
 		SetLang(m_lang);
+		InitLoca();
+	}
+	void Assets::InitLoca()
+	{
+
+	
 	}
 	void Assets::HotReload()
 	{

@@ -85,6 +85,7 @@ namespace SandCastle
 			//return asset;
 		}
 
+		void InitLoca();
 		void ChangeLocaTexture(sptr<OpaqueAsset>& prev, sptr<OpaqueAsset>& next);
 		void ChangeLocaText();
 
