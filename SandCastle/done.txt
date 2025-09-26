@@ -459,8 +459,8 @@ std::vector avoid this problem.
 -Ui bool OnEvents, remove the Inputs from UI
 -check if UI blocking event works
 -left click UI
+-get rid of inputs system: merge into inputs singleton
 
->get rid of inputs system: merge into inputs singleton
 >check destroy from fast roots
 
 tasks:

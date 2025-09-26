@@ -10,6 +10,7 @@
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/UI/Ui.h"
+#include "SandCastle/Input/Inputs.h"
 
 namespace SandCastle
 {
@@ -90,6 +91,9 @@ namespace SandCastle
 			if (Ui::Instance()->OnEvent(event))
 				break;
 
+			if (Inputs::Instance()->OnEvent(event))
+				break;
+
 			for (auto& eventSystem : m_eventSystems)
 			{
 				if (eventSystem.system->OnEvent(event))
@@ -97,7 +101,6 @@ namespace SandCastle
 					break;
 				}
 			}
-
 		}
 
 		m_fixedUpdateAccumulator += m_fixedUpdateClock.Restart();

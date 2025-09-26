@@ -6,7 +6,6 @@
 #include "SandCastle/EngineParameters.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
-#include "SandCastle/Input/InputSystem.h"
 #include "SandCastle/Render/Renderer2D.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Core/Assets.h"
@@ -17,7 +16,6 @@
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"
 #include "SandCastle/UI/Ui.h"
-
 
 namespace SandCastle
 {
@@ -69,7 +67,6 @@ namespace SandCastle
 #endif
 
 		//Default systems
-		Systems::Push<InputSystem>();
 		Systems::Push<SpriteRenderSystem>();
 		Systems::Push<LineRendererSystem>();
 		Systems::Push<WireRenderSystem>();
