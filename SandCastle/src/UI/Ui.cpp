@@ -135,7 +135,6 @@ namespace SandCastle
 		if (it != m_roots.end())
 		{
 			m_roots.erase(it);
-			Container::Remove(m_fastRoots, it->second);
 		}
 		if (m_hovered && m_hovered->id == id)
 			m_hovered = nullptr;
@@ -184,9 +183,9 @@ namespace SandCastle
 		bool hover = m_hovered != nullptr;
 		if (!hover)
 		{
-			for (int i = 0; i < m_fastRoots.size(); i++)
+			for (auto& kvp : m_roots)
 			{
-				if (m_fastRoots[i]->IsInside(MousePos()))
+				if (kvp.second->IsInside(MousePos()))
 				{
 					hover = true;
 					break;
@@ -316,7 +315,6 @@ namespace SandCastle
 		{
 			//root
 			i->m_roots.insert(std::make_pair(canvas->id, canvas));
-			i->m_fastRoots.emplace_back(canvas);
 		}
 		return canvas;
 	}

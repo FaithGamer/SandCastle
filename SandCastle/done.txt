@@ -460,11 +460,12 @@ std::vector avoid this problem.
 -check if UI blocking event works
 -left click UI
 -get rid of inputs system: merge into inputs singleton
+-destroy test
+-removed fast roots
 
->check destroy from fast roots
+>create memory leak test
 
 tasks:
-
 
 >test pixel art rotations
 >have a default texture setting custom

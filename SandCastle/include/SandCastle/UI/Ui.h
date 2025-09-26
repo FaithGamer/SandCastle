@@ -225,7 +225,6 @@ namespace SandCastle
 		std::vector<UiTxt*> m_values;
 		std::vector<UiElem*> m_destroy;
 		std::unordered_map<UiElem::ID, UiCanvas*> m_roots;
-		std::vector<UiCanvas*> m_fastRoots; //roots for fast iteration
 		std::vector<UiCanvas*> m_layoutUpdate;
 		UiElem* m_hovered = nullptr;
 		UiElem* m_pressed = nullptr;

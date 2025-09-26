@@ -24,6 +24,7 @@ public:
 		Images();
 		Right();
 		Button();
+		Destroy();
 
 		auto map = Inputs::CreateInputMap();
 		auto button = map->CreateButtonInput("Button");
@@ -147,7 +148,6 @@ public:
 	int clicked = 0;
 	void Button()
 	{
-		
 		Ui::Context("title");
 		Ui::SetRootAnchor(CanvasAnchor::BotLeft);
 		auto r = Ui::Begin(Vec2f(150, 0));
@@ -159,6 +159,40 @@ public:
 	void OnClickOk(UiElem* signal)
 	{
 		clicked++;
+	}
+	std::vector<UiElem*> createds;
+	void Destroy()
+	{
+		Ui::Context("base");
+		Ui::SetRootAnchor(CanvasAnchor::BotRight);
+		Ui::SetCanvasLayoutAlignV(LayoutAlign::End);
+		auto r = Ui::Begin(Vec2f(0, 100));
+		r->SetPosition(Vec2f(320, -180));
+		auto cbtn = Ui::Button("Create");
+		cbtn->SetColor(Color::Green);
+		cbtn->ListenClickReleased(&TestSys::OnClickCreate, this);
+		auto dbtn = Ui::Button("Destroy");
+		dbtn->SetColor(Color::Red);
+		dbtn->ListenClickReleased(&TestSys::OnClickDestroy, this);
+		Ui::End();
+	}
+	void OnClickCreate(UiElem* signal)
+	{
+		Ui::Context("popup");
+		auto r = Ui::Begin(Vec2f(50, 50));
+		Vec2f pos(Random::Range(-100, 100), Random::Range(-100, 100));
+		r->SetPosition(pos);
+		Ui::Text("This text is too long to fit in.");
+		Ui::End();
+		createds.emplace_back(r);
+	}
+	void OnClickDestroy(UiElem* signal)
+	{
+		for (auto c : createds)
+		{
+			Ui::Destroy(c);
+		}
+		createds.clear();
 	}
 };
 void UiTest2()
