@@ -78,7 +78,7 @@ namespace SandCastle
 	Serialized Assets::CreateDefaultTextureImportSettings()
 	{
 		//Create the default texture settings 
-		Serialized importSettings = m_defaultImportSettings.Serialize();
+		Serialized importSettings = TextureImportSettings::defaultSettings.Serialize();
 		return importSettings;
 	}
 	Serialized Assets::CreateDefaultSpritesheet(const Texture* texture)

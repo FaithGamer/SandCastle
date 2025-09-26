@@ -14,7 +14,7 @@ namespace SandCastle
 	{
 
 	public:
-		void Init(bool logging);
+		void Init();
 		sptr<spdlog::logger> GetLogger();
 	private:
 		friend sptr<Log> Singleton<Log>::Instance();

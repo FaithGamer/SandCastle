@@ -1,24 +1,25 @@
 #include "pch.h"
-#include "SandCastle/EngineParameters.h"
+#include "SandCastle/EngineSettings.h"
 
 namespace SandCastle
 {
-	EngineParameters::EngineParameters()
+	EngineSettings::EngineSettings()
 		:
 		appName("SandCastle Application"),
 		startupWindowResolution(Vec2u(1280, 720)),
 		enableImGui(true),
 		fixedUpdateTimeStep(0.01f),
-		fullscreen(false)
+		fullscreen(false),
+		textureImport(TextureImportSettings())
 	{
 
 	}
-	EngineParameters::EngineParameters(Serialized settings)
+	EngineSettings::EngineSettings(Serialized settings)
 	{
 		Deserialize(settings);
 	}
 
-	void EngineParameters::Deserialize(Serialized& settings)
+	void EngineSettings::Deserialize(Serialized& settings)
 	{
 		appName = settings.GetString("app_name");
 
@@ -27,10 +28,12 @@ namespace SandCastle
 		fullscreen = settings.GetBool("fullscreen");
 		enableImGui = settings.GetBool("enable_imgui");
 		fixedUpdateTimeStep = settings.GetFloat("fixed_time_step");
+		auto texture = settings.GetObj("texture_import");
+		textureImport.Deserialize(texture);
 
 	}
 
-	Serialized EngineParameters::Serialize()
+	Serialized EngineSettings::Serialize()
 	{
 		Serialized s;
 		s["app_name"] = "SandCastle Application";
@@ -39,6 +42,7 @@ namespace SandCastle
 		s["fullscreen"] = fullscreen;
 		s["enable_imgui"] = enableImGui;
 		s["fixed_time_step"] = (float)fixedUpdateTimeStep;
+		s["texture_import"] = textureImport.Serialize();
 
 		return s;
 	}

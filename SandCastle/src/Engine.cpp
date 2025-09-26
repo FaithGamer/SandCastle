@@ -3,7 +3,7 @@
 #include "SandCastle/Engine.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Render/Window.h"
-#include "SandCastle/EngineParameters.h"
+#include "SandCastle/EngineSettings.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 #include "SandCastle/Render/Renderer2D.h"
@@ -21,29 +21,17 @@ namespace SandCastle
 {
 	bool Engine::play = true;
 
-	void Engine::Init(bool logging)
+	void Engine::Init(EngineSettings settings)
 	{
-		Log::Instance()->Init(logging);
+		Log::Instance()->Init();
 
 		LOG_INFO("Engine start.");
-		EngineParameters params;
-		Serialized paramsJson("assets/config/application.config");
 
-		if (paramsJson.HadLoadError())
-		{
-			LOG_WARN("Couldn't load engine parameters, creating one with default values.");
-
-			Serialized parametersWriteOnDisk = params.Serialize();
-			parametersWriteOnDisk.WriteOnDisk("assets/config/application.config");
-		}
-		else
-		{
-			params = EngineParameters(paramsJson);
-		}
+		TextureImportSettings::defaultSettings = settings.textureImport;
 
 		LOG_INFO("Creating window...");
-		Window::Instance()->Init(params.appName, params.startupWindowResolution);
-		Window::SetFullScreen(params.fullscreen);
+		Window::Instance()->Init(settings.appName, settings.startupWindowResolution);
+		Window::SetFullScreen(settings.fullscreen);
 		LOG_INFO("Initializing context...");
 		Renderer2D::Instance()->Init();
 		LOG_INFO("Loading assets...");
@@ -61,7 +49,7 @@ namespace SandCastle
 		LOG_INFO("Creating world...");
 		auto system = Systems::Instance();
 		system->Init();
-		Systems::SetFixedUpdateTime(params.fixedUpdateTimeStep);
+		Systems::SetFixedUpdateTime(settings.fixedUpdateTimeStep);
 #ifdef SC_IMGUI
 		LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());
 #endif
@@ -72,6 +60,21 @@ namespace SandCastle
 		Systems::Push<WireRenderSystem>();
 		Systems::Push<AnimationSystem>();
 		Systems::Push<PhysicsSystem>();
+	}
+
+	void Engine::Init(const String& settingsPath)
+	{
+		Serialized settingsJson(settingsPath);
+		EngineSettings settings;
+		if (settingsJson.HadLoadError())
+		{
+			LOG_WARN("Couldn't load engine parameters at path: {0}", settingsPath);
+		}
+		else
+		{
+			settings = EngineSettings(settingsJson);
+		}
+		Init(settings);
 	}
 
 	void Engine::Launch()

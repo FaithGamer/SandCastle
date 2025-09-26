@@ -267,7 +267,15 @@ public:
 };
 void UiTest2()
 {
-	Engine::Init();
+	EngineSettings settings;
+	settings.textureImport = TextureImportSettings(
+		TextureFiltering::Nearest,
+		TextureWrapping::Clamp,
+		1.f,
+		false,
+		false
+	);
+	Engine::Init(settings);
 	Systems::Push<TestSys>();
 
 	//Pixel art render

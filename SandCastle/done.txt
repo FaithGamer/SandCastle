@@ -465,6 +465,8 @@ std::vector avoid this problem.
 -improved checkbox with bool pointer
 -create memory leak test
 -Ui::Destroy(all kind of elem&*) to nullptr the pointer
+-Engine init with settings or path to settings
+-default import texture settings can be set in the engine settings.
 
 tasks:
 

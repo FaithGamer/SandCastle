@@ -4,14 +4,15 @@
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Time.h"
 #include "SandCastle/Core/Serialization.h"
+#include "SandCastle/Render/TextureSettings.h"
 
 namespace SandCastle
 {
 	//To do: enable serialization/deserialization
-	struct EngineParameters : public Serializable
+	struct EngineSettings : public Serializable
 	{
-		EngineParameters();
-		EngineParameters(Serialized settings);
+		EngineSettings();
+		EngineSettings(Serialized settings);
 		void Deserialize(Serialized& parameters) override;
 		Serialized Serialize() override;
 
@@ -20,6 +21,7 @@ namespace SandCastle
 		bool enableImGui;
 		Time fixedUpdateTimeStep;
 		bool fullscreen;
+		TextureImportSettings textureImport;
 
 	};
 }

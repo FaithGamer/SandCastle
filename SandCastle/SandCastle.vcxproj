@@ -250,6 +250,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Render\TextureSettings.cpp" />
     <ClCompile Include="src\UI\UiBtn.cpp" />
     <ClCompile Include="src\UI\UiCheckbox.cpp" />
     <ClCompile Include="src\UI\UiFrame.cpp" />
@@ -292,7 +293,7 @@
     <ClCompile Include="src\ECS\Systems.cpp" />
     <ClCompile Include="src\ECS\WireRenderSystem.cpp" />
     <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\EngineParameters.cpp" />
+    <ClCompile Include="src\EngineSettings.cpp" />
     <ClCompile Include="src\Input\ButtonInput.cpp" />
     <ClCompile Include="src\Input\Gamepad.cpp" />
     <ClCompile Include="src\Input\DirectionalInput.cpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="include\SandCastle\ECS\System.h" />
     <ClInclude Include="include\SandCastle\ECS\Systems.h" />
     <ClInclude Include="include\SandCastle\Render\Text.h" />
+    <ClInclude Include="include\SandCastle\Render\TextureSettings.h" />
     <ClInclude Include="include\SandCastle\UIheader.h" />
     <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
@@ -381,7 +383,7 @@
     <ClInclude Include="include\SandCastle\UI\UiTxt.h" />
     <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />
-    <ClInclude Include="include\SandCastle\EngineParameters.h" />
+    <ClInclude Include="include\SandCastle\EngineSettings.h" />
     <ClInclude Include="include\SandCastle\Entt.h" />
     <ClInclude Include="include\SandCastle\Input.h" />
     <ClInclude Include="include\SandCastle\Input\Bindings.h" />
