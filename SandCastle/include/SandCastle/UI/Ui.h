@@ -63,8 +63,12 @@ namespace SandCastle
 		static UiBtn* Button(std::string_view utf8);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
 		static void End();
-		/// @brief Only root canvas can be deleted.
-		static void Destroy(UiElem* elem);
+		static void Destroy(UiElem*& elem);
+		static void Destroy(UiCanvas*& elem);
+		static void Destroy(UiTxt*& elem);
+		static void Destroy(UiImg*& elem);
+		static void Destroy(UiBtn*& elem);
+		static void Destroy(UiCheckbox*& elem);
 
 		/*---Ui update---*/
 
@@ -180,6 +184,7 @@ namespace SandCastle
 	private:
 
 		/*---Helpers---*/
+		void DestroyHelper(UiElem* elem);
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
 

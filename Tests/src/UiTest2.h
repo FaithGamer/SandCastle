@@ -73,7 +73,6 @@ public:
 		if (uis.popup == nullptr)
 			return;
 		Ui::Destroy(uis.popup);
-		uis.popup = nullptr;
 	}
 	bool memoryLeakTest = false;
 	void Checkbox()
@@ -142,7 +141,6 @@ public:
 		{
 			counter = 0;
 			Ui::Destroy(r);
-			r = nullptr;
 		}
 		
 	}
@@ -176,7 +174,6 @@ public:
 		else if (popupChecked != nullptr)
 		{
 			Ui::Destroy(popupChecked);
-			popupChecked = nullptr;
 		}
 	}
 	void Images()

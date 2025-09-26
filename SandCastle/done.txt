@@ -464,7 +464,7 @@ std::vector avoid this problem.
 -removed fast roots
 -improved checkbox with bool pointer
 -create memory leak test
->Ui::Destroy(all kind of elem&*) to nullptr the pointer
+-Ui::Destroy(all kind of elem&*) to nullptr the pointer
 
 tasks:
 

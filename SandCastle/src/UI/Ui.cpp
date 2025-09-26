@@ -490,9 +490,40 @@ namespace SandCastle
 		i->m_canvas.pop();
 	}
 
-	void Ui::Destroy(UiElem* elem)
+	void Ui::Destroy(UiElem*& elem)
 	{
-		Instance()->m_destroy.emplace_back(elem);
+		Instance()->DestroyHelper(elem);
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiCanvas*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiTxt*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiImg*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiBtn*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiCheckbox*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
 	}
 
 	/*---Contect---*/
@@ -707,6 +738,11 @@ namespace SandCastle
 	}
 
 	/*---Helpers---*/
+
+	void Ui::DestroyHelper(UiElem* elem)
+	{
+		Instance()->m_destroy.emplace_back(elem);
+	}
 
 	void Ui::SetFrame(UiFrame::Template** frame, String texture)
 	{
