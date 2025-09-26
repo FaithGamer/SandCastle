@@ -121,7 +121,14 @@ namespace SandCastle
 
 	}
 
-	Shader::~Shader()
+	Shader::Shader(const Shader& shader)
+	{
+		m_glid = shader.m_glid;
+		m_id = shader.m_id;
+		m_name = shader.m_name;
+	}
+
+	void Shader::Destroy()
 	{
 		glDeleteProgram(m_glid);
 	}

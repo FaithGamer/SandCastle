@@ -14,6 +14,11 @@ namespace SandCastle
 		m_ppu = 1.f / m_importSettings.pixelPerUnit;
 	}
 
+	Texture::Texture(const Texture& texture)
+	{
+		Copy(texture);
+	}
+
 	Texture::Texture(std::string path, TextureImportSettings importSettings)
 		: m_size(0, 0), m_nbChannels(0), m_pixels(nullptr), m_id(0), m_importSettings(importSettings)
 	{
@@ -253,7 +258,7 @@ namespace SandCastle
 		Generate(importSettings);
 	}
 
-	void Texture::Copy(Texture& texture)
+	void Texture::Copy(const Texture& texture)
 	{
 		m_importSettings = texture.m_importSettings;
 		m_ppu = texture.m_ppu;
@@ -268,7 +273,7 @@ namespace SandCastle
 		m_pendingFence = { 0 };
 	}
 
-	Texture::~Texture()
+	void Texture::Destroy()
 	{
 		glDeleteTextures(1, &m_id);
 		if (m_importSettings.keepData)

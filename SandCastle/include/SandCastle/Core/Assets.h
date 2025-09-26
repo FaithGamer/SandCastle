@@ -29,20 +29,22 @@ namespace SandCastle
 	class Asset : public OpaqueAsset
 	{
 	public:
-		Asset(T* ptr) : m_ptr(ptr)
+		Asset()
+		{ }
+		Asset(T&& ptr) : m_ptr(ptr)
 		{
 
 		}
 		~Asset()
 		{
-			delete m_ptr;
+	
 		}
 
 		Asset(const Asset<T>& asset) = delete;
 		Asset(const Asset<T>&& asset) = delete;
 		inline T* Ptr()
 		{
-			return m_ptr;
+			return &m_ptr;
 		}
 		inline int32_t GetType()
 		{
@@ -51,7 +53,7 @@ namespace SandCastle
 	private:
 
 		friend Assets;
-		T* m_ptr;
+		T m_ptr;
 
 	};
 
@@ -78,7 +80,7 @@ namespace SandCastle
 		template<class T, class... Args>
 		static sptr<Asset<T>> MakeAsset(Args&&... args)
 		{
-			return makesptr<Asset<T>>(new T(args...));
+			return makesptr<Asset<T>>(T(args...));
 			//asset->m_ptr = new T(args...);
 			//return asset;
 		}
@@ -107,6 +109,10 @@ namespace SandCastle
 		void InsertLocalizedAsset(const String& filename, const String& lang, sptr<Asset<T>> asset)
 		{
 			m_localized[lang].assets.emplace_back(MakePair(filename, asset));
+			if (m_assets.find(filename) == m_assets.end())
+			{
+				m_assets[filename] = makesptr<Asset<T>>();
+			}
 		}
 		void CreateAnimations();
 		Serialized CreateDefaultTextureImportSettings();

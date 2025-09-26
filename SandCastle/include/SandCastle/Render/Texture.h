@@ -14,6 +14,7 @@ namespace SandCastle
     {
     public:
         Texture();
+        Texture(const Texture& texture);
         Texture(std::string path, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
         Texture(unsigned char* buffer, int size, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
         /// @brief Creates a texture from another texture subregion, should probably be used through Renderer2D::CreateSubTexture
@@ -25,7 +26,7 @@ namespace SandCastle
 
         void Reload(std::string path, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
  
-        ~Texture();
+        void Destroy();
 
         void Bind(uint32_t textureUnit = 0) const;
         void SetPixelPerUnit(float ppu);
@@ -41,7 +42,7 @@ namespace SandCastle
 
     private:
         friend Assets;
-        void Copy(Texture& texture);
+        void Copy(const Texture& texture);
         inline void LoadFromMemory(unsigned char* buffer, int size);
         inline void LoadFromFile(std::string paths);
         inline void Generate(TextureImportSettings importSettings);

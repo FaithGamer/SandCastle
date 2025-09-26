@@ -12,9 +12,11 @@ namespace SandCastle
 	class Shader
 	{
 	public:
+		Shader() = default;
 		Shader(std::string vertexSource, std::string fragmentSource);
 		Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource);
-		~Shader();
+		Shader(const Shader& shader);
+		void Destroy();
 
 		void Bind() const;
 

@@ -26,7 +26,7 @@ namespace SandCastle
 	{
 		auto Prev = static_pointer_cast<Asset<Texture>>(prev);
 		auto Next = static_pointer_cast<Asset<Texture>>(next);
-		Prev->Ptr()->Copy(*Next->Ptr());
+		Prev->m_ptr.Copy(Next->m_ptr);
 	}
 
 	void Assets::GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture)
@@ -133,7 +133,7 @@ namespace SandCastle
 		if (m_reloading)
 		{
 			//Reload the rexture
-			static_pointer_cast<Asset<Texture>>(m_assets[filename])->m_ptr->Reload(path, importSettings);
+			static_pointer_cast<Asset<Texture>>(m_assets[filename])->m_ptr.Reload(path, importSettings);
 			//Do not generate sprites
 			return;
 		}
@@ -155,7 +155,7 @@ namespace SandCastle
 			if (lang == GetLang())
 			{
 				GenerateSprites(filename, spritesheet, texture->Ptr());
-				InsertAsset(filename, texture);
+				//InsertAsset(filename, texture);
 			}
 		}
 		else
@@ -214,6 +214,7 @@ namespace SandCastle
 		LoadAssets();
 		CompileShaders();
 		CreateAnimations();
+		SetLang(m_lang);
 	}
 	void Assets::HotReload()
 	{
@@ -236,7 +237,7 @@ namespace SandCastle
 		{
 			auto& newAsset = loca.second;
 			auto& assetKey = loca.first;
-			auto& currentAsset = i->m_assets.at(assetKey);
+			auto& currentAsset = i->m_assets[assetKey]; //> swap does not occur between new and current ? add & to i->m_assets?
 			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
 			it_fun->second.Call(currentAsset, newAsset);
 		}

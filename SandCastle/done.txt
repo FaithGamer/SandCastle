@@ -468,6 +468,12 @@ std::vector avoid this problem.
 -Engine init with settings or path to settings
 -default import texture settings can be set in the engine settings.
 
+>current problem:
+when changing loca, we override the value of the asset.
+Asset<T> must hold the base value, not a pointer, but this breaks stuff like shader
+Find a way to 
+
+>try assets not being pointers
 >add default lang in engine settings
 >dontt forget to add the changeloca ptr function init
 >localization system built in the asset:
