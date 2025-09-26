@@ -35,16 +35,30 @@ namespace SandCastle
 		m_context.layer = uiLayer;
 		m_writer = new Writer(m_context.material, m_context.layer);
 
-		auto input = Inputs::CreateInputMap("UI");
+		/*auto input = Inputs::CreateInputMap("UI");
 		auto click = input->CreateButtonInput("Click");
 		click->BindMouse(Mouse::Button::Left);
 		click->SetSignalOnRelease(true);
-		click->signal.Listen(&Ui::OnClick, this);
+		click->signal.Listen(&Ui::OnClick, this);*/
 	}
 
 	Ui::~Ui()
 	{
 		delete m_writer;
+	}
+
+	bool Ui::OnEvent(SDL_Event& event)
+	{
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			return OnClick(true);
+			break;
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			return OnClick(false);
+			break;
+		}
+		return false;
 	}
 
 	void Ui::Update()
@@ -118,6 +132,7 @@ namespace SandCastle
 		if (it != m_roots.end())
 		{
 			m_roots.erase(it);
+			Container::Remove(m_fastRoots, it->second);
 		}
 		if (m_hovered && m_hovered->id == id)
 			m_hovered = nullptr;
@@ -160,11 +175,26 @@ namespace SandCastle
 		}
 	}
 
-	void Ui::OnClick(InputSignal* signal)
+	bool Ui::OnClick(bool pressed)
 	{
-		bool pressed = signal->GetBool();
+		//Are we over any ui canvas ?
+		bool hover = m_hovered != nullptr;
+		if (!hover)
+		{
+			for (int i = 0; i < m_fastRoots.size(); i++)
+			{
+				if (m_fastRoots[i]->IsInside(MousePos()))
+				{
+					hover = true;
+					break;
+				}
+			}
+		}
+
+		//Handling clickable UI
 		if (m_hovered != nullptr && m_hovered->clickable)
 		{
+
 			if (pressed)
 			{
 				m_pressed = m_hovered;
@@ -176,6 +206,9 @@ namespace SandCastle
 				m_hovered->ClickReleased();
 			}
 		}
+
+		//Return true if mouse is over any canvas
+		return hover;
 	}
 
 	void Ui::OnCanvasMustUpdate(UiCanvas* canvas)
@@ -280,6 +313,7 @@ namespace SandCastle
 		{
 			//root
 			i->m_roots.insert(std::make_pair(canvas->id, canvas));
+			i->m_fastRoots.emplace_back(canvas);
 		}
 		return canvas;
 	}

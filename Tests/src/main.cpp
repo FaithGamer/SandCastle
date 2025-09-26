@@ -30,7 +30,7 @@ int main()
 	//WindowEvents();
 	//Serialization();
 	//Benchmark1();
-	Benchmark2(); //~190
+	//Benchmark2(); //~190 -> 210
 	//Delegates();
 	//Signals();
 	//FontTest();
@@ -40,5 +40,5 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	//UiTest2();
+	UiTest2();
 }

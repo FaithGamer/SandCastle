@@ -182,19 +182,20 @@ namespace SandCastle
 		/*---Helpers---*/
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
-		
+
 		void CreateText(UiTxt* text, std::string_view utf8, float width);
 		/*---Instantiation---*/
 		void NewElem(UiElem* elem, UiCanvas* canvas);
 
 	private:
 		friend Systems;
+		bool OnEvent(SDL_Event& event);
 		void Update();
 		void LayoutUpdate();
 		void DestroyUpdate();
 		void HoverableUpdate();
 		void ValuesUpdate();
-		void OnClick(InputSignal* signal);
+		bool OnClick(bool pressed);
 		void OnCanvasMustUpdate(UiCanvas* canvas);
 		void OnDestroy(UiElem* elem);
 		//Helper
@@ -224,6 +225,7 @@ namespace SandCastle
 		std::vector<UiTxt*> m_values;
 		std::vector<UiElem*> m_destroy;
 		std::unordered_map<UiElem::ID, UiCanvas*> m_roots;
+		std::vector<UiCanvas*> m_fastRoots; //roots for fast iteration
 		std::vector<UiCanvas*> m_layoutUpdate;
 		UiElem* m_hovered = nullptr;
 		UiElem* m_pressed = nullptr;

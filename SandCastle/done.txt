@@ -456,7 +456,10 @@ std::vector avoid this problem.
 26
 
 -shove transform from matrix and other useless stuff and benchmark
+-Ui bool OnEvents, remove the Inputs from UI
 
+>check destroy from fast roots
+>check if UI blocking event works
 
 tasks:
 
@@ -495,6 +498,7 @@ possible solution: realign text after Write bazed on new size at the end of Make
 >overlapp canvases without z fighting
 >scrolling
 >UiElem can be floating: have the same position of the last elem, or custom...
+>thread safety in profiler
 
 bugs:
 

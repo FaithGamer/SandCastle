@@ -86,6 +86,10 @@ namespace SandCastle
 #ifdef SC_IMGUI
 			ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
+
+			if (Ui::Instance()->OnEvent(event))
+				break;
+
 			for (auto& eventSystem : m_eventSystems)
 			{
 				if (eventSystem.system->OnEvent(event))
@@ -93,6 +97,7 @@ namespace SandCastle
 					break;
 				}
 			}
+
 		}
 
 		m_fixedUpdateAccumulator += m_fixedUpdateClock.Restart();
@@ -119,7 +124,7 @@ namespace SandCastle
 		{
 			system.system->LateUpdate();
 		}
-	
+
 		//End CPU Time
 		STOP_PROFILING("cpu_main");
 		Renderer2D::Instance()->Process();
@@ -204,7 +209,7 @@ namespace SandCastle
 			}
 		}
 
-		//Call OnStart with right priority order
+		//Call Start with right priority order
 		for (auto& system : mustCallOnStart)
 		{
 			system.system->Start();
