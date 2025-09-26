@@ -51,11 +51,14 @@ namespace SandCastle
 	{
 		switch (event.type)
 		{
+		//Handle left click
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			return OnClick(true);
+			if (event.button.button == SDL_BUTTON_LEFT)
+				return OnClick(true);
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			return OnClick(false);
+			if (event.button.button == SDL_BUTTON_LEFT)
+				return OnClick(false);
 			break;
 		}
 		return false;
