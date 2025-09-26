@@ -28,9 +28,9 @@ class SwordmanSys : public System
 	void FlipSprite(Transform& tr)
 	{
 		if (dest.x > tr.GetPosition().x)
-			tr.SetScale(-1, 1, 1);
+			tr.SetScale(-1, 1);
 		else
-			tr.SetScale(1, 1, 1);
+			tr.SetScale(1, 1);
 	}
 	void Update() override
 	{

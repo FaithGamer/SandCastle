@@ -41,8 +41,8 @@ public:
 			{
 				auto trans = entity.GetComponent<Transform>();
 
-				trans->RotateZ(_dir*_speed);
-				float rot = trans->GetRotation().z;
+				trans->Rotate(_dir*_speed);
+				float rot = trans->GetRotation();
 
 				auto vec = Math::AngleToVec(rot);
 

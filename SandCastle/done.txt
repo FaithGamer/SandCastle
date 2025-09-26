@@ -453,26 +453,15 @@ std::vector avoid this problem.
 -root anchor: context
 -many ui tests
 
->button test create window
+26
 
->further test canvas context:
->create a complete test for UI with multiple canvases showcasing all  features
->clamp position of (root) canvases to ui border? or have an option to
-
-advanced ui:
-
->UiElem have a specific layout order (by default order of creation)
->UiElem can change parent
->overlapp canvases without z fighting
->scrolling
->UiElem can be floating: have the same position of the last elem, or custom...
-
+-shove transform from matrix and other useless stuff and benchmark
 
 
 tasks:
 
+
 >test pixel art rotations
->shove transform from matrix and other useless stuff 
 >have a default texture setting custom
 >get rid of inputs system: merge into inputs singleton
 >fix ImGui random assert crash (probly bc of threading)
@@ -501,6 +490,11 @@ possible solution: realign text after Write bazed on new size at the end of Make
 >check for useless headers
 >optimize nested transform?
 >edge cases with sprite deformation (notably with ui text), example: very large window but still render is 360p
+>UiElem have a specific layout order (by default order of creation)
+>UiElem can change parent
+>overlapp canvases without z fighting
+>scrolling
+>UiElem can be floating: have the same position of the last elem, or custom...
 
 bugs:
 

@@ -62,7 +62,7 @@ namespace SandCastle
 			sprite->orgY,
 			uvs,
 			sprite->GetDimensions() * (Vec2f)transform->GetScale(),
-			transform->GetRotation().z,
+			transform->GetRotation(),
 			texture->GetId(),
 			render->GetLayer(),
 			render->GetMaterialID(),
