@@ -35,7 +35,7 @@ namespace SandCastle
 		LOG_INFO("Initializing context...");
 		Renderer2D::Instance()->Init();
 		LOG_INFO("Loading assets...");
-		Assets::Instance()->Init();
+		Assets::Instance()->Init(settings.defaultLang);
 		LOG_INFO("Initializing audio...");
 		Audio::Instance()->Init();
 		LOG_INFO("Initializing renderer...");

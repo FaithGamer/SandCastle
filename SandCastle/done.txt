@@ -468,40 +468,15 @@ std::vector avoid this problem.
 -Engine init with settings or path to settings
 -default import texture settings can be set in the engine settings.
 
->current problem:
-when changing loca, we override the value of the asset.
-Asset<T> must hold the base value, not a pointer, but this breaks stuff like shader
-Find a way to 
+27
 
->try assets not being pointers
->add default lang in engine settings
->dontt forget to add the changeloca ptr function init
->localization system built in the asset:
+-fixed the localized texture issue.
+-localization built into the asset working
 
-beahviour wanted:
-in assets there is a localized folder.
-each subfolder name correspond to a lang_key
-en
-ja
-de
-...
-assets in theses folder also start with en_,de_,ja_
-when iterating assets folder, Assets treats them differently
--record the different languages available.
--Do we want an interface just for localization, or de we use Assets?
-Localization/Assets::SetLang(String lang_key):
-->all localized asset pointer values are changed.
-->sprites changes automatically because their underlying texture* value has changed
-->emits a lang change signal
-->TextLoc change automatically cause UI receive signal
-what can be localized?
--texts
--sprites (so texture?)
-
-
-
-
+>Asset must check if default lang is part of available lang
+>add textual asset
 >Ui::TextLoc(const String& key) -> automatic update with lang change
+>add Asset:CheckLang, check for assets that are in one lang but not another
 
 tasks:
 
@@ -520,6 +495,7 @@ no need plmp if data is in registry and communication is only through signal?
 >custom path for assets, fonts, and so on... Roaming system
 >versioning and app name
 >japanese breaking rules
+>visual loading during engine Init (especially for assets)
 
 secondary tasks:
 

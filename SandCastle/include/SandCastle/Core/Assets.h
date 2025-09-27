@@ -11,6 +11,7 @@
 namespace SandCastle
 {
 	class Assets;
+	class Engine;
 
 	class OpaqueAsset
 	{
@@ -62,7 +63,7 @@ namespace SandCastle
 	public:
 
 		Assets();
-		void Init();
+		void Init(const String& defaultLang);
 
 		void HotReload();
 		static void SetLang(const String& lang);
@@ -85,7 +86,7 @@ namespace SandCastle
 			//return asset;
 		}
 
-		void InitLoca();
+		void InitLang();
 		void ChangeLocaTexture(sptr<OpaqueAsset>& prev, sptr<OpaqueAsset>& next);
 		void ChangeLocaText();
 
@@ -110,10 +111,6 @@ namespace SandCastle
 		void InsertLocalizedAsset(const String& filename, const String& lang, sptr<Asset<T>> asset)
 		{
 			m_localized[lang].assets.emplace_back(MakePair(filename, asset));
-			if (m_assets.find(filename) == m_assets.end())
-			{
-				m_assets[filename] = makesptr<Asset<T>>();
-			}
 		}
 		void CreateAnimations();
 		Serialized CreateDefaultTextureImportSettings();
@@ -146,7 +143,8 @@ namespace SandCastle
 		};
 
 	private:
-		String m_lang = "fr";
+		friend Engine;
+		String m_lang = "";
 		bool m_reloading = false;
 		struct Localized
 		{

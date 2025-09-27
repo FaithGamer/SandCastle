@@ -10,7 +10,8 @@ namespace SandCastle
 		enableImGui(true),
 		fixedUpdateTimeStep(0.01f),
 		fullscreen(false),
-		textureImport(TextureImportSettings())
+		textureImport(TextureImportSettings()),
+		defaultLang("")
 	{
 
 	}
@@ -30,7 +31,7 @@ namespace SandCastle
 		fixedUpdateTimeStep = settings.GetFloat("fixed_time_step");
 		auto texture = settings.GetObj("texture_import");
 		textureImport.Deserialize(texture);
-
+		defaultLang = settings.GetString("default_lang");
 	}
 
 	Serialized EngineSettings::Serialize()
@@ -43,6 +44,7 @@ namespace SandCastle
 		s["enable_imgui"] = enableImGui;
 		s["fixed_time_step"] = (float)fixedUpdateTimeStep;
 		s["texture_import"] = textureImport.Serialize();
+		s["default_lang"] = defaultLang;
 
 		return s;
 	}

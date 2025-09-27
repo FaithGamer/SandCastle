@@ -269,11 +269,14 @@ public:
 	{
 		Ui::Context("base");
 		Ui::SetRootAnchor(CanvasAnchor::BotCenter);
+		Ui::SetCanvasLayoutAlignH(LayoutAlign::Middle);
 		auto r = Ui::Begin();
 		r->SetPosition(Vec2f(0, -180));
+		Ui::Text("Localized texture.");
 		Ui::Image("flag.png_0_0");
 		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
-		Ui::Begin();
+		
+		Ui::Begin(0.f, false);
 		Ui::Button("FR")->ListenClickReleased(&TestSys::OnFR, this);
 		Ui::Button("JA")->ListenClickReleased(&TestSys::OnJA, this);
 		Ui::End();
@@ -291,6 +294,7 @@ public:
 void UiTest2()
 {
 	EngineSettings settings;
+	settings.defaultLang = "fr";
 	settings.textureImport = TextureImportSettings(
 		TextureFiltering::Nearest,
 		TextureWrapping::Clamp,

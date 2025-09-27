@@ -154,9 +154,11 @@ namespace SandCastle
 			InsertLocalizedAsset(filename, lang, texture);
 			if (lang == GetLang())
 			{
-				InsertAsset(filename, texture);
-				auto textureInPlace = static_pointer_cast<Asset<Texture>>(m_assets[filename]);
-				GenerateSprites(filename, spritesheet, &textureInPlace->m_ptr);
+				auto receptacle = MakeAsset<Texture>(); // make an empty texture that will receive the localized version
+				receptacle->m_ptr.Copy(texture->m_ptr); // receptacle copy the value of the localized version.
+				GenerateSprites(filename, spritesheet, &receptacle->m_ptr); // the sprite point to the receptacle
+				InsertAsset(filename, receptacle); // put it in place as the current used asset.
+				//receptacle->m_ptr.m_size = texture->m_ptr.m_size; //trick to make the sprites generated coherent with the localized textures
 			}
 		}
 		else
@@ -207,21 +209,25 @@ namespace SandCastle
 
 	}
 
-	void Assets::Init()
+	void Assets::Init(const String& defaultLang)
 	{
+		m_lang = defaultLang;
 		//Can't be done in constructor because of recursion
 		stbi_set_flip_vertically_on_load(true);
 		InitFunctions();
 		LoadAssets();
 		CompileShaders();
 		CreateAnimations();
-		SetLang(m_lang);
-		InitLoca();
+		InitLang();
 	}
-	void Assets::InitLoca()
+	void Assets::InitLang()
 	{
+		//Check that the base loca is part of the available loca
+		if (m_lang == "" && m_availableLangs.empty())
+			return; //No localization
 
-	
+		auto f_it = std::find(m_availableLangs.begin(), m_availableLangs.end(), m_lang);
+		ASSERT_LOG_ERROR((f_it != m_availableLangs.end()), "The default selected lang is not part of the available langs");
 	}
 	void Assets::HotReload()
 	{
@@ -244,7 +250,7 @@ namespace SandCastle
 		{
 			auto& newAsset = loca.second;
 			auto& assetKey = loca.first;
-			auto& currentAsset = i->m_assets[assetKey]; //> swap does not occur between new and current ? add & to i->m_assets?
+			auto& currentAsset = i->m_assets[assetKey];
 			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
 			it_fun->second.Call(currentAsset, newAsset);
 		}
@@ -316,6 +322,10 @@ namespace SandCastle
 						lang = pstr.substr(localized.size(), pstr.size() - localized.size());
 						lang = lang.substr(0, lang.find_first_of('/'));
 						m_availableLangs.emplace_back(lang);
+						//Trick to make sure one default lang is always selected
+						//If the user failed to put it in the engine settings.
+						if (m_lang == "")
+							m_lang = lang;
 					}
 					
 					folders.push_back(Folder(loca, lang, folder_it->path()));

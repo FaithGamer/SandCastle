@@ -22,6 +22,7 @@ namespace SandCastle
 		Time fixedUpdateTimeStep;
 		bool fullscreen;
 		TextureImportSettings textureImport;
+		String defaultLang;
 
 	};
 }
