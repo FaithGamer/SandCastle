@@ -212,6 +212,7 @@ namespace SandCastle
 	void Assets::Init(const String& defaultLang)
 	{
 		m_lang = defaultLang;
+		m_langFallback = defaultLang;
 		//Can't be done in constructor because of recursion
 		stbi_set_flip_vertically_on_load(true);
 		InitFunctions();
@@ -228,6 +229,16 @@ namespace SandCastle
 
 		auto f_it = std::find(m_availableLangs.begin(), m_availableLangs.end(), m_lang);
 		ASSERT_LOG_ERROR((f_it != m_availableLangs.end()), "The default selected lang is not part of the available langs");
+
+		//Check every localized asset, they MUST exist in the fallback lang
+		auto& fallback = m_localized.at(m_langFallback);
+		for (const auto& asset : m_localizedAssets)
+		{
+			bool present = fallback.assets.find(asset) != fallback.assets.end();
+			ASSERT_LOG_ERROR(present, 
+				"Localized asset {0}, isn't present in the fallback lang.", asset);
+		}
+		//Use the fallback asset in the missing langs
 	}
 	void Assets::HotReload()
 	{
@@ -246,7 +257,7 @@ namespace SandCastle
 			return;
 		}
 		i->m_lang = lang;
-		for (auto& loca : it->second.assets)
+		for (auto loca : it->second.assets)
 		{
 			auto& newAsset = loca.second;
 			auto& assetKey = loca.first;
@@ -398,6 +409,7 @@ namespace SandCastle
 			ASSERT_LOG_ERROR((flang == lang), "Localized asset in the wrong folder: {0}", path);
 			//Remove the lang from the filename
 			filename = filename.substr(flang.size() + 1, filename.size() - flang.size());
+			m_localizedAssets.insert(filename);
 		}
 		find_it->second.Call(filename, path, localized, lang);
 		//LOG_INFO("Asset loaded " + path);

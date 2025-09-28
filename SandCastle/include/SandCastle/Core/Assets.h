@@ -110,7 +110,7 @@ namespace SandCastle
 		template<class T>
 		void InsertLocalizedAsset(const String& filename, const String& lang, sptr<Asset<T>> asset)
 		{
-			m_localized[lang].assets.emplace_back(MakePair(filename, asset));
+			m_localized[lang].assets.insert(MakePair(filename, asset));
 		}
 		void CreateAnimations();
 		Serialized CreateDefaultTextureImportSettings();
@@ -145,13 +145,15 @@ namespace SandCastle
 	private:
 		friend Engine;
 		String m_lang = "";
+		String m_langFallback = "";
 		bool m_reloading = false;
 		struct Localized
 		{
-			std::vector<std::pair<String, sptr<OpaqueAsset>>> assets;
+			std::unordered_map<String, sptr<OpaqueAsset>> assets;
 		};
 		std::unordered_map<String, Localized> m_localized;
 		std::vector<String> m_availableLangs;
+		std::set<String> m_localizedAssets;
 		std::unordered_map<String, sptr<OpaqueAsset>> m_assets;
 		std::unordered_map<String, Delegate<void, Assets, const String&, const String&, bool, const String&>> m_addAssetFunctions;
 		std::unordered_map<int32_t, Delegate<void, Assets, sptr<OpaqueAsset>&, sptr<OpaqueAsset>&>> m_changeLocaFunctions;

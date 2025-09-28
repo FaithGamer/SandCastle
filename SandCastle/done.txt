@@ -472,9 +472,19 @@ std::vector avoid this problem.
 
 -fixed the localized texture issue.
 -localization built into the asset working
+-Asset must check if default lang is part of available lang
 
->Asset must check if default lang is part of available lang
+28
+
+-fallback lang is default lang
+-assert that fallback lang has every lang
+-have a fallback lang for non-localized: especially for texture like game title
+-assert when fallback lang does not have a localized asset
+
+>one container for each asset type to reduce finding times
+
 >add textual asset
+
 >Ui::TextLoc(const String& key) -> automatic update with lang change
 >add Asset:CheckLang, check for assets that are in one lang but not another
 
