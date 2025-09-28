@@ -250,6 +250,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Render\Animation.cpp" />
+    <ClCompile Include="src\Render\Animator.cpp" />
     <ClCompile Include="src\Render\TextureSettings.cpp" />
     <ClCompile Include="src\UI\UiBtn.cpp" />
     <ClCompile Include="src\UI\UiCheckbox.cpp" />
@@ -355,6 +357,7 @@
     <ClInclude Include="include\SandCastle\Core\Signal.h" />
     <ClInclude Include="include\SandCastle\Core\std_macros.h" />
     <ClInclude Include="include\SandCastle\Core\Task.h" />
+    <ClInclude Include="include\SandCastle\Core\Textual.h" />
     <ClInclude Include="include\SandCastle\Core\Time.h" />
     <ClInclude Include="include\SandCastle\Core\TypeId.h" />
     <ClInclude Include="include\SandCastle\Core\Vec.h" />
@@ -363,6 +366,7 @@
     <ClInclude Include="include\SandCastle\ECS\Components.h" />
     <ClInclude Include="include\SandCastle\ECS\Entity.h" />
     <ClInclude Include="include\SandCastle\ECS\EntityId.h" />
+    <ClInclude Include="include\SandCastle\Render\Animation.h" />
     <ClInclude Include="include\SandCastle\Render\Color.h" />
     <ClInclude Include="include\SandCastle\Render\Layer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h" />
@@ -435,8 +439,10 @@
     <ClInclude Include="include\SandCastle\SandCastle.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="include\SandCastle\Render\QuadRenderData.h" />
+    <ClInclude Include="include\SandCastle\Render\Animator.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\SandCastle\Core\Assets.tpp" />
     <None Include="include\SandCastle\Core\Container.tpp" />
     <None Include="include\SandCastle\Core\Math.tpp" />
     <None Include="include\SandCastle\Core\Signal.tpp" />

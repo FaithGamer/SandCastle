@@ -55,6 +55,7 @@ namespace SandCastle
 		}
 		numeric::float16_t orgX = 0.f;
 		numeric::float16_t orgY = 0.f;
+
 	private:
 		Vec2f m_textureCoords[4];
 		Vec2f m_dimensions = { 0.f, 0.f };

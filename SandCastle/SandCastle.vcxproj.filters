@@ -252,6 +252,12 @@
     <ClCompile Include="src\Render\TextureSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Animator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h">
@@ -557,10 +563,20 @@
     <ClInclude Include="include\SandCastle\Render\TextureSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\Core\Textual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\Animator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Signal.tpp" />
     <None Include="include\SandCastle\Core\Math.tpp" />
     <None Include="include\SandCastle\Core\Container.tpp" />
+    <None Include="include\SandCastle\Core\Assets.tpp" />
   </ItemGroup>
 </Project>

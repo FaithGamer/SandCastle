@@ -4,8 +4,12 @@
 #include "TypeId.h"
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Core/Delegate.h"
-#include "SandCastle/Render/Texture.h"
 #include "SandCastle/Core/Signal.h"
+#include "SandCastle/Core/Textual.h"
+#include "SandCastle/Render/Texture.h"
+#include "SandCastle/Render/Sprite.h"
+#include "SandCastle/Render/Animation.h"
+#include "SandCastle/Render/Shader.h"
 #include <unordered_map>
 
 namespace SandCastle
@@ -31,21 +35,22 @@ namespace SandCastle
 	{
 	public:
 		Asset()
-		{ }
-		Asset(T&& ptr) : m_ptr(ptr)
+		{
+		}
+		Asset(T&& ptr) : m_data(ptr)
 		{
 
 		}
 		~Asset()
 		{
-	
+
 		}
 
 		Asset(const Asset<T>& asset) = delete;
 		Asset(const Asset<T>&& asset) = delete;
 		inline T* Ptr()
 		{
-			return &m_ptr;
+			return &m_data;
 		}
 		inline int32_t GetType()
 		{
@@ -54,7 +59,7 @@ namespace SandCastle
 	private:
 
 		friend Assets;
-		T m_ptr;
+		T m_data;
 
 	};
 
@@ -69,10 +74,21 @@ namespace SandCastle
 		static void SetLang(const String& lang);
 		static String GetLang();
 		template <class T>
-		static T* Get(String name)
+		inline static T* Get(const String& name)
 		{
-			return Instance()->GetPrivate<T>(name);
+			ASSERT_LOG_ERROR(false, "Asset type non implemented.");
 		}
+		template <>
+		inline static Sprite* Get(const String& name);
+		template <>
+		inline static Texture* Get(const String& name);
+		template <>
+		inline static Shader* Get(const String& name);
+		template <>
+		inline static Animation* Get(const String& name);
+		template <>
+		inline static Textual* Get(const String& name);
+
 		Signal<LangSignal> langSignal;
 	private:
 		friend sptr<Assets> Singleton<Assets>::Instance();
@@ -87,26 +103,15 @@ namespace SandCastle
 		}
 
 		void InitLang();
-		void ChangeLocaTexture(sptr<OpaqueAsset>& prev, sptr<OpaqueAsset>& next);
-		void ChangeLocaText();
+		void ChangeLocaTexture(sptr<OpaqueAsset>& prev, const String& key);
+		void ChangeLocaTextual(sptr<OpaqueAsset>& prev, const String& key);
 
 		void GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture);
 		void LoadAssets();
 		void InitFunctions();
 		void AddAsset(const String& path, bool localized, const String& lang);
 		void CompileShaders();
-		template<class T>
-		void InsertAsset(const String& filename, sptr<Asset<T>> asset)
-		{
-			if (m_assets.find(filename) == m_assets.end())
-			{
-				m_assets.insert(MakePair(filename, asset));
-			}
-			else
-			{
-				LOG_ERROR("More than one asset with the same filename: " + filename + ", only one could be loaded.");
-			}
-		}
+
 		template<class T>
 		void InsertLocalizedAsset(const String& filename, const String& lang, sptr<Asset<T>> asset)
 		{
@@ -117,23 +122,11 @@ namespace SandCastle
 		Serialized CreateDefaultSpritesheet(const Texture* texture);
 		void AddAnimation(const String& filename, const String& path, bool localized, const String& lang);
 		void AddTexture(const String& filename, const String& path, bool localized, const String& lang);
-		void AddConfig(const String& filename, const String& path, bool localized, const String& lang);
 		void AddFragmentShader(const String& filename, const String& path, bool localized, const String& lang);
 		void AddVertexShader(const String& filename, const String& path, bool localized, const String& lang);
 		void AddGeometryShader(const String& filename, const String& path, bool localized, const String& lang);
 		void AddAudio(const String& filename, const String& path, bool localized, const String& lang);
-
-	
-		template <class T>
-		T* GetPrivate(String name)
-		{
-			auto find_it = m_assets.find(name);
-
-			ASSERT_LOG_ERROR((bool)(find_it != m_assets.end()), "Cannot find asset, " + name);
-			ASSERT_LOG_ERROR((bool)(find_it->second->GetType() == TypeId::GetId<T>()), "Getting wrong asset type, " + name);
-
-			return static_pointer_cast<Asset<T>>(find_it->second)->Ptr();
-		} 
+		void AddTextual(const String& filename, const String& path, bool localized, const String& lang);
 
 		struct ShaderSources
 		{
@@ -154,10 +147,18 @@ namespace SandCastle
 		std::unordered_map<String, Localized> m_localized;
 		std::vector<String> m_availableLangs;
 		std::set<String> m_localizedAssets;
-		std::unordered_map<String, sptr<OpaqueAsset>> m_assets;
+
+		std::unordered_map<String, Sprite> m_sprites;
+		std::unordered_map<String, Texture> m_textures;
+		std::unordered_map<String, Shader> m_shaders;
+		std::unordered_map<String, Animation> m_animations;
+		std::unordered_map<String, Textual> m_textuals;
+
 		std::unordered_map<String, Delegate<void, Assets, const String&, const String&, bool, const String&>> m_addAssetFunctions;
-		std::unordered_map<int32_t, Delegate<void, Assets, sptr<OpaqueAsset>&, sptr<OpaqueAsset>&>> m_changeLocaFunctions;
+		std::unordered_map<int32_t, Delegate<void, Assets, sptr<OpaqueAsset>&, const String&>> m_changeLocaFunctions;
 		std::unordered_map<String, ShaderSources> m_shadersPath;
-		std::vector<std::pair<String, Serialized>> m_animations;
+		std::vector<std::pair<String, Serialized>> m_animSerialized;
 	};
 }
+
+#include "Assets.tpp"

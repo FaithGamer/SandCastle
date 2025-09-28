@@ -15,18 +15,23 @@ namespace SandCastle
 {
 	void Assets::CreateAnimations()
 	{
-		for (int i = 0; i < m_animations.size(); i++)
+		for (int i = 0; i < m_animSerialized.size(); i++)
 		{
-			InsertAsset(m_animations[i].first, MakeAsset<Animation>(m_animations[i].second));
+			m_animations.insert(std::make_pair(m_animSerialized[i].first, Animation(m_animSerialized[i].second)));
 		}
-		m_animations.clear();
+		m_animSerialized.clear();
 	}
 
-	void Assets::ChangeLocaTexture(sptr<OpaqueAsset>& prev, sptr<OpaqueAsset>& next)
+	void Assets::ChangeLocaTexture(sptr<OpaqueAsset>& next, const String& key)
 	{
-		auto Prev = static_pointer_cast<Asset<Texture>>(prev);
 		auto Next = static_pointer_cast<Asset<Texture>>(next);
-		Prev->m_ptr.Copy(Next->m_ptr);
+		m_textures[key].Copy(Next->m_data);
+	}
+
+	void Assets::ChangeLocaTextual(sptr<OpaqueAsset>& next, const String& key)
+	{
+		auto Next = static_pointer_cast<Asset<Textual>>(next);
+		m_textuals[key] = Next->m_data;
 	}
 
 	void Assets::GenerateSprites(String filename, Serialized& spritesheet, const Texture* texture)
@@ -71,11 +76,13 @@ namespace SandCastle
 				texRect.height = (float)height;
 
 				String spriteName = filename + "_" + std::to_string((rows - 1) - y) + "_" + std::to_string(x);
-				InsertAsset(spriteName, MakeAsset<Sprite>(
-					texture,
-					texRect,
-					(numeric::float16_t)origin.x,
-					(numeric::float16_t)origin.y));
+				m_sprites.insert(
+					std::make_pair(
+						spriteName, Sprite(
+							texture,
+							texRect,
+							(numeric::float16_t)origin.x,
+							(numeric::float16_t)origin.y)));
 			}
 		}
 	}
@@ -100,7 +107,7 @@ namespace SandCastle
 	void Assets::AddAnimation(const String& filename, const String& path, bool localized, const String& lang)
 	{
 		ASSERT_LOG_ERROR(!localized, "Animation cannot be localized.");
-		m_animations.emplace_back(std::make_pair(filename, Serialized(path)));
+		m_animSerialized.emplace_back(std::make_pair(filename, Serialized(path)));
 	}
 	void Assets::AddTexture(const String& filename, const String& path, bool localized, const String& lang)
 	{
@@ -133,48 +140,49 @@ namespace SandCastle
 		if (m_reloading)
 		{
 			//Reload the rexture
-			static_pointer_cast<Asset<Texture>>(m_assets[filename])->m_ptr.Reload(path, importSettings);
+			m_textures[filename].Reload(path, importSettings);
 			//Do not generate sprites
 			return;
 		}
-		
+
 		//Create the texture with the import settings
-		auto texture = MakeAsset<Texture>(path, importSettings);
+
 		//Load sprite sheet from settings
-		auto spritesheet = settings.GetObj("Spritesheet");
-		if (spritesheet.HadGetError())
-		{
-			//Texture settings was non existant or ill formed
-			spritesheet = CreateDefaultSpritesheet(texture->Ptr());
-			settings["Spritesheet"] = spritesheet;
-			settings.WriteOnDisk(settingsPath);
-		}
+
+		auto MakeSprites = [&](Texture& tex)
+			{
+				auto spritesheet = settings.GetObj("Spritesheet");
+				if (spritesheet.HadGetError())
+				{
+					//Texture settings was non existant or ill formed
+					spritesheet = CreateDefaultSpritesheet(&tex);
+					settings["Spritesheet"] = spritesheet;
+					settings.WriteOnDisk(settingsPath);
+				}
+				GenerateSprites(filename, spritesheet, &tex);
+				ASSERT_LOG_ERROR(!spritesheet.HadGetError(), "Ill formed spritesheet: " + path);
+				
+			};
 		if (localized)
 		{
-			InsertLocalizedAsset(filename, lang, texture);
+			auto locaTexture = MakeAsset<Texture>(path, importSettings);
+			InsertLocalizedAsset(filename, lang, locaTexture);
 			if (lang == GetLang())
 			{
-				auto receptacle = MakeAsset<Texture>(); // make an empty texture that will receive the localized version
-				receptacle->m_ptr.Copy(texture->m_ptr); // receptacle copy the value of the localized version.
-				GenerateSprites(filename, spritesheet, &receptacle->m_ptr); // the sprite point to the receptacle
-				InsertAsset(filename, receptacle); // put it in place as the current used asset.
-				//receptacle->m_ptr.m_size = texture->m_ptr.m_size; //trick to make the sprites generated coherent with the localized textures
+				ASSERT_LOG_ERROR((m_textures.find(filename) == m_textures.end()), "Double asset texture {0}.");
+				auto it_insert = m_textures.insert(std::make_pair(filename, Texture()));
+				auto& texture = it_insert.first->second;
+				texture.Copy(locaTexture->m_data);
+				MakeSprites(texture);
 			}
 		}
 		else
 		{
-			GenerateSprites(filename, spritesheet, texture->Ptr());
-			InsertAsset(filename, texture);
+			ASSERT_LOG_ERROR((m_textures.find(filename) == m_textures.end()), "Double asset texture {0}.");
+			auto it_insert = m_textures.insert(std::make_pair(filename, Texture(path, importSettings)));
+			auto& texture = it_insert.first->second;
+			MakeSprites(texture); 
 		}
-
-		//Check if the sprites generated are correct
-		ASSERT_LOG_ERROR(!spritesheet.HadGetError(), "Ill formed spritesheet: " + path);
-
-	}
-	void Assets::AddConfig(const String& filename, const String& path, bool localized, const String& lang)
-	{
-		ASSERT_LOG_ERROR(!localized, "Config cannot be localized.");
-		InsertAsset(filename, MakeAsset<Serialized>(path));
 	}
 	void Assets::AddFragmentShader(const String& filename, const String& path, bool localized, const String& lang)
 	{
@@ -204,6 +212,10 @@ namespace SandCastle
 		Audio::Instance()->LoadSound(path);
 	}
 
+	void Assets::AddTextual(const String& filename, const String& path, bool localized, const String& lang)
+	{
+	}
+
 	Assets::Assets()
 	{
 
@@ -231,11 +243,13 @@ namespace SandCastle
 		ASSERT_LOG_ERROR((f_it != m_availableLangs.end()), "The default selected lang is not part of the available langs");
 
 		//Check every localized asset, they MUST exist in the fallback lang
+		if (m_langFallback == "")
+			return;
 		auto& fallback = m_localized.at(m_langFallback);
 		for (const auto& asset : m_localizedAssets)
 		{
 			bool present = fallback.assets.find(asset) != fallback.assets.end();
-			ASSERT_LOG_ERROR(present, 
+			ASSERT_LOG_ERROR(present,
 				"Localized asset {0}, isn't present in the fallback lang.", asset);
 		}
 		//Use the fallback asset in the missing langs
@@ -261,9 +275,8 @@ namespace SandCastle
 		{
 			auto& newAsset = loca.second;
 			auto& assetKey = loca.first;
-			auto& currentAsset = i->m_assets[assetKey];
 			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
-			it_fun->second.Call(currentAsset, newAsset);
+			it_fun->second.Call(newAsset, assetKey);
 		}
 		i->langSignal.Send(LangSignal(lang));
 	}
@@ -276,7 +289,6 @@ namespace SandCastle
 		//Add assets
 		m_addAssetFunctions.insert(std::make_pair(".anim", Delegate(&Assets::AddAnimation, this)));
 		m_addAssetFunctions.insert(std::make_pair(".png", Delegate(&Assets::AddTexture, this)));
-		m_addAssetFunctions.insert(std::make_pair(".config", Delegate(&Assets::AddConfig, this)));
 		m_addAssetFunctions.insert(std::make_pair(".vert", Delegate(&Assets::AddVertexShader, this)));
 		m_addAssetFunctions.insert(std::make_pair(".frag", Delegate(&Assets::AddFragmentShader, this)));
 		m_addAssetFunctions.insert(std::make_pair(".geom", Delegate(&Assets::AddGeometryShader, this)));
@@ -284,7 +296,8 @@ namespace SandCastle
 		m_addAssetFunctions.insert(std::make_pair(".wav", Delegate(&Assets::AddAudio, this)));
 
 		//Change loca 
-		m_changeLocaFunctions.insert(MakePair(TypeId::GetId<Texture>(), Delegate(&Assets::ChangeLocaTexture, this)));
+		m_changeLocaFunctions.insert(std::make_pair(TypeId::GetId<Texture>(), Delegate(&Assets::ChangeLocaTexture, this)));
+		m_changeLocaFunctions.insert(std::make_pair(TypeId::GetId<Textual>(), Delegate(&Assets::ChangeLocaTextual, this)));
 	}
 
 	void Assets::LoadAssets()
@@ -326,7 +339,7 @@ namespace SandCastle
 				{
 					String pstr = folder_it->path().generic_string();
 					String sub = pstr.substr(0, localized.size());
-					bool loca = pstr.size() > localized.size() ?  sub == localized : false;
+					bool loca = pstr.size() > localized.size() ? sub == localized : false;
 					String lang = "";
 					if (loca)
 					{
@@ -338,7 +351,7 @@ namespace SandCastle
 						if (m_lang == "")
 							m_lang = lang;
 					}
-					
+
 					folders.push_back(Folder(loca, lang, folder_it->path()));
 				}
 				folder_it++;
@@ -366,14 +379,21 @@ namespace SandCastle
 			String fragSrc = Shader::LoadShaderSourceFromFile(fragPath);
 			String geomSrc = geomPath == "" ? "" : Shader::LoadShaderSourceFromFile(geomPath);
 
-			auto shaderAsset = geomSrc == "" ? MakeAsset<Shader>(vertSrc, fragSrc) : MakeAsset<Shader>(vertSrc, geomSrc, fragSrc);
 			String path = vertPath;
 			size_t i = path.find_last_of("/");
 			size_t j = path.find_last_of(".");
 			size_t s = path.size();
 			String assetName = path.substr(i + 1, (s - i) - (s - j)) + "shader";
-			shaderAsset->Ptr()->m_name = assetName;
-			InsertAsset(assetName, shaderAsset);
+
+			if (geomSrc == "")
+			{
+				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, fragSrc))).first->second.m_name = assetName;
+			}
+			else
+			{
+				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, geomSrc, fragSrc))).first->second.m_name = assetName;
+			}
+
 		}
 	}
 

@@ -480,8 +480,7 @@ std::vector avoid this problem.
 -assert that fallback lang has every lang
 -have a fallback lang for non-localized: especially for texture like game title
 -assert when fallback lang does not have a localized asset
-
->one container for each asset type to reduce finding times
+-opti assets: each asset type has its own container.
 
 >add textual asset
 
@@ -525,6 +524,8 @@ possible solution: realign text after Write bazed on new size at the end of Make
 >scrolling
 >UiElem can be floating: have the same position of the last elem, or custom...
 >thread safety in profiler
+>opti: sprite have texture id? + spriteRender have texture id + all sprite relevant data to reduce cache miss
+(and then for localization sprite render with localized sprite must listen to OnChangeLoca)
 
 bugs:
 
