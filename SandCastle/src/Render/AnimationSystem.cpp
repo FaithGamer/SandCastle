@@ -1,97 +1,12 @@
 #include "pch.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Render/SpriteRender.h"
+#include "SandCastle/Render/Animator.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
-	//---Keyframe---
-
-	Keyframe::Keyframe() : timeToNext(0)
-	{
-	}
-
-	Animation::Animation() : frequency(0.1666f)
-	{
-	}
-
-	Animation::Animation(Serialized& config)
-	{
-		Deserialize(config);
-	}
-
-	float Animation::GetTime()
-	{
-		return frequency * frames.size();
-	}
-
-	//---Animation---
-
-	Serialized Animation::Serialize()
-	{
-		LOG_WARN("Cannot serialize animation.");
-		return Serialized();
-	}
-
-	void Animation::Deserialize(Serialized& config)
-	{
-		frequency = 1.f / config["frame_per_second"].get<float>();
-
-		int currentFrame = 0;
-		bool signal = false;
-		for (auto& frame : config["frames"])
-		{
-			Sprite* sprite = nullptr;
-			//Set sprite if any
-			auto sprite_it = frame.find("sprite");
-			if (sprite_it != frame.end())
-			{
-				sprite = Assets::Get<Sprite>(sprite_it->get<String>());
-			}
-
-			float timeToNext = 1.f * frequency;
-
-			//Set custom time if any
-			auto time_it = frame.find("time");
-			if (time_it != frame.end())
-			{
-				timeToNext = time_it->get<float>() * frequency;
-			}
-
-			Keyframe keyframe;
-			keyframe.sprite = sprite;
-			keyframe.timeToNext = timeToNext;
-			keyframe.sendSignal = frame.find("signal") != frame.end() ? frame.at("signal").get<bool>() : false;
-			if (keyframe.sendSignal)
-				signal = true;
-			frames.push_back(keyframe);
-		}
-		if (signal)
-		{
-			signalsTemplate.resize(frames.size());
-		}
-	}
-
-
-	//---Animator---
-
-	void Animator::SetAnimation(String animation)
-	{
-		auto find_it = animations.find(animation);
-		if (find_it != animations.end())
-		{
-			currentStateName = animation;
-			currentState = &find_it->second;
-			accumulator = 0;
-			currentKeyFrame = 0;
-		}
-		else
-		{
-			LOG_WARN("Cannot find animation with name: {0}", animation);
-		}
-	}
-
 	/// @brief Add an animation to be played later at any time.
 	/// @param stateName The state name to reference this animation
 	/// @param animation the animation pointer
@@ -166,9 +81,4 @@ namespace SandCastle
 		return System::Method::Updt;
 	}
 
-	Keyframe AnimationSystem::EvaluateTransform(Animator& animator)
-	{
-		return Keyframe();
-	}
-	
 }
