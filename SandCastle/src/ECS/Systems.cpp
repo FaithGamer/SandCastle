@@ -82,10 +82,10 @@ namespace SandCastle
 		SDL_Event event;
 		while (SDL_PollEvent(&event) != 0)
 		{
-			HandleWindowEvents(event);
+			WindowEvents(event);
 			bool imGuiEventHandled = false;
 #ifdef SC_IMGUI
-			ImGui_ImplSDL3_ProcessEvent(&event);
+			ImGuiLoader::Events(event);
 #endif
 
 			if (Ui::Instance()->OnEvent(event))
@@ -134,7 +134,7 @@ namespace SandCastle
 		STOP_PROFILING("frame_time");
 	}
 
-	void Systems::HandleWindowEvents(SDL_Event& event)
+	void Systems::WindowEvents(SDL_Event& event)
 	{
 		if (event.type == SDL_EVENT_QUIT)
 		{
@@ -285,6 +285,7 @@ namespace SandCastle
 
 	void Systems::ImGuiUpdates()
 	{
+		std::lock_guard lock(ImGuiLoader::mutex);
 		for (auto& system : m_imGuiSystems)
 		{
 			system.system->OnImGui();

@@ -192,7 +192,7 @@ namespace SandCastle
 		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
 		for (auto& mat : ins->m_materials)
 		{
-			if(!mat->IsLayer())
+			if (!mat->IsLayer())
 				ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
 		}
 		ins->Wait();
@@ -382,9 +382,12 @@ namespace SandCastle
 		End();
 
 #ifdef SC_IMGUI
-		BeginImGui();
-		Systems::Instance()->ImGuiUpdates();
-		EndImGui(Window::GetSize());
+		if (ImGuiLoader::enabled)
+		{
+			ImGuiLoader::BeginImGui();
+			Systems::Instance()->ImGuiUpdates();
+			ImGuiLoader::EndImGui(Window::GetSize());
+		}
 
 #endif
 
@@ -493,7 +496,7 @@ namespace SandCastle
 		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
 			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		//Bind target framebuffer
-		
+
 		m_target->Bind();
 
 		//Put offscreen layer in according texture slots

@@ -1,12 +1,20 @@
 #pragma once
 #include "SandCastle/Core/Vec.h"
+#include <mutex>
 #include <SDL3/SDL.h>
 
 
 namespace SandCastle
 {
-	void BeginImGui();
-	void EndImGui(Vec2u windowSize);
-	void LoadImGui(SDL_Window* sdlWindow, SDL_GLContext sdlGlContext, bool lightTheme = false);
-	void ExitImGui();
+	class ImGuiLoader
+	{
+	public:
+		static void BeginImGui();
+		static void Events(SDL_Event& event);
+		static void EndImGui(Vec2u windowSize);
+		static void LoadImGui(SDL_Window* sdlWindow, SDL_GLContext sdlGlContext, bool lightTheme = false);
+		static void ExitImGui();
+		static std::atomic<bool> enabled;
+		static std::mutex mutex;
+	};
 }

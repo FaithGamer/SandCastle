@@ -123,7 +123,7 @@ namespace SandCastle
 		void Init();
 
 		void Update();
-		void HandleWindowEvents(SDL_Event& event);
+		void WindowEvents(SDL_Event& event);
 		void IntegratePending();
 		void RemovePending();
 		void RemovePending(std::vector<SystemIdPriority>& systems, int32_t system, std::set<SystemIdPriority, CompareSystemId>& toDelete);

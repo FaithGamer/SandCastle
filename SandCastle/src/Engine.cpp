@@ -51,7 +51,7 @@ namespace SandCastle
 		system->Init();
 		Systems::SetFixedUpdateTime(settings.fixedUpdateTimeStep);
 #ifdef SC_IMGUI
-		LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());
+		ImGuiLoader::LoadImGui(Window::GetSDLWindow(), Window::GetRenderContext());
 #endif
 
 		//Default systems
@@ -91,6 +91,7 @@ namespace SandCastle
 		Systems::Kill();
 		Renderer2D::Kill();
 		Window::Kill();
+		ImGuiLoader::ExitImGui();
 	}
 
 	void Engine::Stop()

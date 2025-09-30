@@ -492,24 +492,15 @@ std::vector avoid this problem.
 
 -writer has possibly lang for fonts
 -Ui make font integrate langs
-
->btn listen to lang change and update text (an possibly frame)
-
->automatically recreate buttons and texts when changing langs
->I want adding a language to not require changing the makefont calls!
-
->Change of font in changing language:
+-btn localized
+-fonts localiezd
+-mutexed imgui events and render with the hope it removes crashes
 
 
 tasks:
 
->test pixel art rotations
->have a default texture setting custom
-
->fix ImGui random assert crash (probly bc of threading)
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?
-
 >rename Filter to MaskFilter and use template
 >Implement a default GameSystem class with state machine
 >Implement LoveAudio from idle colony as a default audio system
