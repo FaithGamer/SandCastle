@@ -250,6 +250,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Core\Versioning.cpp" />
     <ClCompile Include="src\Render\Animation.cpp" />
     <ClCompile Include="src\Render\Animator.cpp" />
     <ClCompile Include="src\Render\TextureSettings.cpp" />
@@ -362,6 +363,7 @@
     <ClInclude Include="include\SandCastle\Core\Time.h" />
     <ClInclude Include="include\SandCastle\Core\TypeId.h" />
     <ClInclude Include="include\SandCastle\Core\Vec.h" />
+    <ClInclude Include="include\SandCastle\Core\Versioning.h" />
     <ClInclude Include="include\SandCastle\Core\Worker.h" />
     <ClInclude Include="include\SandCastle\ECS.h" />
     <ClInclude Include="include\SandCastle\ECS\Components.h" />

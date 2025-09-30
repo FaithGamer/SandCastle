@@ -14,7 +14,9 @@ namespace SandCastle
 		/// @brief Call in your main function after Engine::Init and optionally your initializations.
 		static void Launch();
 		static void Stop();
+		static bool IsInit();
 	private:
+		static bool init;
 		static bool play;
 	};
 }

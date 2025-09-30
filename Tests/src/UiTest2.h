@@ -294,6 +294,7 @@ public:
 void UiTest2()
 {
 	EngineSettings settings;
+	settings.appName = "Ui tests";
 	settings.defaultLang = "fr";
 	settings.textureImport = TextureImportSettings(
 		TextureFiltering::Nearest,
@@ -302,6 +303,8 @@ void UiTest2()
 		false,
 		false
 	);
+	Versioning::Push("0.1");
+	Versioning::Push("0.2");
 	Engine::Init(settings);
 	Systems::Push<TestSys>();
 

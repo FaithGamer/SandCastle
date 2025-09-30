@@ -16,10 +16,12 @@
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"
 #include "SandCastle/UI/Ui.h"
+#include "SandCastle/Core/Versioning.h"
 
 namespace SandCastle
 {
 	bool Engine::play = true;
+	bool Engine::init = false;
 
 	void Engine::Init(EngineSettings settings)
 	{
@@ -30,7 +32,8 @@ namespace SandCastle
 		TextureImportSettings::defaultSettings = settings.textureImport;
 
 		LOG_INFO("Creating window...");
-		Window::Instance()->Init(settings.appName, settings.startupWindowResolution);
+		String windowName = settings.appName + " - " + Versioning::Get();
+		Window::Instance()->Init(windowName, settings.startupWindowResolution);
 		Window::SetFullScreen(settings.fullscreen);
 		LOG_INFO("Initializing context...");
 		Renderer2D::Instance()->Init();
@@ -60,6 +63,8 @@ namespace SandCastle
 		Systems::Push<WireRenderSystem>();
 		Systems::Push<AnimationSystem>();
 		Systems::Push<PhysicsSystem>();
+
+		init = true;
 	}
 
 	void Engine::Init(const String& settingsPath)
@@ -97,6 +102,10 @@ namespace SandCastle
 	void Engine::Stop()
 	{
 		play = false;
+	}
+	bool Engine::IsInit()
+	{
+		return init;
 	}
 }
 

@@ -20,5 +20,6 @@
 #include "SandCastle/Core/Worker.h"
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/Core/Fancy.h"
+#include "SandCastle/Core/Versioning.h"
 
 

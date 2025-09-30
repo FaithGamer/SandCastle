@@ -495,19 +495,19 @@ std::vector avoid this problem.
 -btn localized
 -fonts localiezd
 -mutexed imgui events and render with the hope it removes crashes
-
+-versioning
 
 tasks:
 
+>versioning and app name
+>custom path for assets, fonts, and so on... Roaming system
+>Implement LoveAudio from idle colony as a default audio system
+>Implement steamworks from idle colony
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?
 >rename Filter to MaskFilter and use template
 >Implement a default GameSystem class with state machine
->Implement LoveAudio from idle colony as a default audio system
->Implement steamworks from idle colony
 >math inverselerp
->custom path for assets, fonts, and so on... Roaming system
->versioning and app name
 >japanese breaking rules
 >visual loading during engine Init (especially for assets)
 
@@ -534,6 +534,7 @@ possible solution: realign text after Write bazed on new size at the end of Make
 
 bugs:
 
+>F12 create a crash
 >asset log error not always log in the .txt logs?
 
 render:
