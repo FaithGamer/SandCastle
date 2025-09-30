@@ -14,7 +14,10 @@ namespace fs = std::filesystem;
 
 namespace SandCastle
 {
-
+	inline String Concatenated(const String& lang, const String& font)
+	{
+		return lang + '_' + font;
+	}
 	inline bool IsSpace(uint32_t cp)
 	{
 		switch (cp) {
@@ -150,7 +153,7 @@ namespace SandCastle
 		FT_Done_FreeType(m_ft);
 	}
 
-	FontID Writer::MakeFont(std::string filename, int size,
+	FontID Writer::MakeFont(const String& filename, int size,
 		float outlineThickness, Vec4f outlineColor)
 	{
 		// Load face by path
@@ -187,7 +190,7 @@ namespace SandCastle
 		return index;
 	}
 
-	void Writer::SetFontFolder(String path)
+	void Writer::SetFontFolder(const String& path)
 	{
 		m_fontFolder = path;
 	}
@@ -197,9 +200,21 @@ namespace SandCastle
 		m_filtering = filtering;
 	}
 
-	void Writer::NameFont(FontID font, String name)
+	void Writer::NameFont(FontID font, const String& name, const std::vector<String> langs)
 	{
-		m_fontFinder[name] = font;
+		if (langs.empty())
+		{
+			m_fontFinder[name] = font;
+			return;
+		}
+		for (auto& lang : langs)
+		{
+			auto ins_it = m_localized.insert(std::make_pair(Concatenated(lang, name), font));
+			if (!ins_it.second)
+			{
+				LOG_ERROR("SetFontLangs: {0} already exists.", Concatenated(lang, name));
+			}
+		}
 	}
 
 	void Writer::UseFont(FontID id)
@@ -212,15 +227,9 @@ namespace SandCastle
 		m_current = id;
 	}
 
-	void Writer::UseFont(String name)
+	void Writer::UseFont(const String& name, const String& lang)
 	{
-		auto it = m_fontFinder.find(name);
-		if (it == m_fontFinder.end())
-		{
-			LOG_ERROR("The font {0}, cannot be found.");
-			return;
-		}
-		m_current = it->second;
+		m_current = GetFontID(name, lang);
 	}
 	void Writer::SetPPU(float ppu)
 	{
@@ -512,15 +521,9 @@ namespace SandCastle
 		return m_ppu;
 	}
 
-	const Font* Writer::GetFont(String fancyName) const
+	const Font* Writer::GetFont(const String& fancyName, const String& lang)
 	{
-		auto font = m_fontFinder.find(fancyName);
-		if (font == m_fontFinder.end())
-		{
-			LOG_ERROR("Writer::GetFont, the fancy name {0}, doesn't exists.", fancyName);
-			return 0;
-		}
-		return &m_fonts[font->second];
+		return &m_fonts[GetFontID(fancyName, lang)];
 	}
 
 	const Font* Writer::GetFont(FontID font) const
@@ -532,6 +535,28 @@ namespace SandCastle
 			LOG_ERROR("Trying to get a font but fond id is out of range.");
 			return nullptr;
 		}
+	}
+
+	FontID Writer::GetFontID(const String& name, const String& lang)
+	{
+		std::unordered_map<String, FontID>* container = nullptr;
+		String id = name;
+		if (lang != "")
+		{
+			container = &m_localized;
+			id = Concatenated(lang, name);
+		}
+		else
+		{
+			container = &m_fontFinder;
+		}
+		auto f_it = container->find(id);
+		if (f_it == container->end())
+		{
+			LOG_ERROR("Font {0}, doesn't exists.", id);
+			return 0;
+		}
+		return f_it->second;
 	}
 
 	static int NextPow2(int x) { int p = 1; while (p < x) p <<= 1; return p; }

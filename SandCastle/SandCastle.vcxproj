@@ -347,6 +347,7 @@
     <ClInclude Include="include\SandCastle\Core\Fancy.h" />
     <ClInclude Include="include\SandCastle\Core\Files.h" />
     <ClInclude Include="include\SandCastle\Core\Geometry.h" />
+    <ClInclude Include="include\SandCastle\Core\LangSignal.h" />
     <ClInclude Include="include\SandCastle\Core\Log.h" />
     <ClInclude Include="include\SandCastle\Core\Math.h" />
     <ClInclude Include="include\SandCastle\Core\Noise.h" />
@@ -450,9 +451,6 @@
   <ItemGroup>
     <ProjectReference Include="vendor\box2d-2.4.2\src\box2d.vcxproj">
       <Project>{d806b2b9-8bef-3370-8310-a4acd0895af9}</Project>
-    </ProjectReference>
-    <ProjectReference Include="vendor\freetype-2.13.3\freetype\freetype.vcxproj">
-      <Project>{ff004f71-d6bf-3db4-a6ce-ca00bd590b11}</Project>
     </ProjectReference>
     <ProjectReference Include="vendor\glad\glad.vcxproj">
       <Project>{3a4323e7-9de1-4f77-a00a-826acb74f7c6}</Project>

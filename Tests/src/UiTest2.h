@@ -222,7 +222,7 @@ public:
 		Ui::SetRootAnchor(CanvasAnchor::BotLeft);
 		auto r = Ui::Begin(Vec2f(150, 0));
 		r->SetPosition(Vec2f(-320.f, -180.f));
-		Ui::Text("You clicked {0} times", 0.f, &clicked);
+		Ui::TextLoc("clicked_times", 0.f, &clicked);
 		Ui::Button("Ok")->ListenClickReleased(&TestSys::OnClickOk, this);
 		Ui::End();
 	}
@@ -272,7 +272,7 @@ public:
 		Ui::SetCanvasLayoutAlignH(LayoutAlign::Middle);
 		auto r = Ui::Begin();
 		r->SetPosition(Vec2f(0, -180));
-		Ui::Text("Localized texture.");
+		Ui::TextLoc("ui_test");
 		Ui::Image("flag.png_0_0");
 		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
 		

@@ -10,6 +10,7 @@
 #include "SandCastle/Render/Sprite.h"
 #include "SandCastle/Render/Animation.h"
 #include "SandCastle/Render/Shader.h"
+#include "SandCastle/Core/LangSignal.h"
 #include <unordered_map>
 
 namespace SandCastle
@@ -23,11 +24,6 @@ namespace SandCastle
 		virtual ~OpaqueAsset() {};
 		virtual int32_t GetType() = 0;
 	protected:
-	};
-
-	struct LangSignal
-	{
-		String lang;
 	};
 
 	template<class T>
@@ -73,6 +69,7 @@ namespace SandCastle
 		void HotReload();
 		static void SetLang(const String& lang);
 		static String GetLang();
+		static std::vector<String> GetAvailableLangs();
 		template <class T>
 		inline static T* Get(const String& name)
 		{
@@ -89,7 +86,7 @@ namespace SandCastle
 		template <>
 		inline static Textual* Get(const String& name);
 
-		Signal<LangSignal> langSignal;
+		Signal<LangSignal*> langSignal;
 	private:
 		friend sptr<Assets> Singleton<Assets>::Instance();
 		friend void Singleton<Assets>::Kill();

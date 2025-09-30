@@ -481,11 +481,17 @@ std::vector avoid this problem.
 -have a fallback lang for non-localized: especially for texture like game title
 -assert when fallback lang does not have a localized asset
 -opti assets: each asset type has its own container.
+-using the .sln shipped with freetype to fix the static issue, manually copying the freetype.lib in the vendor folder...
 
->add textual asset
+29
 
->Ui::TextLoc(const String& key) -> automatic update with lang change
->add Asset:CheckLang, check for assets that are in one lang but not another
+-added textual asset
+-UiTextLoc with UiTxt that change loca automatically
+
+>Change of font in changing language:
+>uitxt have font name id instead of font id
+>writer map font to lang
+>create font ask for lang (optional)
 
 tasks:
 

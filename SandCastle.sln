@@ -24,8 +24,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxpro
 		{DFE64D30-3B0F-4900-AB9D-5DC225FB97D6} = {DFE64D30-3B0F-4900-AB9D-5DC225FB97D6}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freetype", "SandCastle\vendor\freetype-2.13.3\freetype\freetype.vcxproj", "{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -96,15 +94,6 @@ Global
 		{66251D44-4D3D-47B2-869E-376136255C82}.Release|x64.Build.0 = Release|x64
 		{66251D44-4D3D-47B2-869E-376136255C82}.Release|x86.ActiveCfg = Release|Win32
 		{66251D44-4D3D-47B2-869E-376136255C82}.Release|x86.Build.0 = Release|Win32
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Debug|x64.ActiveCfg = Debug|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Debug|x86.ActiveCfg = Debug|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Debug|x86.Build.0 = Debug|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Distrib|x64.ActiveCfg = Release|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Distrib|x86.ActiveCfg = Debug|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Distrib|x86.Build.0 = Debug|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Release|x64.ActiveCfg = Release|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Release|x86.ActiveCfg = Release|x64
-		{FF004F71-D6BF-3DB4-A6CE-CA00BD590B11}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

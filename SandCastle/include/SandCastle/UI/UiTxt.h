@@ -4,12 +4,15 @@
 #include "SandCastle/UI/UiContext.h"
 #include "SandCastle/Render/Text.h"
 #include "SandCastle/Render/Color.h"
+#include "SandCastle/Core/LangSignal.h"
 
 namespace SandCastle
 {
+
 	class UiTxt : public UiElem
 	{
 	public:
+		~UiTxt();
 		UiElem::Type GetType() const override;
 
 		template<typename... Ts>
@@ -28,8 +31,9 @@ namespace SandCastle
 				return data->Format(utf8);
 			return utf8;
 		}
-
+		Signal<UiTxt*> langSignal;
 	protected:
+		void OnLang(LangSignal* signal);
 		class Data
 		{
 		public:
@@ -148,6 +152,7 @@ namespace SandCastle
 		Sentence             sentence;
 		TextContext			 context;
 		String				 utf8;
+		String				 locKey = "";
 		std::unique_ptr<Data> data;
 	};
 }

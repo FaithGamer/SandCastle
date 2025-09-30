@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SandCastle/UI/Ui.h"
-#include "SandCastle/Core/Assets.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Math.h"
 #include "SandCastle/Render/SpriteRender.h"
@@ -15,8 +14,6 @@
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
-#include "SandCastle/Input/Inputs.h"
-#include "SandCastle/Input/ButtonInput.h"
 #include "SandCastle/Core/Container.h"
 
 namespace SandCastle
@@ -34,12 +31,6 @@ namespace SandCastle
 		m_context.material = uiMat;
 		m_context.layer = uiLayer;
 		m_writer = new Writer(m_context.material, m_context.layer);
-
-		/*auto input = Inputs::CreateInputMap("UI");
-		auto click = input->CreateButtonInput("Click");
-		click->BindMouse(Mouse::Button::Left);
-		click->SetSignalOnRelease(true);
-		click->signal.Listen(&Ui::OnClick, this);*/
 	}
 
 	Ui::~Ui()
@@ -143,6 +134,11 @@ namespace SandCastle
 
 		RemoveHelper(m_hoverables, id);
 		RemoveHelper(m_values, id);
+	}
+
+	void Ui::OnTxtLang(UiTxt* txt)
+	{
+		UpdateText(txt, *Assets::Get<Textual>(txt->locKey), true);
 	}
 
 	void Ui::HoverableUpdate()
@@ -333,6 +329,14 @@ namespace SandCastle
 		i->CreateText(text, utf8, width);
 		i->NewElem(text, canvas);
 
+		return text;
+	}
+	UiTxt* Ui::TextLoc(const String& key, float width)
+	{
+		auto text = Text(*Assets::Get<Textual>(key), width);
+		text->locKey = key;
+		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
+		Assets::Instance()->langSignal.Listen(&UiTxt::OnLang, text);
 		return text;
 	}
 	void Ui::CreateText(UiTxt* text, std::string_view utf8, float width)

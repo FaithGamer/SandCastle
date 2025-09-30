@@ -161,7 +161,7 @@ namespace SandCastle
 				}
 				GenerateSprites(filename, spritesheet, &tex);
 				ASSERT_LOG_ERROR(!spritesheet.HadGetError(), "Ill formed spritesheet: " + path);
-				
+
 			};
 		if (localized)
 		{
@@ -181,7 +181,7 @@ namespace SandCastle
 			ASSERT_LOG_ERROR((m_textures.find(filename) == m_textures.end()), "Double asset texture {0}.");
 			auto it_insert = m_textures.insert(std::make_pair(filename, Texture(path, importSettings)));
 			auto& texture = it_insert.first->second;
-			MakeSprites(texture); 
+			MakeSprites(texture);
 		}
 	}
 	void Assets::AddFragmentShader(const String& filename, const String& path, bool localized, const String& lang)
@@ -214,6 +214,37 @@ namespace SandCastle
 
 	void Assets::AddTextual(const String& filename, const String& path, bool localized, const String& lang)
 	{
+		Serialized json(path);
+		Json j = (Json)json;
+		ASSERT_LOG_ERROR(!json.HadLoadError(), "Cannot load textual {0}", path);
+		ASSERT_LOG_ERROR(!json.HadParseError(), "Cannot parse textual {0}", path);
+		try
+		{
+			for (auto it = j.begin(); it != j.end(); it++)
+			{
+				auto& key = it.key();
+				auto value = it.value().get<std::string>();
+				if (localized)
+				{
+					m_localized[lang].assets.insert(std::make_pair(key, MakeAsset<Textual>(value)));
+					if (lang == m_lang)
+					{
+						auto insert_it = m_textuals.insert(std::make_pair(key, value));
+						m_localizedAssets.insert(key);
+						ASSERT_LOG_ERROR(insert_it.second, "Textual key doubled.\nkey: {0}\nfile: {1}", key, path);
+					}
+				}
+				else
+				{
+					auto insert_it = m_textuals.insert(std::make_pair(key, value));
+					ASSERT_LOG_ERROR(insert_it.second, "Textual key doubled.\nkey: {0}\nfile: {1}", key, path);
+				}
+			}
+		}
+		catch (Json::exception& exception)
+		{
+			ASSERT_LOG_ERROR(false, "Textual exception {0}, when reading {1}", exception.what(), path);
+		}
 	}
 
 	Assets::Assets()
@@ -250,7 +281,7 @@ namespace SandCastle
 		{
 			bool present = fallback.assets.find(asset) != fallback.assets.end();
 			ASSERT_LOG_ERROR(present,
-				"Localized asset {0}, isn't present in the fallback lang.", asset);
+				"Localized asset {0}, isn't present in the fallback lang {1}.", asset, m_langFallback);
 		}
 		//Use the fallback asset in the missing langs
 	}
@@ -278,11 +309,16 @@ namespace SandCastle
 			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
 			it_fun->second.Call(newAsset, assetKey);
 		}
-		i->langSignal.Send(LangSignal(lang));
+		auto signal = LangSignal(lang);
+		i->langSignal.Send(&signal);
 	}
 	String Assets::GetLang()
 	{
 		return Instance()->m_lang;
+	}
+	std::vector<String> Assets::GetAvailableLangs()
+	{
+		return Instance()->m_availableLangs;
 	}
 	void Assets::InitFunctions()
 	{
@@ -294,6 +330,7 @@ namespace SandCastle
 		m_addAssetFunctions.insert(std::make_pair(".geom", Delegate(&Assets::AddGeometryShader, this)));
 		m_addAssetFunctions.insert(std::make_pair(".mp3", Delegate(&Assets::AddAudio, this)));
 		m_addAssetFunctions.insert(std::make_pair(".wav", Delegate(&Assets::AddAudio, this)));
+		m_addAssetFunctions.insert(std::make_pair(".textual", Delegate(&Assets::AddTextual, this)));
 
 		//Change loca 
 		m_changeLocaFunctions.insert(std::make_pair(TypeId::GetId<Texture>(), Delegate(&Assets::ChangeLocaTexture, this)));
@@ -429,7 +466,8 @@ namespace SandCastle
 			ASSERT_LOG_ERROR((flang == lang), "Localized asset in the wrong folder: {0}", path);
 			//Remove the lang from the filename
 			filename = filename.substr(flang.size() + 1, filename.size() - flang.size());
-			m_localizedAssets.insert(filename);
+			if(extension != ".textual")
+				m_localizedAssets.insert(filename);
 		}
 		find_it->second.Call(filename, path, localized, lang);
 		//LOG_INFO("Asset loaded " + path);

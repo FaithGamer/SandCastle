@@ -71,19 +71,20 @@ namespace SandCastle
 		
 		~Writer();
 
-		FontID MakeFont(std::string filename,
+		FontID MakeFont(const String& filename,
 			int size,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
 		/// @brief Give a fancy name to the font to find it easily later 
 		/// across all your project.
-		void NameFont(FontID font, String name);
+		void NameFont(FontID font, const String& name, const std::vector<String> langs = {});
 		/// @brief Set the font that will be used for every subsequent Write
 		void UseFont(FontID id);
-		/// @brief Set the font that will be used for every subsequent Write, using its fancy name
-		void UseFont(String name);
+		/// @brief Set the font that will be used for every subsequent Write, 
+		/// using its fancy name, also enable localized version 
+		void UseFont(const String& name, const String& lang = "");
 		/// @brief Set the folder path for the font assets
-		void SetFontFolder(String path);
+		void SetFontFolder(const String& path);
 		/// @brief Set atlas texture filtering (default is nearest)
 		void SetFiltering(TextureFiltering filtering);
 		/// @brief Set the PPU that will be used for every subsequent MakeFont
@@ -117,8 +118,9 @@ namespace SandCastle
 		Color GetColor() const;
 		float GetFontWorldSize(FontID font);
 		float GetPPU() const;
-		const Font* GetFont(String fancyName) const;
+		const Font* GetFont(const String& fancyName, const String& lang = "");
 		const Font* GetFont(FontID font) const;
+		FontID GetFontID(const String& name, const String& lang = "");
 
 	private:
 		friend Ui;
@@ -160,6 +162,7 @@ namespace SandCastle
 		FT_Library m_ft = nullptr;
 		std::vector<std::vector<DynamicPage>> m_dynPages;
 		std::vector<Font> m_fonts;
+		std::unordered_map<String, FontID> m_localized;
 		std::unordered_map<String, FontID> m_fontFinder;
 		FontID m_current = 0;
 		int m_maxAtlasSize = 4096;

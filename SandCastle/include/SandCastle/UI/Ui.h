@@ -12,6 +12,8 @@
 #include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/UI/UiContext.h"
+#include "SandCastle/Core/Assets.h"
+#include "SandCastle/Core/Textual.h"
 
 namespace SandCastle
 {
@@ -57,8 +59,11 @@ namespace SandCastle
 
 		static UiCanvas* Begin(Vec2f size = { 0, 0 }, bool frame = true);
 		static UiTxt* Text(std::string_view utf8, float width = -1.f);
+		static UiTxt* TextLoc(const String& utf8, float width = -1.f);
 		template <typename... Ts>
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
+		template <typename... Ts>
+		static UiTxt* TextLoc(const String& key, float width = -1.f, Ts... args);
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
@@ -203,6 +208,7 @@ namespace SandCastle
 		bool OnClick(bool pressed);
 		void OnCanvasMustUpdate(UiCanvas* canvas);
 		void OnDestroy(UiElem* elem);
+		void OnTxtLang(UiTxt* txt);
 		//Helper
 		Writer* m_writer = nullptr;
 
@@ -212,17 +218,6 @@ namespace SandCastle
 
 		//State (creation of new elements)
 		Material* m_defaultMaterial = nullptr;
-		/*Material m_material = nullptr;
-		String m_checkBoxSprites;
-		Color m_txtColor = Color(255, 255, 255, 255);
-		FontID m_font = 0;
-		LayerID m_layer = 0;
-		Vec2f m_margin = 0.f;
-		Vec2f m_rootMargin = 0.f;
-		UiFrame::Template* m_buttonFrame = nullptr;
-		UiFrame::Template* m_buttonFrameHover = nullptr;
-		TextAlign m_textAlign = TextAlign::Left;
-		UiFrame::Template* m_buttonFramePressed = nullptr;*/
 		UiContext m_context;
 
 		//Runtime
@@ -256,6 +251,15 @@ namespace SandCastle
 		i->NewElem(text, canvas);
 		i->m_values.emplace_back(text);
 
+		return text;
+	}
+	template<typename ...Ts>
+	inline UiTxt* Ui::TextLoc(const String& key, float width, Ts ...args)
+	{
+		UiTxt* text = Ui::Text(*Assets::Get<Textual>(key), width, args...);
+		text->locKey = key;
+		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
+		Assets::Instance()->langSignal.Listen<UiTxt>(&UiTxt::OnLang, text);
 		return text;
 	}
 }
