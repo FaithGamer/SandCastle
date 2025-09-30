@@ -7,7 +7,7 @@ namespace SandCastle
 
 	UiTxt::~UiTxt()
 	{
-		if (locKey != "")
+		if (keyLoc != "")
 			Assets::Instance()->langSignal.StopListen(this);
 	}
 

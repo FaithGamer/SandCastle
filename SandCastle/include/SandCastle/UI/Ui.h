@@ -47,6 +47,7 @@ namespace SandCastle
 		static void MakeFont(String filename,
 			String fancyName,
 			float uiSize,
+			std::vector<String> langs = {},
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
 		/// @brief Override the default material.
@@ -66,6 +67,7 @@ namespace SandCastle
 		static UiTxt* TextLoc(const String& key, float width = -1.f, Ts... args);
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8);
+		static UiBtn* ButtonLoc(const String& key);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
 		static void End();
 		static void Destroy(UiElem*& elem);
@@ -78,6 +80,7 @@ namespace SandCastle
 		/*---Ui update---*/
 
 		static void UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8 = true);
+		static void UpdateBtn(UiBtn* button, std::string_view utf8);
 
 		/*---Context---*/
 		/// @brief Create a snapshot of the current context for later usage.
@@ -90,13 +93,7 @@ namespace SandCastle
 		static void SetMaterial(Material* material);
 		/// @brief Context setting.
 		/// Set the font that will be used for every subsequent text creation
-		static void SetTextFont(FontID font);
-		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent text creation
 		static void SetTextFont(String fancyName);
-		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent button creation
-		static void SetButtonFont(FontID font);
 		/// @brief Context setting.
 		/// Set the font that will be used for every subsequent button creation
 		static void SetButtonFont(String fancyName);
@@ -181,7 +178,7 @@ namespace SandCastle
 		/// @brief Get the material currently used 
 		static Material* GetMaterial();
 		/// @brief Get the font currently used
-		static FontID GetFont();
+		static String GetFont();
 		/// @brief Get the layer currently used
 		static LayerID GetLayer();
 		/// @brief Get all the root canvases.
@@ -209,6 +206,7 @@ namespace SandCastle
 		void OnCanvasMustUpdate(UiCanvas* canvas);
 		void OnDestroy(UiElem* elem);
 		void OnTxtLang(UiTxt* txt);
+		void OnBtnLang(UiBtn* btn);
 		//Helper
 		Writer* m_writer = nullptr;
 
@@ -257,7 +255,7 @@ namespace SandCastle
 	inline UiTxt* Ui::TextLoc(const String& key, float width, Ts ...args)
 	{
 		UiTxt* text = Ui::Text(*Assets::Get<Textual>(key), width, args...);
-		text->locKey = key;
+		text->keyLoc = key;
 		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
 		Assets::Instance()->langSignal.Listen<UiTxt>(&UiTxt::OnLang, text);
 		return text;

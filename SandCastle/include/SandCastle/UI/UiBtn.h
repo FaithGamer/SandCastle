@@ -5,6 +5,8 @@
 #include "SandCastle/Render/Text.h"
 #include "SandCastle/Render/Color.h"
 #include "SandCastle/UI/UiFrame.h"
+#include "SandCastle/Core/LangSignal.h"
+#include "SandCastle/UI/UiContext.h"
 
 namespace SandCastle
 {
@@ -12,7 +14,7 @@ namespace SandCastle
 	class UiBtn : public UiElem
 	{
 	public:
-		
+		~UiBtn();
 		UiElem::Type GetType() const override;
 		void SetColor(const Color& color);
 		void UpdateFrames();
@@ -21,9 +23,14 @@ namespace SandCastle
 		void OnUnHover() override;
 		void OnClickPressed() override;
 		void OnClickReleased() override;
+		void OnLang(LangSignal* signal);
 		void ShowHideFrame();
+		Signal<UiBtn*> langSignal;
+
 	protected:
 		friend Ui;
+		String keyLoc = "";
+		ButtonContext context;
 		Sentence label;
 		UiFrame frameIdle;
 		UiFrame frameHover;

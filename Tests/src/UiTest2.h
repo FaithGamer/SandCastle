@@ -277,8 +277,8 @@ public:
 		Ui::SetCanvasLayoutDir(LayoutDir::LeftRight);
 		
 		Ui::Begin(0.f, false);
-		Ui::Button("FR")->ListenClickReleased(&TestSys::OnFR, this);
-		Ui::Button("JA")->ListenClickReleased(&TestSys::OnJA, this);
+		Ui::ButtonLoc("fr")->ListenClickReleased(&TestSys::OnFR, this);
+		Ui::ButtonLoc("jap")->ListenClickReleased(&TestSys::OnJA, this);
 		Ui::End();
 		Ui::End();
 	}
@@ -311,9 +311,12 @@ void UiTest2()
 	Camera::main->SetConstraints(cons);
 
 	//Ui assets
-	Ui::MakeFont("ark-pixel-10px-proportional-latin.ttf", "p", 10);
-	Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12);
-	Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16);
+	Ui::MakeFont("ark-pixel-10px-proportional-latin.ttf", "p", 10, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "p", 10, { "fr" });
+	Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, {"ja"});
+	Ui::MakeFont("alata-regular.ttf", "h2", 12, {"fr"});
+	Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "h1", 16, { "fr" });
 	Ui::MakeFrameTemplate("frame.png");
 	Ui::MakeFrameTemplate("frame_black.png");
 	Ui::MakeFrameTemplate("btn.png");

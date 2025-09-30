@@ -1,5 +1,7 @@
 {
     "ui_test":"Langue test",
     "hello": "Bonjour",
-    "clicked_times":"You clicked {0} times"
+    "clicked_times":"You clicked {0} times",
+    "jap":"ja",
+    "fr":"fr"
 }

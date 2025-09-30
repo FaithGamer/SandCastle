@@ -2,10 +2,15 @@
 #include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/Render/SpriteRender.h"
 #include "SandCastle/UI/Ui.h"
+#include "SandCastle/Core/Assets.h"
 
 namespace SandCastle
 {
-
+	UiBtn::~UiBtn()
+	{
+		if (keyLoc != "")
+			Assets::Instance()->langSignal.StopListen(this);
+	}
 	UiElem::Type UiBtn::GetType() const
 	{
 		return UiElem::Type::Button;
@@ -54,6 +59,10 @@ namespace SandCastle
 		}
 		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
 		labelOffset = 0.f;
+	}
+	void UiBtn::OnLang(LangSignal* signal)
+	{
+		langSignal.Send(this);
 	}
 	void UiBtn::ShowHideFrame()
 	{

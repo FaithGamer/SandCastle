@@ -152,7 +152,7 @@ namespace SandCastle
 		Sentence             sentence;
 		TextContext			 context;
 		String				 utf8;
-		String				 locKey = "";
+		String				 keyLoc = "";
 		std::unique_ptr<Data> data;
 	};
 }

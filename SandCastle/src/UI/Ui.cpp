@@ -42,7 +42,7 @@ namespace SandCastle
 	{
 		switch (event.type)
 		{
-		//Handle left click
+			//Handle left click
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			if (event.button.button == SDL_BUTTON_LEFT)
 				return OnClick(true);
@@ -138,7 +138,12 @@ namespace SandCastle
 
 	void Ui::OnTxtLang(UiTxt* txt)
 	{
-		UpdateText(txt, *Assets::Get<Textual>(txt->locKey), true);
+		UpdateText(txt, *Assets::Get<Textual>(txt->keyLoc), true);
+	}
+
+	void Ui::OnBtnLang(UiBtn* btn)
+	{
+		UpdateBtn(btn, *Assets::Get<Textual>(btn->keyLoc));
 	}
 
 	void Ui::HoverableUpdate()
@@ -243,7 +248,7 @@ namespace SandCastle
 		UiFrame::MakeTemplate(i->m_frameTemplates[texture], texture, fixedStep);
 
 	}
-	void Ui::MakeFont(String filename, String fancyName, float uiSize, float outlineThickness, Vec4f outlineColor)
+	void Ui::MakeFont(String filename, String fancyName, float uiSize, std::vector<String> langs, float outlineThickness, Vec4f outlineColor)
 	{
 		auto ins = Instance();
 		float ppu = ins->m_writer->GetPPU();
@@ -251,7 +256,7 @@ namespace SandCastle
 		int pxOutline = outlineThickness > 0.f ? (int)std::max(1, (int)std::round(outlineThickness * ppu)) : 0;
 		ins->m_writer->SetLayer(ins->m_context.layer);
 		auto font = ins->m_writer->MakeFont(filename, pxSize, pxOutline, outlineColor);
-		ins->m_writer->NameFont(font, fancyName);
+		ins->m_writer->NameFont(font, fancyName, langs);
 	}
 
 	void Ui::DefaultMaterial(Material* material)
@@ -334,7 +339,7 @@ namespace SandCastle
 	UiTxt* Ui::TextLoc(const String& key, float width)
 	{
 		auto text = Text(*Assets::Get<Textual>(key), width);
-		text->locKey = key;
+		text->keyLoc = key;
 		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
 		Assets::Instance()->langSignal.Listen(&UiTxt::OnLang, text);
 		return text;
@@ -351,12 +356,12 @@ namespace SandCastle
 		else
 			//There is no size limit
 			width = width > 0.f ? std::min(limit, width) : 0.f;
-
-		auto font = m_writer->GetFont(text->context.font);
+		String lang = Assets::GetLang();
+		auto font = m_writer->GetFont(text->context.fontName, lang);
 		text->sentence = m_writer->Write
 		(
 			utf8,
-			text->context.font,
+			font->id,
 			text->context.color,
 			font->material,
 			font->layer,
@@ -368,6 +373,7 @@ namespace SandCastle
 		text->size = text->sentence.size;
 		text->root = text->sentence.root;
 	}
+
 	void Ui::UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8)
 	{
 		auto prevSize = text->sentence.size;
@@ -379,6 +385,21 @@ namespace SandCastle
 			text->parent->UpdateLayout();
 		else
 			text->SetPosition(text->position);
+	}
+
+	void Ui::UpdateBtn(UiBtn* button, std::string_view utf8)
+	{
+		auto i = Instance();
+		auto lang = Assets::GetLang();
+		auto font = i->m_writer->GetFont(button->context.fontName, lang);
+		button->label.root.Destroy();
+		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label.root.GetComponent<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		button->root.AddChild(button->label.root);
+		button->size.x = button->label.size.x + button->context.padding.x * 2;
+		button->size.y = button->label.size.y + button->context.padding.y * 2;
+		button->UpdateFrames();
+		button->parent->MustUpdate();
 	}
 
 	UiImg* Ui::Image(String sprite)
@@ -411,29 +432,40 @@ namespace SandCastle
 		UiBtn* button = new UiBtn();
 		button->root = Entity::Create();
 		button->root.AddComponent<Transform>();
+		button->context = i->m_context.button;
 		button->margin = i->m_context.margin;
-		auto font = i->m_writer->GetFont(i->m_context.button.font);
-		button->label = i->m_writer->Write(utf8, font->id, i->m_context.button.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.GetComponent<Transform>()->Move(i->m_context.button.padding.x, -i->m_context.button.padding.y, -3.f);
+		auto lang = Assets::GetLang();
+		auto font = i->m_writer->GetFont(button->context.fontName, lang);
+		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label.root.GetComponent<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
 		button->root.AddChild(button->label.root);
-		button->size.x = button->label.size.x + i->m_context.button.padding.x * 2;
-		button->size.y = button->label.size.y + i->m_context.button.padding.y * 2;
+		button->size.x = button->label.size.x + button->context.padding.x * 2;
+		button->size.y = button->label.size.y + button->context.padding.y * 2;
 		button->frameIdle = UiFrame(
-			i->m_context.button.frameIdle,
+			button->context.frameIdle,
 			i->m_context.material,
 			i->m_context.layer);
 		button->frameHover = UiFrame(
-			i->m_context.button.frameHover,
+			button->context.frameHover,
 			i->m_context.material,
 			i->m_context.layer);
 		button->framePressed = UiFrame(
-			i->m_context.button.framePressed,
+			button->context.framePressed,
 			i->m_context.material,
 			i->m_context.layer);
 		i->NewElem(button, canvas);
 		button->UpdateFrames();
 		RegisterHoverable(button);
 		return button;
+	}
+
+	UiBtn* Ui::ButtonLoc(const String& key)
+	{
+		auto btn = Button(*Assets::Get<Textual>(key));
+		btn->keyLoc = key;
+		btn->langSignal.Listen(&Ui::OnBtnLang, Instance().get());
+		Assets::Instance()->langSignal.Listen(&UiBtn::OnLang, btn);
+		return btn;
 	}
 
 	UiCheckbox* Ui::Checkbox(bool* value)
@@ -559,23 +591,19 @@ namespace SandCastle
 		material->SetFloat("uPpu", Instance()->m_ppu * 2.f);
 		Instance()->m_context.material = material;
 	}
-	void Ui::SetTextFont(FontID font)
-	{
-		Instance()->m_context.text.font = font;
-	}
 	void Ui::SetTextFont(String fancyName)
 	{
 		auto ins = Instance();
-		ins->m_context.text.font = ins->m_writer->GetFont(fancyName)->id;
-	}
-	void Ui::SetButtonFont(FontID font)
-	{
-		Instance()->m_context.button.font = font;
+		auto lang = Assets::GetLang();
+		ins->m_writer->GetFont(fancyName, lang); // for error message if font doesn't exists.
+		ins->m_context.text.fontName = fancyName;
 	}
 	void Ui::SetButtonFont(String fancyName)
 	{
 		auto ins = Instance();
-		ins->m_context.button.font = ins->m_writer->GetFont(fancyName)->id;
+		auto lang = Assets::GetLang();
+		ins->m_writer->GetFont(fancyName, lang); // for error message if font doesn't exists.
+		ins->m_context.button.fontName = fancyName;
 	}
 	void Ui::SetTextColor(Color color)
 	{
@@ -727,9 +755,9 @@ namespace SandCastle
 	{
 		return Instance()->m_context.material;
 	}
-	FontID Ui::GetFont()
+	String Ui::GetFont()
 	{
-		return Instance()->m_context.text.font;
+		return Instance()->m_context.text.fontName;
 	}
 	LayerID Ui::GetLayer()
 	{

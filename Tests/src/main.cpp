@@ -40,22 +40,5 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	//UiTest2();
-
-	Engine::Init();
-
-	auto wri = Ui::GetWriter();
-	auto fontFR = wri->MakeFont("alata-regular.ttf", 10);
-	auto fontJA = wri->MakeFont("NotoSansJP-Regular.ttf", 10);
-
-	wri->NameFont(fontFR, "name", { "fr" });
-	wri->NameFont(fontJA, "name", { "ja" });
-
-	wri->UseFont("name", "ja");
-	auto s = wri->Write("Salut");
-	s.root.gtr()->Move(0, -50, 0);
-	wri->UseFont("name", "fr");
-	wri->Write("Salut");
-
-	Engine::Launch();
+	UiTest2();
 }

@@ -488,10 +488,18 @@ std::vector avoid this problem.
 -added textual asset
 -UiTextLoc with UiTxt that change loca automatically
 
+30
+
+-writer has possibly lang for fonts
+-Ui make font integrate langs
+
+>btn listen to lang change and update text (an possibly frame)
+
+>automatically recreate buttons and texts when changing langs
+>I want adding a language to not require changing the makefont calls!
+
 >Change of font in changing language:
->uitxt have font name id instead of font id
->writer map font to lang
->create font ask for lang (optional)
+
 
 tasks:
 
