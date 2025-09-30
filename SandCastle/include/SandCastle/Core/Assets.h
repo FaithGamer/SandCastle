@@ -64,9 +64,10 @@ namespace SandCastle
 	public:
 
 		Assets();
-		void Init(const String& defaultLang);
+		void Init(const String& folder, const String& defaultLang);
 
 		void HotReload();
+		static String GetFolder();
 		static void SetLang(const String& lang);
 		static String GetLang();
 		static std::vector<String> GetAvailableLangs();
@@ -134,6 +135,7 @@ namespace SandCastle
 
 	private:
 		friend Engine;
+		String m_folder = "assets/";
 		String m_lang = "";
 		String m_langFallback = "";
 		bool m_reloading = false;

@@ -17,12 +17,11 @@ namespace SandCastle
 		Serialized Serialize() override;
 
 		std::string appName;
+		std::string assetFolder;
 		Vec2u startupWindowResolution;
-		bool enableImGui;
 		Time fixedUpdateTimeStep;
 		bool fullscreen;
 		TextureImportSettings textureImport;
 		String defaultLang;
-
 	};
 }

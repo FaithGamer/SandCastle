@@ -496,11 +496,11 @@ std::vector avoid this problem.
 -fonts localiezd
 -mutexed imgui events and render with the hope it removes crashes
 -versioning
+-custom asset folder
+>roaming system
 
 tasks:
 
->versioning and app name
->custom path for assets, fonts, and so on... Roaming system
 >Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony
 >game system pattern: Plmp, data in registry, signal are pointers.

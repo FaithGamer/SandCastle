@@ -157,7 +157,7 @@ namespace SandCastle
 		float outlineThickness, Vec4f outlineColor)
 	{
 		// Load face by path
-		String path = m_fontFolder + filename;
+		String path = Assets::GetFolder() + m_fontFolder + filename;
 		Font font;
 		{
 			FT_Error err = FT_New_Face(m_ft, path.c_str(), 0, &font.face);

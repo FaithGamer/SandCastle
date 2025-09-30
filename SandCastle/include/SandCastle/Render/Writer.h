@@ -171,6 +171,6 @@ namespace SandCastle
 		Material* m_material = nullptr;
 		LayerID m_layer = 0;
 		TextureFiltering m_filtering = TextureFiltering::Nearest;
-		String m_fontFolder = "assets/fonts/";
+		String m_fontFolder = "fonts/";
 	};
 }

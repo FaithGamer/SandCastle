@@ -21,5 +21,6 @@
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/Core/Fancy.h"
 #include "SandCastle/Core/Versioning.h"
+#include "SandCastle/Core/Roaming.h"
 
 

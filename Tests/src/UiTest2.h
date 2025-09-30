@@ -295,7 +295,7 @@ void UiTest2()
 {
 	EngineSettings settings;
 	settings.appName = "Ui tests";
-	settings.defaultLang = "fr";
+	settings.defaultLang = "ja";
 	settings.textureImport = TextureImportSettings(
 		TextureFiltering::Nearest,
 		TextureWrapping::Clamp,
@@ -305,9 +305,9 @@ void UiTest2()
 	);
 	Versioning::Push("0.1");
 	Versioning::Push("0.2");
+	
 	Engine::Init(settings);
 	Systems::Push<TestSys>();
-
 	//Pixel art render
 	Camera::Constraints cons;
 	cons.SetDefault();

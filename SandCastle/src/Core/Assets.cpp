@@ -252,8 +252,9 @@ namespace SandCastle
 
 	}
 
-	void Assets::Init(const String& defaultLang)
+	void Assets::Init(const String& folder, const String& defaultLang)
 	{
+		m_folder = folder;
 		m_lang = defaultLang;
 		m_langFallback = defaultLang;
 		//Can't be done in constructor because of recursion
@@ -291,6 +292,10 @@ namespace SandCastle
 		m_reloading = true;
 		LoadAssets();
 		m_reloading = false;
+	}
+	String Assets::GetFolder()
+	{
+		return Instance()->m_folder;
 	}
 	void Assets::SetLang(const String& lang)
 	{
@@ -340,7 +345,7 @@ namespace SandCastle
 	void Assets::LoadAssets()
 	{
 		//Iterate every subfolders in assets and load every file into the asset map
-		String root = "assets/";
+		String root = m_folder;
 		String localized = root + "localized/";
 
 		struct Folder
@@ -350,10 +355,7 @@ namespace SandCastle
 			std::filesystem::path path;
 		};
 		std::list<Folder> folders;
-		if (!std::filesystem::exists(root))
-		{
-			LOG_ERROR("No assets folder found.");
-		}
+		ASSERT_LOG_ERROR(std::filesystem::exists(root), "The following asset folder doesn't exists: {0}", root);
 		folders.push_front(Folder(false, "", root));
 
 		while (!folders.empty())
