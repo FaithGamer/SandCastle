@@ -17,6 +17,7 @@
 #include "DepthBlendTest.h"
 #include "UiPosTest.h"
 #include "UiTest2.h"
+#include "RateTest.h"
 
 using namespace SandCastle;
 
@@ -40,5 +41,6 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	UiTest2();
+	//UiTest2();
+	RateTest();
 }

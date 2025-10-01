@@ -251,6 +251,7 @@
   <ItemGroup>
     <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
     <ClCompile Include="include\SandCastle\Core\Roaming.cpp" />
+    <ClCompile Include="src\Core\Rate.cpp" />
     <ClCompile Include="src\Core\Versioning.cpp" />
     <ClCompile Include="src\Render\Animation.cpp" />
     <ClCompile Include="src\Render\Animator.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="include\SandCastle\Core\Print.h" />
     <ClInclude Include="include\SandCastle\Core\Profiling.h" />
     <ClInclude Include="include\SandCastle\Core\Random.h" />
+    <ClInclude Include="include\SandCastle\Core\Rate.h" />
     <ClInclude Include="include\SandCastle\Core\Roaming.h" />
     <ClInclude Include="include\SandCastle\Core\Serialization.h" />
     <ClInclude Include="include\SandCastle\Core\Signal.h" />

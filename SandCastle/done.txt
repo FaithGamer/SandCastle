@@ -497,7 +497,15 @@ std::vector avoid this problem.
 -mutexed imgui events and render with the hope it removes crashes
 -versioning
 -custom asset folder
->roaming system
+-roaming system
+
+October
+
+1
+
+>rate
+>sounds
+>sound as ui context (button click, checkboxes)
 
 tasks:
 
