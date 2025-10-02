@@ -249,7 +249,9 @@
     <Text Include="done.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\SandCastle\Audio\Sound.cpp" />
+    <ClCompile Include="src\Audio\HighrateSound.cpp" />
+    <ClCompile Include="src\Audio\Sound.cpp" />
+    <ClCompile Include="src\Audio\SoundHandle.cpp" />
     <ClCompile Include="include\SandCastle\Core\Roaming.cpp" />
     <ClCompile Include="src\Core\Rate.cpp" />
     <ClCompile Include="src\Core\Versioning.cpp" />
@@ -341,7 +343,8 @@
   <ItemGroup>
     <ClInclude Include="include\ft2build.h" />
     <ClInclude Include="include\SandCastle\Audio\Audio.h" />
-    <ClInclude Include="include\SandCastle\Audio\Sound.h" />
+    <ClInclude Include="include\SandCastle\Audio\HighrateSound.h" />
+    <ClInclude Include="include\SandCastle\Audio\SoundHandle.h" />
     <ClInclude Include="include\SandCastle\Core.h" />
     <ClInclude Include="include\SandCastle\Core\Assets.h" />
     <ClInclude Include="include\SandCastle\Core\Container.h" />

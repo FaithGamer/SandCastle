@@ -207,7 +207,7 @@
     <ClCompile Include="src\stb_impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\SandCastle\Audio\Sound.cpp">
+    <ClCompile Include="src\Audio\SoundHandle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ECS\EntityCreate.cpp">
@@ -267,6 +267,12 @@
     <ClCompile Include="src\Core\Rate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Audio\HighrateSound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h">
@@ -275,7 +281,7 @@
     <ClInclude Include="include\SandCastle\Audio\Audio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SandCastle\Audio\Sound.h">
+    <ClInclude Include="include\SandCastle\Audio\SoundHandle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Core\Assets.h">
@@ -591,6 +597,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Core\Rate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Audio\HighrateSound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

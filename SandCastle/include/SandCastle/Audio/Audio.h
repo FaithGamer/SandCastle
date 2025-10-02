@@ -1,42 +1,80 @@
 #pragma once
 
-#include "SandCastle/Internal/Singleton.h"
 #include <miniaudio/miniaudio.h>
+#include "SandCastle/Internal/Singleton.h"
+#include "SandCastle/Audio/SoundHandle.h"
 #include "SandCastle/Audio/Sound.h"
+#include "SandCastle/Audio/HighrateSound.h"
 
 namespace SandCastle
 {
+	class Assets;
+	class Engine;
+	class Systems;
 	class Audio : public Singleton<Audio>
 	{
 	public:
 
 		Audio();
 		~Audio();
-		void Init();
-		/// @brief For internal use only. (Assets loading)
-		/// @param path 
-		void LoadSound(String path);
-		/// @brief Instance handle for the sound located at path.
-		/// The returned handle must be kept alive as long as you want the sound to play.
-		/// The sound has already been loaded, path is just used as a hash key in the memory manager.
-		/// To play multiple times the same sound at the same time, call this function multiple times.
-		/// @param path The full path of the sound
-		/// @play Play the sound right away or not.
-		/// @return Handle to the sound being played.
-		static Sound MakeSound(String path, bool play = true);
-		static Sound MakeSound(String path, unsigned int channel, bool play = true);
-		static unsigned int AddChannel(String channel, String parent = "");
-		static unsigned int GetChannel(String channel);
-		static void SetChannelVolume(unsigned int channel, float volume);
 
+
+		/// @brief Add an audio channel, example "Music", "FX"...
+		/// @param channel The name of the channel
+		/// @param parent The name of the parent audio channel, example "Master"
+		/// @return a unique identifier. (low level API only)
+		static unsigned int AddChannel(String channel, String parent = "");
+		static void SetChannelVolume(String channel, float volume);
+		static unsigned int GetChannel(String channel);
+		//High level API
+		/// @brief Every sound used in game must first be created with this method.
+		/// @param filename the name of the file (not the full path)
+		/// @return The sound.
+		static Sound* MakeSound(String filename, String channel);
+		/// @brief Create a sound that can switch to playing a loop when the
+		/// rate of playing (call to Play()) it is over a certain threshold.
+		/// There can be multiple loops, each representing a given rate.
+		/// The different sound will fade in and out of each other depending
+		/// On the rate that is set.
+		/// @param path 
+		/// @param channel 
+		/// @return 
+		static HighrateSound* MakeHighrateSound(String path, String channel);
+
+		/// @brief Low level API, most likely you don't need this
+		static SoundHandle MakeHandle(String path, bool play = true);
+		/// @brief Low level API, most likely you don't need this
+		static SoundHandle MakeHandle(String path, unsigned int channel, bool play = true);
+
+	private:
+		friend Engine;
+		friend Systems;
+		friend Assets;
+		void Init();
+		void Update();
+		void LoadSound(String path);
+		void SpikeProtectionUpdate();
+		void OnMinimized(bool minimized);
+		void OnFocus(bool focus);
 	private:
 		friend sptr<Audio> Singleton<Audio>::Instance();
 		friend void Singleton<Audio>::Kill();
-#ifndef SandCastle_NO_AUDIO
+
+		//Backend
 		ma_engine* m_engine = nullptr;
-		std::vector<ma_sound*> m_sounds;
-		std::vector<String> m_channelNames;
+		std::vector<ma_sound*> m_maSounds;
 		std::vector<ma_sound_group*> m_channels;
-#endif
+
+		//collection
+		std::unordered_map<String, String> m_filenameToPath;
+		std::unordered_map<String, Sound*> m_filenameToSound;
+		std::vector<String> m_channelNames;
+		std::vector<Sound*> m_sounds;
+		std::vector<HighrateSound*> m_sounds;
+	
+		float m_spikeDetector = 0.f;
+		std::vector<float> m_spikeLastVolumes;
+		float m_spikeMuter = 0.f;
+		float m_spikeMuterTimeMax = 0.f;
 	};
 }

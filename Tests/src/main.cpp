@@ -42,5 +42,6 @@ int main()
 	//DepthBlendTest();
 	//UiTest();
 	//UiTest2();
-	RateTest();
+	//RateTest();
+	SoundTest();
 }

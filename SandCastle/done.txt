@@ -503,13 +503,15 @@ October
 
 1
 
->rate
+-rate
+
+2
+
 >sounds
 >sound as ui context (button click, checkboxes)
 
 tasks:
 
->Implement LoveAudio from idle colony as a default audio system
 >Implement steamworks from idle colony
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?
@@ -518,6 +520,7 @@ no need plmp if data is in registry and communication is only through signal?
 >math inverselerp
 >japanese breaking rules
 >visual loading during engine Init (especially for assets)
+>reintegrate the audio spike protection 
 
 secondary tasks:
 

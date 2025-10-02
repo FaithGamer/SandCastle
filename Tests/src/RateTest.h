@@ -6,7 +6,7 @@ using namespace SandCastle;
 class RateSys : public System
 {
 public:
-	Rate clickRate = Rate(60., 5);
+	Rate clickRate = Rate(60., 5 );
 	Rate testRate;
 	float rate = 0.;
 	float timer = 0.;
