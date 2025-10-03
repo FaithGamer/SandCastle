@@ -11,7 +11,7 @@ namespace SandCastle
 		typedef size_t ID;
 	public:
 		virtual ~Sound() = default;
-		void AddVariant(String path);
+		void AddVariant(String filename);
 		virtual void Play(float fadeIn = 0.f, float pitch = -1);
 		virtual void Loop(float fadeIn = 0.f, float pitch = -1);
 		virtual void Stop(float fadeOut = -1.f);

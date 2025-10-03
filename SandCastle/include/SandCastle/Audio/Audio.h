@@ -39,7 +39,7 @@ namespace SandCastle
 		/// @param channel 
 		/// @return 
 		static HighrateSound* MakeHighrateSound(const String& filename, const String& channel);
-
+		static String Path(const String& filename);
 		/// @brief Low level API, most likely you don't need this
 		static SoundHandle MakeHandle(const String& path, bool play = true);
 		/// @brief Low level API, most likely you don't need this

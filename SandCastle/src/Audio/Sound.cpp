@@ -14,9 +14,9 @@ namespace SandCastle
 	{
 	}
 
-	void Sound::AddVariant(String path)
+	void Sound::AddVariant(String filename)
 	{
-		m_variants.emplace_back(path);
+		m_variants.emplace_back(Audio::Path(filename));
 		m_timers.emplace_back(100.f);
 	}
 	void Sound::PlayPrivate(bool loop, float fadeIn, float pitch)

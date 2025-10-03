@@ -71,16 +71,8 @@ namespace SandCastle
 	Sound* Audio::MakeSound(const String& filename, const String& channel)
 	{
 		auto i = Instance();
-		auto f_it = i->m_filenameToPath.find(filename);
-		if (f_it == i->m_filenameToPath.end())
-		{
-			LOG_ERROR("Sound file {0} doesn't exists", filename);
-			return new Sound(0);
-		}
-		String path = f_it->second;
-
 		auto& sound = i->m_sounds.emplace_back(Sound(GetChannel(channel)));
-		sound.AddVariant(path);
+		sound.AddVariant(filename);
 		sound.m_id = i->m_sounds.size()-1;
 		return &sound;
 	}
@@ -88,17 +80,22 @@ namespace SandCastle
 	HighrateSound* Audio::MakeHighrateSound(const String& filename, const String& channel)
 	{
 		auto i = Instance();
+		auto& sound = i->m_hrSounds.emplace_back(HighrateSound(GetChannel(channel)));
+		sound.AddVariant(filename);
+		sound.m_id = i->m_hrSounds.size() - 1;
+		return &sound;
+	}
+
+	String Audio::Path(const String& filename)
+	{
+		auto i = Instance();
 		auto f_it = i->m_filenameToPath.find(filename);
 		if (f_it == i->m_filenameToPath.end())
 		{
 			LOG_ERROR("Sound file {0} doesn't exists", filename);
-			return new HighrateSound(0);
+			return "";
 		}
-		String path = f_it->second;
-		auto& sound = i->m_hrSounds.emplace_back(HighrateSound(GetChannel(channel)));
-		sound.AddVariant(path);
-		sound.m_id = i->m_hrSounds.size() - 1;
-		return &sound;
+		return f_it->second;
 	}
 
 	void Audio::SetChannelVolume(const String& channel, float volume)

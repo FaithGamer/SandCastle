@@ -10,18 +10,14 @@ namespace SandCastle
 	public:
 		struct Range
 		{
-			float volMin = 0;
-			float volMax = 1;
-			float volRateMin = 0;
-			float volRateMax = 100;
 			float pitchMin = 1;
 			float pitchMax = 1;
-			float pitchRateMin = 0;
-			float pitchRateMax = 1;
+			float rateMin = 0;
+			float rateMax = 1;
 		};
 	public:
 		HighrateSound(unsigned int channel);
-		void AddMerged(String path, Range range);
+		void AddRate(String filename, Range range);
 		void Play(float fadeIn = -1.f, float pitch = -1) override;
 		void Loop(float fadeIn = -1.f, float pitch = -1) override;
 		void Update() override;
