@@ -9,52 +9,20 @@ namespace SandCastle
 	{
 	public:
 		Rate() = default;
-		Rate(double period, size_t sampleMax = 100) :
-			m_period(period),
-			m_sampleMax(sampleMax)
-		{ }
+		Rate(double period, size_t sampleMax = 100);
 
-		void Tick(double amount)
-		{
-			m_ticks += amount;
-		}
-		void Update(float delta)
-		{
-			m_time += (double)delta;
-			if (m_ticks > 0)
-			{
-				PushSample(m_ticks / m_time * m_period);
-				m_ticks = 0.;
-				m_time = 0.;
-			}
-			else if (m_time > 1.)
-			{
-				rate -= rate * 0.5f * delta;
-				if (rate < 0.) rate = 0.;
-			}
-		}
-		void SetSampleMax(size_t max)
-		{
-			m_samples.clear();
-			m_sampleSum = 0.;
-			m_sampleMax = max;
-		}
+		void Tick(double amount);
+		void Update(float delta);
+		void SetSampleMax(size_t max);
 		double rate = 0.;
+		double minRate = 1.;
 
 	private:
-		void PushSample(double sample)
-		{
-			m_samples.push_back(sample);
-			m_sampleSum += sample;
-			if (m_samples.size() > m_sampleMax)
-			{
-				m_sampleSum -= m_samples.front();
-				m_samples.pop_front();
-			}
-			rate = m_sampleSum / (double)m_samples.size();
-		}
+		void PushSample(double sample);
+		double m_lastInterval = 0.;
 		double m_period = 1.;
 		double m_time = 0.f;
+		double m_decrTime = 0.f;
 		double m_ticks = 0.;
 		std::deque<double> m_samples;
 		double m_sampleSum = 0.;
