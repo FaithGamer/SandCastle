@@ -29,7 +29,7 @@ namespace SandCastle
 		Window::GetFocusSignal()->Listen(&Audio::OnFocus, this);
 	}
 
-	void Audio::LoadSound(String path)
+	void Audio::LoadSound(const String& path)
 	{
 		m_maSounds.emplace_back(new ma_sound);
 		ma_sound_init_from_file(m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, m_maSounds.back());
@@ -38,9 +38,7 @@ namespace SandCastle
 		auto ins_it = m_filenameToPath.insert(std::make_pair(filename, path));
 	}
 
-	
-
-	void Audio::AddChannel(String channel, String parent)
+	void Audio::AddChannel(const String& channel, const String& parent)
 	{
 		auto i = Instance();
 		i->m_channels.emplace_back(new ma_sound_group);
@@ -58,7 +56,7 @@ namespace SandCastle
 		}
 	}
 
-	unsigned int Audio::GetChannel(String channel)
+	unsigned int Audio::GetChannel(const String& channel)
 	{
 		auto ins = Instance();
 		for (int i = 0; i < ins->m_channelNames.size(); i++)
@@ -70,24 +68,47 @@ namespace SandCastle
 		return 0;
 	}
 
-	Sound* Audio::MakeSound(String path, String channel)
+	Sound* Audio::MakeSound(const String& filename, const String& channel)
 	{
-		auto sound = new Sound(path, GetChannel(channel));
+		auto i = Instance();
+		auto f_it = i->m_filenameToPath.find(filename);
+		if (f_it == i->m_filenameToPath.end())
+		{
+			LOG_ERROR("Sound file {0} doesn't exists", filename);
+			return new Sound(0);
+		}
+		String path = f_it->second;
+
+		auto& sound = i->m_sounds.emplace_back(Sound(GetChannel(channel)));
+		sound.AddVariant(path);
+		sound.m_id = i->m_sounds.size()-1;
+		return &sound;
 	}
 
-	HighrateSound* Audio::MakeHighrateSound(String path, String channel)
+	HighrateSound* Audio::MakeHighrateSound(const String& filename, const String& channel)
 	{
-		
+		auto i = Instance();
+		auto f_it = i->m_filenameToPath.find(filename);
+		if (f_it == i->m_filenameToPath.end())
+		{
+			LOG_ERROR("Sound file {0} doesn't exists", filename);
+			return new HighrateSound(0);
+		}
+		String path = f_it->second;
+		auto& sound = i->m_hrSounds.emplace_back(HighrateSound(GetChannel(channel)));
+		sound.AddVariant(path);
+		sound.m_id = i->m_hrSounds.size() - 1;
+		return &sound;
 	}
 
-	void Audio::SetChannelVolume(String channel, float volume)
+	void Audio::SetChannelVolume(const String& channel, float volume)
 	{
 		auto i = Instance();
 		auto ch = i->GetChannel(channel);
 		ma_sound_group_set_volume(i->m_channels[ch], volume);
 	}
 
-	SoundHandle Audio::MakeHandle(String soundPath, bool play)
+	SoundHandle Audio::MakeHandle(const String& soundPath, bool play)
 	{
 		auto i = Instance();
 		ma_sound* masound = new ma_sound;
@@ -98,7 +119,7 @@ namespace SandCastle
 		return SoundHandle(masound);
 	}
 
-	SoundHandle Audio::MakeHandle(String soundPath, unsigned int channel, bool play)
+	SoundHandle Audio::MakeHandle(const String& soundPath, unsigned int channel, bool play)
 	{
 		auto i = Instance();
 		if (channel >= i->m_channels.size())
@@ -132,15 +153,14 @@ namespace SandCastle
 	void Audio::Update()
 	{
 		SpikeProtectionUpdate();
-		for (int i = 0; i < SoundCount; i++)
+		for (int i = 0; i < m_sounds.size(); i++)
 		{
-			if (m_sounds[i] != nullptr)
-			{
-				m_sounds[i]->Update(delta);
-			}
+			m_sounds[i].Update();
 		}
-
-		//Test(delta);
+		for (int i = 0; i < m_hrSounds.size(); i++)
+		{
+			m_hrSounds[i].Update();
+		}
 	}
 	void Audio::SpikeProtectionUpdate()
 	{
@@ -170,20 +190,13 @@ namespace SandCastle
 
 	}
 
-
 	void Audio::OnMinimized(bool minimized)
 	{
-		
+
 	}
 
 	void Audio::OnFocus(bool focus)
 	{
-		
+
 	}
-
 }
-
-/*
-* init from file in assets.
-* 
-*/

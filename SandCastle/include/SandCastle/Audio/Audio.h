@@ -18,19 +18,18 @@ namespace SandCastle
 		Audio();
 		~Audio();
 
-
 		/// @brief Add an audio channel, example "Music", "FX"...
 		/// @param channel The name of the channel
 		/// @param parent The name of the parent audio channel, example "Master"
 		/// @return a unique identifier. (low level API only)
-		static unsigned int AddChannel(String channel, String parent = "");
-		static void SetChannelVolume(String channel, float volume);
-		static unsigned int GetChannel(String channel);
+		static void AddChannel(const String& channel, const String& parent = "");
+		static void SetChannelVolume(const String& channel, float volume);
+		static unsigned int GetChannel(const String& channel);
 		//High level API
 		/// @brief Every sound used in game must first be created with this method.
 		/// @param filename the name of the file (not the full path)
 		/// @return The sound.
-		static Sound* MakeSound(String filename, String channel);
+		static Sound* MakeSound(const String& filename, const String& channel);
 		/// @brief Create a sound that can switch to playing a loop when the
 		/// rate of playing (call to Play()) it is over a certain threshold.
 		/// There can be multiple loops, each representing a given rate.
@@ -39,12 +38,12 @@ namespace SandCastle
 		/// @param path 
 		/// @param channel 
 		/// @return 
-		static HighrateSound* MakeHighrateSound(String path, String channel);
+		static HighrateSound* MakeHighrateSound(const String& filename, const String& channel);
 
 		/// @brief Low level API, most likely you don't need this
-		static SoundHandle MakeHandle(String path, bool play = true);
+		static SoundHandle MakeHandle(const String& path, bool play = true);
 		/// @brief Low level API, most likely you don't need this
-		static SoundHandle MakeHandle(String path, unsigned int channel, bool play = true);
+		static SoundHandle MakeHandle(const String& path, unsigned int channel, bool play = true);
 
 	private:
 		friend Engine;
@@ -52,7 +51,7 @@ namespace SandCastle
 		friend Assets;
 		void Init();
 		void Update();
-		void LoadSound(String path);
+		void LoadSound(const String& path);
 		void SpikeProtectionUpdate();
 		void OnMinimized(bool minimized);
 		void OnFocus(bool focus);
@@ -67,10 +66,9 @@ namespace SandCastle
 
 		//collection
 		std::unordered_map<String, String> m_filenameToPath;
-		std::unordered_map<String, Sound*> m_filenameToSound;
 		std::vector<String> m_channelNames;
-		std::vector<Sound*> m_sounds;
-		std::vector<HighrateSound*> m_sounds;
+		std::vector<Sound> m_sounds;
+		std::vector<HighrateSound> m_hrSounds;
 	
 		float m_spikeDetector = 0.f;
 		std::vector<float> m_spikeLastVolumes;

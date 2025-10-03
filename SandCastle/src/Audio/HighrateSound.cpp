@@ -9,19 +9,19 @@
 
 namespace SandCastle
 {
-	HighrateSound::HighrateSound()
+	HighrateSound::HighrateSound(unsigned int channel) : Sound(channel)
 	{
 		easing = &Easing::QuadOut;
 	}
-	void HighrateSound::AddMerged(Range range, String soundPath)
+	void HighrateSound::AddMerged(String path, Range range)
 	{
-		m_mergeRange.push_back(range);
-		m_mergePath.push_back(soundPath);
-		m_mergeSound.push_back(SoundHandle());
-		m_mergeVolume.push_back(0);
-		m_mergeVolumeTarget.push_back(0);
-		m_mergePitch.push_back(1);
-		m_mergePitchTarget.push_back(1);
+		m_mergeRange.emplace_back(range);
+		m_mergePath.emplace_back(path);
+		m_mergeSounds.emplace_back(SoundHandle());
+		m_mergeVolume.emplace_back(0);
+		m_mergeVolumeTarget.emplace_back(0);
+		m_mergePitch.emplace_back(1);
+		m_mergePitchTarget.emplace_back(1);
 	}
 	void HighrateSound::Play(float fadeIn, float pitch)
 	{
@@ -39,105 +39,94 @@ namespace SandCastle
 		LOG_ERROR("Cannot loop a highrate sound.");
 	}
 
-	void HighrateSound::Update(float delta)
+	void HighrateSound::Update()
 	{
-		Sound::Update(delta);
+		Sound::Update();
 
-
-		m_rate.Update(Time::UnscaledDelta());
+		float delta = Time::UnscaledDelta();
+		m_rate.Update(delta);
 		auto rate = m_rate.rate;
 
-		m_volume = Math::Lerp(oneShotRange.minVol, oneShotRange.maxVol, Easing::QuadIn(Math::Clamp01(1.f - rate / oneShotRange.maxRate)));
-		for (int i = 0; i < m_mergeSound.size(); i++)
+		for (int i = 0; i < m_mergeSounds.size(); i++)
 		{
-			if (!m_mergeSound[i].IsPlaying() && rate >= m_mergeRange[i].minRate)
+			if (!m_mergeSounds[i].IsPlaying() && rate >= m_mergeRange[i].volRateMin)
 			{
 				PlayMerged(i);
 			}
 
-			if (m_mergeSound[i].IsPlaying())
+			if (m_mergeSounds[i].IsPlaying())
 			{
 				m_mergeVolumeTarget[i] = ComputeMergeVolume(i);
 				m_mergeVolume[i] = Math::Lerp(m_mergeVolume[i], m_mergeVolumeTarget[i], delta * 10);
-				m_mergeSound[i].SetVolume(m_mergeVolume[i]);
+				m_mergeSounds[i].SetVolume(m_mergeVolume[i]);
 
-				if (fixedPitch < 0)
+				if (m_fixedPitch < 0)
 				{
 					m_mergePitchTarget[i] = ComputeMergePitch(i);
 					m_mergePitch[i] = Math::Lerp(m_mergePitch[i], m_mergePitchTarget[i], delta * 10);
-					m_mergeSound[i].SetPitch(m_mergePitch[i]);
+					m_mergeSounds[i].SetPitch(m_mergePitch[i]);
 				}
 				else
 				{
-					m_mergeSound[i].SetPitch(fixedPitch);
+					m_mergeSounds[i].SetPitch(m_fixedPitch);
 				}
 
-				if (m_mergeVolume[i] < 0.02f && rate < m_mergeRange[i].minRate)
+				if (m_mergeVolume[i] < 0.02f && rate < m_mergeRange[i].volRateMin)
 				{
-					m_mergeSound[i].Stop();
+					m_mergeSounds[i].Stop();
 				}
-
 			}
-
 		}
 	}
 
 	bool HighrateSound::IsPlaying()
 	{
-		return false; // to do
+		for (int i = 0; i < m_mergeSounds.size(); i++)
+		{
+			if (m_mergeSounds[i].IsPlaying())
+				return true;
+		}
+		return Sound::IsPlaying();
 	}
 
-
-	float HighrateSound::GetRate()
+	double HighrateSound::GetRate()
 	{
-		return (float)m_rate.rate;
-	}
-
-	void HighrateSound::SetRate(int rate)
-	{
-		m_playOverPeriod = (double)rate / 10.f;
+		return m_rate.rate;
 	}
 
 	void HighrateSound::SetPitch(float pitch)
 	{
-		fixedPitch = pitch;
+		m_fixedPitch = pitch;
 	}
 
 	void HighrateSound::PlayMerged(int i)
 	{
 		m_playingMerged = true;
 
-		m_mergeSound[i] = Audio::MakeHandle(m_mergePath[i], m_channel, false);
+		m_mergeSounds[i] = Audio::MakeHandle(m_mergePath[i], m_channel, false);
 		m_mergeVolume[i] = 0.f;
-		m_mergeSound[i].SetVolume(m_mergeVolume[i]);
-		m_mergeSound[i].Play();
-		m_mergeSound[i].SetLoop(true);
+		m_mergeSounds[i].SetVolume(m_mergeVolume[i]);
+		m_mergeSounds[i].Play();
+		m_mergeSounds[i].SetLoop(true);
 	}
 
 	void HighrateSound::StopMerged(int i)
 	{
-		m_mergeSound[i].Stop();
+		m_mergeSounds[i].Stop();
 	}
 
 	float HighrateSound::ComputeMergeVolume(int i)
 	{
 		float minus = 0;
 		if (i + 1 < m_mergeRange.size())
-			minus = -(Math::Clamp01((m_rate.rate - m_mergeRange[i + 1].minRate) / m_mergeRange[i + 1].maxRate));
-		return Math::Lerp(m_mergeRange[i].minVol, m_mergeRange[i].maxVol,
-			minus + easing(Math::Clamp01((m_rate.rate - m_mergeRange[i].minRate) / m_mergeRange[i].maxRate)));
+			minus = -(Math::Clamp01((m_rate.rate - m_mergeRange[i + 1].volRateMin) / m_mergeRange[i + 1].volRateMax));
+		return Math::Lerp(m_mergeRange[i].volMin, m_mergeRange[i].volMax,
+			minus + easing(Math::Clamp01((m_rate.rate - m_mergeRange[i].volRateMin) / m_mergeRange[i].volRateMax)));
 	}
 
 	float HighrateSound::ComputeMergePitch(int i)
 	{
 		return Math::Lerp(m_mergeRange[i].pitchMin, m_mergeRange[i].pitchMax,
 			Math::Clamp01((m_rate.rate - m_mergeRange[i].pitchRateMin) / m_mergeRange[i].pitchRateMax));
-	}
-
-	//Music
-	LoveMusic::LoveMusic()
-	{
-		m_channel = Audio::GetChannel("Music");
-		m_assetPath = "assets/audio/music/";
 	}
 }

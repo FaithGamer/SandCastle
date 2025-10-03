@@ -11,6 +11,7 @@
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Input/Inputs.h"
+#include "SandCastle/Audio/Audio.h"
 
 namespace SandCastle
 {
@@ -123,6 +124,7 @@ namespace SandCastle
 			system.system->Update();
 		}
 		Ui::Instance()->Update();
+		Audio::Instance()->Update();
 		for (auto& system : m_lateUpdateSystems)
 		{
 			system.system->LateUpdate();

@@ -26,7 +26,7 @@ namespace SandCastle
 		}
 	}
 
-	SoundHandle::SoundHandle(SoundHandle& obj)
+	SoundHandle::SoundHandle(const SoundHandle& obj)
 	{
 		m_sound = obj.m_sound;
 		m_refcount = obj.m_refcount;
@@ -34,7 +34,7 @@ namespace SandCastle
 			*m_refcount = *m_refcount + 1;
 	}
 
-	SoundHandle& SoundHandle::operator=(SoundHandle& obj)
+	SoundHandle& SoundHandle::operator=(const SoundHandle& obj)
 	{
 		m_sound = obj.m_sound;
 		m_refcount = obj.m_refcount;
@@ -44,7 +44,7 @@ namespace SandCastle
 
 	}
 
-	SoundHandle::SoundHandle(SoundHandle&& obj)
+	SoundHandle::SoundHandle(const SoundHandle&& obj)
 	{
 		m_sound = obj.m_sound;
 		m_refcount = obj.m_refcount;
@@ -52,7 +52,7 @@ namespace SandCastle
 			*m_refcount = *m_refcount + 1;
 	}
 
-	SoundHandle& SoundHandle::operator=(SoundHandle&& obj)
+	SoundHandle& SoundHandle::operator=(const SoundHandle&& obj)
 	{
 		m_sound = obj.m_sound;
 		m_refcount = obj.m_refcount;

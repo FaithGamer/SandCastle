@@ -10,24 +10,23 @@ namespace SandCastle
 	public:
 		struct Range
 		{
-			float minVol = 0;
-			float maxVol = 1;
-			float minRate = 0;
-			float maxRate = 100;
+			float volMin = 0;
+			float volMax = 1;
+			float volRateMin = 0;
+			float volRateMax = 100;
 			float pitchMin = 1;
 			float pitchMax = 1;
 			float pitchRateMin = 0;
 			float pitchRateMax = 1;
 		};
 	public:
-		HighrateSound();
-		void AddMerged(String filename, Range range);
+		HighrateSound(unsigned int channel);
+		void AddMerged(String path, Range range);
 		void Play(float fadeIn = -1.f, float pitch = -1) override;
 		void Loop(float fadeIn = -1.f, float pitch = -1) override;
-		void Update(float delta) override;
+		void Update() override;
 		bool IsPlaying() override;
-		virtual float GetRate() override;
-		void SetRate(int rate) override;
+		double GetRate();
 		void SetPitch(float pitch) override;
 
 	private:
@@ -38,25 +37,18 @@ namespace SandCastle
 	public:
 
 		double(*easing)(double);
-		Range oneShotRange;
-		float fixedPitch = -1;
 	private:
 		Rate m_rate;
 
 		std::vector<Range> m_mergeRange;
 		std::vector<String> m_mergePath;
-		std::vector<SoundHandle> m_mergeSound;
+		std::vector<SoundHandle> m_mergeSounds;
 		std::vector<float> m_mergeVolume;
 		std::vector<float> m_mergeVolumeTarget;
 		std::vector<float> m_mergePitch;
 		std::vector<float> m_mergePitchTarget;
-
-		float m_mergePlaybackSpeed = 1;
+		float m_fixedPitch = -1;
 		bool m_playingMerged = false;
-		int m_playOverPeriod = 0;
-
 		bool m_manualRate = false;
-
-
 	};
 }

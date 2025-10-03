@@ -97,8 +97,9 @@ namespace SandCastle
 		}
 	}
 
-	void Sound::Update(float delta)
+	void Sound::Update()
 	{
+		float delta = Time::UnscaledDelta();
 		//Clean instances not playing
 		for (auto it = m_instances.begin(); it != m_instances.end();)
 		{
@@ -110,7 +111,7 @@ namespace SandCastle
 			{
 				if (m_fadeOut > 0.f)
 				{
-					float min = m_fadeOut * (float)Time::UnscaledDelta();
+					float min = m_fadeOut * delta;
 					m_fadeVolume -= min;
 					if (m_fadeVolume > 0)
 						it->SetVolume(m_fadeVolume);
@@ -119,7 +120,7 @@ namespace SandCastle
 				}
 				else if (m_fadeIn > 0.f && m_fadeVolume < m_volume)
 				{
-					float plus = m_fadeIn * (float)Time::UnscaledDelta();
+					float plus = m_fadeIn * delta;
 					m_fadeVolume += plus;
 					if (m_fadeVolume >= m_volume)
 					{
@@ -157,8 +158,6 @@ namespace SandCastle
 
 	bool Sound::IsPlaying()
 	{
-		if (m_instances.empty())
-			return false;
-		return true;
+		return !m_instances.empty();
 	}
 }

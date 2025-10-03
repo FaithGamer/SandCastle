@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef SandCastle_NO_AUDIO
 #include "miniaudio/miniaudio.h"
-#endif
 #include "SandCastle/Core/std_macros.h"
 
 namespace SandCastle
@@ -15,10 +13,10 @@ namespace SandCastle
 		SoundHandle();
 		SoundHandle(ma_sound* sound);
 		~SoundHandle();
-		SoundHandle(SoundHandle& obj);
-		SoundHandle& operator=(SoundHandle& obj);
-		SoundHandle(SoundHandle&& obj);
-		SoundHandle& operator=(SoundHandle&& obj);
+		SoundHandle(const SoundHandle& obj);
+		SoundHandle& operator=(const SoundHandle& obj);
+		SoundHandle(const SoundHandle&& obj);
+		SoundHandle& operator=(const SoundHandle&& obj);
 		void Play();
 		void Stop();
 		void SetLoop(bool loop);
@@ -28,8 +26,8 @@ namespace SandCastle
 		void SetPitch(float pitch);
 		bool IsPlaying();
 	private:
-		int* m_refcount;
-		ma_sound* m_sound;
+		int* m_refcount = nullptr;
+		ma_sound* m_sound = nullptr;
 
 	};
 }

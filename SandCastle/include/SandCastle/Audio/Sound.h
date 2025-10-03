@@ -4,6 +4,7 @@
 
 namespace SandCastle
 {
+	class Audio;
 	/// @brief High level API for sound
 	class Sound
 	{
@@ -14,11 +15,12 @@ namespace SandCastle
 		virtual void Play(float fadeIn = 0.f, float pitch = -1);
 		virtual void Loop(float fadeIn = 0.f, float pitch = -1);
 		virtual void Stop(float fadeOut = -1.f);
-		virtual void Update(float delta);
+		virtual void Update();
 		virtual void SetPitch(float pitch);
 		virtual bool IsPlaying();
 		void SetVolume(float volume);
 	protected:
+		friend Audio;
 		void PlayPrivate(bool loop = false, float fadeIn = 0.f, float pitch = -1);
 		Sound(unsigned int channel);
 	public:

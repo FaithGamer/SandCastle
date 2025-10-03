@@ -7,3 +7,4 @@
 #include "SandCastle/Input.h"
 #include "SandCastle/PhysicsEngine.h"
 #include "SandCastle/UIheader.h"
+#include "SandCastle/Audioheader.h"

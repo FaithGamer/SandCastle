@@ -18,6 +18,7 @@
 #include "UiPosTest.h"
 #include "UiTest2.h"
 #include "RateTest.h"
+#include "SoundTest.h"
 
 using namespace SandCastle;
 

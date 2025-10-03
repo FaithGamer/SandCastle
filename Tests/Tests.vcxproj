@@ -51,6 +51,7 @@
     <ClInclude Include="src\Rotation.h" />
     <ClInclude Include="src\Serialization.h" />
     <ClInclude Include="src\Signals.h" />
+    <ClInclude Include="src\SoundTest.h" />
     <ClInclude Include="src\SubTexture.h" />
     <ClInclude Include="src\UiPosTest.h" />
     <ClInclude Include="src\UiTest2.h" />
