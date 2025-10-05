@@ -43,6 +43,10 @@ namespace SandCastle
 		ShowHideFrame();
 		labelOffset += Vec2f(-1, -1);
 		label.root.gtr()->Move(labelOffset.x, labelOffset.y, 0.f);
+		if (context.pressSound != nullptr)
+		{
+			context.pressSound->Play();
+		}
 	}
 	void UiBtn::OnClickReleased()
 	{
@@ -56,6 +60,10 @@ namespace SandCastle
 		{
 			frameHover.SetAlpha(0);
 			frameIdle.SetAlpha(255);
+		}
+		if (context.releaseSound != nullptr)
+		{
+			context.releaseSound->Play();
 		}
 		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
 		labelOffset = 0.f;

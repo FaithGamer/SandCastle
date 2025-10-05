@@ -27,6 +27,7 @@ public:
 		Destroy();
 		Loca();
 
+
 		auto map = Inputs::CreateInputMap();
 		auto button = map->CreateButtonInput("Button");
 		button->BindMouse(Mouse::Button::Left);
@@ -326,7 +327,14 @@ void UiTest2()
 	Ui::MakeFrameTemplate("btn_hover.png");
 	Ui::MakeFrameTemplate("btn_pressed.png");
 
-	//Context
+	//Audio asset (for ui)
+	Audio::AddChannel("Master");
+	Audio::AddChannel("UI", "Master");
+	auto clickPressSound = Audio::MakeSound("click_press.wav", "UI");
+	auto clickReleaseSound = Audio::MakeSound("click_release.wav", "UI");
+	Ui::SetButtonPressSound(clickPressSound);
+	Ui::SetButtonReleaseSound(clickReleaseSound);
+
 	Ui::SetCanvasPadding(6.f);
 	Ui::SetRootMargin(2.f);
 	Ui::SetCanvasFrame("frame.png");

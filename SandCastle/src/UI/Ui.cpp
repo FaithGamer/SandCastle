@@ -658,6 +658,14 @@ namespace SandCastle
 	{
 		Instance()->SetFrame(&Instance()->m_context.button.framePressed, texture);
 	}
+	void Ui::SetButtonPressSound(Sound* sound)
+	{
+		Instance()->m_context.button.pressSound = sound;
+	}
+	void Ui::SetButtonReleaseSound(Sound* sound)
+	{
+		Instance()->m_context.button.releaseSound = sound;
+	}
 	void Ui::SetCheckboxSprites(String texture)
 	{
 		Instance()->m_context.checkbox.texture = texture;

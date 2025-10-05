@@ -137,6 +137,8 @@ namespace SandCastle
 		/// @brief Context setting.
 		/// Set the frame that will be used for every subsequent button creation
 		static void SetButtonFramePressed(String texture);
+		static void SetButtonPressSound(Sound* sound);
+		static void SetButtonReleaseSound(Sound* sound);
 		/// @brief Context setting.
 		/// The texture must have 3 horizontal sprites.
 		/// respecting this order: unchecked, hovered, checked

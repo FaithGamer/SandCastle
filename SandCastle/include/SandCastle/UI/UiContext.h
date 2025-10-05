@@ -4,6 +4,7 @@
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Render/Text.h"
+#include "SandCastle/Audio/Sound.h"
 
 namespace SandCastle
 {	
@@ -15,6 +16,8 @@ namespace SandCastle
 		UiFrame::Template* frameIdle = nullptr;
 		UiFrame::Template* frameHover = nullptr;
 		UiFrame::Template* framePressed = nullptr;
+		Sound* pressSound = nullptr;
+		Sound* releaseSound = nullptr;
 	};
 
 	struct CheckboxContext
