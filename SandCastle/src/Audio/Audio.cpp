@@ -28,11 +28,21 @@ namespace SandCastle
 		Window::GetMinimizedSignal()->Listen(&Audio::OnMinimized, this);
 		Window::GetFocusSignal()->Listen(&Audio::OnFocus, this);
 	}
+	void Audio::PostAssetInit()
+	{
+		m_sounds.reserve(m_soundCount);
+		m_hrSounds.reserve(m_soundCount);
+	}
 
 	void Audio::LoadSound(const String& path)
 	{
+		m_soundCount++;
 		m_maSounds.emplace_back(new ma_sound);
-		ma_sound_init_from_file(m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, m_maSounds.back());
+		auto result = ma_sound_init_from_file(m_engine, path.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, m_maSounds.back());
+		if (result != MA_SUCCESS)
+		{
+			LOG_ERROR("Cannot init sound from file:\nMA result: {0}\nfile: {1}", (int)result, path);
+		}
 		size_t i = path.find_last_of("/") + 1;
 		String filename = path.substr(i, path.size() - i);
 		auto ins_it = m_filenameToPath.insert(std::make_pair(filename, path));

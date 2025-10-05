@@ -50,6 +50,7 @@ namespace SandCastle
 		friend Systems;
 		friend Assets;
 		void Init();
+		void PostAssetInit();
 		void Update();
 		void LoadSound(const String& path);
 		void SpikeProtectionUpdate();
@@ -74,5 +75,6 @@ namespace SandCastle
 		std::vector<float> m_spikeLastVolumes;
 		float m_spikeMuter = 0.f;
 		float m_spikeMuterTimeMax = 0.f;
+		size_t m_soundCount = 0;
 	};
 }
