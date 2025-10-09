@@ -153,7 +153,7 @@ namespace SandCastle
 		FT_Done_FreeType(m_ft);
 	}
 
-	FontID Writer::MakeFont(const String& filename, int size, float scale,
+	FontID Writer::MakeFont(const String& filename, int size, float scale, float lineHeight,
 		float outlineThickness, Vec4f outlineColor)
 	{
 		// Load face by path
@@ -182,6 +182,7 @@ namespace SandCastle
 		font.material = m_material;
 		font.layer = m_layer;
 		font.scale = scale;
+		font.lineHeight = lineHeight;
 
 		InitLazyPages(font); // start with an empty atlas we’ll grow on - demand
 		BakeFallbackGlyph(font);
@@ -294,7 +295,7 @@ namespace SandCastle
 
 		Vec2f pen(0.f, 0.f); // baseline origin
 		const float ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit() * font.scale;
-		const float lineStep = ((float)font.size + font.outlineThickness) * lineSpacing * ppu;
+		const float lineStep = std::round(((float)font.size + font.outlineThickness) * lineSpacing * font.lineHeight * ppu);
 
 		uint32_t prevGlyphIndex = 0;
 

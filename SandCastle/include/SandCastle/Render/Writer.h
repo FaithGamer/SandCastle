@@ -59,6 +59,7 @@ namespace SandCastle
 		LayerID layer = 0;
 		TextureFiltering filtering = TextureFiltering::Nearest;
 		float scale = 1.f;
+		float lineHeight = 1.f;
 	};
 
 	// NEW: store each character's "normal" computed position so FX can move them later.
@@ -76,6 +77,7 @@ namespace SandCastle
 		FontID MakeFont(const String& filename,
 			int size,
 			float scale = 1.f,
+			float lineHeight = 1.f,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
 		/// @brief Give a fancy name to the font to find it easily later 

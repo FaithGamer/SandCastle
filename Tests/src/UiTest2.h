@@ -326,12 +326,12 @@ void UiTest2()
 
 	//Ui assets
 	Ui::GetWriter()->SetLineAdjustement(0.2f);
-	Ui::MakeFont("Silver.ttf", "p", 38, .5f, { "ja" });
-	Ui::MakeFont("alata-regular.ttf", "p", 10, 1.f, { "fr" });
-	Ui::MakeFont("Silver.ttf", "h2", 38, .5f, { "ja" });
-	Ui::MakeFont("alata-regular.ttf", "h2", 13, 1.f, { "fr" });
-	Ui::MakeFont("Silver.ttf", "h1", 38, .5f, { "ja" });
-	Ui::MakeFont("alata-regular.ttf", "h1", 14, 1.f, { "fr" });
+	Ui::MakeFont("Silver.ttf", "p", 38, .5f, .75f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "p", 10, 1.f, 1.f, { "fr" });
+	Ui::MakeFont("Silver.ttf", "h2", 38, .5f, 0.5f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "h2", 13, 1.f, 1.f, { "fr" });
+	Ui::MakeFont("Silver.ttf", "h1", 38, .5f, 0.75f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "h1", 14, 1.f, 1.f, { "fr" });
 	Ui::MakeFrameTemplate("frame.png");
 	Ui::MakeFrameTemplate("frame_black.png");
 	Ui::MakeFrameTemplate("btn.png");
