@@ -47,6 +47,7 @@ namespace SandCastle
 		static void MakeFont(String filename,
 			String fancyName,
 			float uiSize,
+			float scale = 1.f,
 			std::vector<String> langs = {},
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });

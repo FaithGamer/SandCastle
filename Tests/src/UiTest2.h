@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <SandCastle.h>
 
@@ -26,6 +26,7 @@ public:
 		Button();
 		Destroy();
 		Loca();
+		JALineR();
 
 
 		auto map = Inputs::CreateInputMap();
@@ -283,6 +284,15 @@ public:
 		Ui::End();
 		Ui::End();
 	}
+	void JALineR()
+	{
+		Ui::Context("base");
+		Ui::SetRootAnchor(CanvasAnchor::TopCenter);
+		auto r = Ui::Begin(Vec2f(200, 0));
+		r->SetPosition(Vec2f(0, 180.f));
+		Ui::Text((const char*)u8"母さ供過通換げ済八えか合巡じすっレ女手ネヱイ処国ト雄約スワリ条球ど置期こがて形申ヱカロ投掲ルコチ極供ごこゅ年鮮堪薫け。");
+		Ui::End();
+	}
 	void OnFR(UiElem* signal)
 	{
 		Assets::SetLang("fr");
@@ -315,12 +325,13 @@ void UiTest2()
 	Camera::main->SetConstraints(cons);
 
 	//Ui assets
-	Ui::MakeFont("ark-pixel-10px-proportional-latin.ttf", "p", 10, { "ja" });
-	Ui::MakeFont("alata-regular.ttf", "p", 10, { "fr" });
-	Ui::MakeFont("ark-pixel-12px-proportional-latin.ttf", "h2", 12, {"ja"});
-	Ui::MakeFont("alata-regular.ttf", "h2", 12, {"fr"});
-	Ui::MakeFont("ark-pixel-16px-proportional-latin.ttf", "h1", 16, { "ja" });
-	Ui::MakeFont("alata-regular.ttf", "h1", 16, { "fr" });
+	Ui::GetWriter()->SetLineAdjustement(0.2f);
+	Ui::MakeFont("Silver.ttf", "p", 38, .5f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "p", 10, 1.f, { "fr" });
+	Ui::MakeFont("Silver.ttf", "h2", 38, .5f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "h2", 13, 1.f, { "fr" });
+	Ui::MakeFont("Silver.ttf", "h1", 38, .5f, { "ja" });
+	Ui::MakeFont("alata-regular.ttf", "h1", 14, 1.f, { "fr" });
 	Ui::MakeFrameTemplate("frame.png");
 	Ui::MakeFrameTemplate("frame_black.png");
 	Ui::MakeFrameTemplate("btn.png");

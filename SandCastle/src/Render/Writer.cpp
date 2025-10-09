@@ -153,7 +153,7 @@ namespace SandCastle
 		FT_Done_FreeType(m_ft);
 	}
 
-	FontID Writer::MakeFont(const String& filename, int size,
+	FontID Writer::MakeFont(const String& filename, int size, float scale,
 		float outlineThickness, Vec4f outlineColor)
 	{
 		// Load face by path
@@ -181,6 +181,7 @@ namespace SandCastle
 		font.outlineColor = outlineColor;
 		font.material = m_material;
 		font.layer = m_layer;
+		font.scale = scale;
 
 		InitLazyPages(font); // start with an empty atlas we’ll grow on - demand
 		BakeFallbackGlyph(font);
@@ -292,7 +293,7 @@ namespace SandCastle
 		sent.root.AddComponent<Transform>();
 
 		Vec2f pen(0.f, 0.f); // baseline origin
-		const float ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit();
+		const float ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit() * font.scale;
 		const float lineStep = ((float)font.size + font.outlineThickness) * lineSpacing * ppu;
 
 		uint32_t prevGlyphIndex = 0;
@@ -377,6 +378,7 @@ namespace SandCastle
 				pos.y += (float)font.size * ppu * m_adjustLine;
 				Entity e = Entity::Create();
 				auto tr = e.AddComponent<Transform>();
+				tr->SetScale(font.scale);
 				tr->SetPosition(pos);
 				auto ch = e.AddComponent<Character>();
 				ch->originalPosition = pos;
@@ -785,6 +787,11 @@ namespace SandCastle
 		font.fallbackGlyph = g;
 		font.hasFallbackGlyph = true;
 		return true;
+	}
+
+	void Writer::OnLang(LangSignal* signal)
+	{
+
 	}
 
 	static inline unsigned char f2ub(float v) { v = std::clamp(v, 0.0f, 1.0f); return (unsigned char)std::round(v * 255.0f); }

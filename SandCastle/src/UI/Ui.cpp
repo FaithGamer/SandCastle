@@ -248,14 +248,14 @@ namespace SandCastle
 		UiFrame::MakeTemplate(i->m_frameTemplates[texture], texture, fixedStep);
 
 	}
-	void Ui::MakeFont(String filename, String fancyName, float uiSize, std::vector<String> langs, float outlineThickness, Vec4f outlineColor)
+	void Ui::MakeFont(String filename, String fancyName, float uiSize, float scale, std::vector<String> langs, float outlineThickness, Vec4f outlineColor)
 	{
 		auto ins = Instance();
 		float ppu = ins->m_writer->GetPPU();
 		int pxSize = (int)std::round(uiSize * ppu);
 		int pxOutline = outlineThickness > 0.f ? (int)std::max(1, (int)std::round(outlineThickness * ppu)) : 0;
 		ins->m_writer->SetLayer(ins->m_context.layer);
-		auto font = ins->m_writer->MakeFont(filename, pxSize, pxOutline, outlineColor);
+		auto font = ins->m_writer->MakeFont(filename, pxSize, scale, pxOutline, outlineColor);
 		ins->m_writer->NameFont(font, fancyName, langs);
 	}
 

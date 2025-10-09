@@ -513,12 +513,25 @@ October
 
 -sound as ui context button click
 -fixed mloading sound and memory allocation 
+
+9
+
+
+
+-adjust writer to have scaling bc some font doesn't comply with the way I create atlas
+(example, LanaPixel is a 11pt font, but I need to create it at 22px to make it right)
+-the problem with font scaling is that font become blurry when resolution is 360p
+
+>check what is the line return behaviour with ja/cn
+>when lang is any lang that has different breaking rule (cn or ja)
+make it impossible to line return on the character that should not be at the beggining of a sentence
 >context for checkbox sound
 
 
 >rename OnImGui oand other On without the On
 tasks:
 
+>vsync not working
 >Implement steamworks from idle colony
 >game system pattern: Plmp, data in registry, signal are pointers.
 no need plmp if data is in registry and communication is only through signal?

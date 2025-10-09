@@ -40,7 +40,7 @@ public:
 		}
 
 		auto font = Ui::GetWriter();
-		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50, 3.f, Vec4f(1, 0, 0, 1));
+		auto fontId = font->MakeFont("NotoSansJP-Regular.ttf", 50, 3.f, 1.f, Vec4f(1, 0, 0, 1));
 		font->UseFont(fontId);
 		auto s = font->Write((const char*)u8"mon de");
 

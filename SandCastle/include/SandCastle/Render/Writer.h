@@ -22,6 +22,7 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/ECS/System.h"
 #include "SandCastle/Render/Text.h"
+#include "SandCastle/Core/LangSignal.h"
 
 namespace SandCastle
 {
@@ -57,6 +58,7 @@ namespace SandCastle
 		Vec4f outlineColor = { 0, 0, 0, 1 };
 		LayerID layer = 0;
 		TextureFiltering filtering = TextureFiltering::Nearest;
+		float scale = 1.f;
 	};
 
 	// NEW: store each character's "normal" computed position so FX can move them later.
@@ -73,6 +75,7 @@ namespace SandCastle
 
 		FontID MakeFont(const String& filename,
 			int size,
+			float scale = 1.f,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
 		/// @brief Give a fancy name to the font to find it easily later 
@@ -98,8 +101,8 @@ namespace SandCastle
 		void SetLineAdjustement(float adjustement);
 		/// @brief Set the Layer that will be used for every subsequent MakeFont
 		void SetLayer(LayerID layer);
-		
 
+		
 		Sentence Write(std::string_view utf8,
 			float width = -1.f,
 			const Color& color = Color(255, 255, 255, 255),
@@ -135,6 +138,7 @@ namespace SandCastle
 		std::vector<unsigned char> PadRGBA(const unsigned char* srcRGBA, int w, int h, int pad);
 		void MakeTofuAlpha(int w, int h, int border, std::vector<unsigned char>& alpha);
 		bool BakeFallbackGlyph(Font& font);
+		void OnLang(LangSignal* signal);
 
 		struct ShelfPacker
 		{
