@@ -508,7 +508,14 @@ October
 2
 
 -sounds
->sound as ui context (button click, checkboxes)
+
+5
+
+-sound as ui context button click
+-fixed mloading sound and memory allocation 
+>context for checkbox sound
+
+
 >rename OnImGui oand other On without the On
 tasks:
 
@@ -518,7 +525,7 @@ no need plmp if data is in registry and communication is only through signal?
 >rename Filter to MaskFilter and use template
 >Implement a default GameSystem class with state machine
 >math inverselerp
->japanese breaking rules
+>japanese (chinses?) breaking rules
 >visual loading during engine Init (especially for assets)
 >reintegrate the audio spike protection 
 
