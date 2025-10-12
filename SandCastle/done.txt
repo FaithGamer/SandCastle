@@ -526,8 +526,15 @@ October
 -Delegate discrimate by method name call arg and call free fun/method
 -post start
 -Add elem to already existing canvas
+-basic elem order
 
->we need elem order.
+>need reordering:
+Canvas->SetOrder(elem, int)
+{
+	each(elem.order >= int) : elem.order++
+}
+				
+
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)
 >animated sprite in UI

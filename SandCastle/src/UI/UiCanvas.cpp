@@ -106,10 +106,12 @@ namespace SandCastle
 		{
 			elem->parent->RemoveElem(elem);
 		}
+		elem->order = (int)children.size();
 		children.insert(std::make_pair(elem->id, elem));
 		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
 		elem->parent = this;
 		elem->z = z - 1.f;
+
 		if (elem->GetType() == UiElem::Type::Canvas)
 		{
 			static_cast<UiCanvas*>(elem)->mustUpdateSignal.Listen(&UiCanvas::OnChildMustUpdate, this);
@@ -327,10 +329,17 @@ namespace SandCastle
 		float wrapSize = 0.f;
 		Vec2f contentSize = Vec2f(0.f, 0.f);
 		float totalWrap = 0.f;
-
-		for (auto& child_kvp : children)
+		std::list<UiElem*> sorted;
+		for (auto& kvp : children)
 		{
-			auto child = child_kvp.second;
+			sorted.emplace_back(kvp.second);
+		}
+		sorted.sort([](UiElem* a, UiElem* b)
+			{
+				return a->order < b->order;
+			});
+		for (auto& child : sorted)
+		{
 			auto margedSize = child->size + child->margin * 2;
 			float width = margedSize.x + context.padding.x;
 			float height = margedSize.y + context.padding.y;

@@ -91,6 +91,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		int order = -1;
 		State state = State::Idle;
 		UiCanvas* parent = nullptr;
 		UiElem::ID id = 0;
