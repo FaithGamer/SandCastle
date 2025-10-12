@@ -116,7 +116,7 @@ namespace SandCastle
 		/// @param ...args arguments for the method/function
 		/// @return return of the method/function
 		template<typename... Ts>
-		Ret Call(Ts&&... args)
+		Ret CallArg(Ts&&... args)
 		{
 			if (m_method != nullptr)
 			{
@@ -133,7 +133,7 @@ namespace SandCastle
 		/// @param ...args the arguments for the method.
 		/// @return return of the method.
 		template<typename... Ts>
-		Ret CallOn(void* const object, Ts&&... args)
+		Ret CallArgOn(void* const object, Ts&&... args)
 		{
 			return (static_cast<Obj*>(object)->*m_method)(std::forward<Ts>(args)...);
 		}

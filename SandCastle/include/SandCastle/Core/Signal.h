@@ -67,11 +67,11 @@ namespace SandCastle
 			}
 			void Call(const T& data) override
 			{
-				delegate.Call(data);
+				delegate.CallArg(data);
 			}
 			void Call(const T&& data) override
 			{
-				delegate.Call(data);
+				delegate.CallArg(data);
 			}
 			bool Equals(const sptr<OpaqueCallback>& other) const override
 			{
@@ -95,11 +95,11 @@ namespace SandCastle
 			}
 			void Call(const T& data) override
 			{
-				delegate.Call(data);
+				delegate.CallArg(data);
 			}
 			void Call(const T&& data) override
 			{
-				delegate.Call(data);
+				delegate.CallArg(data);
 			}
 			bool Equals(const sptr<OpaqueCallback>& other) const override
 			{

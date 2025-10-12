@@ -312,7 +312,7 @@ namespace SandCastle
 			auto& newAsset = loca.second;
 			auto& assetKey = loca.first;
 			auto it_fun = i->m_changeLocaFunctions.find(newAsset->GetType());
-			it_fun->second.Call(newAsset, assetKey);
+			it_fun->second.CallArg(newAsset, assetKey);
 		}
 		auto signal = LangSignal(lang);
 		i->langSignal.Send(&signal);
@@ -471,7 +471,7 @@ namespace SandCastle
 			if(extension != ".textual")
 				m_localizedAssets.insert(filename);
 		}
-		find_it->second.Call(filename, path, localized, lang);
+		find_it->second.CallArg(filename, path, localized, lang);
 		//LOG_INFO("Asset loaded " + path);
 	}
 }

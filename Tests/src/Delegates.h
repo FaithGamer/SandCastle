@@ -76,7 +76,7 @@ void Delegates()
 		LOG_INFO("--Free function--");
 		Arg lvalue("lvalue");
 		Delegate delegate(&Function);
-		auto r = delegate.Call("rvalue", lvalue);
+		auto r = delegate.CallArg("rvalue", lvalue);
 		LOG_INFO({ "return: = {0}" }, r);
 		std::cout << std::endl;
 	}
@@ -98,7 +98,7 @@ void Delegates()
 		Foo obj;
 		obj.value = 1;
 		float lvalue = 2.1f;
-		auto r = delegate.CallOn(&obj, Arg(), lvalue); //Notice when object is provided, method is called CallOn
+		auto r = delegate.CallArgOn(&obj, Arg(), lvalue); //Notice when object is provided, method is called CallOn
 		LOG_INFO({ "return: = {0}" }, r);
 		std::cout << std::endl;
 	}
@@ -110,7 +110,7 @@ void Delegates()
 		obj.value = 2;
 		Delegate delegate(&Foo::Method, &obj);
 		Arg lvalue("lvalue");
-		auto r = delegate.Call(lvalue, 3.1f);
+		auto r = delegate.CallArg(lvalue, 3.1f);
 		LOG_INFO({ "return: = {0}" }, r);
 		std::cout << std::endl;
 	}
