@@ -102,18 +102,31 @@ namespace SandCastle
 
 	void UiCanvas::AddElem(UiElem* elem)
 	{
-		//root.AddChild(elem->root);
+		if (elem->parent != nullptr)
+		{
+			elem->parent->RemoveElem(elem);
+		}
 		children.insert(std::make_pair(elem->id, elem));
 		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
+		elem->parent = this;
+		elem->z = z - 1.f;
 		if (elem->GetType() == UiElem::Type::Canvas)
 		{
 			static_cast<UiCanvas*>(elem)->mustUpdateSignal.Listen(&UiCanvas::OnChildMustUpdate, this);
 		}
+		MustUpdate();
 	}
 
 	void UiCanvas::RemoveElem(UiElem* elem)
 	{
-
+		elem->parent = nullptr;
+		children.erase(elem->id);
+		elem->destroySignal.StopListen(this);
+		if (elem->GetType() == UiElem::Type::Canvas)
+		{
+			static_cast<UiCanvas*>(elem)->mustUpdateSignal.StopListen(this);
+		}
+		MustUpdate();
 	}
 
 	void UiCanvas::OnChildMustUpdate(UiCanvas* child)

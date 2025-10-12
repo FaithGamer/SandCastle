@@ -223,12 +223,10 @@ namespace SandCastle
 	{
 		auto id = m_nextId++;
 		elem->id = id;
-		elem->parent = canvas;
-		elem->z = -(float)m_canvas.size();
-		elem->margin = m_context.rootMargin;
+		//elem->margin = m_context.rootMargin;
 		if (canvas != nullptr)
 		{
-			elem->margin = m_context.margin;
+			//elem->margin = m_context.margin;
 			canvas->AddElem(elem);
 		}
 		elem->destroySignal.Listen(&Ui::OnDestroy, this);
@@ -320,22 +318,6 @@ namespace SandCastle
 		return canvas;
 	}
 
-	UiTxt* Ui::Text(std::string_view utf8, float width)
-	{
-		auto i = Instance();
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
-		auto canvas = i->m_canvas.top();
-
-		//Instantiation
-		UiTxt* text = new UiTxt();
-		text->parent = canvas;
-		text->context = i->m_context.text;
-		text->utf8 = utf8;
-		i->CreateText(text, utf8, width);
-		i->NewElem(text, canvas);
-
-		return text;
-	}
 	UiTxt* Ui::TextLoc(const String& key, float width)
 	{
 		auto text = Text(*Assets::Get<Textual>(key), width);
@@ -348,8 +330,11 @@ namespace SandCastle
 	{
 		if (text->root.Valid())
 			text->root.Destroy();
-		auto canvas = text->parent;
-		float limit = canvas->sizeLimit.x - canvas->context.padding.x * 2;
+		float limit = 8888888.f;
+		if (text->parent != nullptr)
+		{
+			limit = text->parent->sizeLimit.x - text->parent->context.padding.x * 2;
+		}
 		if (limit < 8888888.f)
 			//There is a size limit
 			width = width > 0.f ? std::min(limit, width) : limit;
@@ -405,8 +390,11 @@ namespace SandCastle
 	UiImg* Ui::Image(String sprite)
 	{
 		auto i = Instance();
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Image without active canvas");
-		auto canvas = i->m_canvas.top();
+		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+		auto canvas = i->m_canvas.top();*/
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
 
 		UiImg* image = new UiImg();
 		image->margin = i->m_context.margin;
@@ -419,15 +407,18 @@ namespace SandCastle
 		image->sprite = spr;
 		image->size = image->sprite->GetDimensions();
 
-		i->NewElem(image, canvas);
+		i->NewElem(image, parent);
 		return image;
 	}
 
 	UiBtn* Ui::Button(std::string_view utf8)
 	{
 		auto i = Instance();
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Button without active canvas");
-		auto canvas = i->m_canvas.top();
+		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+		auto canvas = i->m_canvas.top();*/
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
 
 		UiBtn* button = new UiBtn();
 		button->root = Entity::Create();
@@ -453,7 +444,7 @@ namespace SandCastle
 			button->context.framePressed,
 			i->m_context.material,
 			i->m_context.layer);
-		i->NewElem(button, canvas);
+		i->NewElem(button, parent);
 		button->UpdateFrames();
 		RegisterHoverable(button);
 		return button;
@@ -471,8 +462,11 @@ namespace SandCastle
 	UiCheckbox* Ui::Checkbox(bool* value)
 	{
 		auto i = Instance();
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Checkbox without active canvas");
-		auto canvas = i->m_canvas.top();
+		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+		auto canvas = i->m_canvas.top();*/
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
 		ASSERT_LOG_ERROR((i->m_context.checkbox.texture != ""), "Trying to create Checkbox without checkbox sprite");
 
 		auto checkbox = new UiCheckbox();
@@ -502,7 +496,7 @@ namespace SandCastle
 		checkbox->size = spr->GetDimensions();
 		checkbox->margin = i->m_context.margin;
 		checkbox->clickable = true;
-		i->NewElem(checkbox, canvas);
+		i->NewElem(checkbox, parent);
 		checkbox->UpdateVisual();
 		RegisterHoverable(checkbox);
 		if (value != nullptr)

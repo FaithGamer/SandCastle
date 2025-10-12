@@ -61,7 +61,24 @@ namespace SandCastle
 		/*---Ui creation---*/
 
 		static UiCanvas* Begin(Vec2f size = { 0, 0 }, bool frame = true);
-		static UiTxt* Text(std::string_view utf8, float width = -1.f);
+		static UiTxt* Text(std::string_view utf8, float width = -1.f)
+		{
+			auto i = Instance();
+			/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+			auto canvas = i->m_canvas.top();*/
+			UiCanvas* parent = nullptr;
+			if (!i->m_canvas.empty())
+				parent = i->m_canvas.top();
+
+			//Instantiation
+			UiTxt* text = new UiTxt();
+			i->NewElem(text, parent);
+			text->context = i->m_context.text;
+			text->utf8 = utf8;
+			i->CreateText(text, utf8, width);
+
+			return text;
+		}
 		static UiTxt* TextLoc(const String& utf8, float width = -1.f);
 		template <typename... Ts>
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
@@ -240,17 +257,19 @@ namespace SandCastle
 	inline UiTxt* Ui::Text(std::string_view utf8, float width, Ts ...args)
 	{
 		auto i = Instance();
-		ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
-		auto canvas = i->m_canvas.top();
+		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
+		auto canvas = i->m_canvas.top();*/
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
 
 		//Instantiation
 		UiTxt* text = new UiTxt();
 		text->AddData(args...);
-		text->parent = canvas;
 		text->context = i->m_context.text;
 		text->utf8 = utf8;
+		i->NewElem(text, parent);
 		i->CreateText(text, text->Format(), width);
-		i->NewElem(text, canvas);
 		i->m_values.emplace_back(text);
 
 		return text;

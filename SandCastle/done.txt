@@ -514,18 +514,23 @@ October
 -sound as ui context button click
 -fixed mloading sound and memory allocation 
 
+9
+
+-the problem with font scaling is that font become blurry when resolution is 360p
+-Silver.tff and LanaPixel.tff are good candidates for being font
+-font now has a line height
+
 12
 
 -renamed OnFixedUpdate
 -Delegate discrimate by method name call arg and call free fun/method
 -post start
+-Add elem to already existing canvas
 
--adjust writer to have scaling bc some font doesn't comply with the way I create atlas
-(example, LanaPixel is a 11pt font, but I need to create it at 22px to make it right)
--the problem with font scaling is that font become blurry when resolution is 360p
--Silver.tff and LanaPixel.tff are good candidates for being font
--font now has a line height
-
+>we need elem order.
+>add text to canvas should re create text to set limit width
+>fix margin (see Ui::NewElem)
+>animated sprite in UI
 >check what is the line return behaviour with ja/cn
 >when lang is any lang that has different breaking rule (cn or ja)
 make it impossible to line return on the character that should not be at the beggining of a sentence

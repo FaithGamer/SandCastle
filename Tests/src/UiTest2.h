@@ -26,7 +26,8 @@ public:
 		Button();
 		Destroy();
 		Loca();
-		JALineR();
+	//	JALineR();
+		AddElem();
 
 
 		auto map = Inputs::CreateInputMap();
@@ -292,6 +293,23 @@ public:
 		r->SetPosition(Vec2f(0, 180.f));
 		Ui::Text((const char*)u8"母さ供過通換げ済八えか合巡じすっレ女手ネヱイ処国ト雄約スワリ条球ど置期こがて形申ヱカロ投掲ルコチ極供ごこゅ年鮮堪薫け。");
 		Ui::End();
+	}
+	UiCanvas* addelem = nullptr;
+	void AddElem()
+	{
+		Ui::Context("base");
+		Ui::SetRootAnchor(CanvasAnchor::TopCenter);
+		addelem = Ui::Begin(Vec2f(200, 0));
+		addelem->SetPosition(Vec2f(0, 180.f));
+		Ui::Text((const char*)u8"You can add elem");
+		auto btn = Ui::Button("Add");
+		btn->ListenClickReleased(&TestSys::OnAddElem, this);
+		Ui::End();
+	}
+	void OnAddElem(UiElem* signal)
+	{
+		auto t = Ui::Text("added element");
+		addelem->AddElem(t);
 	}
 	void OnFR(UiElem* signal)
 	{
