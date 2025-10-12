@@ -33,7 +33,7 @@ int main()
 	//Serialization();
 	//Benchmark1();
 	//Benchmark2(); //~190 -> 210
-	//Delegates();
+	Delegates();
 	//Signals();
 	//FontTest();
 	//LayerTest();
@@ -42,7 +42,7 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	UiTest2();
+	//UiTest2();
 	//RateTest();
 	//SoundTest();
 }

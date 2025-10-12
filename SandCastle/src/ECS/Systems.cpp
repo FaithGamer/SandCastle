@@ -111,7 +111,7 @@ namespace SandCastle
 			m_fixedUpdateAccumulator -= Time::fixedDelta;
 			for (auto& system : m_fixedUpdateSystems)
 			{
-				system.system->OnFixedUpdate();
+				system.system->FixedUpdate();
 			}
 			if (++i > m_maxFixedUpdate)
 			{
@@ -189,7 +189,7 @@ namespace SandCastle
 					m_eventSystems.push_back(system);
 					std::sort(m_eventSystems.begin(), m_eventSystems.end(), CompareSystemPriority());
 				}
-				if (usedMethodBitmask & System::Method::FixedUpdate)
+				if (usedMethodBitmask & System::Method::FixedUpdt)
 				{
 					m_fixedUpdateSystems.push_back(system);
 					std::sort(m_fixedUpdateSystems.begin(), m_fixedUpdateSystems.end(), CompareSystemPriority());
@@ -218,6 +218,10 @@ namespace SandCastle
 		for (auto& system : mustCallOnStart)
 		{
 			system.system->Start();
+		}
+		for (auto& system : mustCallOnStart)
+		{
+			system.system->PostStart();
 		}
 
 		m_pendingSystemIn.clear();

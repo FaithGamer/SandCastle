@@ -14,7 +14,7 @@ namespace SandCastle
 		typedef enum
 		{
 			Updt = 1,
-			FixedUpdate = 2,
+			FixedUpdt = 2,
 			Event = 4,
 			ImGui = 8,
 			LateUpdt = 16
@@ -22,15 +22,17 @@ namespace SandCastle
 
 		virtual ~System() {}
 
-		/// @brief Called when the system is pushed within Systems
+		/// @brief Called once when before update
 		virtual void Start() {}
+		/// @brief Called once when before update and after start
+		virtual void PostStart() {}
 
 		/// @brief Called as often as possible.
 		/// @param deltaTime Time elapsed since last call.
 		virtual void Update() {}
 
 		/// @brief Called on a fixed timestep.
-		virtual void OnFixedUpdate() {}
+		virtual void FixedUpdate() {}
 
 		/// @brief Called after every other Update/OnFixedUpdate
 		virtual void LateUpdate() {}
@@ -59,7 +61,7 @@ namespace SandCastle
 
 		/// @brief bitmask telling SandCastle wich method are being used.
 		/// overriding this will help the engine save some amount of CPU power.
-		virtual int GetUsedMethod() { return Updt | FixedUpdate | Event | ImGui | LateUpdt; }
+		virtual int GetUsedMethod() { return Updt | FixedUpdt | Event | ImGui | LateUpdt; }
 
 		/// @brief Higher priority will have it's methods called before lower priority
 		virtual int GetPriority() { return m_priority; }
