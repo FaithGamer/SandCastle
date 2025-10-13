@@ -32,6 +32,7 @@ namespace SandCastle
 			return utf8;
 		}
 		Signal<UiTxt*> langSignal;
+		String GetUtf8() const;
 	protected:
 		void OnLang(LangSignal* signal);
 		class Data

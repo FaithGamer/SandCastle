@@ -21,4 +21,9 @@ namespace SandCastle
 		langSignal.Send(this);
 	}
 
+	String UiTxt::GetUtf8() const
+	{
+		return utf8;
+	}
+
 }
