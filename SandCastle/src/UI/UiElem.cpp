@@ -8,8 +8,10 @@ namespace SandCastle
 	UiElem::~UiElem()
 	{
 		destroySignal.Send(this);
-		if(root.Valid())
-		root.Destroy();
+		if (root.Valid())
+			root.Destroy();
+		if (data.Valid())
+			data.Destroy();
 	}
 
 	UiElem::ID UiElem::GetID() const
@@ -24,8 +26,8 @@ namespace SandCastle
 
 	int UiElem::GetParentCount() const
 	{
-		if(parent == nullptr)
-		return 0;
+		if (parent == nullptr)
+			return 0;
 		int count = 1;
 		UiCanvas* p = parent->GetParent();
 		while (p != nullptr)
@@ -76,6 +78,16 @@ namespace SandCastle
 		auto tr = root.GetComponent<Transform>();
 		auto pos = tr->GetPosition();
 		hitbox = Rect(pos.x, pos.y, size.x, size.y);
+	}
+	void UiElem::SetData(Entity entt)
+	{
+		if (data.Valid())
+			data.Destroy();
+		data = entt;
+	}
+	Entity UiElem::GetData()
+	{
+		return data;
 	}
 	void UiElem::Move(Vec2f offset)
 	{

@@ -57,10 +57,10 @@ namespace SandCastle
 
 	void Ui::Update()
 	{
+		DestroyUpdate();
 		HoverableUpdate();
 		ValuesUpdate();
 		LayoutUpdate();
-		DestroyUpdate();
 	}
 
 	void Ui::LayoutUpdate()

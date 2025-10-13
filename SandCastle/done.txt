@@ -528,6 +528,10 @@ October
 -Add elem to already existing canvas
 -basic elem order
 
+13
+
+>UiElem arbitrary data with entity:
+~ entt.Destroy
 >need reordering:
 Canvas->SetOrder(elem, int)
 {
