@@ -46,6 +46,8 @@ namespace SandCastle
 		int GetParentCount() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
+		void SetData(Entity entt);
+		Entity GetData();
 
 		template<typename T>
 		void ListenHover(void(T::* listener)(UiElem* signal), T* obj)
@@ -91,6 +93,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		Entity data;
 		int order = -1;
 		State state = State::Idle;
 		UiCanvas* parent = nullptr;
