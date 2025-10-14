@@ -31,6 +31,7 @@ namespace SandCastle
 		m_context.material = uiMat;
 		m_context.layer = uiLayer;
 		m_writer = new Writer(m_context.material, m_context.layer);
+		m_interactionGroups[0] = true;
 	}
 
 	Ui::~Ui()
@@ -57,9 +58,9 @@ namespace SandCastle
 
 	void Ui::Update()
 	{
-		DestroyUpdate();
 		HoverableUpdate();
 		ValuesUpdate();
+		DestroyUpdate();
 		LayoutUpdate();
 	}
 
@@ -81,6 +82,24 @@ namespace SandCastle
 		auto ins = Instance();
 		for (int i = 0; i < m_destroy.size(); i++)
 		{
+			//Make sure the destroyed UI is not gonna try to update layout just after
+			for (auto it = m_layoutUpdate.begin(); it != m_layoutUpdate.end();)
+			{
+				if ((*it)->GetID() == m_destroy[i]->GetID())
+				{
+					m_layoutUpdate.erase(it++);
+				}
+				else
+				{
+					it++;
+				}
+			}
+			//If it was hovered, remove from hovered.
+			if (m_hovered != nullptr && m_destroy[i]->GetID() == m_hovered->GetID())
+			{
+				m_hovered->UnHover();
+				m_hovered = nullptr;
+			}
 			delete m_destroy[i];
 		}
 		m_destroy.clear();
@@ -643,7 +662,7 @@ namespace SandCastle
 	{
 		Instance()->m_context.canvas.padding = padding;
 	}
-	void Ui::SetCanvasSpacing(Vec2f spacing)
+	void Ui::SetSpacing(Vec2f spacing)
 	{
 		Instance()->m_context.canvas.spacing = spacing;
 	}

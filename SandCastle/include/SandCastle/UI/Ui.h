@@ -113,53 +113,53 @@ namespace SandCastle
 		/// @brief Later you can enable/disable interaction with specific groups
 		static void SetInteractionGroup(int group);
 		/// @brief Context setting.
-		/// Set the material that will be used for every subsequent ui creation
+		/// Set the material that will be used for ui creation
 		static void SetMaterial(Material* material);
 		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent text creation
+		/// Set the font that will be used for text creation
 		static void SetTextFont(String fancyName);
 		/// @brief Context setting.
-		/// Set the font that will be used for every subsequent button creation
+		/// Set the font that will be used for button creation
 		static void SetButtonFont(String fancyName);
 		/// @brief Context setting.
-		/// Set the color that will be sued for every subsequent text creation
+		/// Set the color that will be sued for text creation
 		static void SetTextColor(Color color);
 		/// @brief Context setting.
-		/// Set the text color that will be used for every subsequent button creation 
+		/// Set the text color that will be used for button creation 
 		static void SetButtonTextColor(Color color);
 		/// @brief Context setting.
 		/// Set the padding (space between button text, and button edges)
-		/// that will be used for every subsequent button creation.
+		/// that will be used for  button creation.
 		static void SetButtonPadding(Vec2f padding);
 		/// @brief Context setting.
-		/// Set the layer that will be used for every subsequent ui creation
+		/// Set the layer that will be used for ui creation
 		static void SetLayer(LayerID layer);
 		/// @brief Context setting.
-		/// Set the frame that will be used for every subsequent canvas creation
+		/// Set the frame that will be used for canvas creation
 		static void SetCanvasFrame(String texture);
 		/// @brief Context setting.
-		/// Set the padding for every subsequent canvas creation
+		/// Set the padding for  canvas creation
 		static void SetCanvasPadding(Vec2f padding);
 		/// @brief Context setting.
-		/// Set spacing between element inside every subsequent canvases.
-		static void SetCanvasSpacing(Vec2f spacing);
+		/// Set spacing between element inside canvases.
+		static void SetSpacing(Vec2f spacing);
 		/// @brief Context setting.
-		/// Set the layout direction for every subsequent canvas creation
+		/// Set the layout direction for  canvas creation
 		static void SetCanvasLayoutDir(LayoutDir dir);
 		/// @brief Context setting.
-		/// Set the horizontal alignement of element inside every subsequent canvases
+		/// Set the horizontal alignement of element inside canvases
 		static void SetCanvasLayoutAlignH(LayoutAlign alignH);
 		/// @brief Context setting.
-		/// Set the vertical alignement of element inside every subsequent canvases
+		/// Set the vertical alignement of element inside canvases
 		static void SetCanvasLayoutAlignV(LayoutAlign alignV);
 		/// @brief Context setting.
-		/// Set the frame that will be used for every subsequent button creation
+		/// Set the frame that will be used for button creation
 		static void SetButtonFrame(String texture);
 		/// @brief Context setting.
-		/// Set the frame that will be used for every subsequent button creation
+		/// Set the frame that will be used for button creation
 		static void SetButtonFrameHover(String texture);
 		/// @brief Context setting.
-		/// Set the frame that will be used for every subsequent button creation
+		/// Set the frame that will be used for  button creation
 		static void SetButtonFramePressed(String texture);
 		static void SetButtonPressSound(Sound* sound);
 		static void SetButtonReleaseSound(Sound* sound);
@@ -168,10 +168,10 @@ namespace SandCastle
 		/// respecting this order: unchecked, hovered, checked
 		static void SetCheckboxSprites(String texture);
 		/// @brief Context setting.
-		/// Set the text alignement that will be used for every subsequent text creation
+		/// Set the text alignement that will be used for  text creation
 		static void SetTextAlign(TextAlign textAlign);
 		/// @brief Context setting.
-		/// Set the margin that will be used for every subsequent element creation.
+		/// Set the margin that will be used for  element creation.
 		static void SetMargin(Vec2f margin);
 		/// @brief Context setting.
 		// Set the margin that will be used for every root canvas (non nested canvas).

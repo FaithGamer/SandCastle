@@ -536,6 +536,7 @@ October
 
 -custom canvas Z order (with context)
 -block interaction with canvas
+-clean update layout and m_hovered when destroy
 
 				
 

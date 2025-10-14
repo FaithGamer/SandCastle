@@ -88,7 +88,7 @@ public:
 		r->SetPosition(Vec2f(320, 180));
 		Ui::Text("Checkboxes");
 		Ui::Context("base");
-		Ui::SetCanvasSpacing(2.f);
+		Ui::SetSpacing(2.f);
 		Ui::SetCanvasPadding(0.f);
 
 		Ui::Begin(0.f, false);//checkboxes
@@ -368,7 +368,7 @@ void UiTest2()
 	Ui::SetRootMargin(2.f);
 	Ui::SetCanvasFrame("frame.png");
 	Ui::SetCanvasLayoutDir(LayoutDir::TopDown);
-	Ui::SetCanvasSpacing(3.f);
+	Ui::SetSpacing(3.f);
 	Ui::SetTextColor(Color::Black);
 	Ui::SetTextFont("p");
 	Ui::SetButtonFont("h2");
