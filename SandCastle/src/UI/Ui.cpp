@@ -861,6 +861,8 @@ namespace SandCastle
 
 	void Ui::DestroyHelper(UiElem* elem)
 	{
+		if (elem == nullptr)
+			return;
 		Instance()->m_destroy.emplace_back(elem);
 	}
 
