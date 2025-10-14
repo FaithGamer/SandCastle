@@ -50,8 +50,10 @@ namespace SandCastle
 		TextContext text;
 		Vec2f margin = Vec2f(0.f, 0.f);
 		Vec2f rootMargin = Vec2f(0.f, 0.f);
-		LayerID layer;
-		Material* material;
+		LayerID layer = 0;
+		Material* material = nullptr;
 		CanvasAnchor rootAnchor = CanvasAnchor::MiddleCenter;
+		float z = 0.f;
+		int interactionGroup = 0;
 	};
 }

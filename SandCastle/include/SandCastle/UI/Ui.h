@@ -107,6 +107,11 @@ namespace SandCastle
 		/// @brief Set the context for every subsequent canvas/element creation.
 		/// The context must have been snapshoted with SnapshotContext.
 		static void Context(String name);
+		/// @brief Lower is in front of higher.
+		/// @param z position for visual sorting.
+		static void SetOrder(float z);
+		/// @brief Later you can enable/disable interaction with specific groups
+		static void SetInteractionGroup(int group);
 		/// @brief Context setting.
 		/// Set the material that will be used for every subsequent ui creation
 		static void SetMaterial(Material* material);
@@ -181,6 +186,17 @@ namespace SandCastle
 
 		/*---Utility---*/
 
+		/// @brief Enable an interaction group
+		/// @param group 
+		static void EnableGroup(int group);
+		/// @brief Disable an interaction group
+		/// @param group 
+		static void DisableGroup(int group);
+		/// @brief Keep only one interaction group
+		/// @param group 
+		static void DisableAllGroupBut(int group);
+		/// @brief Enable all interaction group
+		static void EnableAllGroups();
 		/// @brief Convert UI position to world position
 		static Vec3f UiToWorld(Vec2f uiPos);
 		/// @brief Convert world position to UI position
@@ -251,6 +267,7 @@ namespace SandCastle
 		float m_ppu = 1.f / 360.f;
 		static UiElem::ID m_nextId;
 		const float zStep = 1.f;
+		std::unordered_map<int, bool> m_interactionGroups;
 
 	};
 	template<typename ...Ts>

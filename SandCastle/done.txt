@@ -530,13 +530,13 @@ October
 
 13
 
->UiElem arbitrary data with entity:
-~ entt.Destroy
->need reordering:
-Canvas->SetOrder(elem, int)
-{
-	each(elem.order >= int) : elem.order++
-}
+-arbitrary data
+
+14
+
+-custom canvas Z order (with context)
+-block interaction with canvas
+
 				
 
 >add text to canvas should re create text to set limit width

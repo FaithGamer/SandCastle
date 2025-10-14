@@ -148,8 +148,10 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
-		if (m_hovered != nullptr && !m_hovered->IsInside(MousePos()))
+		if (m_hovered != nullptr && (!m_hovered->IsInside(MousePos()) 
+			|| !m_interactionGroups[m_hovered->interactionGroup]))
 		{
+			//Mouse is no longer inside OR interaction group has been disabled
 			m_hovered->UnHover();
 			m_hovered = nullptr;
 		}
@@ -158,6 +160,8 @@ namespace SandCastle
 		for (int i = 0; i < m_hoverables.size(); i++)
 		{
 			auto candidate = m_hoverables[i];
+			if (!m_interactionGroups[candidate->interactionGroup])
+				continue; //Ignore elements of disabled interaction group
 			if (candidate->IsInside(MousePos()))
 			{
 				candidate->Hover();
@@ -222,11 +226,10 @@ namespace SandCastle
 	void Ui::NewElem(UiElem* elem, UiCanvas* canvas)
 	{
 		auto id = m_nextId++;
+		elem->interactionGroup = m_context.interactionGroup;
 		elem->id = id;
-		//elem->margin = m_context.rootMargin;
 		if (canvas != nullptr)
 		{
-			//elem->margin = m_context.margin;
 			canvas->AddElem(elem);
 		}
 		elem->destroySignal.Listen(&Ui::OnDestroy, this);
@@ -307,6 +310,9 @@ namespace SandCastle
 		size.x = size.x > canvas->sizeLimit.x ? canvas->sizeLimit.x : size.x;
 		size.y = size.y > canvas->sizeLimit.y ? canvas->sizeLimit.y : size.y;
 		canvas->size = size;
+		canvas->z = i->m_context.z;
+		if (parent == nullptr)
+			canvas->margin = i->m_context.rootMargin;
 		i->NewElem(canvas, parent);
 		i->m_canvas.push(canvas);
 		canvas->mustUpdateSignal.Listen(&Ui::OnCanvasMustUpdate, i.get(), SignalPriority::high);
@@ -580,6 +586,19 @@ namespace SandCastle
 		}
 		i->m_context = it->second;
 	}
+	void Ui::SetOrder(float z)
+	{
+		Instance()->m_context.z = z;
+	}
+	void Ui::SetInteractionGroup(int group)
+	{
+		auto i = Instance();
+		i->m_context.interactionGroup = group;
+		auto f_it = i->m_interactionGroups.find(group);
+		if (f_it == i->m_interactionGroups.end())
+			i->m_interactionGroups[group] = true;
+
+	}
 	void Ui::SetMaterial(Material* material)
 	{
 		material->SetFloat("uPpu", Instance()->m_ppu * 2.f);
@@ -683,6 +702,54 @@ namespace SandCastle
 	void Ui::ResetMaterial(Material* material)
 	{
 		Instance()->m_context.material = Instance()->m_defaultMaterial;
+	}
+	void Ui::EnableGroup(int group)
+	{
+		auto i = Instance();
+		auto f_it = i->m_interactionGroups.find(group);
+		if (f_it == i->m_interactionGroups.end())
+		{
+			LOG_ERROR("EnableGroup, interaction group {0}, doesn't exists");
+			return;
+		}
+		f_it->second = true;
+	}
+	void Ui::DisableGroup(int group)
+	{
+		auto i = Instance();
+		auto f_it = i->m_interactionGroups.find(group);
+		if (f_it == i->m_interactionGroups.end())
+		{
+			LOG_ERROR("DisableGroup, interaction group {0}, doesn't exists");
+			return;
+		}
+		f_it->second = false;
+	}
+	void Ui::DisableAllGroupBut(int group)
+	{
+		auto i = Instance();
+		auto f_it = i->m_interactionGroups.find(group);
+		if (f_it == i->m_interactionGroups.end())
+		{
+			LOG_ERROR("DisableAllGroupBut, interaction group {0}, doesn't exists");
+		}
+		else
+		{
+			f_it->second = true;
+		}
+		for (auto& g : i->m_interactionGroups)
+		{
+			if(g.first != group)
+				g.second = false;
+		}
+	}
+	void Ui::EnableAllGroups()
+	{
+		auto i = Instance();
+		for (auto& g : i->m_interactionGroups)
+		{
+			g.second = true;
+		}
 	}
 	Vec3f Ui::UiToWorld(Vec2f uiPos)
 	{

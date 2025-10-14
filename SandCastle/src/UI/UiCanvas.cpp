@@ -102,6 +102,7 @@ namespace SandCastle
 
 	void UiCanvas::AddElem(UiElem* elem)
 	{
+		elem->margin = 0; // should be margin
 		if (elem->parent != nullptr)
 		{
 			elem->parent->RemoveElem(elem);

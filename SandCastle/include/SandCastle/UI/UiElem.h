@@ -93,6 +93,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		int interactionGroup = 0;
 		Entity data;
 		int order = -1;
 		State state = State::Idle;
