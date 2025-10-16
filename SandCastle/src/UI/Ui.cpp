@@ -79,29 +79,22 @@ namespace SandCastle
 	}
 	void Ui::DestroyUpdate()
 	{
+		if (m_destroy.empty())
+			return;
 		auto ins = Instance();
+
 		for (int i = 0; i < m_destroy.size(); i++)
 		{
-			//Make sure the destroyed UI is not gonna try to update layout just after
-			for (auto it = m_layoutUpdate.begin(); it != m_layoutUpdate.end();)
-			{
-				if ((*it)->GetID() == m_destroy[i]->GetID())
-				{
-					m_layoutUpdate.erase(it++);
-				}
-				else
-				{
-					it++;
-				}
-			}
 			//If it was hovered, remove from hovered.
 			if (m_hovered != nullptr && m_destroy[i]->GetID() == m_hovered->GetID())
 			{
 				m_hovered->UnHover();
 				m_hovered = nullptr;
 			}
+
 			delete m_destroy[i];
 		}
+		
 		m_destroy.clear();
 	}
 	void RemoveHelper(std::vector<UiElem*>& container, UiElem::ID id)
@@ -167,7 +160,7 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
-		if (m_hovered != nullptr && (!m_hovered->IsInside(MousePos()) 
+		if (m_hovered != nullptr && (!m_hovered->IsInside(MousePos())
 			|| !m_interactionGroups[m_hovered->interactionGroup]))
 		{
 			//Mouse is no longer inside OR interaction group has been disabled
@@ -758,7 +751,7 @@ namespace SandCastle
 		}
 		for (auto& g : i->m_interactionGroups)
 		{
-			if(g.first != group)
+			if (g.first != group)
 				g.second = false;
 		}
 	}
@@ -863,6 +856,9 @@ namespace SandCastle
 	{
 		if (elem == nullptr)
 			return;
+		if (elem->IsDestroyed())
+			return;
+		elem->destroyed = true;
 		Instance()->m_destroy.emplace_back(elem);
 	}
 

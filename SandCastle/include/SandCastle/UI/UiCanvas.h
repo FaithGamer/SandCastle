@@ -40,12 +40,12 @@ namespace SandCastle
 		Signal<UiCanvas*> mustUpdateSignal;
 	private:
 		friend Ui;
-		bool destroyed = false;
 		void OnChildMustUpdate(UiCanvas* child);
 		void OnDestroy(UiElem* elem);
 		void UpdateLayout();
 		Vec2f AnchorOffset() const;
 	private:
+		bool hasDestroyed = false;
 		CanvasContext context;
 		std::optional<UiFrame> frame;
 		Bitmask8 fixedSize = 0;

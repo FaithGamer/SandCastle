@@ -89,6 +89,10 @@ namespace SandCastle
 	{
 		return data;
 	}
+	bool UiElem::IsDestroyed() const
+	{
+		return parent == nullptr ? destroyed : (destroyed || parent->IsDestroyed());
+	}
 	void UiElem::Move(Vec2f offset)
 	{
 		SetPosition(position + offset);

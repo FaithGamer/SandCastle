@@ -538,6 +538,10 @@ October
 -block interaction with canvas
 -clean update layout and m_hovered when destroy
 
+16
+
+-canvas about to destroy will no longer be added in must update
+-m_destroy should no longer contain double entry
 				
 
 >add text to canvas should re create text to set limit width

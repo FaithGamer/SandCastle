@@ -7,7 +7,7 @@ namespace SandCastle
 {
 	UiCanvas::~UiCanvas()
 	{
-		destroyed = true;
+		hasDestroyed = true;
 		for (auto& child : children)
 		{
 			delete child.second;
@@ -16,7 +16,7 @@ namespace SandCastle
 
 	void UiCanvas::MustUpdate()
 	{
-		if (!mustUpdate)
+		if (!mustUpdate && !hasDestroyed && !IsDestroyed())
 		{
 			mustUpdate = true;
 			mustUpdateSignal.Send(this);
@@ -140,7 +140,7 @@ namespace SandCastle
 	void UiCanvas::OnDestroy(UiElem* elem)
 	{
 		//When a children gets destroyed
-		if (destroyed)
+		if (hasDestroyed)
 			return;
 		children.erase(elem->id);
 		MustUpdate();

@@ -48,6 +48,7 @@ namespace SandCastle
 		void ComputeHitbox();
 		void SetData(Entity entt);
 		Entity GetData();
+		bool IsDestroyed() const;
 
 		template<typename T>
 		void ListenHover(void(T::* listener)(UiElem* signal), T* obj)
@@ -93,6 +94,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		bool destroyed = false;
 		int interactionGroup = 0;
 		Entity data;
 		int order = -1;
