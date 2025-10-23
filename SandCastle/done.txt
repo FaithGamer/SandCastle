@@ -547,7 +547,7 @@ October
 22
 
 -Systems::Push returns the created system
-
+-math vec to angle rotation fixed
 
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)
