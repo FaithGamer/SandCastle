@@ -28,7 +28,15 @@ namespace SandCastle
 	struct Animator
 	{
 		void SetAnimation(String animation);
+		/// @brief Add an animation to be played later at any time.
+		/// @param stateName The state name to reference this animation
+		/// @param animation the animation pointer
+		/// @param transition The state to transition to when the animation end, leave empty to loop.
 		void AddAnimation(String stateName, Animation* animation, String transition = "");
+		/// @brief Add an animation to be played later at any time.
+		/// @param stateName The state name to reference this animation
+		/// @param animation The asset file name
+		/// @param transition The state to transition to when the animation end, leave empty to loop.
 		void AddAnimation(String stateName, String animation, String transition = "");
 		std::map<String, AnimationState> animations;
 		AnimationState* currentState = nullptr;
