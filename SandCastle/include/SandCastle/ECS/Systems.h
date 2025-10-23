@@ -65,26 +65,28 @@ namespace SandCastle
 		/// @tparam ...Args 
 		/// @param ...args 
 		template <typename SystemType, typename... Args>
-		static void Push(Args&&... args)
+		static SystemType* Push(Args&&... args)
 		{
-			System* system = new SystemType(std::forward<Args>(args)...);
+			SystemType* system = new SystemType(std::forward<Args>(args)...);
 			if (system->GetPriority() == 0)
 			{
 				//Priority based on push order
 				system->SetPriority(-(++Systems::Instance()->m_pushCount));
 			}
 			Systems::Instance()->m_pendingSystemIn.push_back(SystemIdPriority(system, TypeId::GetId<SystemType>(), system->GetPriority()));
+			return system;
 		}
 		template <typename SystemType>
-		static void Push()
+		static SystemType* Push()
 		{
-			System* system = new SystemType;
+			SystemType* system = new SystemType;
 			if (system->GetPriority() == 0)
 			{
 				//Priority based on push order
 				system->SetPriority(-(++Systems::Instance()->m_pushCount));
 			}
 			Systems::Instance()->m_pendingSystemIn.push_back(SystemIdPriority(system, TypeId::GetId<SystemType>(), system->GetPriority()));
+			return system;
 		}
 		template <typename SystemType>
 		static SystemType* Get()
@@ -92,8 +94,7 @@ namespace SandCastle
 			auto ins = Instance();
 			int32_t typeId = TypeId::GetId<SystemType>();
 			auto system = ins->m_allSystems.find(typeId);
-			if (system == ins->m_allSystems.end())
-				return nullptr;
+			ASSERT_LOG_ERROR((system != ins->m_allSystems.end()), "System doesn't exists!");
 			return static_cast<SystemType*>(system->second);
 		}
 		template <typename SystemType>

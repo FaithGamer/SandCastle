@@ -542,7 +542,12 @@ October
 
 -canvas about to destroy will no longer be added in must update
 -m_destroy should no longer contain double entry
-				
+		
+		
+22
+
+-Systems::Push returns the created system
+
 
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)

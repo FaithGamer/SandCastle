@@ -40,7 +40,6 @@ namespace SandCastle
 		/// @brief This is where you can create ImGui elements
 		/// Warning! Contrarlily to all the other virtual method (including OnLateUpdate)
 		/// This is called from the rendering thread.
-		/// 
 		virtual void OnImGui() {}
 
 		/// @brief Called every time an SDL_Event is received, if no other system has processed the event.
