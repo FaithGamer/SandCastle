@@ -17,3 +17,6 @@
 #include <random>
 #include <initializer_list>
 #include <math.h>
+#include <SDL3/SDL.h>
+#include <glad/glad.h>
+#include <box2D/box2d.h>
