@@ -549,6 +549,10 @@ October
 -Systems::Push returns the created system
 -math vec to angle rotation fixed
 
+24
+
+-fix memory leak minimized
+
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)
 >animated sprite in UI

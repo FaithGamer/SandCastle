@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SandCastle/Render/SpriteRenderSystem.h"
 #include "SandCastle/Render/Renderer2D.h"
-
+#include "SandCastle/Render/Window.h"
 namespace SandCastle
 {
 	struct OrderedSpriteTransform
@@ -39,7 +39,8 @@ namespace SandCastle
 	{
 		sptr<Renderer2D> renderer = Renderer2D::Instance();
 		auto group = Entity::registry.group<SpriteRender, Transform>();
-
+		if (Window::GetMinimized())
+			return;
 		group.each([&](Entity e, SpriteRender& sprite, Transform& tr)
 			{
 				if (sprite.GetSprite() == nullptr)
