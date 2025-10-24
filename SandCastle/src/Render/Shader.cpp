@@ -19,7 +19,7 @@ namespace SandCastle
 
 
 
-	void shaderCompilationError(uint32_t shader)
+	void shaderCompilationError(uint32_t shader, String file, int type)
 	{
 		GLint success;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -31,7 +31,22 @@ namespace SandCastle
 
 			std::vector<GLchar> infoLog(maxLength);
 			glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-			LOG_ERROR("Shader compilation failed " + std::string(&infoLog[0]));
+			String typeStr;
+			switch (type)
+			{
+			case 0:
+				typeStr = "vertex";
+				break;
+			case 1:
+				typeStr = "fragment";
+				break;
+			case 2:
+				typeStr = "geometry";
+				break;
+			default:
+				break;
+			}
+			LOG_ERROR("Shader compilation failed {0}\nfile: {1}\ntype: {2}", std::string(&infoLog[0]), file, typeStr);
 		}
 	}
 
@@ -56,8 +71,9 @@ namespace SandCastle
 		String vertex = vertexAndFrag.find_first_of(#fragment)
 	}*/
 
-	Shader::Shader(std::string vertexSource, std::string fragmentSource)
+	Shader::Shader(std::string vertexSource, std::string fragmentSource, std::string name)
 	{
+		m_name = name;
 		m_id = m_currentId++;
 		//Load shader source files
 		const GLchar* vertexSrc = (const GLchar*)vertexSource.c_str();
@@ -67,12 +83,12 @@ namespace SandCastle
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexSrc, NULL);
 		glCompileShader(vertexShader);
-		shaderCompilationError(vertexShader);
+		shaderCompilationError(vertexShader, m_name, 0);
 
 		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragmentShader, 1, &fragmentSrc, NULL);
 		glCompileShader(fragmentShader);
-		shaderCompilationError(fragmentShader);
+		shaderCompilationError(fragmentShader, m_name, 1);
 
 		m_glid = glCreateProgram();
 		glAttachShader(m_glid, vertexShader);
@@ -85,8 +101,9 @@ namespace SandCastle
 
 	}
 
-	Shader::Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource)
+	Shader::Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource, std::string name)
 	{
+		m_name = name;
 		m_id = m_currentId++;
 		//Load shader source files
 		const GLchar* vertexSrc = (const GLchar*)vertexSource.c_str();
@@ -97,17 +114,17 @@ namespace SandCastle
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertexShader, 1, &vertexSrc, NULL);
 		glCompileShader(vertexShader);
-		shaderCompilationError(vertexShader);
+		shaderCompilationError(vertexShader, m_name, 0);
 
 		GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		glShaderSource(geometryShader, 1, &geometrySrc, NULL);
 		glCompileShader(geometryShader);
-		shaderCompilationError(geometryShader);
+		shaderCompilationError(geometryShader, m_name, 2);
 
 		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragmentShader, 1, &fragmentSrc, NULL);
 		glCompileShader(fragmentShader);
-		shaderCompilationError(fragmentShader);
+		shaderCompilationError(fragmentShader, m_name, 1);
 
 		m_glid = glCreateProgram();
 		glAttachShader(m_glid, vertexShader);

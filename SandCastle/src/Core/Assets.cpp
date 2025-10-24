@@ -426,11 +426,11 @@ namespace SandCastle
 
 			if (geomSrc == "")
 			{
-				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, fragSrc))).first->second.m_name = assetName;
+				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, fragSrc, assetName)));
 			}
 			else
 			{
-				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, geomSrc, fragSrc))).first->second.m_name = assetName;
+				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, geomSrc, fragSrc, assetName)));
 			}
 
 		}
