@@ -39,7 +39,11 @@ namespace SandCastle
 		template <typename... Component>
 		static void DestroyAll()
 		{
-			registry.clear<Component...>();
+			auto view = View<Component...>();
+			view.each([&](auto entity, auto&...)
+				{
+					registry.destroy(entity);
+				});
 		}
 
 		/// @brief Create a view over entities having Component

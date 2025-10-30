@@ -553,6 +553,13 @@ October
 
 -fix memory leak minimized
 
+28
+
+-fixed Entity::DestroyAll
+
+30
+
+
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)
 >animated sprite in UI
