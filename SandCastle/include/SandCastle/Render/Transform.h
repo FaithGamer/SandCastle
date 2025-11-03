@@ -10,7 +10,7 @@ namespace SandCastle
 	class Transform
 	{
 	public:
-		Transform(Transform&& transform) noexcept;
+		//Transform(Transform&& transform) noexcept;
 		//Transform(Transform& transform);
 		Transform();
 		Transform(Vec3f translation, Vec2f scale, float angle);
@@ -30,9 +30,9 @@ namespace SandCastle
 		void Scale(float x, float y);
 		void Rotate(float angleDegrees);
 
-		Transform operator+(const Transform& trans);
-		Transform& operator+=(const Transform& trans);
-		Transform& operator=(const Transform& trans);
+		//Transform operator+(const Transform& trans);
+		//Transform& operator+=(const Transform& trans);
+	//	Transform& operator=(const Transform& trans);
 
 		inline Vec3f GetPosition() const
 		{

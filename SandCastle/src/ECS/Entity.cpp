@@ -2,7 +2,7 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/Render/Transform.h"
-
+#include "SandCastle/Render/SpriteRender.h"
 namespace SandCastle
 {
 	entt::registry Entity::registry = entt::registry();
@@ -39,19 +39,20 @@ namespace SandCastle
 		}
 
 		entity.Unparent();
-		entity.AddComponent<Parent>()->parent = m_id;
+		entity.AddGet<Parent>()->parent = m_id;
 
-		auto children = AddComponent<Children>();
+		auto children = AddGet<Children>();
 		children->children.insert(entity.m_id);
 
-		auto transformChildren = entity.AddComponent<Transform>();
+		entity.Add<Transform>();
+		auto transformChildren = entity.Get<Transform>();
 		transformChildren->SetParent(m_id);
 
 	}
 
 	void Entity::RemoveChild(EntityId entity)
 	{
-		auto children = GetComponent<Children>();
+		auto children = Get<Children>();
 
 		if (children == nullptr)
 		{
@@ -71,16 +72,16 @@ namespace SandCastle
 
 	void Entity::Unparent()
 	{
-		auto transform = GetComponent<Transform>();
+		auto transform = Get<Transform>();
 		if (transform != nullptr)
 		{
 			transform->RemoveParent();
 		}
-		auto parent = GetComponent<Parent>();
+		auto parent = Get<Parent>();
 		if (parent != nullptr)
 		{
 			Entity(parent->parent).JustRemoveChild(m_id);
-			RemoveComponent<Parent>();
+			Remove<Parent>();
 		}
 	}
 
@@ -91,7 +92,7 @@ namespace SandCastle
 
 	Transform* Entity::gtr()
 	{
-		return GetComponent<Transform>();
+		return Get<Transform>();
 	}
 
 	void Entity::Destroy()
@@ -104,7 +105,7 @@ namespace SandCastle
 			return;
 		}
 
-		auto children = GetComponent<Children>();
+		auto children = Get<Children>();
 		if (children != nullptr)
 		{
 			for (auto& child : children->children)
@@ -125,7 +126,7 @@ namespace SandCastle
 			return;
 		}
 
-		auto children = GetComponent<Children>();
+		auto children = Get<Children>();
 		if (children != nullptr)
 		{
 			for (auto& child : children->children)
@@ -140,25 +141,25 @@ namespace SandCastle
 
 	void Entity::JustUnparent()
 	{
-		auto transform = GetComponent<Transform>();
+		auto transform = Get<Transform>();
 		if (transform != nullptr)
 		{
 			transform->RemoveParent();
 			return;
 		}
-		RemoveComponent<Parent>();
+		Remove<Parent>();
 	}
 
 	void Entity::JustRemoveChild(EntityId id)
 	{
-		auto children = GetComponent<Children>();
+		auto children = Get<Children>();
 		if (children == nullptr)
 			return;
 
 		children->children.erase(id);
 		if (children->children.empty())
 		{
-			RemoveComponent<Children>();
+			Remove<Children>();
 		}
 	}
 }

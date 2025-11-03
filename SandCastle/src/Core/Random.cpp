@@ -41,8 +41,18 @@ namespace SandCastle
 		float Range(float min, float max)
 		{
 			//static std::default_random_engine generator;
-			std::uniform_int_distribution<int64_t> dist((int64_t)(min * 10000), (int64_t)(max * 10000));
-			return (float)dist(generator) * 0.0001f;
+			std::uniform_int_distribution<int64_t> dist((int64_t)(min * 10000.), (int64_t)(max * 10000.));
+			return (float)dist(generator) * 0.0001;
+		}
+		/// @brief /!\ max precision 0.0001
+		/// @param min 
+		/// @param max 
+		/// @return random range between min and max.
+		double Range(double min, double max)
+		{
+			//static std::default_random_engine generator;
+			std::uniform_int_distribution<int64_t> dist((int64_t)(min * 10000.), (int64_t)(max * 10000.));
+			return (double)dist(generator) * 0.0001;
 		}
 	}
 }

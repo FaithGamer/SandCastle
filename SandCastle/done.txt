@@ -559,6 +559,14 @@ October
 
 30
 
+03
+
+- simplified entity interface.
+- enforce usage of Add instead of Add get for Transform and SpriteRender (but still you can shoot yourself in the foot)
+
+
+>enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers
+in the case of user Get<Transform> before Add<SpriteRender> or vice versa
 
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)

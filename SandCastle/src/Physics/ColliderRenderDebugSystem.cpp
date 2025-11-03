@@ -12,8 +12,8 @@ namespace SandCastle
 		SetPriority(-9999);
 
 		//Will add a collider render for each new body
-		//ListenAddComponent<KinematicBody>(&ColliderRenderDebugSystem::OnAddKinematicBody);
-		//ListenAddComponent<StaticBody>(&ColliderRenderDebugSystem::OnAddStaticBody);
+		//ListenAddGet<KinematicBody>(&ColliderRenderDebugSystem::OnAddKinematicBody);
+		//ListenAddGet<StaticBody>(&ColliderRenderDebugSystem::OnAddStaticBody);
 	}
 
 	void AddColliderRender(Entity bodyEntt, KinematicBody* body)
@@ -22,8 +22,8 @@ namespace SandCastle
 		for (int i = 0; i < colliders->size(); i++)
 		{
 			Entity wireEntt = Entity::Create();
-			wireEntt.AddComponent<ColliderRender>(&*(*colliders)[i]);
-			wireEntt.AddComponent<Transform>();
+			wireEntt.AddGet<ColliderRender>(&*(*colliders)[i]);
+			wireEntt.Add<Transform>();
 			bodyEntt.AddChild(wireEntt);
 		}
 	}
@@ -35,8 +35,8 @@ namespace SandCastle
 		{
 			
 			Entity wireEntt = Entity::Create();
-			wireEntt.AddComponent<ColliderRender>(&*(*colliders)[i]);
-			wireEntt.AddComponent<Transform>();
+			wireEntt.AddGet<ColliderRender>(&*(*colliders)[i]);
+			wireEntt.Add<Transform>();
 			bodyEntt.AddChild(wireEntt);
 		}
 	}
@@ -79,7 +79,7 @@ namespace SandCastle
 
 	void ColliderRenderDebugSystem::OnRemove()
 	{
-		StopListenAddComponent<Body>();
+		StopListenAddGet<Body>();
 		ForeachEntities<ColliderRender>([](Entity entity, ColliderRender& collider)
 			{
 				entity.Destroy();
@@ -92,13 +92,13 @@ namespace SandCastle
 		{
 			Entity entity(*it);
 			if (entity.Valid())
-				AddColliderRender(entity, entity.GetComponentNoCheck<KinematicBody>());
+				AddColliderRender(entity, entity.GetNoCheck<KinematicBody>());
 		}
 		for (auto it = m_newStaticBodies.begin(); it != m_newStaticBodies.end(); it++)
 		{
 			Entity entity(*it);
 			if(entity.Valid())
-				AddColliderRender(entity, entity.GetComponentNoCheck<StaticBody>());
+				AddColliderRender(entity, entity.GetNoCheck<StaticBody>());
 		}
 		m_newKinematicBodies.clear();
 		m_newStaticBodies.clear();*/

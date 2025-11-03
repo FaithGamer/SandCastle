@@ -13,8 +13,8 @@ namespace SandCastle
 	{
 		position = pos;
 		//Offset sprite to make top left anchor no matter the sprite origin
-		auto tr = root.GetComponent<Transform>();
-		auto rd = root.GetComponent<SpriteRender>();
+		auto tr = root.Get<Transform>();
+		auto rd = root.Get<SpriteRender>();
 		auto spr = rd->GetSprite();
 		auto dim = spr->GetDimensions();
 		Vec2f offset = {

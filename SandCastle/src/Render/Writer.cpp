@@ -291,7 +291,7 @@ namespace SandCastle
 		EnsureGlyphs(font, cps);
 		Sentence sent;
 		sent.root = Entity::Create();
-		sent.root.AddComponent<Transform>();
+		sent.root.Add<Transform>();
 
 		Vec2f pen(0.f, 0.f); // baseline origin
 		const float ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit() * font.scale;
@@ -378,12 +378,14 @@ namespace SandCastle
 				);
 				pos.y += (float)font.size * ppu * m_adjustLine;
 				Entity e = Entity::Create();
-				auto tr = e.AddComponent<Transform>();
+				e.Add<Transform>();
+				auto ch = e.AddGet<Character>();
+				ch->originalPosition = pos;
+				e.Add<SpriteRender>();
+				auto tr = e.Get<Transform>();
+				auto sr = e.Get<SpriteRender>();
 				tr->SetScale(font.scale);
 				tr->SetPosition(pos);
-				auto ch = e.AddComponent<Character>();
-				ch->originalPosition = pos;
-				auto sr = e.AddComponent<SpriteRender>();
 				sr->SetMaterial(material->GetID());
 				sr->SetSprite(g.sprite.get());
 				sr->SetLayer(layer);

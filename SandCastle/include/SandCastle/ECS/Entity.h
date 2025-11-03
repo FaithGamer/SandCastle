@@ -6,6 +6,7 @@
 namespace SandCastle
 {
 	class Transform;
+	class SpriteRender;
 
 	/// @brief For internal use, makes the entity a parent
 	struct Children
@@ -68,20 +69,33 @@ namespace SandCastle
 		/// @brief Add a component if it doesn't exists yet.
 		/// @param args Parameters for the component constructor.
 		/// @return Added component, or the one already in place.
-		template <typename Component, typename... Args>
-		Component* AddComponent(Args&&... args)
+		template<typename Component, typename... Args>
+		Component* AddGet(Args&&... args)
 		{
-			if (!Valid())
-			{
+			static_assert(!std::is_same_v<std::remove_cvref_t<Component>, Transform>,
+				"Use Add() for Transform.  Don't get until SpriteRender has been added");
+			static_assert(!std::is_same_v<std::remove_cvref_t<Component>, SpriteRender>,
+				"Use Add() for SpriteRender. Don't get until Transform has been added");
+
+			if (!Valid()) {
 				LOG_WARN("Trying to add a component to an invalid entity!");
 				return nullptr;
 			}
 			return &registry.get_or_emplace<Component>(m_id, std::forward<Args>(args)...);
 		}
+		template<typename Component, typename... Args>
+		void Add(Args&&... args)
+		{
+			if (!Valid()) {
+				LOG_WARN("Trying to add a component to an invalid entity!");
+				return;
+			}
+			registry.get_or_emplace<Component>(m_id, std::forward<Args>(args)...);
+		}
 		/// @brief Remove a component
 		/// @tparam Component 
 		template <typename Component>
-		void RemoveComponent()
+		void Remove()
 		{
 			registry.remove<Component>(m_id);
 		}
@@ -89,15 +103,15 @@ namespace SandCastle
 		/// Do not store the pointer as it may be invalidated.
 		/// @return Component pointer, nullptr if doesn't exists.
 		template <typename Component>
-		Component* GetComponent()
+		Component* Get()
 		{
 			return registry.try_get<Component>(m_id);
 		}
-		
+
 		/// @brief Access an entity component if it exists
 		/// @return Component reference, nullptr if doesn't exists.
 		template <typename Component>
-		Component* GetComponentNoCheck()
+		Component* GetNoCheck()
 		{
 			return &registry.get<Component>(m_id);
 		}
@@ -109,17 +123,7 @@ namespace SandCastle
 		{
 			return m_id;
 		}
-		template <typename T>
-		constexpr T* gc()
-		{
-			return GetComponent<T>();
-		}
 		Transform* gtr();
-		template <typename T>
-		constexpr T* adc()
-		{
-			return AddComponent<T>();
-		}
 
 		/// @brief Destroy the entity and it's components, and does the same for every children
 		/// Trying to access or add components after using this method

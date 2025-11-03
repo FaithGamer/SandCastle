@@ -108,10 +108,10 @@ namespace SandCastle
 
 	void UiFrame::SetColor(Color color)
 	{
-		auto children = root.GetComponent<Children>();
+		auto children = root.Get<Children>();
 		for (auto child : children->children)
 		{
-			auto spr = Entity(child).GetComponent<SpriteRender>();
+			auto spr = Entity(child).Get<SpriteRender>();
 			spr->color.r = color.r;
 			spr->color.g = color.g;
 			spr->color.b = color.b;
@@ -120,10 +120,10 @@ namespace SandCastle
 
 	void UiFrame::SetAlpha(unsigned int alpha)
 	{
-		auto children = root.GetComponent<Children>();
+		auto children = root.Get<Children>();
 		for (auto& child : children->children)
 		{
-			auto spr = Entity(child).GetComponent<SpriteRender>();
+			auto spr = Entity(child).Get<SpriteRender>();
 			spr->color.a = alpha;
 		}
 	}
@@ -182,12 +182,13 @@ namespace SandCastle
 		Vec2f hDim = sDim * 0.5f;
 
 		//Create the sprites entities:
-		auto rootTr = root.adc<Transform>();
+		root.Add<Transform>();
+		auto rootTr = root.Get<Transform>();
 		rootTr->SetPosition(0, 0, z);
 
 		//Instance border sprites at the right dimensions
 		BorderSprites* borderSpr = nullptr;
-		borderSpr = root.AddComponent<BorderSprites>();
+		borderSpr = root.AddGet<BorderSprites>();
 		for (int i = 0; i < 5; i++)
 		{
 			Vec2f wDim;
@@ -203,10 +204,12 @@ namespace SandCastle
 		{
 			auto& sprite = templ->cornerSpr[i];
 			auto e = Entity::Create();
-			auto spr = e.adc<SpriteRender>();
+			e.Add<Transform>();
+			e.Add<SpriteRender>();
+			auto tr = e.Get<Transform>();
+			auto spr = e.Get<SpriteRender>();
 			spr->SetLayer(layer);
 			spr->SetMaterial(material->GetID());
-			auto tr = e.adc<Transform>();
 			spr->SetSprite(sprite);
 			auto type = (UiFrame::SpriteCorner)i;
 			switch (type)
@@ -235,10 +238,12 @@ namespace SandCastle
 			//Top middle border
 			auto& sprite = borderSpr->sprites[i].sprite;
 			auto e = Entity::Create();
-			auto spr = e.adc<SpriteRender>();
+			e.Add<SpriteRender>();
+			e.Add<Transform>();
+			auto tr = e.Get<Transform>();
+			auto spr = e.Get<SpriteRender>();
 			spr->SetLayer(layer);
 			spr->SetMaterial(material->GetID());
-			auto tr = e.adc<Transform>();
 			spr->SetSprite(&sprite);
 			auto re = sprite.GetTextureRect();
 			auto type = (UiFrame::TexBorder)i;

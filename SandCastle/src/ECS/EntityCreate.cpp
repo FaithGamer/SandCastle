@@ -11,9 +11,10 @@ namespace SandCastle
 	Entity Entity::CreateSprite(String defaultSprite)
 	{
 		auto entity = Entity::Create();
-		auto render = entity.AddComponent<SpriteRender>();
-		auto transform = entity.AddComponent<Transform>();
+		entity.Add<SpriteRender>();
+		entity.Add<Transform>();
 		auto sprite = Assets::Get<Sprite>(defaultSprite);
+		auto render = entity.Get<SpriteRender>();
 		render->SetSprite(sprite);
 		return entity;
 	}
@@ -21,9 +22,9 @@ namespace SandCastle
 	Entity Entity::CreateAnimatedSprite(String defaultAnimation, String defaultAnimStateName)
 	{
 		auto entity = Entity::Create();
-		auto render = entity.AddComponent<SpriteRender>();
-		auto transform = entity.AddComponent<Transform>();
-		auto anim = entity.AddComponent<Animator>();
+		entity.Add<SpriteRender>();
+		entity.Add<Transform>();
+		auto anim = entity.AddGet<Animator>();
 		anim->AddAnimation(defaultAnimStateName, defaultAnimation);
 		anim->SetAnimation(defaultAnimStateName);
 		return entity;

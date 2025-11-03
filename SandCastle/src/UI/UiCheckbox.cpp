@@ -78,7 +78,7 @@ namespace SandCastle
 	}
 	void UiCheckbox::Show(Entity& entt, bool show)
 	{
-		auto rd = entt.GetComponent<SpriteRender>();
+		auto rd = entt.Get<SpriteRender>();
 		rd->color.a = show ? 255 : 0;
 	}
 }

@@ -292,7 +292,7 @@ namespace SandCastle
 		auto canvas = new UiCanvas();
 		canvas->context = i->m_context.canvas;
 		canvas->root = Entity::Create();
-		canvas->root.AddComponent<Transform>();
+		canvas->root.Add<Transform>();
 		auto parent = i->m_canvas.empty() ? nullptr : i->m_canvas.top();
 		if (frame)
 			canvas->frame = UiFrame(canvas->context.frame, i->m_context.material, i->m_context.layer);
@@ -397,7 +397,7 @@ namespace SandCastle
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label.root.Destroy();
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.GetComponent<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + button->context.padding.x * 2;
 		button->size.y = button->label.size.y + button->context.padding.y * 2;
@@ -417,7 +417,7 @@ namespace SandCastle
 		UiImg* image = new UiImg();
 		image->margin = i->m_context.margin;
 		image->root = Entity::CreateSprite(sprite);
-		auto render = image->root.GetComponent<SpriteRender>();
+		auto render = image->root.Get<SpriteRender>();
 
 		render->SetLayer(i->m_context.layer);
 		render->SetMaterial(i->m_context.material->GetID());
@@ -440,13 +440,13 @@ namespace SandCastle
 
 		UiBtn* button = new UiBtn();
 		button->root = Entity::Create();
-		button->root.AddComponent<Transform>();
+		button->root.Add<Transform>();
 		button->context = i->m_context.button;
 		button->margin = i->m_context.margin;
 		auto lang = Assets::GetLang();
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.GetComponent<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + button->context.padding.x * 2;
 		button->size.y = button->label.size.y + button->context.padding.y * 2;
@@ -490,12 +490,12 @@ namespace SandCastle
 		auto checkbox = new UiCheckbox();
 		checkbox->root = Entity::Create();
 		checkbox->value = value;
-		auto tr = checkbox->root.AddComponent<Transform>();
+		checkbox->root.Add<Transform>();
 		for (int j = 0; j < 3; j++)
 		{
 			String spriteName = i->m_context.checkbox.texture + "_0_" + std::to_string(j);
 			auto entt = Entity::CreateSprite(spriteName);
-			auto rd = entt.GetComponent<SpriteRender>();
+			auto rd = entt.Get<SpriteRender>();
 			rd->SetLayer(i->m_context.layer);
 			rd->SetMaterial(i->m_context.material->GetID());
 			auto spr = rd->GetSprite();
@@ -509,7 +509,7 @@ namespace SandCastle
 			checkbox->sprites.emplace_back(entt);
 			checkbox->root.AddChild(entt);
 		}
-		auto rd = checkbox->sprites[0].GetComponent<SpriteRender>();
+		auto rd = checkbox->sprites[0].Get<SpriteRender>();
 		auto spr = rd->GetSprite();
 		checkbox->size = spr->GetDimensions();
 		checkbox->margin = i->m_context.margin;

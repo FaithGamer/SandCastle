@@ -75,7 +75,7 @@ namespace SandCastle
 	}
 	void UiElem::ComputeHitbox()
 	{
-		auto tr = root.GetComponent<Transform>();
+		auto tr = root.Get<Transform>();
 		auto pos = tr->GetPosition();
 		hitbox = Rect(pos.x, pos.y, size.x, size.y);
 	}

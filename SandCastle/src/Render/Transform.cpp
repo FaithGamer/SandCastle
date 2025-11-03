@@ -7,7 +7,7 @@
 #include "SandCastle/ECS/Entity.h"
 namespace SandCastle
 {
-	Transform::Transform(Transform&& transform) noexcept :
+/*	Transform::Transform(Transform&& transform) noexcept :
 		m_localPosition(transform.m_localPosition),
 		m_localScale(transform.m_localScale),
 		m_localRotation(transform.m_localRotation),
@@ -15,7 +15,7 @@ namespace SandCastle
 		m_parent(transform.m_parent)
 	{
 
-	}
+	}*/
 	/*Transform::Transform(Transform& transform):
 		m_localPosition(transform.m_localPosition),
 		m_localScale(transform.m_localScale),
@@ -109,7 +109,7 @@ namespace SandCastle
 		m_localRotation += anglesDegrees;
 	}
 
-	Transform Transform::operator+(const Transform& trans)
+/*	Transform Transform::operator+(const Transform& trans)
 	{
 		Transform t(m_localPosition + trans.m_localPosition,
 			m_localScale * trans.m_localScale,
@@ -135,7 +135,7 @@ namespace SandCastle
 		m_parent = trans.m_parent;
 
 		return *this;
-	}
+	}*/
 
 
 
