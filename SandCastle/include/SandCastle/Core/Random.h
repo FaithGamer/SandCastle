@@ -9,6 +9,7 @@ namespace SandCastle
 		uint64_t Range(uint64_t min, uint64_t max);
 		int64_t Range(int64_t min, int64_t max);
 		float Range(float min, float max);
+		double Range(double min, double max);
 		template<typename T>
 		T PickAndRemove(std::vector<T>& container)
 		{
