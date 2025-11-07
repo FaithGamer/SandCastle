@@ -342,28 +342,22 @@ namespace SandCastle
 
 	bool ButtonInput::PressButton()
 	{
-		if (!m_state.pressed)
+		m_state.pressed = true;
+		if (m_sendSignalOnPress)
 		{
-			m_state.pressed = true;
-			if (m_sendSignalOnPress)
-			{
-				signal.Send(&m_state);
-				return true;
-			}
+			signal.Send(&m_state);
+			return true;
 		}
 		return false;
 	}
 
 	bool ButtonInput::ReleaseButton()
 	{
-		if (m_state.pressed)
+		m_state.pressed = false;
+		if (m_sendSignalOnRelease)
 		{
-			m_state.pressed = false;
-			if (m_sendSignalOnRelease)
-			{
-				signal.Send(&m_state);
-				return true;
-			}
+			signal.Send(&m_state);
+			return true;
 		}
 		return false;
 	}

@@ -52,6 +52,8 @@ namespace SandCastle
 			if (event.button.button == SDL_BUTTON_LEFT)
 				return OnClick(false);
 			break;
+		default:
+			break;
 		}
 		return false;
 	}
