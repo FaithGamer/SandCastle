@@ -8,11 +8,19 @@ namespace SandCastle
 	}
 	double Noise::Get(double x, double y)
 	{
-		return m_generator.noise2D_01(x * m_frequency, y * m_frequency);
+		return m_generator.octave2D_01(x * m_frequency, y * m_frequency, m_octave, m_persistence);
 	}
 	void Noise::SetFrequency(double frequency)
 	{
 		m_frequency = frequency;
+	}
+	void Noise::SetPersistence(double persistence)
+	{
+		m_persistence = persistence;
+	}
+	void Noise::SetOctave(int octave)
+	{
+		m_octave = octave;
 	}
 	void Noise::Seed(unsigned int seed)
 	{
