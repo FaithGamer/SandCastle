@@ -11,10 +11,10 @@ void DrawSprite()
 	//Create an entity
 	auto entity = Entity::Create();
 	//Add a Transform component to exists in world space
-	auto transform = entity.AddComponent<Transform>();
+	entity.Add<Transform>();
 	//Add a SpriteRender component to draw a textured quad
-	auto render = entity.AddComponent<SpriteRender>();
-	
+	auto transform = entity.Get<Transform>();
+	auto render = entity.Get<SpriteRender>();
 	//Fetch a sprite in the assets, and apply it to the SpriteRender.
 	auto sprite = Assets::Get<Sprite>("trollface.png_0_0");
 	render->SetSprite(sprite);

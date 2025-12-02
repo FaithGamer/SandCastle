@@ -12,7 +12,7 @@ class SwordmanSys : public System
 	void Start() override
 	{
 		auto e = Entity::CreateAnimatedSprite("swordman_walk.anim");
-		e.adc<Swordman>();
+		e.Add<Swordman>();
 		Inputs::Get("Player", "Dest")->signal.Listen(&SwordmanSys::OnDest, this);
 		Inputs::Get("Player", "Zoom")->signal.Listen(&SwordmanSys::OnZoom, this);
 		

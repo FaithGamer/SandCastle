@@ -44,12 +44,12 @@ public:
 		font->UseFont(fontId);
 		auto s = font->Write((const char*)u8"mon de");
 
-		s.root.GetComponent<Transform>()->Move(0, 0, 0);
-		s.root.AddComponent<Dummy>();
-		auto sprite = s.glyphEntities[0].GetComponent<SpriteRender>()->GetSprite();
+		s.root.Get<Transform>()->Move(0, 0, 0);
+		s.root.Add<Dummy>();
+		auto sprite = s.glyphEntities[0].Get<SpriteRender>()->GetSprite();
 		static auto s1 = new Sprite(sprite->GetTexture());
 
-		//Entity::CreateSprite().GetComponent<SpriteRender>()->SetSprite(s1);
+		//Entity::CreateSprite().Get<SpriteRender>()->SetSprite(s1);
 		//Entity::CreateSprite();
 	}
 	void Update() override
@@ -81,7 +81,7 @@ public:
 		}
 
 		auto e = Ui::GetWriter()->Write(str);
-		e.root.AddComponent<Dummy>();
+		e.root.Add<Dummy>();
 		e.root.gtr()->Move(-e.size.x * 0.5f, 0, 0);
 
 	}

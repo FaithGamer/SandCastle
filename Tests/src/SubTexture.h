@@ -13,7 +13,7 @@ void SubTexture()
 	texture->SetWrapping(TextureWrapping::Repeat);
 	Sprite* sprite = new Sprite(texture, Rect(0, 0, 1000, 30));
 	Entity e = Entity::CreateSprite();
-	e.gc<SpriteRender>()->SetSprite(sprite);
+	e.Get<SpriteRender>()->SetSprite(sprite);
 	Engine::Launch();
 }
 

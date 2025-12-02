@@ -19,11 +19,11 @@ public:
 		for (int i = 0; i < spriteCount; i++)
 		{
 			auto entt = Entity::CreateSprite("trollface.png_0_0");
-			entt.GetComponent<Transform>()->SetScale(0.1f);
+			entt.Get<Transform>()->SetScale(0.1f);
 			Vec3f pos = { Random::Range(-space.x, space.x),
 				Random::Range(-space.y, space.y),
 				0.f };
-			entt.GetComponent<Transform>()->SetPosition(pos);
+			entt.Get<Transform>()->SetPosition(pos);
 		}
 	}
 };

@@ -39,7 +39,7 @@ public:
 		auto view = Entity::View<Rotate>();
 		view.each([&](Entity entity, Rotate& rotate)
 			{
-				auto trans = entity.GetComponent<Transform>();
+				auto trans = entity.Get<Transform>();
 
 				trans->Rotate(_dir*_speed);
 				float rot = trans->GetRotation();
@@ -78,7 +78,7 @@ void Rotation()
 	dir->BindButtons(buttons);
 
 	auto entity = Entity::CreateSprite("trollface.png_0_0");
-	entity.AddComponent<Rotate>();
+	entity.Add<Rotate>();
 
 	Engine::Launch();
 }

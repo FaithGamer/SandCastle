@@ -35,7 +35,7 @@ public:
 
 				trollCount++;
 
-				auto trans = entity.GetComponent<Transform>();
+				auto trans = entity.Get<Transform>();
 				Vec2f offset = troll.dir * delta * troll.speed;
 				trans->Move(offset);
 
@@ -55,15 +55,15 @@ public:
 		for (int i = 0; i < (int)accumulator; i++)
 		{
 			auto entt = Entity::CreateAnimatedSprite();
-			entt.GetComponent<Transform>()->SetScale(0.1f * scale);
-			auto troll = entt.AddComponent<Troll>();
+			entt.Get<Transform>()->SetScale(0.1f * scale);
+			auto troll = entt.AddGet<Troll>();
 			troll->timer = Random::Range(0.1f, time * 2.f);
 			troll->dir = Math::AngleToVec(Random::Range(0, 359));
 			troll->speed = Random::Range(1.f, 10.f);
 			Vec3f pos = { Random::Range(-space.x, space.x),
 				Random::Range(-space.y, space.y),
 				0.f };
-			entt.GetComponent<Transform>()->SetPosition(pos);
+			entt.Get<Transform>()->SetPosition(pos);
 
 		}
 		accumulator -= (int)accumulator;
