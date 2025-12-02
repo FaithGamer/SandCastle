@@ -20,7 +20,7 @@ namespace SandCastle
 			return ret;
 		}
 		template<typename T>
-		T Pick(const std::vector<T>& container)
+		const T& Pick(const std::vector<T>& container)
 		{
 			int64_t r = Range((int64_t)0, (int64_t)(container.size() - 1));
 			return container[r];
