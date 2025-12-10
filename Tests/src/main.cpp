@@ -42,7 +42,7 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	//UiTest2();
-	RateTest();
+	UiTest2();
+	//RateTest();
 	//SoundTest();
 }

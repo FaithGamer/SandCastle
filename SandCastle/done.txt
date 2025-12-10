@@ -570,6 +570,13 @@ nov
 
 -noise enhanced with octaves
 
+december
+
+09
+
+-ui elements with absolute position (actually relative to the canvas)
+>ui button with animations
+
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers
 in the case of user Get<Transform> before Add<SpriteRender> or vice versa
 

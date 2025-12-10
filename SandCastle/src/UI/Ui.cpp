@@ -576,7 +576,7 @@ namespace SandCastle
 		elem = nullptr;
 	}
 
-	/*---Contect---*/
+	/*---Context---*/
 
 	void Ui::SnapshotContext(String name)
 	{

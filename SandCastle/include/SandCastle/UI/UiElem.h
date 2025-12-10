@@ -46,6 +46,7 @@ namespace SandCastle
 		int GetParentCount() const;
 		bool IsInside(Vec2f uiPos);
 		void ComputeHitbox();
+		void SetAbsolutePos(bool absolute);
 		void SetData(Entity entt);
 		Entity GetData();
 		bool IsDestroyed() const;
@@ -94,6 +95,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		bool absolutePos = false;
 		bool destroyed = false;
 		int interactionGroup = 0;
 		Entity data;

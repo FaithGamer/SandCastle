@@ -79,6 +79,10 @@ namespace SandCastle
 		auto pos = tr->GetPosition();
 		hitbox = Rect(pos.x, pos.y, size.x, size.y);
 	}
+	void UiElem::SetAbsolutePos(bool absolute)
+	{
+		absolutePos = absolute;
+	}
 	void UiElem::SetData(Entity entt)
 	{
 		if (data.Valid())

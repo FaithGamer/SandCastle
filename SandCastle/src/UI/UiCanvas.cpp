@@ -333,6 +333,8 @@ namespace SandCastle
 		std::list<UiElem*> sorted;
 		for (auto& kvp : children)
 		{
+			if (kvp.second->absolutePos)
+				continue;
 			sorted.emplace_back(kvp.second);
 		}
 		sorted.sort([](UiElem* a, UiElem* b)

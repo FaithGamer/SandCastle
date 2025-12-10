@@ -86,7 +86,9 @@ public:
 
 		auto r = Ui::Begin();//root
 		r->SetPosition(Vec2f(320, 180));
-		Ui::Text("Checkboxes");
+		auto t = Ui::Text("Checkboxes");
+		t->SetAbsolutePos(true);
+		t->SetPosition({ 0, 0 });
 		Ui::Context("base");
 		Ui::SetSpacing(2.f);
 		Ui::SetCanvasPadding(0.f);
