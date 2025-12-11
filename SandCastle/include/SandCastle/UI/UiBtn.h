@@ -14,17 +14,21 @@ namespace SandCastle
 	class UiBtn : public UiElem
 	{
 	public:
-		~UiBtn();
+		virtual ~UiBtn();
 		UiElem::Type GetType() const override;
 		void SetColor(const Color& color);
 		void UpdateFrames();
 	protected:
-		void OnHover() override;
-		void OnUnHover() override;
-		void OnClickPressed() override;
-		void OnClickReleased() override;
+		virtual void OnHover() override;
+		virtual void OnUnHover() override;
+		virtual void OnClickPressed() override;
+		virtual void OnClickReleased() override;
+		virtual void OnDisable() override;
+		virtual void OnEnable() override;
 		void OnLang(LangSignal* signal);
 		void ShowHideFrame();
+		void ResetLabelOffset();
+		void SetLabelColor(Color color);
 		Signal<UiBtn*> langSignal;
 
 	protected:
@@ -35,6 +39,7 @@ namespace SandCastle
 		UiFrame frameIdle;
 		UiFrame frameHover;
 		UiFrame framePressed;
+		UiFrame frameDisabled;
 		Vec2f labelOffset = 0.f;
 	};
 }

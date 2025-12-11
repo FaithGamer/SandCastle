@@ -8,16 +8,27 @@
 
 namespace SandCastle
 {	
+	struct Animation;
 	struct ButtonContext
 	{
 		String fontName;
 		Color textColor;
+		Color textColorDisabled;
 		Vec2f padding = Vec2f(0.f, 0.f);
 		UiFrame::Template* frameIdle = nullptr;
 		UiFrame::Template* frameHover = nullptr;
 		UiFrame::Template* framePressed = nullptr;
+		UiFrame::Template* frameDisabled = nullptr;
 		Sound* pressSound = nullptr;
 		Sound* releaseSound = nullptr;
+	};
+
+	struct AnimButtonContext
+	{
+		Animation* idle = nullptr;
+		Animation* hover = nullptr;
+		Animation* pressed = nullptr;
+		Animation* disabled = nullptr;
 	};
 
 	struct CheckboxContext
@@ -47,6 +58,7 @@ namespace SandCastle
 		CanvasContext canvas;
 		CheckboxContext checkbox;
 		ButtonContext button;
+		AnimButtonContext animButton;
 		TextContext text;
 		Vec2f margin = Vec2f(0.f, 0.f);
 		Vec2f rootMargin = Vec2f(0.f, 0.f);

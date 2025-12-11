@@ -1,20 +1,20 @@
 #include "pch.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/ECS/Entity.h"
-#include "SandCastle/Core/Math.h"
 #include "SandCastle/Render/SpriteRender.h"
 #include "SandCastle/Render/RenderOptions.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/Animator.h"
 #include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiImg.h"
 #include "SandCastle/UI/UiBtn.h"
+#include "SandCastle/UI/UiAnimBtn.h"
 #include "SandCastle/UI/UiCheckbox.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
-#include "SandCastle/Core/Container.h"
 
 namespace SandCastle
 {
@@ -96,7 +96,7 @@ namespace SandCastle
 
 			delete m_destroy[i];
 		}
-		
+
 		m_destroy.clear();
 	}
 	void RemoveHelper(std::vector<UiElem*>& container, UiElem::ID id)
@@ -434,8 +434,7 @@ namespace SandCastle
 	UiBtn* Ui::Button(std::string_view utf8)
 	{
 		auto i = Instance();
-		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
-		auto canvas = i->m_canvas.top();*/
+
 		UiCanvas* parent = nullptr;
 		if (!i->m_canvas.empty())
 			parent = i->m_canvas.top();
@@ -452,16 +451,22 @@ namespace SandCastle
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + button->context.padding.x * 2;
 		button->size.y = button->label.size.y + button->context.padding.y * 2;
+
+		ASSERT_LOG_ERROR((button->context.frameIdle != nullptr), "Trying to create a button without at least a frame idle context.");
 		button->frameIdle = UiFrame(
 			button->context.frameIdle,
 			i->m_context.material,
 			i->m_context.layer);
 		button->frameHover = UiFrame(
-			button->context.frameHover,
+			button->context.frameHover == nullptr ? button->context.frameIdle : button->context.frameHover,
 			i->m_context.material,
 			i->m_context.layer);
 		button->framePressed = UiFrame(
-			button->context.framePressed,
+			button->context.framePressed == nullptr ? button->context.frameIdle : button->context.framePressed,
+			i->m_context.material,
+			i->m_context.layer);
+		button->frameDisabled = UiFrame(
+			button->context.frameDisabled == nullptr ? button->context.frameIdle : button->context.frameDisabled,
 			i->m_context.material,
 			i->m_context.layer);
 		i->NewElem(button, parent);
@@ -476,6 +481,51 @@ namespace SandCastle
 		btn->keyLoc = key;
 		btn->langSignal.Listen(&Ui::OnBtnLang, Instance().get());
 		Assets::Instance()->langSignal.Listen(&UiBtn::OnLang, btn);
+		return btn;
+	}
+
+	UiAnimBtn* Ui::AnimButton(std::string_view utf8)
+	{
+		auto i = Instance();
+
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
+
+		UiAnimBtn* button = new UiAnimBtn();
+		button->root = Entity::Create();
+		button->root.Add<Transform>();
+		button->root.Add<SpriteRender>();
+		auto animator = button->root.AddGet<Animator>();
+		auto& animContext = i->m_context.animButton;
+		ASSERT_LOG_ERROR((animContext.idle != nullptr), "Trying to create anim button without at least an idle animation context.");
+		animator->AddAnimation("idle", animContext.idle);
+		animator->AddAnimation("hover", animContext.hover == nullptr ? animContext.idle : animContext.hover);
+		animator->AddAnimation("pressed", animContext.pressed == nullptr ? animContext.idle : animContext.pressed);
+		animator->AddAnimation("disabled", animContext.disabled == nullptr ? animContext.idle : animContext.disabled);
+		button->context = i->m_context.button;
+		button->animContext = animContext;
+		button->margin = i->m_context.margin;
+		auto lang = Assets::GetLang();
+		auto font = i->m_writer->GetFont(button->context.fontName, lang);
+		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		button->root.AddChild(button->label.root);
+		button->size.x = button->label.size.x + button->context.padding.x * 2;
+		button->size.y = button->label.size.y + button->context.padding.y * 2;
+
+		i->NewElem(button, parent);
+
+		RegisterHoverable(button);
+		return button;
+	}
+
+	UiAnimBtn* Ui::AnimButtonLoc(const String& key)
+	{
+		auto btn = AnimButton(*Assets::Get<Textual>(key));
+		btn->keyLoc = key;
+		btn->langSignal.Listen(&Ui::OnBtnLang, Instance().get());
+		Assets::Instance()->langSignal.Listen(&UiBtn::OnLang, (UiBtn*)btn);
 		return btn;
 	}
 
@@ -640,6 +690,10 @@ namespace SandCastle
 	{
 		Instance()->m_context.button.textColor = color;
 	}
+	void Ui::SetButtonDisabledTextColor(Color color)
+	{
+		Instance()->m_context.button.textColorDisabled = color;
+	}
 	void Ui::SetButtonPadding(Vec2f padding)
 	{
 		Instance()->m_context.button.padding = padding;
@@ -685,6 +739,10 @@ namespace SandCastle
 	{
 		Instance()->SetFrame(&Instance()->m_context.button.framePressed, texture);
 	}
+	void Ui::SetButtonFrameDisabled(String texture)
+	{
+		Instance()->SetFrame(&Instance()->m_context.button.frameDisabled, texture);
+	}
 	void Ui::SetButtonPressSound(Sound* sound)
 	{
 		Instance()->m_context.button.pressSound = sound;
@@ -692,6 +750,22 @@ namespace SandCastle
 	void Ui::SetButtonReleaseSound(Sound* sound)
 	{
 		Instance()->m_context.button.releaseSound = sound;
+	}
+	void Ui::SetAnimBtnIdle(Animation* anim)
+	{
+		Instance()->m_context.animButton.idle = anim;
+	}
+	void Ui::SetAnimBtnPressed(Animation* anim)
+	{
+		Instance()->m_context.animButton.pressed = anim;
+	}
+	void Ui::SetAnimBtnHover(Animation* anim)
+	{
+		Instance()->m_context.animButton.hover = anim;
+	}
+	void Ui::SetAnimBtnDisabled(Animation* anim)
+	{
+		Instance()->m_context.animButton.disabled = anim;
 	}
 	void Ui::SetCheckboxSprites(String texture)
 	{
@@ -728,6 +802,29 @@ namespace SandCastle
 		}
 		f_it->second = true;
 	}
+
+	void Ui::OnDisable(int group)
+	{
+		for (int j = 0; j < m_hoverables.size(); j++)
+		{
+			auto& hoverable = m_hoverables[j];
+			if (hoverable->interactionGroup == group)
+			{
+				hoverable->Disable();
+			}
+		}
+	}
+	void Ui::OnEnable(int group)
+	{
+		for (int j = 0; j < m_hoverables.size(); j++)
+		{
+			auto& hoverable = m_hoverables[j];
+			if (hoverable->interactionGroup == group)
+			{
+				hoverable->Enable();
+			}
+		}
+	}
 	void Ui::DisableGroup(int group)
 	{
 		auto i = Instance();
@@ -738,23 +835,29 @@ namespace SandCastle
 			return;
 		}
 		f_it->second = false;
+		i->OnDisable(group);
+		
 	}
-	void Ui::DisableAllGroupBut(int group)
+	void Ui::EnableOnlyGroup(int group)
 	{
 		auto i = Instance();
 		auto f_it = i->m_interactionGroups.find(group);
 		if (f_it == i->m_interactionGroups.end())
 		{
-			LOG_ERROR("DisableAllGroupBut, interaction group {0}, doesn't exists");
+			LOG_ERROR("EnableOnlyGroup, interaction group {0}, doesn't exists");
 		}
 		else
 		{
 			f_it->second = true;
+			i->OnEnable(f_it->first);
 		}
 		for (auto& g : i->m_interactionGroups)
 		{
 			if (g.first != group)
+			{
 				g.second = false;
+				i->OnDisable(g.first);
+			}
 		}
 	}
 	void Ui::EnableAllGroups()
@@ -763,6 +866,7 @@ namespace SandCastle
 		for (auto& g : i->m_interactionGroups)
 		{
 			g.second = true;
+			i->OnEnable(g.first);
 		}
 	}
 	Vec3f Ui::UiToWorld(Vec2f uiPos)

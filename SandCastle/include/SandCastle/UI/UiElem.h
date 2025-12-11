@@ -24,6 +24,7 @@ namespace SandCastle
 			Canvas,
 			Text,
 			Button,
+			AnimButton,
 			Image,
 			Checkbox
 		};
@@ -37,6 +38,8 @@ namespace SandCastle
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
+		void Disable();
+		void Enable();
 		virtual Vec2f GetPosition() const;
 		Vec2f GetSize() const;
 		Vec2f GetLocalPosition() const;
@@ -85,6 +88,8 @@ namespace SandCastle
 		virtual void OnUnHover() {};
 		virtual void OnClickPressed() {};
 		virtual void OnClickReleased() {};
+		virtual void OnDisable() {};
+		virtual void OnEnable() {};
 
 	private:
 		friend UiCanvas;
@@ -95,6 +100,7 @@ namespace SandCastle
 		void ClickReleased();
 
 	protected:
+		bool disabled = false;
 		bool absolutePos = false;
 		bool destroyed = false;
 		int interactionGroup = 0;

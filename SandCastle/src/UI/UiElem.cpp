@@ -111,6 +111,20 @@ namespace SandCastle
 		OnHover();
 		hoverSignal.Send(this);
 	}
+	void UiElem::Disable()
+	{
+		if (disabled == true)
+			return;
+		disabled = true;
+		OnDisable();
+	}
+	void UiElem::Enable()
+	{
+		if (disabled == false)
+			return;
+		disabled = false;
+		OnEnable();
+	}
 	void UiElem::UnHover()
 	{
 		state = State::Idle;

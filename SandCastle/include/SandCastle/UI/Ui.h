@@ -2,15 +2,12 @@
 #include <stack>
 #include "SandCastle/Core/std_macros.h"
 #include "SandCastle/Core/Vec.h"
-#include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Render/Texture.h"
-#include "SandCastle/Render/Sprite.h"
 #include "SandCastle/Internal/Singleton.h"
 #include "SandCastle/Render/Writer.h"
 #include "SandCastle/UI/UiTxt.h"
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/UI/UiEnum.h"
-#include "SandCastle/Core/Container.h"
 #include "SandCastle/UI/UiContext.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Core/Textual.h"
@@ -22,6 +19,7 @@ namespace SandCastle
 	class UiElem;
 	class UiImg;
 	class UiBtn;
+	class UiAnimBtn;
 	class UiCheckbox;
 	struct InputSignal;
 
@@ -87,6 +85,8 @@ namespace SandCastle
 		static UiImg* Image(String sprite);
 		static UiBtn* Button(std::string_view utf8);
 		static UiBtn* ButtonLoc(const String& key);
+		static UiAnimBtn* AnimButton(std::string_view utf8);
+		static UiAnimBtn* AnimButtonLoc(const String& key);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
 		static void End();
 		static void Destroy(UiElem*& elem);
@@ -128,6 +128,9 @@ namespace SandCastle
 		/// Set the text color that will be used for button creation 
 		static void SetButtonTextColor(Color color);
 		/// @brief Context setting.
+		/// Set the text color that will be used for disabled button
+		static void SetButtonDisabledTextColor(Color color);
+		/// @brief Context setting.
 		/// Set the padding (space between button text, and button edges)
 		/// that will be used for  button creation.
 		static void SetButtonPadding(Vec2f padding);
@@ -161,8 +164,13 @@ namespace SandCastle
 		/// @brief Context setting.
 		/// Set the frame that will be used for  button creation
 		static void SetButtonFramePressed(String texture);
+		static void SetButtonFrameDisabled(String texture);
 		static void SetButtonPressSound(Sound* sound);
 		static void SetButtonReleaseSound(Sound* sound);
+		static void SetAnimBtnIdle(Animation* anim);
+		static void SetAnimBtnPressed(Animation* anim);
+		static void SetAnimBtnHover(Animation* anim);
+		static void SetAnimBtnDisabled(Animation* anim);
 		/// @brief Context setting.
 		/// The texture must have 3 horizontal sprites.
 		/// respecting this order: unchecked, hovered, checked
@@ -192,9 +200,9 @@ namespace SandCastle
 		/// @brief Disable an interaction group
 		/// @param group 
 		static void DisableGroup(int group);
-		/// @brief Keep only one interaction group
+		/// @brief Keep only one interaction group, disable all others
 		/// @param group 
-		static void DisableAllGroupBut(int group);
+		static void EnableOnlyGroup(int group);
 		/// @brief Enable all interaction group
 		static void EnableAllGroups();
 		/// @brief Convert UI position to world position
@@ -223,6 +231,8 @@ namespace SandCastle
 	private:
 
 		/*---Helpers---*/
+		void OnDisable(int group);
+		void OnEnable(int group);
 		void DestroyHelper(UiElem* elem);
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);

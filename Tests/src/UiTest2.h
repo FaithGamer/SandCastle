@@ -205,9 +205,14 @@ public:
 		Ui::Text("I hope you enjoyed.");
 		Ui::End();
 	}
+	void OnClickDisableEnable(UiElem* signal)
+	{
+		Ui::DisableGroup(0);
+	}
 	void Right()
 	{
 		Ui::Context("right");
+		Ui::SetInteractionGroup(1);
 		Ui::SetRootAnchor(CanvasAnchor::MiddleRight);
 		auto r = Ui::Begin(Vec2f(150, 0));
 		r->SetPosition(Vec2f(320, 0));
@@ -218,6 +223,8 @@ public:
 		Ui::Image("blue.png_0_0");
 		Ui::End();
 		Ui::Image("green.png_0_0");
+		auto btn = Ui::Button("Disable/Enable");
+		btn->ListenClickReleased(&TestSys::OnClickDisableEnable, this);
 		Ui::End();
 	}
 	int clicked = 0;
@@ -357,6 +364,7 @@ void UiTest2()
 	Ui::MakeFrameTemplate("btn.png");
 	Ui::MakeFrameTemplate("btn_hover.png");
 	Ui::MakeFrameTemplate("btn_pressed.png");
+	Ui::MakeFrameTemplate("btn_disabled.png");
 
 	//Audio asset (for ui)
 	Audio::AddChannel("Master");
@@ -366,6 +374,8 @@ void UiTest2()
 	Ui::SetButtonPressSound(clickPressSound);
 	Ui::SetButtonReleaseSound(clickReleaseSound);
 
+	//Ui contexts
+	Ui::SetInteractionGroup(0);
 	Ui::SetCanvasPadding(6.f);
 	Ui::SetRootMargin(2.f);
 	Ui::SetCanvasFrame("frame.png");
@@ -376,9 +386,11 @@ void UiTest2()
 	Ui::SetButtonFont("h2");
 	Ui::SetButtonPadding(5.f);
 	Ui::SetButtonTextColor(Color::White);
+	Ui::SetButtonDisabledTextColor(Color::Black);
 	Ui::SetButtonFrame("btn.png");
 	Ui::SetButtonFrameHover("btn_hover.png");
 	Ui::SetButtonFramePressed("btn_pressed.png");
+	Ui::SetButtonFrameDisabled("btn_disabled.png");
 	Ui::SetCheckboxSprites("checkbox.png");
 	Ui::SnapshotContext("base");
 

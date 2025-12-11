@@ -261,6 +261,7 @@
     <ClCompile Include="src\Render\Animation.cpp" />
     <ClCompile Include="src\Render\Animator.cpp" />
     <ClCompile Include="src\Render\TextureSettings.cpp" />
+    <ClCompile Include="src\UI\UiAnimBtn.cpp" />
     <ClCompile Include="src\UI\UiBtn.cpp" />
     <ClCompile Include="src\UI\UiCheckbox.cpp" />
     <ClCompile Include="src\UI\UiFrame.cpp" />
@@ -391,6 +392,7 @@
     <ClInclude Include="include\SandCastle\Render\Text.h" />
     <ClInclude Include="include\SandCastle\Render\TextureSettings.h" />
     <ClInclude Include="include\SandCastle\UIheader.h" />
+    <ClInclude Include="include\SandCastle\UI\UiAnimBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiBtn.h" />
     <ClInclude Include="include\SandCastle\UI\UiCanvas.h" />
     <ClInclude Include="include\SandCastle\UI\UiContext.h" />

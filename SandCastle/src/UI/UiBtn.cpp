@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SandCastle/UI/UiBtn.h"
-#include "SandCastle/Render/SpriteRender.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/Assets.h"
 
@@ -26,6 +25,7 @@ namespace SandCastle
 		frameIdle.Update(this, 0.f);
 		framePressed.Update(this, -1.f);
 		frameHover.Update(this, -2.f);
+		frameDisabled.Update(this, -3.f);
 		ShowHideFrame();
 	}
 	void UiBtn::OnHover()
@@ -35,8 +35,7 @@ namespace SandCastle
 	void UiBtn::OnUnHover()
 	{
 		ShowHideFrame();
-		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
-		labelOffset = 0.f;
+		ResetLabelOffset();
 	}
 	void UiBtn::OnClickPressed()
 	{
@@ -65,8 +64,23 @@ namespace SandCastle
 		{
 			context.releaseSound->Play();
 		}
-		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
-		labelOffset = 0.f;
+		ResetLabelOffset();
+	}
+	void UiBtn::OnDisable()
+	{
+		SetLabelColor(context.textColorDisabled);
+		ShowHideFrame();
+		ResetLabelOffset();
+		
+	}
+	void UiBtn::OnEnable()
+	{
+		SetLabelColor(context.textColor);
+		ShowHideFrame();
+		for (auto& glyph : label.glyphEntities)
+		{
+			glyph.Get<SpriteRender>()->color = context.textColor;
+		}
 	}
 	void UiBtn::OnLang(LangSignal* signal)
 	{
@@ -74,25 +88,48 @@ namespace SandCastle
 	}
 	void UiBtn::ShowHideFrame()
 	{
+		if (disabled)
+		{
+			frameIdle.SetAlpha(0);
+			framePressed.SetAlpha(0);
+			frameHover.SetAlpha(0);
+			frameDisabled.SetAlpha(255);
+			return;
+		}
 		switch (state)
 		{
 		case UiElem::State::Idle:
 			frameIdle.SetAlpha(255);
 			framePressed.SetAlpha(0);
 			frameHover.SetAlpha(0);
+			frameDisabled.SetAlpha(0);
 			break;
 		case UiElem::State::Hovered:
 			frameIdle.SetAlpha(0);
 			framePressed.SetAlpha(0);
 			frameHover.SetAlpha(255);
+			frameDisabled.SetAlpha(0);
 			break;
 		case UiElem::State::Pressed:
 			frameIdle.SetAlpha(0);
 			framePressed.SetAlpha(255);
 			frameHover.SetAlpha(0);
+			frameDisabled.SetAlpha(0);
 			break;
 		default:
 			break;
+		}
+	}
+	void UiBtn::ResetLabelOffset()
+	{
+		label.root.gtr()->Move(-labelOffset.x, -labelOffset.y, 0.f);
+		labelOffset = 0.f;
+	}
+	void UiBtn::SetLabelColor(Color color)
+	{
+		for (auto& glyph : label.glyphEntities)
+		{
+			glyph.Get<SpriteRender>()->color = color;
 		}
 	}
 }
