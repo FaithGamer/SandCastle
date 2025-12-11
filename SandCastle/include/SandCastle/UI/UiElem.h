@@ -38,6 +38,7 @@ namespace SandCastle
 		virtual Type GetType() const = 0;
 		virtual void SetPosition(Vec2f pos);
 		virtual void Move(Vec2f offset);
+		virtual void ComputeHitbox();
 		void Disable();
 		void Enable();
 		virtual Vec2f GetPosition() const;
@@ -48,7 +49,6 @@ namespace SandCastle
 		UiCanvas* GetParent() const;
 		int GetParentCount() const;
 		bool IsInside(Vec2f uiPos);
-		void ComputeHitbox();
 		void SetAbsolutePos(bool absolute);
 		void SetData(Entity entt);
 		Entity GetData();

@@ -226,6 +226,7 @@ namespace SandCastle
 		static String GetFont();
 		/// @brief Get the layer currently used
 		static LayerID GetLayer();
+		static bool IsGroupEnabled(int group);
 		/// @brief Get all the root canvases.
 		static std::unordered_map<UiElem::ID, UiCanvas*> GetCanvases();
 	private:

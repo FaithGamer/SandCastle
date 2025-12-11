@@ -207,7 +207,10 @@ public:
 	}
 	void OnClickDisableEnable(UiElem* signal)
 	{
-		Ui::DisableGroup(0);
+		if (Ui::IsGroupEnabled(0))
+			Ui::DisableGroup(0);
+		else
+			Ui::EnableGroup(0);
 	}
 	void Right()
 	{
@@ -223,7 +226,8 @@ public:
 		Ui::Image("blue.png_0_0");
 		Ui::End();
 		Ui::Image("green.png_0_0");
-		auto btn = Ui::Button("Disable/Enable");
+		Ui::SetInteractionGroup(1);
+		auto btn = Ui::Button("Disable/Enable Group 0");
 		btn->ListenClickReleased(&TestSys::OnClickDisableEnable, this);
 		Ui::End();
 	}
@@ -235,6 +239,8 @@ public:
 		auto r = Ui::Begin(Vec2f(150, 0));
 		r->SetPosition(Vec2f(-320.f, -180.f));
 		Ui::TextLoc("clicked_times", 0.f, &clicked);
+		auto aBtn = Ui::AnimButton("");
+		aBtn->ListenClickReleased(&TestSys::OnClickDisableEnable, this);
 		Ui::Button("Ok")->ListenClickReleased(&TestSys::OnClickOk, this);
 		Ui::End();
 	}
@@ -392,6 +398,10 @@ void UiTest2()
 	Ui::SetButtonFramePressed("btn_pressed.png");
 	Ui::SetButtonFrameDisabled("btn_disabled.png");
 	Ui::SetCheckboxSprites("checkbox.png");
+	Ui::SetAnimBtnDisabled(Assets::Get<Animation>("machine_lock_btn_disabled.anim"));
+	Ui::SetAnimBtnIdle(Assets::Get<Animation>("machine_lock_btn_idle.anim"));
+	Ui::SetAnimBtnHover(Assets::Get<Animation>("machine_lock_btn_hover.anim"));
+	Ui::SetAnimBtnPressed(Assets::Get<Animation>("machine_lock_btn_pressed.anim"));
 	Ui::SnapshotContext("base");
 
 	Ui::SetCanvasFrame("frame_black.png");

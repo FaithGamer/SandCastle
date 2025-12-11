@@ -1,0 +1,9 @@
+{
+    "frame_per_second": 10,
+    "frames":
+    [
+        {
+            "sprite": "machine_lock_btn.png_3_0"
+        }
+    ]
+}

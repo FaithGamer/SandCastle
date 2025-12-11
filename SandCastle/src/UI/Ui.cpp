@@ -447,7 +447,7 @@ namespace SandCastle
 		auto lang = Assets::GetLang();
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -4.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + button->context.padding.x * 2;
 		button->size.y = button->label.size.y + button->context.padding.y * 2;
@@ -496,6 +496,9 @@ namespace SandCastle
 		button->root = Entity::Create();
 		button->root.Add<Transform>();
 		button->root.Add<SpriteRender>();
+		auto render = button->root.Get<SpriteRender>();
+		render->SetLayer(i->m_context.layer);
+		render->SetMaterial(i->m_context.material->GetID());
 		auto animator = button->root.AddGet<Animator>();
 		auto& animContext = i->m_context.animButton;
 		ASSERT_LOG_ERROR((animContext.idle != nullptr), "Trying to create anim button without at least an idle animation context.");
@@ -503,16 +506,16 @@ namespace SandCastle
 		animator->AddAnimation("hover", animContext.hover == nullptr ? animContext.idle : animContext.hover);
 		animator->AddAnimation("pressed", animContext.pressed == nullptr ? animContext.idle : animContext.pressed);
 		animator->AddAnimation("disabled", animContext.disabled == nullptr ? animContext.idle : animContext.disabled);
+		animator->SetAnimation("idle");
 		button->context = i->m_context.button;
 		button->animContext = animContext;
 		button->margin = i->m_context.margin;
 		auto lang = Assets::GetLang();
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
-		button->root.AddChild(button->label.root);
-		button->size.x = button->label.size.x + button->context.padding.x * 2;
-		button->size.y = button->label.size.y + button->context.padding.y * 2;
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -4.f);
+		button->root.AddChild(button->label.root);	
+		button->size = animContext.idle->frames[0].sprite->GetDimensions();
 
 		i->NewElem(button, parent);
 
@@ -801,6 +804,7 @@ namespace SandCastle
 			return;
 		}
 		f_it->second = true;
+		i->OnEnable(group);
 	}
 
 	void Ui::OnDisable(int group)
@@ -949,6 +953,15 @@ namespace SandCastle
 	LayerID Ui::GetLayer()
 	{
 		return Instance()->m_context.layer;
+	}
+
+	bool Ui::IsGroupEnabled(int group)
+	{
+		auto i = Instance();
+		auto f_it = i->m_interactionGroups.find(group);
+		if (f_it == i->m_interactionGroups.end())
+			return false;
+		return f_it->second;
 	}
 
 	std::unordered_map<UiElem::ID, UiCanvas*> Ui::GetCanvases()

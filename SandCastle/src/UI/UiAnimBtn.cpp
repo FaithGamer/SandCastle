@@ -3,6 +3,7 @@
 #include "SandCastle/Render/Animator.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/Assets.h"
+#include "SandCastle/UI/UiCanvas.h"
 
 namespace SandCastle
 {
@@ -14,6 +15,51 @@ namespace SandCastle
 	UiElem::Type UiAnimBtn::GetType() const
 	{
 		return UiElem::Type::Button;
+	}
+
+	void UiAnimBtn::SetPosition(Vec2f pos)
+	{
+		position = pos;
+		//Offset sprite to make top left anchor no matter the sprite origin
+		auto tr = root.Get<Transform>();
+		auto rd = root.Get<SpriteRender>();
+		auto spr = rd->GetSprite();
+		auto dim = spr->GetDimensions();
+		Vec2f offset = {
+			((float)spr->orgX + 0.5f) * dim.x,
+			((float)spr->orgY - 0.5f) * dim.y
+		};
+
+		pos += offset;
+
+		if (parent != nullptr)
+		{
+			pos += parent->GetPosition();
+		}
+
+		pos = {
+		std::round(pos.x + margin.x),
+		std::round(pos.y - margin.y)
+		};
+		root.gtr()->SetPosition(pos.x, pos.y, z);
+	}
+
+	void UiAnimBtn::ComputeHitbox()
+	{
+		auto tr = root.Get<Transform>();
+		auto rd = root.Get<SpriteRender>();
+		auto spr = rd->GetSprite();
+		auto dim = spr->GetDimensions();
+		Vec2f offset = {
+			((float)spr->orgX + 0.5f) * dim.x,
+			((float)spr->orgY - 0.5f) * dim.y
+		};
+		auto pos = tr->GetPosition();
+		hitbox = Rect(
+			pos.x - offset.x,
+			pos.y - offset.y,
+			size.x,
+			size.y);
 	}
 
 	void UiAnimBtn::OnHover()
@@ -28,7 +74,7 @@ namespace SandCastle
 	}
 
 	void UiAnimBtn::OnClickPressed()
-	{	
+	{
 		labelOffset += Vec2f(-1, -1);
 		label.root.gtr()->Move(labelOffset.x, labelOffset.y, 0.f);
 		if (context.pressSound != nullptr)

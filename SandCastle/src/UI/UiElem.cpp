@@ -128,15 +128,15 @@ namespace SandCastle
 	void UiElem::UnHover()
 	{
 		state = State::Idle;
-		OnUnHover();
 		pressed = false;
+		OnUnHover();
 		unhoverSignal.Send(this);
 	}
 	void UiElem::ClickPressed()
 	{
 		state = State::Pressed;
-		OnClickPressed();
 		pressed = true;
+		OnClickPressed();
 		clickPressSignal.Send(this);
 	}
 	void UiElem::ClickReleased()
@@ -144,9 +144,9 @@ namespace SandCastle
 		state = State::Hovered;
 		if (pressed)
 		{
+			pressed = false;
 			OnClickReleased();
 			clickReleasedSignal.Send(this);
 		}
-		pressed = false;
 	}
 }

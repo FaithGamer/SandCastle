@@ -71,7 +71,6 @@ namespace SandCastle
 		SetLabelColor(context.textColorDisabled);
 		ShowHideFrame();
 		ResetLabelOffset();
-		
 	}
 	void UiBtn::OnEnable()
 	{

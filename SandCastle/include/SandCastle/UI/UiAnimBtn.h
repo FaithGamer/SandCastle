@@ -12,7 +12,8 @@ namespace SandCastle
 	public:
 		~UiAnimBtn();
 		UiElem::Type GetType() const override;
-
+		virtual void SetPosition(Vec2f pos) override;
+		virtual void ComputeHitbox() override;
 	protected:
 		void OnHover() override;
 		void OnUnHover() override;

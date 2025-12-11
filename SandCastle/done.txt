@@ -579,10 +579,10 @@ december
 11
 
 -disabled button (frame and anim, and text color)
+-fixed disabled frame z pos
+-fixed on enable not called
+-ui anim button works (hitbox pas position adjusted)
 
->disabling button make text z pos conflict with frame
-
->ui button with animations, hitbox size?
 
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers
 in the case of user Get<Transform> before Add<SpriteRender> or vice versa
