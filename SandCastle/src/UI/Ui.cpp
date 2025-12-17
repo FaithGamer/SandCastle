@@ -406,8 +406,7 @@ namespace SandCastle
 		button->UpdateFrames();
 		button->parent->MustUpdate();
 	}
-
-	UiImg* Ui::Image(String sprite)
+	UiImg* Ui::Image(Sprite* sprite)
 	{
 		auto i = Instance();
 		/*ASSERT_LOG_ERROR(!i->m_canvas.empty(), "Trying to create Ui Text without active canvas");
@@ -418,9 +417,12 @@ namespace SandCastle
 
 		UiImg* image = new UiImg();
 		image->margin = i->m_context.margin;
-		image->root = Entity::CreateSprite(sprite);
+		image->root = Entity::Create();
+		image->root.Add<Transform>();
+		image->root.Add<SpriteRender>();
 		auto render = image->root.Get<SpriteRender>();
 
+		render->SetSprite(sprite);
 		render->SetLayer(i->m_context.layer);
 		render->SetMaterial(i->m_context.material->GetID());
 		auto spr = render->GetSprite();
@@ -429,6 +431,10 @@ namespace SandCastle
 
 		i->NewElem(image, parent);
 		return image;
+	}
+	UiImg* Ui::Image(String sprite)
+	{
+		return Image(Assets::Get<Sprite>(sprite));
 	}
 
 	UiBtn* Ui::Button(std::string_view utf8)
@@ -507,6 +513,7 @@ namespace SandCastle
 		animator->AddAnimation("pressed", animContext.pressed == nullptr ? animContext.idle : animContext.pressed);
 		animator->AddAnimation("disabled", animContext.disabled == nullptr ? animContext.idle : animContext.disabled);
 		animator->SetAnimation("idle");
+		render->SetSprite(animator->currentState->animation->frames[0].sprite);
 		button->context = i->m_context.button;
 		button->animContext = animContext;
 		button->margin = i->m_context.margin;

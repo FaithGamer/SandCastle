@@ -83,6 +83,7 @@ namespace SandCastle
 		template <typename... Ts>
 		static UiTxt* TextLoc(const String& key, float width = -1.f, Ts... args);
 		static UiImg* Image(String sprite);
+		static UiImg* Image(Sprite* sprite);
 		static UiBtn* Button(std::string_view utf8);
 		static UiBtn* ButtonLoc(const String& key);
 		static UiAnimBtn* AnimButton(std::string_view utf8);
