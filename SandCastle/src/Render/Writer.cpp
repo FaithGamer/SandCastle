@@ -399,7 +399,7 @@ namespace SandCastle
 				pen.x += adv;
 			};
 		float maxPenX = 0.f;
-		//Iterating sentence CPS
+		//Iterating sentence codepoints (characters)
 		for (uint32_t cp : cps)
 		{
 			if (cp == (uint32_t)'\n')
