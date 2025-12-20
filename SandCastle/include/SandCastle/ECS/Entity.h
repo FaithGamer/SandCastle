@@ -43,7 +43,7 @@ namespace SandCastle
 			auto view = View<Component...>();
 			view.each([&](auto entity, auto&...)
 				{
-					registry.destroy(entity);
+					Entity(entity).Destroy();
 				});
 		}
 
@@ -59,7 +59,8 @@ namespace SandCastle
 		/// @brief The child's transform become affected by the parent's transform
 		/// @param entity 
 		void AddChild(Entity entity);
-		void RemoveChild(EntityId entity);
+		std::optional<std::unordered_set<EntityId>::iterator> RemoveChild(EntityId entity);
+		void RemoveAllChildren();
 		void Unparent();
 
 		/// @brief Check validity of entity.

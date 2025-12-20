@@ -583,10 +583,16 @@ december
 -fixed on enable not called
 -ui anim button works (hitbox pas position adjusted)
 
+20
 
+-remove child does remove from children unordered set, and returns an optional iterator
+-remove all children method
+-fixed destroy all to also destroy children
+
+>new remove child hasn't been tested 
+>new remove child requires documentation
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers
 in the case of user Get<Transform> before Add<SpriteRender> or vice versa
-
 >add text to canvas should re create text to set limit width
 >fix margin (see Ui::NewElem)
 >animated sprite in UI

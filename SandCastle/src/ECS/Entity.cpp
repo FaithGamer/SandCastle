@@ -50,24 +50,32 @@ namespace SandCastle
 
 	}
 
-	void Entity::RemoveChild(EntityId entity)
+	std::optional<std::unordered_set<EntityId>::iterator> Entity::RemoveChild(EntityId entity)
 	{
 		auto children = Get<Children>();
 
 		if (children == nullptr)
-		{
-			LOG_WARN("Trying to remove child on an entity with no children. What are you doing ?");
-			return;
-		}
+			return std::nullopt;
 
 		auto find_it = children->children.find(entity);
 		if (find_it == children->children.end())
-		{
-			LOG_WARN("Trying to remove a child entity that is not in the parent. You looser.");
-			return;
-		}
-
+			return std::nullopt;
+		
 		Entity(*find_it).JustUnparent();
+		return children->children.erase(find_it);
+	}
+
+	void Entity::RemoveAllChildren()
+	{
+		auto children = Get<Children>();
+
+		if (children == nullptr)
+			return;
+		for (auto it = children->children.begin(); it != children->children.end();)
+		{
+			Entity(*it).JustUnparent();
+			it = children->children.erase(it);
+		}
 	}
 
 	void Entity::Unparent()
