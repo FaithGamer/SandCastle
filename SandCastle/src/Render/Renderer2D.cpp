@@ -139,8 +139,8 @@ namespace SandCastle
 			window,
 			m_defaultLayerMaterial,
 			GenerateLayerVertexArray(screenSpace, 0)));
-		m_layerMax++;
-		m_lastLayerAdded = m_layerMax;
+		//m_layerMax++;
+		m_lastLayerAdded = 1;
 
 		//Create initial quad batch for windoww layer and default batch material
 		Renderer2D::CreateQuadBatchThread(m_layers.back(), m_defaultBatchMaterial);
@@ -196,7 +196,7 @@ namespace SandCastle
 				ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
 		}
 		ins->Wait();
-		ins->m_layerMax++;
+		//ins->m_layerMax++;
 		return ins->m_lastLayerAdded;
 	}
 
@@ -210,23 +210,20 @@ namespace SandCastle
 		return AddLayer(name, 0, material);
 	}
 
-	LayerID Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex)
+	LayerID Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex, Material* material)
 	{
 		auto ins = Instance();
+		ins->m_queue.thread.Queue(&Renderer2D::AddOffscreenLayerThread, ins.get(), name, sampler2DIndex, material);
 		ins->Wait();
-		ASSERT_LOG_ERROR(bool(sampler2DIndex > 0 && sampler2DIndex < 16), "sampler2DIndex must be comprised between 1 and 15");
-		ASSERT_LOG_ERROR(bool(ins->m_offscreenLayers.size() < 15), "Number of Offscreen layers exceeded (max 15)");
-
-		//To do: check if sampler2DIndex hasn't been used already.
-
-		sptr<RenderTexture> layer = makesptr<RenderTexture>(Window::GetSize());
-		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		uint32_t index = (uint32_t)ins->m_layers.size();
-		sptr<VertexArray> layerVertexArray = ins->GenerateLayerVertexArray(screenSpace, index);
-		ins->m_layers.push_back(RenderLayer(name, index, layer, ins->m_defaultLayerMaterial, layerVertexArray, false, true));
-		ins->m_offscreenLayers.push_back(OffscreenRenderLayer(layer, sampler2DIndex, index));
-
-		return (uint32_t)ins->m_layers.size() - 1;
+		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
+		for (auto& mat : ins->m_materials)
+		{
+			if (!mat->IsLayer())
+				ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, mat);
+		}
+		ins->Wait();
+		//ins->m_layerMax++;
+		return ins->m_lastLayerAdded;
 	}
 
 	void Renderer2D::SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace)
@@ -442,6 +439,34 @@ namespace SandCastle
 
 		m_lastLayerAdded = index;
 	}
+	void Renderer2D::AddOffscreenLayerThread(std::string name, uint32_t sampler2DIndex, Material* material)
+	{
+		if (material == nullptr)
+			material = m_defaultLayerMaterial;
+
+		ASSERT_LOG_ERROR(bool(sampler2DIndex > 0 && sampler2DIndex < 16), "sampler2DIndex must be comprised between 1 and 15");
+		ASSERT_LOG_ERROR(bool(m_offscreenLayers.size() < 15), "Number of Offscreen layers exceeded (max 15)");
+
+		LayerID index = (LayerID)m_layers.size();
+		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
+		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace, index);
+		auto windowSize = Window::GetSize();
+		sptr<RenderTexture> layer;
+		/*if (height == 0)
+		{*/
+			layer = makesptr<RenderTexture>(windowSize);
+		/*}
+		else
+		{
+			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
+			layer = makesptr<RenderTexture>(Vec2u(width, height));
+		}*/
+
+		m_layers.push_back(RenderLayer(name, index, layer, material, layerVertexArray, 0, false, true));
+		m_offscreenLayers.push_back(OffscreenRenderLayer(layer, sampler2DIndex, index));
+
+		m_lastLayerAdded = index;
+	}
 	void Renderer2D::CreateSubTextureThread(const Texture* source, Rect region)
 	{
 		m_createdTexture = new Texture(source, region);
@@ -553,6 +578,7 @@ namespace SandCastle
 			return ins->m_materials.back();
 
 		//Create quad batch for every layers
+		ins->Wait();
 		for (auto& layer : ins->m_layers)
 		{
 			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, ins->m_materials.back());

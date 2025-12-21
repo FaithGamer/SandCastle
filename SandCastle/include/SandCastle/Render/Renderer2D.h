@@ -167,7 +167,7 @@ namespace SandCastle
 		/// @brief Add a layer on the bottom of the render queue with a fixed height, it will keep the aspect ratio of the window.
 		/// @param name A friendly identifier.
 		/// @return The identifier to use when refering to this layer.
-		static LayerID AddLayer(std::string name, unsigned int height, Material* shader = nullptr);
+		static LayerID AddLayer(std::string name, unsigned int height, Material* material = nullptr);
 		/// @brief Set true to draw sprites on this layer sorted by Z position.
 		/// Set to true if you want to ensure coherent drawing of overlapping sprites.
 		/// Set to false (default) if you want maximum speed.
@@ -176,7 +176,7 @@ namespace SandCastle
 		/// Usage example: normal map.
 		/// @param sampler2DIndex Wich index the texture will be available in the sampler2D uniform.
 		/// Must be comprised in between 1 and 15.
-		static LayerID AddOffscreenLayer(std::string name, uint32_t sampler2DIndex);
+		static LayerID AddOffscreenLayer(std::string name, uint32_t sampler2DIndex, Material* material = nullptr);
 
 		/// @brief Set the space the layer take up on the screen,
 		/// @param screenSpace  normalized screen space (vector must be of size 4)
@@ -218,6 +218,7 @@ namespace SandCastle
 		void RenderThread();
 		void OnWindowResizeThread();
 		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr);
+		void AddOffscreenLayerThread(std::string name, uint32_t sampler2DIndex, Material* material = nullptr);
 		void CreateSubTextureThread(const Texture* source, Rect region);
 		void Begin();
 		void End();
@@ -273,7 +274,7 @@ namespace SandCastle
 		std::vector<OffscreenRenderLayer> m_offscreenLayers;
 		std::vector<RenderLayer*> m_renderLayers;
 		Material* m_defaultLayerMaterial;
-		LayerID m_layerMax = 0;
+		//LayerID m_layerMax = 0;
 
 		//Materials
 		std::vector<Material*> m_materials;

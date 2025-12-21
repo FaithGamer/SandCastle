@@ -83,6 +83,9 @@
     <ClInclude Include="src\SoundTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\MaskTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
@@ -98,5 +101,7 @@
     <None Include="assets\shaders\pixel.frag" />
     <None Include="assets\shaders\pixel.vert" />
     <None Include="assets\shaders\ui.frag" />
+    <None Include="assets\shaders\masked_layer.frag" />
+    <None Include="assets\shaders\masked_layer.vert" />
   </ItemGroup>
 </Project>

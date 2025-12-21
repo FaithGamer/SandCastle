@@ -589,6 +589,12 @@ december
 -remove all children method
 -fixed destroy all to also destroy children
 
+21
+
+-fixed offscreen layer creation with quad batch allocation
+-alpha blending with mask layer test work: white mask, black dosen't
+
+
 >new remove child hasn't been tested 
 >new remove child requires documentation
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers

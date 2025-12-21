@@ -19,6 +19,7 @@
 #include "UiTest2.h"
 #include "RateTest.h"
 #include "SoundTest.h"
+#include "MaskTest.h"
 
 using namespace SandCastle;
 
@@ -42,7 +43,8 @@ int main()
 	//FrameTest();
 	//DepthBlendTest();
 	//UiTest();
-	UiTest2();
+	//UiTest2();
 	//RateTest();
 	//SoundTest();
+	MaskTest();
 }

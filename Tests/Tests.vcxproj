@@ -46,6 +46,7 @@
     <ClInclude Include="src\Launch.h" />
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\LayerTest.h" />
+    <ClInclude Include="src\MaskTest.h" />
     <ClInclude Include="src\PixPerfectGame.h" />
     <ClInclude Include="src\RateTest.h" />
     <ClInclude Include="src\Rotation.h" />
@@ -65,6 +66,8 @@
     <None Include="assets\shaders\line.frag" />
     <None Include="assets\shaders\line.geom" />
     <None Include="assets\shaders\line.vert" />
+    <None Include="assets\shaders\masked_layer.frag" />
+    <None Include="assets\shaders\masked_layer.vert" />
     <None Include="assets\shaders\pixel.frag" />
     <None Include="assets\shaders\pixel.vert" />
     <None Include="assets\shaders\ui.frag" />
