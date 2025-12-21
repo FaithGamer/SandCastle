@@ -593,6 +593,8 @@ december
 
 -fixed offscreen layer creation with quad batch allocation
 -alpha blending with mask layer test work: white mask, black dosen't
+-fixed wrong initialization of Renderer default material: blocking due to thread calling itslef
+-offscreen layer now also create batches, it's useless but it fixes my problems haha
 
 
 >new remove child hasn't been tested 

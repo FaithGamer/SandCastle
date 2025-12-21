@@ -124,9 +124,11 @@ namespace SandCastle
 		//Create default materials
 		auto defaultShader = Assets::Get<Shader>("default.shader");
 		//Not using CreateMaterial because it would be blocking thread by attempting to create the batch.
-		m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size(), false));
-		m_defaultBatchMaterial = m_materials.back();
-		m_defaultLayerMaterial = CreateMaterial(Assets::Get<Shader>("default_layer.shader"), true);
+		m_defaultBatchMaterial = 
+			m_materials.emplace_back(new Material(defaultShader, (MaterialID)m_materials.size(), false));
+		m_defaultLayerMaterial = 
+			m_materials.emplace_back(new Material(Assets::Get<Shader>("default_layer.shader"), (MaterialID)m_materials.size(), true));
+
 		m_defaultBatchMaterial->SetFloat("uDiscardAlpha", 0.05f);
 		m_defaultLayerMaterial->GetRenderOptions()->SetDepthTest(false);
 		m_defaultLineShader = Assets::Get<Shader>("line.shader");
@@ -142,9 +144,16 @@ namespace SandCastle
 		//m_layerMax++;
 		m_lastLayerAdded = 1;
 
-		//Create initial quad batch for windoww layer and default batch material
-		Renderer2D::CreateQuadBatchThread(m_layers.back(), m_defaultBatchMaterial);
-		SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), MAX_OFF_LAYERS + 1);
+		//Create all quad batches required (one for every layer * material)
+		for (auto& layer : m_layers)
+		{
+			for (auto& mat : m_materials)
+			{
+				CreateQuadBatchThread(layer, mat);
+			}
+		}
+		//Renderer2D::CreateQuadBatchThread(m_layers.back(), m_defaultBatchMaterial);
+		//SetShaderUniformSampler(m_defaultLayerMaterial->GetShader(), MAX_TEXTURE_INDEX);
 
 		//Listen to window resize signal
 		Window::GetResizeSignal()->Listen(&Renderer2D::OnWindowResize, this);
@@ -293,7 +302,7 @@ namespace SandCastle
 	void Renderer2D::SetLayerMaterial(LayerID layer, Material* material)
 	{
 		auto ins = Instance();
-		ins->SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
+		ins->SetShaderUniformSampler(material->GetShader(), MAX_TEXTURE_INDEX);
 		ins->m_layers[layer].material = material;
 	}
 
@@ -313,7 +322,6 @@ namespace SandCastle
 		LayerID layerId = layer.index;
 		MaterialID matId = material->GetID();
 		ASSERT_LOG_ERROR((layerId < MAX_LAYERS), "LayerId above max layer count!");
-
 		while (m_batches[(size_t)layerId].size() <= (size_t)matId)
 		{
 			m_batches[(size_t)layerId].emplace_back(QuadBatch());
@@ -331,7 +339,8 @@ namespace SandCastle
 		SetShaderUniformSampler(shader, MAX_TEXTURE_INDEX);
 
 		//Bind shader to the scene uniform buffer
-		shader->BindUniformBlock("scene", m_sceneUniformBinding);
+		if(!material->IsLayer())
+			shader->BindUniformBlock("scene", m_sceneUniformBinding);
 		batch.allocated = true;
 	}
 
@@ -419,7 +428,7 @@ namespace SandCastle
 		if (material == nullptr)
 			material = m_defaultLayerMaterial;
 
-		SetShaderUniformSampler(material->GetShader(), MAX_OFF_LAYERS + 1);
+		SetShaderUniformSampler(material->GetShader(), MAX_TEXTURE_INDEX);
 		LayerID index = (LayerID)m_layers.size();
 		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };
 		sptr<VertexArray> layerVertexArray = GenerateLayerVertexArray(screenSpace, index);
@@ -574,11 +583,10 @@ namespace SandCastle
 		auto ins = Instance();
 		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size(), layer));
 
-		if (layer)
-			return ins->m_materials.back();
+		/*if (layer)
+			return ins->m_materials.back();*/
 
 		//Create quad batch for every layers
-		ins->Wait();
 		for (auto& layer : ins->m_layers)
 		{
 			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, ins->m_materials.back());
