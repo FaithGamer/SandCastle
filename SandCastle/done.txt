@@ -596,6 +596,9 @@ december
 -fixed wrong initialization of Renderer default material: blocking due to thread calling itslef
 -offscreen layer now also create batches, it's useless but it fixes my problems haha
 
+22
+
+-disabled button cannot be clicked anymore
 
 >new remove child hasn't been tested 
 >new remove child requires documentation

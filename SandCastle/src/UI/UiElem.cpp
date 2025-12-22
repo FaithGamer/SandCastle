@@ -107,6 +107,8 @@ namespace SandCastle
 	}
 	void UiElem::Hover()
 	{
+		if (disabled == true)
+			return;
 		state = State::Hovered;
 		OnHover();
 		hoverSignal.Send(this);
@@ -127,6 +129,8 @@ namespace SandCastle
 	}
 	void UiElem::UnHover()
 	{
+		if (disabled == true)
+			return;
 		state = State::Idle;
 		pressed = false;
 		OnUnHover();
@@ -134,6 +138,8 @@ namespace SandCastle
 	}
 	void UiElem::ClickPressed()
 	{
+		if (disabled == true)
+			return;
 		state = State::Pressed;
 		pressed = true;
 		OnClickPressed();
@@ -141,6 +147,8 @@ namespace SandCastle
 	}
 	void UiElem::ClickReleased()
 	{
+		if (disabled == true)
+			return;
 		state = State::Hovered;
 		if (pressed)
 		{

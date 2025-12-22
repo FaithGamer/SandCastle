@@ -213,7 +213,7 @@ namespace SandCastle
 		}
 
 		//Handling clickable UI
-		if (m_hovered != nullptr && m_hovered->clickable)
+		if (m_hovered != nullptr && m_hovered->clickable && !m_hovered->disabled)
 		{
 
 			if (pressed)
