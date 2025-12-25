@@ -52,7 +52,7 @@ namespace SandCastle
 		std::round(pos.x + margin.x),
 		std::round(pos.y - margin.y)
 		};
-		root.gtr()->SetPosition(wPos.x, wPos.y, z);
+		root.gtr()->SetPosition(wPos.x, wPos.y, z+zOffset);
 	}
 	Vec2f UiElem::GetSize() const
 	{
@@ -88,6 +88,11 @@ namespace SandCastle
 		if (data.Valid())
 			data.Destroy();
 		data = entt;
+	}
+	void UiElem::SetZOffset(float offset)
+	{
+		zOffset = offset;
+		SetPosition(position);
 	}
 	Entity UiElem::GetData()
 	{

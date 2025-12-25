@@ -51,6 +51,7 @@ namespace SandCastle
 		bool IsInside(Vec2f uiPos);
 		void SetAbsolutePos(bool absolute);
 		void SetData(Entity entt);
+		void SetZOffset(float offset);
 		Entity GetData();
 		bool IsDestroyed() const;
 
@@ -110,6 +111,7 @@ namespace SandCastle
 		UiCanvas* parent = nullptr;
 		UiElem::ID id = 0;
 		float z = 0.f;
+		float zOffset = 0.f;
 		Vec2f size = Vec2f(0, 0);
 		Vec2f margin = Vec2f(0, 0);
 		Vec2f position = Vec2f(0, 0);
