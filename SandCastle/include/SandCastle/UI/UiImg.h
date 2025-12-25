@@ -14,6 +14,7 @@ namespace SandCastle
 	public:
 		UiElem::Type GetType() const override;
 		void SetPosition(Vec2f pos) override;
+		void SetSprite(Sprite* sprite);
 
 	private:
 		friend Ui;
