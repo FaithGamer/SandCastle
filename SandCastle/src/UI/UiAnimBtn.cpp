@@ -41,7 +41,7 @@ namespace SandCastle
 		std::round(pos.x + margin.x),
 		std::round(pos.y - margin.y)
 		};
-		root.gtr()->SetPosition(pos.x, pos.y, z);
+		root.gtr()->SetPosition(pos.x, pos.y, z+zOffset);
 	}
 
 	void UiAnimBtn::ComputeHitbox()

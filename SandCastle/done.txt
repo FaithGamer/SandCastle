@@ -600,8 +600,11 @@ december
 
 -disabled button cannot be clicked anymore
 
+26
+
+-added zOffset in AnimBtn
+
 >need an errpr message when frame ui texture size doesn't match découpage
->add Z offset to context
 >new remove child hasn't been tested 
 >new remove child requires documentation
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers
