@@ -162,10 +162,9 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
-		if (m_hovered != nullptr && (!m_hovered->IsInside(MousePos())
-			|| !m_interactionGroups[m_hovered->interactionGroup]))
+		if (m_hovered != nullptr && !m_hovered->IsInside(MousePos()))
 		{
-			//Mouse is no longer inside OR interaction group has been disabled
+			//Mouse is no longer inside
 			m_hovered->UnHover();
 			m_hovered = nullptr;
 		}

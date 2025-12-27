@@ -134,8 +134,6 @@ namespace SandCastle
 	}
 	void UiElem::UnHover()
 	{
-		if (disabled == true)
-			return;
 		state = State::Idle;
 		pressed = false;
 		OnUnHover();
