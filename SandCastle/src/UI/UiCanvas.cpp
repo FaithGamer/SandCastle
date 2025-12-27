@@ -89,7 +89,7 @@ namespace SandCastle
 			pos += parent->GetPosition();
 		pos += AnchorOffset();
 		pos = Vec2f(std::round(pos.x), std::round(pos.y));
-		root.gtr()->SetPosition(pos.x, pos.y, z);
+		root.gtr()->SetPosition(pos.x, pos.y, z+zOffset);
 		//update children hitboxes:
 		for (auto& child_kvp : children)
 		{
