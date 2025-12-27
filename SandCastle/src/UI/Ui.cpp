@@ -162,6 +162,7 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
+		//Unhover
 		if (m_hovered != nullptr && !m_hovered->IsInside(MousePos()))
 		{
 			//Mouse is no longer inside
@@ -170,11 +171,13 @@ namespace SandCastle
 		}
 		if (m_hovered != nullptr)
 			return;
+		
+		//Hover
 		for (int i = 0; i < m_hoverables.size(); i++)
 		{
 			auto candidate = m_hoverables[i];
-			if (!m_interactionGroups[candidate->interactionGroup])
-				continue; //Ignore elements of disabled interaction group
+			if (candidate->disabled && !candidate->hoverableWhenDisabled)
+				continue;
 			if (candidate->IsInside(MousePos()))
 			{
 				candidate->Hover();
@@ -520,7 +523,7 @@ namespace SandCastle
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
 		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -4.f);
-		button->root.AddChild(button->label.root);	
+		button->root.AddChild(button->label.root);
 		button->size = animContext.idle->frames[0].sprite->GetDimensions();
 
 		i->NewElem(button, parent);
@@ -846,7 +849,7 @@ namespace SandCastle
 		}
 		f_it->second = false;
 		i->OnDisable(group);
-		
+
 	}
 	void Ui::EnableOnlyGroup(int group)
 	{

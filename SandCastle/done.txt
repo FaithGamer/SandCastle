@@ -604,6 +604,11 @@ december
 
 -added zOffset in AnimBtn
 
+27
+
+-zOffset for canvas
+-uielem can be hoverable when disabled
+
 >need an errpr message when frame ui texture size doesn't match découpage
 >new remove child hasn't been tested 
 >new remove child requires documentation

@@ -94,6 +94,10 @@ namespace SandCastle
 		zOffset = offset;
 		SetPosition(position);
 	}
+	void UiElem::SetHoverableWhenDisabled(bool yesorno)
+	{
+		hoverableWhenDisabled = yesorno;
+	}
 	Entity UiElem::GetData()
 	{
 		return data;
@@ -112,8 +116,6 @@ namespace SandCastle
 	}
 	void UiElem::Hover()
 	{
-		if (disabled == true)
-			return;
 		state = State::Hovered;
 		OnHover();
 		hoverSignal.Send(this);

@@ -52,6 +52,9 @@ namespace SandCastle
 		void SetAbsolutePos(bool absolute);
 		void SetData(Entity entt);
 		void SetZOffset(float offset);
+		/// @brief Does it send callbacks when hovered if disabled?
+		/// @param yesorno false by default
+		void SetHoverableWhenDisabled(bool yesorno);
 		Entity GetData();
 		bool IsDestroyed() const;
 
@@ -102,6 +105,7 @@ namespace SandCastle
 
 	protected:
 		bool disabled = false;
+		bool hoverableWhenDisabled = false;
 		bool absolutePos = false;
 		bool destroyed = false;
 		int interactionGroup = 0;
