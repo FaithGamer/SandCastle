@@ -87,6 +87,14 @@ namespace SandCastle
 
 		for (int i = 0; i < m_destroy.size(); i++)
 		{
+			//Remove from layout update
+			auto it_f = std::find_if(m_layoutUpdate.begin(), m_layoutUpdate.end(),
+			[&](const UiCanvas* obj) 
+				{
+					return obj->GetID() == m_destroy[i]->GetID(); 
+				});
+			if (it_f != m_layoutUpdate.end())
+				m_layoutUpdate.erase(it_f);
 			//If it was hovered, remove from hovered.
 			if (m_hovered != nullptr && m_destroy[i]->GetID() == m_hovered->GetID())
 			{

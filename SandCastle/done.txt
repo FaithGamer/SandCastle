@@ -609,6 +609,10 @@ december
 -zOffset for canvas
 -uielem can be hoverable when disabled
 
+29
+
+-Ui destroy Update, removes destroyed from update layout to avoid potential crashes
+
 >need an errpr message when frame ui texture size doesn't match découpage
 >new remove child hasn't been tested 
 >new remove child requires documentation
