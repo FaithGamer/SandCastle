@@ -384,7 +384,9 @@ namespace SandCastle
 					{
 						lang = pstr.substr(localized.size(), pstr.size() - localized.size());
 						lang = lang.substr(0, lang.find_first_of('/'));
-						m_availableLangs.emplace_back(lang);
+						auto f_it = std::find(m_availableLangs.begin(), m_availableLangs.end(), lang);
+						if(f_it == m_availableLangs.end())
+							m_availableLangs.emplace_back(lang);
 						//Trick to make sure one default lang is always selected
 						//If the user failed to put it in the engine settings.
 						if (m_lang == "")
