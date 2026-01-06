@@ -276,6 +276,11 @@ namespace SandCastle
 	}
 	void Ui::MakeFont(String filename, String fancyName, float uiSize, float scale, float lineHeight, std::vector<String> langs, float outlineThickness, Vec4f outlineColor)
 	{
+		if (langs.empty())
+		{
+			//make the font for every language if none is specified.
+			langs = Assets::GetAvailableLangs();
+		}
 		auto ins = Instance();
 		float ppu = ins->m_writer->GetPPU();
 		int pxSize = (int)std::round(uiSize * ppu);
