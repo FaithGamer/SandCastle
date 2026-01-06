@@ -528,7 +528,8 @@ namespace SandCastle
 
 	const Font* Writer::GetFont(const String& fancyName, const String& lang)
 	{
-		return &m_fonts[GetFontID(fancyName, lang)];
+		String l = lang == "" ? Assets::GetLang() : lang;
+		return &m_fonts[GetFontID(fancyName, l)];
 	}
 
 	const Font* Writer::GetFont(FontID font) const
@@ -544,12 +545,13 @@ namespace SandCastle
 
 	FontID Writer::GetFontID(const String& name, const String& lang)
 	{
+		String l = lang == "" ? Assets::GetLang() : lang;
 		std::unordered_map<String, FontID>* container = nullptr;
 		String id = name;
 		if (lang != "")
 		{
 			container = &m_localized;
-			id = Concatenated(lang, name);
+			id = Concatenated(l, name);
 		}
 		else
 		{
