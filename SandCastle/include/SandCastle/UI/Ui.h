@@ -95,6 +95,7 @@ namespace SandCastle
 		static void Destroy(UiTxt*& elem);
 		static void Destroy(UiImg*& elem);
 		static void Destroy(UiBtn*& elem);
+		static void Destroy(UiAnimBtn*& elem);
 		static void Destroy(UiCheckbox*& elem);
 
 		/*---Ui update---*/

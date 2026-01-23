@@ -111,7 +111,7 @@ namespace SandCastle
 		children.insert(std::make_pair(elem->id, elem));
 		elem->destroySignal.Listen(&UiCanvas::OnDestroy, this, SignalPriority::low);
 		elem->parent = this;
-		elem->z = z - 1.f;
+		elem->z = z - 5.f;
 
 		if (elem->GetType() == UiElem::Type::Canvas)
 		{

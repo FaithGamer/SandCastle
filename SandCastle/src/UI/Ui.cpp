@@ -646,6 +646,12 @@ namespace SandCastle
 		elem = nullptr;
 	}
 
+	void Ui::Destroy(UiAnimBtn*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
 	void Ui::Destroy(UiCheckbox*& elem)
 	{
 		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
