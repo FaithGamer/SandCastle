@@ -48,7 +48,7 @@ namespace SandCastle
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLoader::Events(SDL_Event& event)
+	bool ImGuiLoader::Events(SDL_Event& event)
 	{
 		if (event.type == SDL_EVENT_KEY_DOWN)
 		{
@@ -56,9 +56,9 @@ namespace SandCastle
 				ImGuiLoader::enabled = !ImGuiLoader::enabled;
 		}
 		if (!ImGuiLoader::enabled)
-			return;
+			return false;
 		std::lock_guard lock(ImGuiLoader::mutex);
-		ImGui_ImplSDL3_ProcessEvent(&event);
+		return ImGui_ImplSDL3_ProcessEvent(&event);
 	}
 
 	void ImGuiLoader::EndImGui(Vec2u windowSize)

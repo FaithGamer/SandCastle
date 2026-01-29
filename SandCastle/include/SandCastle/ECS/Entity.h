@@ -131,6 +131,14 @@ namespace SandCastle
 		/// will result in undefined behaviour
 		void Destroy();
 
+		/// @brief Get the first component in the registry
+		/// Using this for components that appear only once in the registry.
+		template <class T>
+		static T* GetFirst()
+		{
+			return Entity(Entity::View<T>().front()).Get<T>();
+		}
+
 		inline bool operator==(const Entity& rhs) const
 		{
 			return m_id == rhs.m_id;

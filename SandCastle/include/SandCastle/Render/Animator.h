@@ -20,6 +20,20 @@ namespace SandCastle
 				return false;
 			signals[frame].Listen(callback, priority);
 		}
+		template <typename ListenerType>
+		bool StopListenFrame(int frame, ListenerType* const listener)
+		{
+			if (signals.size() <= frame)
+				return false;
+			signals[frame].StopListen(listener);
+		}
+		template <typename SignalType>
+		bool StopListen(int frame, void (*callback)(SignalType))
+		{
+			if (signals.size() <= frame)
+				return false;
+			signals[frame].StopListen(callback);
+		}
 		Animation* animation = nullptr;
 		bool looping = false;
 		String transition = "";

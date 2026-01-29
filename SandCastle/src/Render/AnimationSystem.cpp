@@ -12,7 +12,7 @@ namespace SandCastle
 	void AnimationSystem::Update()
 	{
 		auto delta = Time::Delta();
-		auto group = Entity::registry.group<Animator>(entt::get<SpriteRender, Transform>);
+		auto group = Entity::View<Animator, SpriteRender, Transform>();
 		group.each([&](Animator& animator, SpriteRender& sprite, Transform& transform)
 			{
 				if (animator.currentState == nullptr)
@@ -22,12 +22,19 @@ namespace SandCastle
 				auto* frame = &animator.currentKeyFrame;
 				float frameTime = anim->frames[*frame].timeToNext;
 
+				struct Call
+				{
+					int frame;
+					AnimationState* state;
+					String name;
+				};
+				std::vector<Call> calls;
 				while (animator.accumulator > frameTime)
 				{
 					//Go to next frame, or go back to frame 0, or stay and last frame
 					size_t frameMax = anim->frames.size() - 1;
 					(*frame)++;
-					
+
 					if (*frame > frameMax)
 					{
 						if (animator.currentState->transition.size() > 0)
@@ -43,13 +50,19 @@ namespace SandCastle
 					}
 					if (anim->frames[*frame].sendSignal)
 					{
-						animator.currentState->signals[*frame].Send(KeyframeSignal(animator.currentStateName, *frame));
+						calls.emplace_back(*frame, animator.currentState, animator.currentStateName);
 					}
 					//Reset frame timer
 					animator.accumulator = std::max(animator.accumulator - frameTime, 0.f);
 				}
 				sprite.SetSprite(anim->frames[*frame].sprite);
 				animator.accumulator += (float)delta * animator.speed;
+
+				//Despite having the callback at the end, it is NOT safe to destroy the entity within the callback
+				for (auto& c : calls)
+				{
+					animator.animations[c.name].signals[c.frame].Send(KeyframeSignal(c.name, c.frame));
+				}
 				//to do, evaluate transform
 			});
 	}

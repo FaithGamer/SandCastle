@@ -10,7 +10,7 @@ namespace SandCastle
 	{
 	public:
 		static void BeginImGui();
-		static void Events(SDL_Event& event);
+		static bool Events(SDL_Event& event);
 		static void EndImGui(Vec2u windowSize);
 		static void LoadImGui(SDL_Window* sdlWindow, SDL_GLContext sdlGlContext, bool lightTheme = false);
 		static void ExitImGui();
