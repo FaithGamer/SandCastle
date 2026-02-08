@@ -80,6 +80,7 @@ namespace SandCastle
 			float lineHeight = 1.f,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
+		void AddIcon(String id, Sprite* sprite);
 		/// @brief Give a fancy name to the font to find it easily later 
 		/// across all your project.
 		void NameFont(FontID font, const String& name, const std::vector<String> langs = {});
@@ -178,5 +179,6 @@ namespace SandCastle
 		LayerID m_layer = 0;
 		TextureFiltering m_filtering = TextureFiltering::Nearest;
 		String m_fontFolder = "fonts/";
+		std::unordered_map<String, Glyph> m_icons;
 	};
 }

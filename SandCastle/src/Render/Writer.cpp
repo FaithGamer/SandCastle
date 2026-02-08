@@ -192,6 +192,37 @@ namespace SandCastle
 		return index;
 	}
 
+	void Writer::AddIcon(String id, Sprite* sprite)
+	{
+		if (m_icons.find(id) != m_icons.end())
+		{
+			LOG_ERROR("Writer::AddIcon, icon {0} already exists.", id);
+			return;
+		}
+		/*uint32_t codepoint = 0;
+		Vec2i    sizePx{ 0,0 };     // bitmap size in pixels
+		Vec2i    bearingPx{ 0,0 };  // left/top bearing in pixels
+		int      advancePx = 0;     // advance in pixels (FT 26.6 to px)
+		int      atlasIndex = 0;    // which atlas texture/page this glyph lives on
+		sptr<Sprite> sprite = nullptr;*/
+
+		Vec2f spriteDim = sprite->GetDimensions();
+		Vec2i bearing;
+		bearing.x = 0;//std::round(spriteDim.x / 2);
+		bearing.y = 0;// -std::round(spriteDim.y / 2);
+
+		m_icons.insert(std::make_pair(id,
+			Glyph(
+				0,
+				sprite->GetDimensions(),
+				bearing,
+				std::round(spriteDim.x),
+				0,
+				sptr<Sprite>(sprite)
+			)));
+	}
+
+
 	void Writer::SetFontFolder(const String& path)
 	{
 		m_fontFolder = path;
@@ -294,8 +325,8 @@ namespace SandCastle
 		sent.root.Add<Transform>();
 
 		Vec2f pen(0.f, 0.f); // baseline origin
-		const float ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit() * font.scale;
-		const float lineStep = std::round(((float)font.size + font.outlineThickness) * lineSpacing * font.lineHeight * ppu);
+		const float ppuBase = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit() * font.scale;
+		const float lineStep = std::round(((float)font.size + font.outlineThickness) * lineSpacing * font.lineHeight * ppuBase);
 
 		uint32_t prevGlyphIndex = 0;
 
@@ -369,11 +400,11 @@ namespace SandCastle
 				}
 				return false;
 			};
-		auto CreateEntity = [&](const Glyph& g, float adv)
+		auto CreateEntity = [&](const Glyph* g, float adv, float ppu)
 			{
 				Vec3f pos(
-					pen.x + (g.bearingPx.x + 0.5f * g.sizePx.x) * ppu,
-					pen.y + (g.bearingPx.y - 0.5f * g.sizePx.y) * ppu - (float)font.size * ppu,
+					pen.x + (g->bearingPx.x + 0.5f * g->sizePx.x) * ppu,
+					pen.y + (g->bearingPx.y - 0.5f * g->sizePx.y) * ppu - (float)font.size * ppu,
 					0
 				);
 				pos.y += (float)font.size * ppu * m_adjustLine;
@@ -384,10 +415,11 @@ namespace SandCastle
 				e.Add<SpriteRender>();
 				auto tr = e.Get<Transform>();
 				auto sr = e.Get<SpriteRender>();
-				tr->SetScale(font.scale);
+				if (g->codepoint != (uint32_t)0)
+					tr->SetScale(font.scale);
 				tr->SetPosition(pos);
 				sr->SetMaterial(material->GetID());
-				sr->SetSprite(g.sprite.get());
+				sr->SetSprite(g->sprite.get());
 				sr->SetLayer(layer);
 				sr->color = color;
 				sent.root.AddChild(e);
@@ -400,39 +432,84 @@ namespace SandCastle
 			};
 		float maxPenX = 0.f;
 		//Iterating sentence codepoints (characters)
-		for (uint32_t cp : cps)
+		for (int i = 0; i < cps.size(); i++)
 		{
+			auto& cp = cps[i];
+			Glyph* g = nullptr;
+			bool icon = false;
+			bool isSpace = false;
+			float ppu = ppuBase;
+			auto fallback = [&]()
+				{
+					if (font.hasFallbackGlyph)
+					{
+						g = &font.fallbackGlyph;
+						float nextAdv = (float)g->advancePx * ppu;
+						CheckLineBounds(nextAdv);
+						CreateEntity(g, nextAdv, ppu);
+						prevGlyphIndex = 0;
+					}
+				};
+			//Icon
+			if (cp == (uint32_t)'|')
+			{
+				ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit();
+				icon = true;
+				String iconId;
+				while (i < cps.size())
+				{
+					i++;
+					if (IsSpace(cps[i]))
+						break;
+					iconId += cps[i];
+				}
+				int image = 0;
+				auto it_id = m_icons.find(iconId);
+				if (it_id == m_icons.end())
+				{
+					LOG_ERROR("The icon {0} doesn't exists.", iconId);
+					fallback();
+					continue;
+				}
+				else
+				{
+					g = &it_id->second;
+				}
+			}
 			if (cp == (uint32_t)'\n')
 			{
 				NextLine();
 				RestartCurrWord();
 				continue;
 			}
-			bool isSpace = IsSpace(cp);
-			auto it = font.glyphs.find(cp);
-			if (it == font.glyphs.end())
+			if (!icon)
 			{
-				if (isSpace)
+				isSpace = IsSpace(cp);
+				auto it = font.glyphs.find(cp);
+				if (it == font.glyphs.end())
 				{
-					float adv = (float)font.size * ppu * 0.5f;
-					pen.x += adv;
-					RestartCurrWord();
-					lines.back().totalAdv += adv;
-					lines.back().lastSpaceAdv = adv;
+					if (isSpace)
+					{
+						float adv = (float)font.size * ppu * 0.5f;
+						pen.x += adv;
+						RestartCurrWord();
+						lines.back().totalAdv += adv;
+						lines.back().lastSpaceAdv = adv;
+					}
+					else if (font.hasFallbackGlyph)
+					{
+						fallback();
+					}
+					continue;
 				}
-				else if (font.hasFallbackGlyph)
-				{
-					const Glyph& g = font.fallbackGlyph;
-					float nextAdv = (float)g.advancePx * ppu;
-					CheckLineBounds(nextAdv);
-					CreateEntity(g, nextAdv);
-					prevGlyphIndex = 0;
-				}
+
+				g = &it->second;
+			}
+			if (g == nullptr)
+			{
+				LOG_ERROR("Writer::Write, glyph was still nullptr.");
 				continue;
 			}
-
-			const Glyph& g = it->second;
-
 			// Kerning
 			float kernPx = 0.f;
 			if (FT_HAS_KERNING(font.face) && prevGlyphIndex != 0)
@@ -446,7 +523,7 @@ namespace SandCastle
 				}
 			}
 
-			float nextAdv = (kernPx + (float)g.advancePx) * ppu;
+			float nextAdv = (kernPx + (float)g->advancePx) * ppu;
 			bool lineR = CheckLineBounds(nextAdv);
 			if (!lineR)
 				prevGlyphIndex = FT_Get_Char_Index(font.face, cp);
@@ -463,13 +540,13 @@ namespace SandCastle
 			}
 			else
 			{
-				CreateEntity(g, nextAdv);
+				CreateEntity(g, nextAdv, ppu);
 			}
 			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}
 		sent.maxWidth = width;
 		sent.size.x = maxPenX;// width > 0.f ? width : maxPenX;
-		sent.size.y = std::abs(pen.y) + ((float)font.size + font.outlineThickness) * ppu;
+		sent.size.y = std::abs(pen.y) + ((float)font.size + font.outlineThickness) * ppuBase;
 
 		//Lines alignement
 		void (*Align)(Line & line, float w) = nullptr;
