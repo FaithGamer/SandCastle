@@ -209,7 +209,7 @@ namespace SandCastle
 		Vec2f spriteDim = sprite->GetDimensions();
 		Vec2i bearing;
 		bearing.x = 0;//std::round(spriteDim.x / 2);
-		bearing.y = 0;// -std::round(spriteDim.y / 2);
+		bearing.y = std::round(spriteDim.y);
 
 		m_icons.insert(std::make_pair(id,
 			Glyph(
@@ -407,7 +407,7 @@ namespace SandCastle
 					pen.y + (g->bearingPx.y - 0.5f * g->sizePx.y) * ppu - (float)font.size * ppu,
 					0
 				);
-				pos.y += (float)font.size * ppu * m_adjustLine;
+				pos.y += (float)font.size * ppuBase * m_adjustLine;
 				Entity e = Entity::Create();
 				e.Add<Transform>();
 				auto ch = e.AddGet<Character>();
@@ -541,6 +541,9 @@ namespace SandCastle
 			else
 			{
 				CreateEntity(g, nextAdv, ppu);
+				if(icon)
+				{
+				}
 			}
 			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}
