@@ -192,7 +192,7 @@ namespace SandCastle
 		return index;
 	}
 
-	void Writer::AddIcon(String id, Sprite* sprite)
+	void Writer::AddIcon(String id, Sprite* sprite, Vec2f offset)
 	{
 		if (m_icons.find(id) != m_icons.end())
 		{
@@ -211,6 +211,7 @@ namespace SandCastle
 		bearing.x = 0;//std::round(spriteDim.x / 2);
 		bearing.y = std::round(spriteDim.y
 		);
+		bearing += offset;
 
 		m_icons.insert(std::make_pair(id,
 			Glyph(
@@ -422,7 +423,8 @@ namespace SandCastle
 				sr->SetMaterial(material->GetID());
 				sr->SetSprite(g->sprite.get());
 				sr->SetLayer(layer);
-				sr->color = color;
+				if (g->codepoint != (uint32_t)0)
+					sr->color = color;
 				sent.root.AddChild(e);
 				sent.glyphEntities.push_back(e);
 				currentWord.totalAdv += adv;
@@ -542,7 +544,7 @@ namespace SandCastle
 			else
 			{
 				CreateEntity(g, nextAdv, ppu);
-				if(icon)
+				if (icon)
 				{
 				}
 			}
