@@ -209,7 +209,8 @@ namespace SandCastle
 		Vec2f spriteDim = sprite->GetDimensions();
 		Vec2i bearing;
 		bearing.x = 0;//std::round(spriteDim.x / 2);
-		bearing.y = std::round(spriteDim.y);
+		bearing.y = std::round(spriteDim.y
+		);
 
 		m_icons.insert(std::make_pair(id,
 			Glyph(
@@ -218,7 +219,7 @@ namespace SandCastle
 				bearing,
 				std::round(spriteDim.x),
 				0,
-				sptr<Sprite>(sprite)
+				makesptr<Sprite>(*sprite)
 			)));
 	}
 
@@ -459,7 +460,7 @@ namespace SandCastle
 				while (i < cps.size())
 				{
 					i++;
-					if (IsSpace(cps[i]))
+					if (cps[i] == (uint32_t)'|')
 						break;
 					iconId += cps[i];
 				}
