@@ -671,6 +671,17 @@ namespace SandCastle
 		}
 		i->m_contextSnapshots[name] = i->m_context;
 	}
+	void Ui::SnapshotBtnContext(String name)
+	{
+		auto i = Instance();
+		auto it = i->m_btnContextSnapshots.find(name);
+		if (it != i->m_btnContextSnapshots.end())
+		{
+			LOG_ERROR("Button context snapshot with the name {0}, already exists.");
+			return;
+		}
+		i->m_btnContextSnapshots[name] = i->m_context.button;
+	}
 	void Ui::Context(String name)
 	{
 		auto i = Instance();
@@ -681,6 +692,17 @@ namespace SandCastle
 			return;
 		}
 		i->m_context = it->second;
+	}
+	void Ui::BtnContext(String name)
+	{
+		auto i = Instance();
+		auto it = i->m_btnContextSnapshots.find(name);
+		if (it == i->m_btnContextSnapshots.end())
+		{
+			LOG_ERROR("The following canvas context doesnt exists: {0}", name);
+			return;
+		}
+		i->m_context.button = it->second;
 	}
 	void Ui::SetOrder(float z)
 	{

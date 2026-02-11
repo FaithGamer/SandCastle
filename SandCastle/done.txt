@@ -613,6 +613,12 @@ december
 
 -Ui destroy Update, removes destroyed from update layout to avoid potential crashes
 
+2026
+
+Feb
+
+-button context can be set individually from the rest of the context
+
 >need an errpr message when frame ui texture size doesn't match découpage
 >new remove child hasn't been tested 
 >new remove child requires documentation

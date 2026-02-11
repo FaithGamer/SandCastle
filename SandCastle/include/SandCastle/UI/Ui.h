@@ -106,9 +106,14 @@ namespace SandCastle
 		/*---Context---*/
 		/// @brief Create a snapshot of the current context for later usage.
 		static void SnapshotContext(String name);
+		/// @brief Create a snapeshot of the current button context for later usage.
+		static void SnapshotBtnContext(String name);
 		/// @brief Set the context for every subsequent canvas/element creation.
 		/// The context must have been snapshoted with SnapshotContext.
 		static void Context(String name);
+		/// @brief Set the button context for every subsequent canvas/element creation.
+		/// The context must have been snapshoted with SnapshotBtnContext.
+		static void BtnContext(String name);
 		/// @brief Lower is in front of higher.
 		/// @param z position for visual sorting.
 		static void SetOrder(float z);
@@ -263,6 +268,7 @@ namespace SandCastle
 		//Data
 		std::unordered_map<String, UiFrame::Template> m_frameTemplates;
 		std::unordered_map<String, UiContext> m_contextSnapshots;
+		std::unordered_map<String, ButtonContext> m_btnContextSnapshots;
 
 		//State (creation of new elements)
 		Material* m_defaultMaterial = nullptr;
