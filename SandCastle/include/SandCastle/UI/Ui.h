@@ -23,6 +23,11 @@ namespace SandCastle
 	class UiCheckbox;
 	struct InputSignal;
 
+	struct UiGroupSignal
+	{
+		bool ennabled = false;
+		int group = 0;
+	};
 	class Ui : public Singleton<Ui>
 	{
 	public:
@@ -234,6 +239,7 @@ namespace SandCastle
 		/// @brief Get the layer currently used
 		static LayerID GetLayer();
 		static bool IsGroupEnabled(int group);
+		static Signal<UiGroupSignal>* GetGroupSignal();
 		/// @brief Get all the root canvases.
 		static std::unordered_map<UiElem::ID, UiCanvas*> GetCanvases();
 	private:
@@ -287,6 +293,9 @@ namespace SandCastle
 		static UiElem::ID m_nextId;
 		const float zStep = 1.f;
 		std::unordered_map<int, bool> m_interactionGroups;
+
+		//Signal
+		Signal<UiGroupSignal> uiGroupSignal;
 
 	};
 	template<typename ...Ts>

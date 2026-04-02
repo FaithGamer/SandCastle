@@ -4,7 +4,6 @@
 #include "SandCastle/UI/UiCanvas.h"
 namespace SandCastle
 {
-
 	UiElem::~UiElem()
 	{
 		destroySignal.Send(this);

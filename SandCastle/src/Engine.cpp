@@ -97,7 +97,9 @@ namespace SandCastle
 		Systems::Kill();
 		Renderer2D::Kill();
 		Window::Kill();
+#ifdef SC_IMGUI
 		ImGuiLoader::ExitImGui();
+#endif
 	}
 
 	void Engine::Stop()

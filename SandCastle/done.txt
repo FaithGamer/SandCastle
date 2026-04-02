@@ -619,7 +619,14 @@ Feb
 
 -button context can be set individually from the rest of the context
 
->need an errpr message when frame ui texture size doesn't match découpage
+April
+
+-Signal on UiGroup enable/disable
+>add a particle system from nukes vs swords with contexting like UI
+>what happen if AddElem is called and the elem is already in? 
+
+
+>need an errpr message when frame ui texture size doesn't match dï¿½coupage
 >new remove child hasn't been tested 
 >new remove child requires documentation
 >enforce the creation of sprite render and transform altogether to avoid owning group invalidating the components pointers

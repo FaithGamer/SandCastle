@@ -868,6 +868,11 @@ namespace SandCastle
 				hoverable->Disable();
 			}
 		}
+		UiGroupSignal sig{
+			false,
+			group
+		};
+		uiGroupSignal.Send(sig);
 	}
 	void Ui::OnEnable(int group)
 	{
@@ -879,6 +884,11 @@ namespace SandCastle
 				hoverable->Enable();
 			}
 		}
+		UiGroupSignal sig{
+			true,
+			group
+		};
+		uiGroupSignal.Send(sig);
 	}
 	void Ui::DisableGroup(int group)
 	{
@@ -1013,6 +1023,11 @@ namespace SandCastle
 		if (f_it == i->m_interactionGroups.end())
 			return false;
 		return f_it->second;
+	}
+
+	Signal<UiGroupSignal>* Ui::GetGroupSignal()
+	{
+		return &Instance()->uiGroupSignal;
 	}
 
 	std::unordered_map<UiElem::ID, UiCanvas*> Ui::GetCanvases()
