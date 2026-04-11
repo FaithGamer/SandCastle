@@ -7,6 +7,8 @@ namespace SandCastle
 {
 	class Transform;
 	class SpriteRender;
+	class Sprite;
+	struct Animation;
 
 	/// @brief For internal use, makes the entity a parent
 	struct Children
@@ -161,12 +163,14 @@ namespace SandCastle
 		///			at position 0, 0, 0
 		/// @return The entity created
 		static Entity CreateSprite(String defaultSprite = "square.png_0_0");
+		static Entity CreateSprite(Sprite* sprite);
 		/// @brief Create an entity with Transform and SpriteRender 
 		/// and Animator component at position 0, 0, 0
 		/// @param defaultAnimaion the animation that will be played by default
 		/// @return 
 		static Entity CreateAnimatedSprite(String defaultAnimation = "anim_test.anim",
 			String defaultAnimStateName = "default");
+		static Entity CreateAnimatedSprite(String animId, Animation* anim);
 
 	};
 }

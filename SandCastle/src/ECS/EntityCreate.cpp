@@ -18,6 +18,16 @@ namespace SandCastle
 		render->SetSprite(sprite);
 		return entity;
 	}
+
+	Entity Entity::CreateSprite(Sprite* sprite)
+	{
+		auto entity = Entity::Create();
+		entity.Add<SpriteRender>();
+		entity.Add<Transform>();
+		auto render = entity.Get<SpriteRender>();
+		render->SetSprite(sprite);
+		return entity;
+	}
 	
 	Entity Entity::CreateAnimatedSprite(String defaultAnimation, String defaultAnimStateName)
 	{
@@ -27,6 +37,20 @@ namespace SandCastle
 		auto anim = entity.AddGet<Animator>();
 		anim->AddAnimation(defaultAnimStateName, defaultAnimation);
 		anim->SetAnimation(defaultAnimStateName);
+		return entity;
+	}
+
+	Entity Entity::CreateAnimatedSprite(String animId, Animation* anim)
+	{
+		auto entity = Entity::Create();
+		entity.Add<SpriteRender>();
+		entity.Add<Transform>();
+		auto anima = entity.AddGet<Animator>();
+		anima->AddAnimation(animId, anim);
+		anima->SetAnimation(animId);
+		return entity;
+
+
 		return entity;
 	}
 }
