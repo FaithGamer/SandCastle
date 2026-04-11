@@ -190,6 +190,8 @@ namespace SandCastle
 		for (int i = 0; i < m_hoverables.size(); i++)
 		{
 			auto candidate = m_hoverables[i];
+			if (candidate->state == UiElem::State::Hovered || candidate->state == UiElem::State::Pressed)
+				continue; //cannot hover twice (if pressed, considering it's hovered)
 			if (candidate->disabled && !candidate->hoverableWhenDisabled)
 				continue;
 			if (candidate->IsInside(MousePos()))
