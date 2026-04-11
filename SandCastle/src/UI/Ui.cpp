@@ -89,18 +89,21 @@ namespace SandCastle
 		{
 			//Remove from layout update
 			auto it_f = std::find_if(m_layoutUpdate.begin(), m_layoutUpdate.end(),
-			[&](const UiCanvas* obj) 
+				[&](const UiCanvas* obj)
 				{
-					return obj->GetID() == m_destroy[i]->GetID(); 
+					return obj->GetID() == m_destroy[i]->GetID();
 				});
 			if (it_f != m_layoutUpdate.end())
 				m_layoutUpdate.erase(it_f);
 			//If it was hovered, remove from hovered.
-			if (m_hovered != nullptr && m_destroy[i]->GetID() == m_hovered->GetID())
+			auto f_it = m_hovered.find(m_destroy[i]->GetID());
+			if (f_it != m_hovered.end())
 			{
-				m_hovered->UnHover();
-				m_hovered = nullptr;
+				f_it->second->UnHover();
+				m_hovered.erase(f_it);
 			}
+			//If it is pressed, remove it from pressed
+			m_pressed.erase(m_destroy[i]->GetID());
 
 			delete m_destroy[i];
 		}
@@ -149,10 +152,8 @@ namespace SandCastle
 		{
 			m_roots.erase(it);
 		}
-		if (m_hovered && m_hovered->id == id)
-			m_hovered = nullptr;
-		if (m_pressed && m_pressed->id == id)
-			m_pressed = nullptr;
+		m_hovered.erase(id);
+		m_pressed.erase(id);
 
 		RemoveHelper(m_hoverables, id);
 		RemoveHelper(m_values, id);
@@ -171,16 +172,20 @@ namespace SandCastle
 	void Ui::HoverableUpdate()
 	{
 		//Unhover
-		if (m_hovered != nullptr && 
-			(!m_hovered->IsInside(MousePos()) || m_hovered->disabled && !m_hovered->hoverableWhenDisabled))
+		for (auto it = m_hovered.begin(); it != m_hovered.end();)
 		{
-			//Mouse is no longer inside
-			m_hovered->UnHover();
-			m_hovered = nullptr;
+			auto hovered = it->second;
+			if (!hovered->IsInside(MousePos()) || hovered->disabled && !hovered->hoverableWhenDisabled)
+			{
+				hovered->UnHover();
+				m_hovered.erase(it++);
+			}
+			else
+			{
+				it++;
+			}
 		}
-		if (m_hovered != nullptr)
-			return;
-		
+
 		//Hover
 		for (int i = 0; i < m_hoverables.size(); i++)
 		{
@@ -190,8 +195,7 @@ namespace SandCastle
 			if (candidate->IsInside(MousePos()))
 			{
 				candidate->Hover();
-				m_hovered = candidate;
-				break;
+				m_hovered.insert(std::make_pair(candidate->id, candidate));
 			}
 		}
 	}
@@ -210,7 +214,7 @@ namespace SandCastle
 	bool Ui::OnClick(bool pressed)
 	{
 		//Are we over any ui canvas ?
-		bool hover = m_hovered != nullptr;
+		bool hover = !m_hovered.empty();
 		if (!hover)
 		{
 			for (auto& kvp : m_roots)
@@ -224,18 +228,21 @@ namespace SandCastle
 		}
 
 		//Handling clickable UI
-		if (m_hovered != nullptr && m_hovered->clickable && !m_hovered->disabled)
+		for (auto& hovered_kvp : m_hovered)
 		{
-
-			if (pressed)
+			auto hovered = hovered_kvp.second;
+			if (hovered->clickable && !hovered->disabled)
 			{
-				m_pressed = m_hovered;
-				m_hovered->ClickPressed();
-			}
-			else
-			{
-				m_pressed = nullptr;
-				m_hovered->ClickReleased();
+				if (pressed)
+				{
+					m_pressed.insert(std::make_pair(hovered->id, hovered));
+					hovered->ClickPressed();
+				}
+				else
+				{
+					m_pressed.erase(hovered->id);
+					hovered->ClickReleased();
+				}
 			}
 		}
 
@@ -1033,6 +1040,11 @@ namespace SandCastle
 	std::unordered_map<UiElem::ID, UiCanvas*> Ui::GetCanvases()
 	{
 		return Instance()->m_roots;
+	}
+
+	UiContext Ui::GetContext()
+	{
+		return Instance()->m_context;
 	}
 
 	/*---Helpers---*/

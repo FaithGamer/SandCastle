@@ -242,6 +242,7 @@ namespace SandCastle
 		static Signal<UiGroupSignal>* GetGroupSignal();
 		/// @brief Get all the root canvases.
 		static std::unordered_map<UiElem::ID, UiCanvas*> GetCanvases();
+		static UiContext GetContext();
 	private:
 
 		/*---Helpers---*/
@@ -286,8 +287,8 @@ namespace SandCastle
 		std::vector<UiElem*> m_destroy;
 		std::unordered_map<UiElem::ID, UiCanvas*> m_roots;
 		std::vector<UiCanvas*> m_layoutUpdate;
-		UiElem* m_hovered = nullptr;
-		UiElem* m_pressed = nullptr;
+		std::unordered_map<UiElem::ID, UiElem*> m_hovered;
+		std::unordered_map<UiElem::ID, UiElem*> m_pressed;
 		std::stack<UiCanvas*> m_canvas;
 		float m_ppu = 1.f / 360.f;
 		static UiElem::ID m_nextId;
