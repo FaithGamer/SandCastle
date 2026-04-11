@@ -622,6 +622,11 @@ Feb
 April
 
 -Signal on UiGroup enable/disable
+
+11
+
+-multiple hoverable/pressed at the same time
+
 >add a particle system from nukes vs swords with contexting like UI
 >what happen if AddElem is called and the elem is already in? 
 
