@@ -266,6 +266,7 @@
     <ClCompile Include="src\UI\UiBtn.cpp" />
     <ClCompile Include="src\UI\UiCheckbox.cpp" />
     <ClCompile Include="src\UI\UiFrame.cpp" />
+    <ClCompile Include="src\UI\UiLoadBar.cpp" />
     <ClCompile Include="src\UI\UiImg.cpp" />
     <ClCompile Include="src\Core\Profiling.cpp" />
     <ClCompile Include="src\Render\Color.cpp" />
@@ -402,6 +403,7 @@
     <ClInclude Include="include\SandCastle\UI\UiEnum.h" />
     <ClInclude Include="include\SandCastle\UI\UiFrame.h" />
     <ClInclude Include="include\SandCastle\UI\UiImg.h" />
+    <ClInclude Include="include\SandCastle\UI\UiLoadBar.h" />
     <ClInclude Include="include\SandCastle\UI\UiTxt.h" />
     <ClInclude Include="include\SandCastle\Render\WireRenderSystem.h" />
     <ClInclude Include="include\SandCastle\Engine.h" />

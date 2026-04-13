@@ -12,6 +12,7 @@
 #include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/UI/UiAnimBtn.h"
 #include "SandCastle/UI/UiCheckbox.h"
+#include "SandCastle/UI/UiLoadBar.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
@@ -417,6 +418,13 @@ namespace SandCastle
 			text->SetPosition(text->position);
 	}
 
+	void Ui::UpdateLoadBar(UiLoadBar* loadBar, float current, float goal)
+	{
+		loadBar->SetProgress(current, goal);
+		if (loadBar->parent != nullptr)
+			loadBar->parent->MustUpdate();
+	}
+
 	void Ui::UpdateBtn(UiBtn* button, std::string_view utf8)
 	{
 		auto i = Instance();
@@ -612,6 +620,45 @@ namespace SandCastle
 
 	}
 
+	UiLoadBar* Ui::LoadBar(Vec2f size, float goal, float current)
+	{
+		auto i = Instance();
+
+		UiCanvas* parent = nullptr;
+		if (!i->m_canvas.empty())
+			parent = i->m_canvas.top();
+
+		auto loadBar = new UiLoadBar();
+		loadBar->root = Entity::Create();
+		loadBar->root.Add<Transform>();
+		loadBar->context = i->m_context.loadBar;
+		loadBar->margin = i->m_context.margin;
+		loadBar->size = size;
+		loadBar->goal = goal;
+		loadBar->current = current;
+
+		ASSERT_LOG_ERROR((loadBar->context.frameContour != nullptr), "Trying to create a LoadBar without at least a contour frame context.");
+		loadBar->frameContour = UiFrame(
+			loadBar->context.frameContour,
+			i->m_context.material,
+			i->m_context.layer);
+		ASSERT_LOG_ERROR((loadBar->context.frameFilling != nullptr), "Trying to create a LoadBar without at least a filling frame context.");
+		loadBar->frameFilling = UiFrame(
+			loadBar->context.frameFilling,
+			i->m_context.material,
+			i->m_context.layer);
+
+		i->NewElem(loadBar, parent);
+
+		// Update contour to full size
+		loadBar->frameContour.Update(loadBar, 0.f);
+		// Update filling and label
+		loadBar->UpdateFilling();
+		loadBar->UpdateLabel();
+
+		return loadBar;
+	}
+
 	void Ui::End()
 	{
 		auto i = Instance();
@@ -662,6 +709,12 @@ namespace SandCastle
 	}
 
 	void Ui::Destroy(UiCheckbox*& elem)
+	{
+		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
+		elem = nullptr;
+	}
+
+	void Ui::Destroy(UiLoadBar*& elem)
 	{
 		Instance()->DestroyHelper(static_cast<UiElem*>(elem));
 		elem = nullptr;
@@ -833,6 +886,33 @@ namespace SandCastle
 	void Ui::SetCheckboxSprites(String texture)
 	{
 		Instance()->m_context.checkbox.texture = texture;
+	}
+	void Ui::SetLoadBarFrameContour(String texture)
+	{
+		Instance()->SetFrame(&Instance()->m_context.loadBar.frameContour, texture);
+	}
+	void Ui::SetLoadBarFrameFilling(String texture)
+	{
+		Instance()->SetFrame(&Instance()->m_context.loadBar.frameFilling, texture);
+	}
+	void Ui::SetLoadBarFillingMargin(Vec2f margin)
+	{
+		Instance()->m_context.loadBar.fillingMargin = margin;
+	}
+	void Ui::SetLoadBarTextMode(LoadBarTextMode mode)
+	{
+		Instance()->m_context.loadBar.textMode = mode;
+	}
+	void Ui::SetLoadBarFont(String fancyName)
+	{
+		auto ins = Instance();
+		auto lang = Assets::GetLang();
+		ins->m_writer->GetFont(fancyName, lang); // for error message if font doesn't exists.
+		ins->m_context.loadBar.fontName = fancyName;
+	}
+	void Ui::SetLoadBarTextColor(Color color)
+	{
+		Instance()->m_context.loadBar.textColor = color;
 	}
 	void Ui::SetTextAlign(TextAlign textAlign)
 	{

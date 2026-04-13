@@ -53,6 +53,23 @@ namespace SandCastle
 		TextAlign align = TextAlign::Left;
 	};
 
+	enum class LoadBarTextMode
+	{
+		None,
+		Percent,
+		ValueGoal
+	};
+
+	struct LoadBarContext
+	{
+		UiFrame::Template* frameContour = nullptr;
+		UiFrame::Template* frameFilling = nullptr;
+		Vec2f fillingMargin = Vec2f(0.f, 0.f);
+		LoadBarTextMode textMode = LoadBarTextMode::None;
+		String fontName;
+		Color textColor;
+	};
+
 	struct UiContext
 	{
 		CanvasContext canvas;
@@ -60,6 +77,7 @@ namespace SandCastle
 		ButtonContext button;
 		AnimButtonContext animButton;
 		TextContext text;
+		LoadBarContext loadBar;
 		Vec2f margin = Vec2f(0.f, 0.f);
 		Vec2f rootMargin = Vec2f(0.f, 0.f);
 		LayerID layer = 0;

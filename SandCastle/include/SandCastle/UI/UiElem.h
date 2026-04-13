@@ -26,7 +26,8 @@ namespace SandCastle
 			Button,
 			AnimButton,
 			Image,
-			Checkbox
+			Checkbox,
+			LoadBar
 		};
 		struct Component
 		{

@@ -9,4 +9,5 @@
 #include "SandCastle/UI/UiAnimBtn.h"
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/UI/UiCheckbox.h"
+#include "SandCastle/UI/UiLoadBar.h"
 #include "SandCastle/UI/UiEnum.h"

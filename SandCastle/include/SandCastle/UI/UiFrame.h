@@ -69,9 +69,10 @@ namespace SandCastle
 		void SetColor(Color color);
 		void SetAlpha(unsigned int alpha);
 		Vec2f Update(UiElem* elem, float z);
+	public:
+		Entity root;
 	private:
 		friend Ui;
-		Entity root;
 		Vec2f size;
 		UiFrame::Template* templ = nullptr;
 		Material* material = nullptr;

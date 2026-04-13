@@ -21,6 +21,7 @@ namespace SandCastle
 	class UiBtn;
 	class UiAnimBtn;
 	class UiCheckbox;
+	class UiLoadBar;
 	struct InputSignal;
 
 	struct UiGroupSignal
@@ -94,6 +95,7 @@ namespace SandCastle
 		static UiAnimBtn* AnimButton(std::string_view utf8);
 		static UiAnimBtn* AnimButtonLoc(const String& key);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
+		static UiLoadBar* LoadBar(Vec2f size, float goal = 1.f, float current = 0.f);
 		static void End();
 		static void Destroy(UiElem*& elem);
 		static void Destroy(UiCanvas*& elem);
@@ -102,11 +104,13 @@ namespace SandCastle
 		static void Destroy(UiBtn*& elem);
 		static void Destroy(UiAnimBtn*& elem);
 		static void Destroy(UiCheckbox*& elem);
+		static void Destroy(UiLoadBar*& elem);
 
 		/*---Ui update---*/
 
 		static void UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8 = true);
 		static void UpdateBtn(UiBtn* button, std::string_view utf8);
+		static void UpdateLoadBar(UiLoadBar* loadBar, float current, float goal);
 
 		/*---Context---*/
 		/// @brief Create a snapshot of the current context for later usage.
@@ -187,6 +191,24 @@ namespace SandCastle
 		/// The texture must have 3 horizontal sprites.
 		/// respecting this order: unchecked, hovered, checked
 		static void SetCheckboxSprites(String texture);
+		/// @brief Context setting.
+		/// Set the contour frame for load bar creation
+		static void SetLoadBarFrameContour(String texture);
+		/// @brief Context setting.
+		/// Set the filling frame for load bar creation
+		static void SetLoadBarFrameFilling(String texture);
+		/// @brief Context setting.
+		/// Set the margin between contour and filling in load bars
+		static void SetLoadBarFillingMargin(Vec2f margin);
+		/// @brief Context setting.
+		/// Set the text display mode for load bars (None, Percent, ValueGoal)
+		static void SetLoadBarTextMode(LoadBarTextMode mode);
+		/// @brief Context setting.
+		/// Set the font for load bar text
+		static void SetLoadBarFont(String fancyName);
+		/// @brief Context setting.
+		/// Set the text color for load bar text
+		static void SetLoadBarTextColor(Color color);
 		/// @brief Context setting.
 		/// Set the text alignement that will be used for  text creation
 		static void SetTextAlign(TextAlign textAlign);
