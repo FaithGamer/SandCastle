@@ -2,6 +2,7 @@
 #include "SandCastle/UI/UiLoadBar.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/Assets.h"
+#include "SandCastle/Core/Math.h"
 #include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
@@ -28,6 +29,12 @@ namespace SandCastle
 		context.fillingColor = color;
 		if (frameFilling.root.Valid())
 			frameFilling.SetColor(color);
+	}
+
+	void UiLoadBar::SetUseCompact(bool useCompact)
+	{
+		useCompactFormat = useCompact;
+		UpdateLabel();
 	}
 
 	double UiLoadBar::GetProgress() const
@@ -87,7 +94,14 @@ namespace SandCastle
 		}
 		else // ValueGoal
 		{
-			text = std::to_string((long long)current) + "/" + std::to_string((long long)goal);
+			if (useCompactFormat)
+			{
+				text = Math::FormatCompact(current) + "/" + Math::FormatCompact(goal);
+			}
+			else
+			{
+				text = std::to_string((long long)current) + "/" + std::to_string((long long)goal);
+			}
 		}
 
 		auto writer = Ui::GetWriter();

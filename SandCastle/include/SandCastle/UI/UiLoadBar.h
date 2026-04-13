@@ -15,6 +15,7 @@ namespace SandCastle
 		UiElem::Type GetType() const override;
 		void SetProgress(double current, double goal);
 		void SetFillingColor(Color color);
+		void SetUseCompact(bool useCompact);
 		double GetProgress() const;
 		double GetCurrent() const;
 		double GetGoal() const;
@@ -30,5 +31,6 @@ namespace SandCastle
 		Sentence label;
 		double current = 0.0;
 		double goal = 1.0;
+		bool useCompactFormat = false;
 	};
 }
