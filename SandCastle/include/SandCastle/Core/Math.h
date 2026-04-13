@@ -1,5 +1,7 @@
 #pragma once
 #include <math.h>
+#include <string>
+#include <cstdint>
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Core/Log.h"
 
@@ -234,6 +236,86 @@ namespace SandCastle
 				return value - 1;
 			return value;
 		}
+
+		/// @brief Format a number into a compact, human-readable string of at most 5 characters.
+		/// Uses no locale, no heap allocation, and no standard format calls — pure integer arithmetic on a stack buffer.
+		/// Examples: 1000 -> "1.00k" | 10000 -> "10.0k" | 100000 -> "100k" | 1.5e9 -> "1.50B" | 1e15 -> "1e+15"
+		/// Suffixes: k (thousand), M (million), B (billion), T (trillion). Above 1T uses scientific notation.
+		inline std::string FormatCompact(double value)
+		{
+			char buf[8];
+			int  len = 0;
+
+			// ---- Numbers below 1000: write as plain integer ----
+			if (value < 1000.0)
+			{
+				uint32_t n = (uint32_t)value;
+				if      (n >= 100) { buf[len++] = (char)('0' + n / 100); buf[len++] = (char)('0' + (n / 10) % 10); buf[len++] = (char)('0' + n % 10); }
+				else if (n >= 10)  { buf[len++] = (char)('0' + n / 10);  buf[len++] = (char)('0' + n % 10); }
+				else               { buf[len++] = (char)('0' + n); }
+				return { buf, (size_t)len };
+			}
+
+			// ---- Scale detection: find the largest suffix where value >= scale ----
+			static constexpr double scales[4]  = { 1e3, 1e6, 1e9, 1e12 };
+			static constexpr char   suffixes[4] = { 'k', 'M', 'B', 'T'  };
+
+			int idx = 3;
+			while (idx > 0 && value < scales[idx]) --idx;
+
+			double s = value / scales[idx];
+
+			// ---- Values >= 1e15: scientific notation "1e+NN" (always exactly 5 chars) ----
+			if (idx == 3 && s >= 1000.0)
+			{
+				int exp = (int)std::log10(value);
+				if (exp > 99) exp = 99; // clamp to 2 digits — doubles top out at ~e308 anyway
+				buf[0] = '1'; buf[1] = 'e'; buf[2] = '+';
+				buf[3] = (char)('0' + exp / 10);
+				buf[4] = (char)('0' + exp % 10);
+				return { buf, 5 };
+			}
+
+			// ---- Format scaled value using only integer arithmetic ----
+			// s in [1,   10)  -> "X.XX" + suffix  (5 chars, 2 decimals)
+			// s in [10, 100)  -> "XX.X" + suffix  (5 chars, 1 decimal)
+			// s in [100,1000) -> "XXX"  + suffix  (4 chars, 0 decimals)
+			if (s < 10.0)
+			{
+				int n = (int)(s * 100.0 + 0.5);
+				if (n > 999) n = 999; // guard rounding at boundary (e.g. 9.995)
+				buf[0] = (char)('0' + n / 100);
+				buf[1] = '.';
+				buf[2] = (char)('0' + (n / 10) % 10);
+				buf[3] = (char)('0' + n % 10);
+				buf[4] = suffixes[idx];
+				return { buf, 5 };
+			}
+
+			if (s < 100.0)
+			{
+				int n = (int)(s * 10.0 + 0.5);
+				if (n > 999) n = 999;
+				buf[0] = (char)('0' + n / 100);
+				buf[1] = (char)('0' + (n / 10) % 10);
+				buf[2] = '.';
+				buf[3] = (char)('0' + n % 10);
+				buf[4] = suffixes[idx];
+				return { buf, 5 };
+			}
+
+			{
+				int n = (int)(s + 0.5);
+				if (n > 999) n = 999;
+				buf[0] = (char)('0' + n / 100);
+				buf[1] = (char)('0' + (n / 10) % 10);
+				buf[2] = (char)('0' + n % 10);
+				buf[3] = suffixes[idx];
+				return { buf, 4 };
+			}
+		}
+		inline std::string FormatCompact(int64_t value) { return FormatCompact((double)value); }
+		inline std::string FormatCompact(int     value) { return FormatCompact((double)value); }
 	}
 }
 
