@@ -1008,6 +1008,22 @@ namespace SandCastle
 			LOG_WARN("Trying to make hoverable an elem that is already in the list.");
 		}
 	}
+	void Ui::ChangeFrame(UiCanvas* canvas, String frame)
+	{
+		auto i = Instance();
+		auto it = i->m_frameTemplates.find(frame);
+		if (it == i->m_frameTemplates.end())
+		{
+			LOG_ERROR("Ui::SetFrame, the frame template {0}, doesn't exists.", frame);
+			return;
+		}
+		if (canvas->frame && canvas->frame->root.Valid())
+		{
+			canvas->frame->root.Destroy();
+		}
+		canvas->frame = UiFrame(&it->second, i->m_context.material, i->m_context.layer);
+		canvas->MustUpdate();
+	}
 	Writer* Ui::GetWriter()
 	{
 		return Instance()->m_writer;

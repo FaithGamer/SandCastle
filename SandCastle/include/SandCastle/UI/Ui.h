@@ -226,6 +226,7 @@ namespace SandCastle
 		/// @brief Get the mouse UI position
 		static Vec2f MousePos();
 		static void RegisterHoverable(UiElem* elem);
+		static void ChangeFrame(UiCanvas* canvas, String frame);
 
 		/*---Accessors---*/
 
