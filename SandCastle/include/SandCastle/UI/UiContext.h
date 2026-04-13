@@ -65,6 +65,7 @@ namespace SandCastle
 		UiFrame::Template* frameContour = nullptr;
 		UiFrame::Template* frameFilling = nullptr;
 		Vec2f fillingMargin = Vec2f(0.f, 0.f);
+		Color fillingColor = Color(255, 255, 255, 255);
 		LoadBarTextMode textMode = LoadBarTextMode::None;
 		String fontName;
 		Color textColor;

@@ -95,7 +95,7 @@ namespace SandCastle
 		static UiAnimBtn* AnimButton(std::string_view utf8);
 		static UiAnimBtn* AnimButtonLoc(const String& key);
 		static UiCheckbox* Checkbox(bool* value = nullptr);
-		static UiLoadBar* LoadBar(Vec2f size, float goal = 1.f, float current = 0.f);
+		static UiLoadBar* LoadBar(Vec2f size, double goal = 1.0, double current = 0.0);
 		static void End();
 		static void Destroy(UiElem*& elem);
 		static void Destroy(UiCanvas*& elem);
@@ -110,7 +110,7 @@ namespace SandCastle
 
 		static void UpdateText(UiTxt* text, std::string_view utf8, bool replaceUtf8 = true);
 		static void UpdateBtn(UiBtn* button, std::string_view utf8);
-		static void UpdateLoadBar(UiLoadBar* loadBar, float current, float goal);
+		static void UpdateLoadBar(UiLoadBar* loadBar, double current, double goal);
 
 		/*---Context---*/
 		/// @brief Create a snapshot of the current context for later usage.
@@ -200,6 +200,9 @@ namespace SandCastle
 		/// @brief Context setting.
 		/// Set the margin between contour and filling in load bars
 		static void SetLoadBarFillingMargin(Vec2f margin);
+		/// @brief Context setting.
+		/// Set the color of the filling frame in load bars
+		static void SetLoadBarFillingColor(Color color);
 		/// @brief Context setting.
 		/// Set the text display mode for load bars (None, Percent, ValueGoal)
 		static void SetLoadBarTextMode(LoadBarTextMode mode);

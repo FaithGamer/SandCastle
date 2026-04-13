@@ -15,7 +15,7 @@ namespace SandCastle
 		return UiElem::Type::LoadBar;
 	}
 
-	void UiLoadBar::SetProgress(float current, float goal)
+	void UiLoadBar::SetProgress(double current, double goal)
 	{
 		this->current = current;
 		this->goal = goal;
@@ -23,36 +23,45 @@ namespace SandCastle
 		UpdateLabel();
 	}
 
-	float UiLoadBar::GetProgress() const
+	void UiLoadBar::SetFillingColor(Color color)
 	{
-		if (goal <= 0.f) return 0.f;
-		float ratio = current / goal;
-		return ratio < 0.f ? 0.f : (ratio > 1.f ? 1.f : ratio);
+		context.fillingColor = color;
+		if (frameFilling.root.Valid())
+			frameFilling.SetColor(color);
 	}
 
-	float UiLoadBar::GetCurrent() const
+	double UiLoadBar::GetProgress() const
+	{
+		if (goal <= 0.0) return 0.0;
+		double ratio = current / goal;
+		return ratio < 0.0 ? 0.0 : (ratio > 1.0 ? 1.0 : ratio);
+	}
+
+	double UiLoadBar::GetCurrent() const
 	{
 		return current;
 	}
 
-	float UiLoadBar::GetGoal() const
+	double UiLoadBar::GetGoal() const
 	{
 		return goal;
 	}
 
 	void UiLoadBar::UpdateFilling()
 	{
-		float ratio = GetProgress();
+		double ratio = GetProgress();
 		Vec2f margin = context.fillingMargin;
-		float fillWidth = (size.x - margin.x * 2.f) * ratio;
+		float fillWidth = (size.x - margin.x * 2.f) * (float)ratio;
 		float fillHeight = size.y - margin.y * 2.f;
 
 		// Temporarily override size for filling frame update
 		Vec2f savedSize = size;
-		Vec2f savedPos = position;
 		size = Vec2f(fillWidth, fillHeight);
 		frameFilling.Update(this, -1.f);
 		size = savedSize;
+
+		// Apply filling color (Update() rebuilds all entities, color must be re-applied)
+		frameFilling.SetColor(context.fillingColor);
 
 		// Reposition filling frame to account for margin
 		if (frameFilling.root.Valid())
@@ -73,12 +82,12 @@ namespace SandCastle
 		String text;
 		if (context.textMode == LoadBarTextMode::Percent)
 		{
-			int pct = (int)(GetProgress() * 100.f);
+			int pct = (int)(GetProgress() * 100.0);
 			text = std::to_string(pct) + "%";
 		}
 		else // ValueGoal
 		{
-			text = std::to_string((int)current) + "/" + std::to_string((int)goal);
+			text = std::to_string((long long)current) + "/" + std::to_string((long long)goal);
 		}
 
 		auto writer = Ui::GetWriter();

@@ -13,10 +13,11 @@ namespace SandCastle
 	public:
 		~UiLoadBar();
 		UiElem::Type GetType() const override;
-		void SetProgress(float current, float goal);
-		float GetProgress() const;
-		float GetCurrent() const;
-		float GetGoal() const;
+		void SetProgress(double current, double goal);
+		void SetFillingColor(Color color);
+		double GetProgress() const;
+		double GetCurrent() const;
+		double GetGoal() const;
 
 	private:
 		friend Ui;
@@ -27,7 +28,7 @@ namespace SandCastle
 		UiFrame frameContour;
 		UiFrame frameFilling;
 		Sentence label;
-		float current = 0.f;
-		float goal = 1.f;
+		double current = 0.0;
+		double goal = 1.0;
 	};
 }

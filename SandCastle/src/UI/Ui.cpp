@@ -418,7 +418,7 @@ namespace SandCastle
 			text->SetPosition(text->position);
 	}
 
-	void Ui::UpdateLoadBar(UiLoadBar* loadBar, float current, float goal)
+	void Ui::UpdateLoadBar(UiLoadBar* loadBar, double current, double goal)
 	{
 		loadBar->SetProgress(current, goal);
 		if (loadBar->parent != nullptr)
@@ -620,7 +620,7 @@ namespace SandCastle
 
 	}
 
-	UiLoadBar* Ui::LoadBar(Vec2f size, float goal, float current)
+	UiLoadBar* Ui::LoadBar(Vec2f size, double goal, double current)
 	{
 		auto i = Instance();
 
@@ -652,7 +652,7 @@ namespace SandCastle
 
 		// Update contour to full size
 		loadBar->frameContour.Update(loadBar, 0.f);
-		// Update filling and label
+		// Update filling (applies filling color) and label
 		loadBar->UpdateFilling();
 		loadBar->UpdateLabel();
 
@@ -898,6 +898,10 @@ namespace SandCastle
 	void Ui::SetLoadBarFillingMargin(Vec2f margin)
 	{
 		Instance()->m_context.loadBar.fillingMargin = margin;
+	}
+	void Ui::SetLoadBarFillingColor(Color color)
+	{
+		Instance()->m_context.loadBar.fillingColor = color;
 	}
 	void Ui::SetLoadBarTextMode(LoadBarTextMode mode)
 	{
