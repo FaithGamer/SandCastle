@@ -60,7 +60,7 @@ namespace SandCastle
 		const GLuint srcTex = sourceTexture->GetId();
 		ASSERT_LOG_ERROR(srcTex != 0, "Invalid source texture");
 
-		// Save a bit of state we’ll touch
+		// Save a bit of state weï¿½ll touch
 		GLint prevTex = 0, prevReadFBO = 0, prevDrawFBO = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
 		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevReadFBO);
@@ -187,6 +187,7 @@ namespace SandCastle
 		if (!importSettings.keepData)
 		{
 			stbi_image_free(m_pixels);
+			m_pixels = nullptr;
 		}
 
 		//Unbind since we are done configuring this texture
@@ -224,7 +225,7 @@ namespace SandCastle
 
 		if (importSettings.useMipmaps)
 		{
-			// We’ll generate after updates, no need now.
+			// Weï¿½ll generate after updates, no need now.
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);

@@ -8,6 +8,8 @@ namespace SandCastle
 {
 	Window::~Window()
 	{
+		if (m_cursor)
+			SDL_DestroyCursor(m_cursor);
 		SDL_GL_DestroyContext(m_initContext);
 		SDL_GL_DestroyContext(m_renderContext);
 		SDL_DestroyWindow(m_window);
@@ -43,6 +45,7 @@ namespace SandCastle
 		m_clearColor = Vec4f(0.1, 0.1, 0.1, 1);
 		m_initialized = true;
 		m_pixelSize = GetSize();
+		ResizeSignal.Listen(&Window::OnCursorResize, this);
 	}
 
 	void Window::SetSize(Vec2u size)
@@ -109,6 +112,72 @@ namespace SandCastle
 			SDL_ShowCursor();
 		else
 			SDL_HideCursor();
+	}
+
+	void Window::SetCursor(const std::string& texturePath, int hotX, int hotY)
+	{
+		auto instance = Instance();
+
+		if (texturePath.empty())
+		{
+			instance->m_cursorPath.clear();
+			if (instance->m_cursor)
+			{
+				SDL_DestroyCursor(instance->m_cursor);
+				instance->m_cursor = nullptr;
+			}
+			SDL_SetCursor(SDL_GetDefaultCursor());
+			return;
+		}
+
+		instance->m_cursorPath = texturePath;
+		instance->m_cursorHotX = hotX;
+		instance->m_cursorHotY = hotY;
+		instance->RefreshCursor();
+	}
+
+	void Window::RefreshCursor()
+	{
+		if (m_cursorPath.empty())
+			return;
+
+		SDL_Surface* surface = SDL_LoadBMP(m_cursorPath.c_str());
+		if (!surface)
+		{
+			LOG_ERROR("Window::SetCursor: failed to load '{0}': {1}", m_cursorPath, SDL_GetError());
+			return;
+		}
+
+		int h = GetSize().y;
+		int scale = h < 720 ? 1 : h < 1080 ? 2 : h < 1440 ? 3 : 4;
+
+		SDL_Surface* scaled = SDL_ScaleSurface(surface, surface->w * scale, surface->h * scale, SDL_SCALEMODE_NEAREST);
+		SDL_DestroySurface(surface);
+		if (!scaled)
+		{
+			LOG_ERROR("Window::SetCursor: SDL_ScaleSurface failed: {0}", SDL_GetError());
+			return;
+		}
+
+		SDL_Cursor* newCursor = SDL_CreateColorCursor(scaled, m_cursorHotX * scale, m_cursorHotY * scale);
+		SDL_DestroySurface(scaled);
+
+		if (!newCursor)
+		{
+			LOG_ERROR("Window::SetCursor: SDL_CreateColorCursor failed: {0}", SDL_GetError());
+			return;
+		}
+
+		if (m_cursor)
+			SDL_DestroyCursor(m_cursor);
+
+		m_cursor = newCursor;
+		SDL_SetCursor(newCursor);
+	}
+
+	void Window::OnCursorResize(Vec2u size)
+	{
+		RefreshCursor();
 	}
 
 	void Window::SetRenderWhenMinimized(bool renderWhenMinimized)

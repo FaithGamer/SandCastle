@@ -21,7 +21,7 @@ namespace SandCastle
         /// To ensure thread safety with rendering thread
         Texture(const Texture* sourceTexture, const Rect region);
 
-        /// @brief construct an empty RGBA8 texture you’ll fill/update later (e.g., font atlas).
+        /// @brief construct an empty RGBA8 texture youï¿½ll fill/update later (e.g., font atlas).
         Texture(int width, int height, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
 
         void Reload(std::string path, TextureImportSettings importSettings = TextureImportSettings::defaultSettings);
@@ -39,6 +39,9 @@ namespace SandCastle
         void SetPBOStreaming(bool enable);
         /// @brief upload a rectangle (x,y,w,h) from 'src' (RGBA8).
         void UpdateRegion(int x, int y, int w, int h, const void* rgba8);
+        /// @brief Returns the CPU-side RGBA8 pixel buffer.
+        /// Only valid when the texture was imported with keepData = true, nullptr otherwise.
+        const unsigned char* GetPixels() const { return m_pixels; }
 
     private:
         friend Assets;

@@ -26,6 +26,11 @@ namespace SandCastle
 		static void RenderWindow();
 		static void SetClearColor(Vec4f color);
 		static void ShowCursor(bool showCursor);
+		/// @brief Set the OS cursor image from a BMP file. The OS renders this cursor independently
+		/// of the game loop, so there is zero latency between mouse movement and the visible cursor.
+		/// hotX/hotY are the cursor hotspot in pixels from the top-left of the image.
+		/// Pass an empty string to restore the default system cursor.
+		static void SetCursor(const std::string& texturePath, int hotX = 0, int hotY = 0);
 		static void SetRenderWhenMinimized(bool renderWhenMinimized);
 		static bool IsInitialized();
 		/// @brief Get the V sync mode
@@ -71,7 +76,7 @@ namespace SandCastle
 		void Clear() override;
 		void OnSDLPixelSizeChanged(SDL_Event& event);
 		void OnSDLWindowResized(SDL_Event& event);
-		
+
 		Signal<Vec2u> ResizeSignal;
 		Signal<bool> FocusSignal;
 		Signal<bool> MinimizedSignal;
@@ -80,11 +85,17 @@ namespace SandCastle
 		friend Singleton<Window>;
 		Window() = default;
 		void Init(std::string name, Vec2u size);
+		void RefreshCursor();
+		void OnCursorResize(Vec2u size);
 		bool m_initialized = false;
 		bool m_renderWhenMiminized = false;
 		SDL_Window* m_window = nullptr;
 		SDL_GLContext m_initContext = nullptr;
 		SDL_GLContext m_renderContext = nullptr;
+		SDL_Cursor* m_cursor = nullptr;
+		std::string m_cursorPath;
+		int m_cursorHotX = 0;
+		int m_cursorHotY = 0;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
 	};
