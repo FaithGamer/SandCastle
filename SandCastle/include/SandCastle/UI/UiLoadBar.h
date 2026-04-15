@@ -16,6 +16,7 @@ namespace SandCastle
 		void SetProgress(double current, double goal);
 		void SetFillingColor(Color color);
 		void SetUseCompact(bool useCompact);
+		void SetSuffix(String Suffix);
 		double GetProgress() const;
 		double GetCurrent() const;
 		double GetGoal() const;
@@ -29,6 +30,7 @@ namespace SandCastle
 		UiFrame frameContour;
 		UiFrame frameFilling;
 		Sentence label;
+		String suffix="";
 		double current = 0.0;
 		double goal = 1.0;
 		bool useCompactFormat = false;

@@ -37,6 +37,12 @@ namespace SandCastle
 		UpdateLabel();
 	}
 
+	void UiLoadBar::SetSuffix(String Suffix)
+	{
+		suffix = Suffix;
+		UpdateLabel();
+	}
+
 	double UiLoadBar::GetProgress() const
 	{
 		if (goal <= 0.0) return 0.0;
@@ -103,6 +109,7 @@ namespace SandCastle
 				text = std::to_string((long long)current) + "/" + std::to_string((long long)goal);
 			}
 		}
+		text += suffix;
 
 		auto writer = Ui::GetWriter();
 		String lang = Assets::GetLang();
