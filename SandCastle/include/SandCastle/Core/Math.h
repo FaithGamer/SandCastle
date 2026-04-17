@@ -428,6 +428,21 @@ namespace SandCastle
 		}
 		inline std::string FormatCompact(int64_t value) { return FormatCompact((double)value, 0); }
 		inline std::string FormatCompact(int     value) { return FormatCompact((double)value, 0); }
+
+		inline String ToString(double value, int precision = 0)
+		{
+			std::ostringstream out;
+			out << std::fixed << std::setprecision(precision) << value;
+			return out.str();
+		}
+
+		inline String ToString(float value, int precision = 0)
+		{
+			std::ostringstream out;
+			out << std::fixed << std::setprecision(precision) << value;
+			return out.str();
+		}
+
 	}
 }
 
