@@ -30,6 +30,7 @@ namespace SandCastle
 		{
 			return anchor;
 		}
+		Vec2f GetAnchoredPosition() const;
 		void AddElem(UiElem* elem);
 		void RemoveElem(UiElem* elem);
 		/// @brief Spacing between element inside the canvas

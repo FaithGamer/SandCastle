@@ -99,7 +99,12 @@ namespace SandCastle
 		}
 		ComputeHitbox();
 	}
-
+	Vec2f UiCanvas::GetAnchoredPosition() const
+	{
+		if (parent != nullptr)
+			return position + parent->GetAnchoredPosition();
+		return position;
+	}
 	void UiCanvas::AddElem(UiElem* elem)
 	{
 		elem->margin = 0; // should be margin
