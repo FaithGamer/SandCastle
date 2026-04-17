@@ -623,6 +623,9 @@
     <ClInclude Include="include\SandCastle\UI\UiAnimBtn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\Core\Int128.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\SandCastle\Core\Signal.tpp" />

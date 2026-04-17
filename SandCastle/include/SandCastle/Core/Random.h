@@ -1,4 +1,5 @@
 #pragma once
+#include "SandCastle/Core/Int128.h"
 
 namespace SandCastle
 {
@@ -10,6 +11,7 @@ namespace SandCastle
 		int64_t Range(int64_t min, int64_t max);
 		float Range(float min, float max);
 		double Range(double min, double max);
+		Int128 Range(Int128 min, Int128 max);
 		template<typename T>
 		T PickAndRemove(std::vector<T>& container)
 		{

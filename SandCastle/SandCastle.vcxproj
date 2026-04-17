@@ -361,6 +361,7 @@
     <ClInclude Include="include\SandCastle\Core\Fancy.h" />
     <ClInclude Include="include\SandCastle\Core\Files.h" />
     <ClInclude Include="include\SandCastle\Core\Geometry.h" />
+    <ClInclude Include="include\SandCastle\Core\Int128.h" />
     <ClInclude Include="include\SandCastle\Core\LangSignal.h" />
     <ClInclude Include="include\SandCastle\Core\Log.h" />
     <ClInclude Include="include\SandCastle\Core\Math.h" />
