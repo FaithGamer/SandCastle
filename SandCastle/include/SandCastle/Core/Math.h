@@ -246,10 +246,11 @@ namespace SandCastle
 		///
 		/// Scaled values (>= 1000):
 		///   1000    -> "1.00k"  |  10000  -> "10.0k"  |  100000 -> "100k"
-		///   1.5e9   -> "1.50B"  |  1e15   -> "1e+15"
+		///   1.5e9   -> "1.50B"  |  1e15   -> "1.0Q"  |  1e18   -> "1.0e18"
 		///
-		/// Suffixes: k (thousand), M (million), B (billion), T (trillion).
-		/// Above 999T uses scientific notation ("Ne+NN", always 5 chars).
+		/// Suffixes: k (thousand), M (million), B (billion), T (trillion), Q (quadrillion).
+		/// Above 999Q uses scientific notation ("N.DeNN" or "N.De-N", always 6 chars).
+		/// Positive exponents omit the + sign; negative exponents include the - sign.
 		///
 		/// @param value             The value to format. Negative values are treated as positive.
 		/// @param maxFloatPrecision Max decimal places shown for sub-1000 values (default 2).
@@ -329,27 +330,60 @@ namespace SandCastle
 			}
 
 			// ---- Scale detection: find the largest suffix where value >= scale ----
-			static constexpr double scales[4] = { 1e3, 1e6, 1e9, 1e12 };
-			static constexpr char   suffixes[4] = { 'k', 'M', 'B', 'T' };
+			static constexpr double scales[5] = { 1e3, 1e6, 1e9, 1e12, 1e15 };
+			static constexpr char   suffixes[5] = { 'k', 'M', 'B', 'T', 'Q' };
 
-			int idx = 3;
+			int idx = 4;
 			while (idx > 0 && value < scales[idx]) --idx;
 
 			double s = value / scales[idx];
 
-			// ---- Values >= 1e15: scientific notation "Ne+NN" (always 5 chars) ----
-			if (idx == 3 && s >= 1000.0)
+			// ---- Values >= 1e18: scientific notation "N.DeNN" or "N.De-N" (always 6 chars) ----
+			// Positive exponents omit the + sign (user knows from context), negative exponents keep the -
+			if (idx == 4 && s >= 1000.0)
 			{
+				// Precomputed powers of 10 lookup table (initialized once, eliminates std::pow call)
+				static double pow10_cache[309] = {};
+				static bool initialized = false;
+				if (!initialized)
+				{
+					pow10_cache[0] = 1.0;
+					for (int i = 1; i < 309; ++i)
+						pow10_cache[i] = pow10_cache[i - 1] * 10.0;
+					initialized = true;
+				}
+
 				int exp = (int)std::floor(std::log10(value));
-				int leading = (int)(value / std::pow(10.0, exp) + 0.5);
-				if (leading >= 10) { leading = 1; ++exp; }  // carry from rounding
-				if (exp > 99)      exp = 99;                 // clamp to 2 digits
+				if (exp < 0) exp = 0;      // clamp to valid range
+				if (exp >= 309) exp = 308; // clamp to valid range
+
+				double mantissa = value / pow10_cache[exp];
+				int leading = (int)mantissa;
+				int decimal = (int)((mantissa - leading) * 10.0 + 0.5);  // first decimal digit
+				if (decimal >= 10) { decimal = 9; }  // clamp rounding
 
 				buf[0] = (char)('0' + leading);
-				buf[1] = 'e'; buf[2] = '+';
-				buf[3] = (char)('0' + exp / 10);
-				buf[4] = (char)('0' + exp % 10);
-				return { buf, 5 };
+				buf[1] = '.';
+				buf[2] = (char)('0' + decimal);
+				buf[3] = 'e';
+
+				if (exp < 0)
+				{
+					// Negative exponent: "N.De-D"
+					buf[4] = '-';
+					exp = -exp;
+					if (exp > 9) exp = 9;  // clamp single-digit negative
+					buf[5] = (char)('0' + exp);
+					return { buf, 6 };
+				}
+				else
+				{
+					// Positive exponent: "N.DeNN" (no + sign)
+					if (exp > 99) exp = 99;  // clamp to 2 digits
+					buf[4] = (char)('0' + exp / 10);
+					buf[5] = (char)('0' + exp % 10);
+					return { buf, 6 };
+				}
 			}
 
 			// ---- Format scaled value using only integer arithmetic ----
