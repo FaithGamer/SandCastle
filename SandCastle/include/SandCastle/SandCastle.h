@@ -8,3 +8,4 @@
 #include "SandCastle/PhysicsEngine.h"
 #include "SandCastle/UIheader.h"
 #include "SandCastle/Audioheader.h"
+#include "SandCastle/Tools/SpriteExport.h"

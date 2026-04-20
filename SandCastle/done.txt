@@ -637,7 +637,9 @@ April
 -added int128 but it's actually useless (for incremental game i'll stick to using double for quantities)
 -added ToString(double, precision)
 -finally int128 is useless, quantity is double and everything is fine this way
+
 >
+
 >adjust ui filling bar
 >add a particle system from nukes vs swords with contexting like UI
 >what happen if AddElem is called and the elem is already in? 
