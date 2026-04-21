@@ -21,6 +21,8 @@ namespace SandCastle
 		/// Pixels of padding inserted on each side of every frame in the sheet
 		/// (mirrors Aseprite's "inner padding" export option).
 		int         innerPadding = 2;
+		/// Maximum columns in the exported spritesheet. 0 = unlimited.
+		int         maxColumns   = 0;
 	};
 
 	/// @brief Renders an inline ImGui widget that exports an Aseprite file

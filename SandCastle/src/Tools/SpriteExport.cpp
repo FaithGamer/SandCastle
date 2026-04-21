@@ -35,6 +35,7 @@ namespace SandCastle
 		struct FrameInfo
 		{
 			int x = 0, y = 0, w = 0, h = 0;
+			int sourceW = 0, sourceH = 0; // canvas size (unaffected by padding/trim)
 			int duration = 100; // ms
 		};
 
@@ -54,6 +55,8 @@ namespace SandCastle
 			int                   sheetH   = 0;
 			int                   totalRows = 0;
 			int                   padding  = 0;
+			int                   frameOffsetX = 0; // aseprite-reported offset of the first frame within its cell
+			int                   frameOffsetY = 0;
 			std::vector<FrameInfo> frames;
 			std::vector<TagInfo>   tags;
 			bool                   includeAnim = false;
@@ -71,6 +74,7 @@ namespace SandCastle
 			char textureDir  [k_pathBufSize] = {};
 			char animationDir[k_pathBufSize] = {};
 			int  innerPadding = 2;
+			int  maxColumns   = 0;
 
 			std::string status;
 			bool        statusOk = true;
@@ -134,6 +138,7 @@ namespace SandCastle
 			CopyTo(st.textureDir,   k_pathBufSize, cfg.textureDir);
 			CopyTo(st.animationDir, k_pathBufSize, cfg.animationDir);
 			st.innerPadding = cfg.innerPadding;
+			st.maxColumns   = cfg.maxColumns;
 		}
 
 		std::string QuoteArg(const std::string& s) { return "\"" + s + "\""; }
@@ -142,7 +147,8 @@ namespace SandCastle
 		                      const std::filesystem::path& input,
 		                      const std::filesystem::path& outPng,
 		                      const std::filesystem::path& outJson,
-		                      int innerPadding)
+		                      int innerPadding,
+		                      int maxColumns)
 		{
 			std::string inner;
 			inner += QuoteArg(exe);
@@ -154,6 +160,11 @@ namespace SandCastle
 			inner += " --split-tags";
 			inner += " --inner-padding ";
 			inner += std::to_string(innerPadding);
+			if (maxColumns > 0)
+			{
+				inner += " --sheet-columns ";
+				inner += std::to_string(maxColumns);
+			}
 			inner += " --data ";
 			inner += QuoteArg(outJson.generic_string());
 			inner += " --format json-array";
@@ -202,11 +213,23 @@ namespace SandCastle
 				fi.y = r.value("y", 0);
 				fi.w = r.value("w", 0);
 				fi.h = r.value("h", 0);
+				if (f.contains("sourceSize"))
+				{
+					fi.sourceW = f["sourceSize"].value("w", fi.w);
+					fi.sourceH = f["sourceSize"].value("h", fi.h);
+				}
+				else
+				{
+					fi.sourceW = fi.w;
+					fi.sourceH = fi.h;
+				}
 				fi.duration = f.value("duration", 100);
 				ex.frames.push_back(fi);
 			}
-			ex.frameW = ex.frames.front().w;
-			ex.frameH = ex.frames.front().h;
+			// sourceSize is the Aseprite canvas size; prefer it over frame.w/h
+			// because some Aseprite versions include inner-padding in frame.w/h.
+			ex.frameW = ex.frames.front().sourceW;
+			ex.frameH = ex.frames.front().sourceH;
 
 			if (j.contains("meta"))
 			{
@@ -234,6 +257,13 @@ namespace SandCastle
 			const int cellW = ex.frameW + ex.padding * 2;
 			ex.totalRows = cellH > 0 ? ex.sheetH / cellH : 0;
 
+			// The first frame sits at grid (0,0), so whatever x/y it reports is
+			// the offset applied to every other frame's coords. This lets us be
+			// agnostic to whether Aseprite reports frame rects in cell-origin or
+			// content-origin coordinates.
+			ex.frameOffsetX = ex.frames.front().x;
+			ex.frameOffsetY = ex.frames.front().y;
+
 			// Determine each tag's row on the sheet from its first frame's y.
 			// With --sheet-type rows --split-tags, every frame of a tag shares
 			// the same row.
@@ -241,11 +271,11 @@ namespace SandCastle
 			{
 				if (tag.from < 0 || tag.from >= (int)ex.frames.size()) continue;
 				int firstY = ex.frames[tag.from].y;
-				tag.sheetRow = cellH > 0 ? (firstY - ex.padding) / cellH : 0;
+				tag.sheetRow = cellH > 0 ? (firstY - ex.frameOffsetY) / cellH : 0;
 
 				for (int i = tag.from; i <= tag.to && i < (int)ex.frames.size(); ++i)
 				{
-					int r = cellH > 0 ? (ex.frames[i].y - ex.padding) / cellH : 0;
+					int r = cellH > 0 ? (ex.frames[i].y - ex.frameOffsetY) / cellH : 0;
 					if (r != tag.sheetRow)
 					{
 						LOG_WARN("Tag '" + tag.name +
@@ -297,7 +327,7 @@ namespace SandCastle
 			j["Spritesheet"] = {
 				{"Width",   frameW},
 				{"Height",  frameH},
-				{"Origin",  Json::array({0.5f, 0.5f})},
+				{"Origin",  Json::array({0.0f, 0.0f})},
 				{"Padding", Json::array({(float)padding, (float)padding})},
 			};
 			WriteJsonFile(path, j);
@@ -343,7 +373,7 @@ namespace SandCastle
 			Json frames = Json::array();
 			for (int idx : order)
 			{
-				int col = cellW > 0 ? (ex.frames[idx].x - ex.padding) / cellW : 0;
+				int col = cellW > 0 ? (ex.frames[idx].x - ex.frameOffsetX) / cellW : 0;
 				Json frame;
 				frame["sprite"] = pngFileName + "_" +
 					std::to_string(engineRow) + "_" + std::to_string(col);
@@ -464,7 +494,8 @@ namespace SandCastle
 			ex.tmpPng  = ex.textureDir / (stem + ".__scexport.png");
 			ex.tmpJson = ex.textureDir / (stem + ".__scexport.json");
 
-			int rc = RunAsepriteExport(st.asepriteExe, input, ex.tmpPng, ex.tmpJson, ex.padding);
+			int rc = RunAsepriteExport(st.asepriteExe, input, ex.tmpPng, ex.tmpJson, ex.padding,
+				st.maxColumns < 0 ? 0 : st.maxColumns);
 			if (rc != 0)
 			{
 				CleanupTemps(ex);
@@ -567,6 +598,7 @@ namespace SandCastle
 		ImGui::InputText("Texture dir",    st.textureDir,    k_pathBufSize);
 		ImGui::InputText("Animation dir",  st.animationDir,  k_pathBufSize);
 		ImGui::InputInt ("Inner padding",  &st.innerPadding);
+		ImGui::InputInt ("Max columns (0=unlimited)", &st.maxColumns);
 
 		const bool wantSprite     = ImGui::Button("export sprite");
 		ImGui::SameLine();
