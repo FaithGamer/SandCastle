@@ -69,6 +69,12 @@ namespace SandCastle
 
 	void Ui::LayoutUpdate()
 	{
+		//Defensive: skip any canvas that got flagged destroyed between
+		//DestroyUpdate and here (shouldn't happen in normal flow, but
+		//protects against ordering surprises in future callers).
+		auto end = std::remove_if(m_layoutUpdate.begin(), m_layoutUpdate.end(),
+			[](UiCanvas* c) { return c == nullptr || c->IsDestroyed(); });
+		m_layoutUpdate.erase(end, m_layoutUpdate.end());
 		std::sort(m_layoutUpdate.begin(), m_layoutUpdate.end(),
 			[](UiCanvas* a, UiCanvas* b)->bool
 			{
@@ -86,16 +92,40 @@ namespace SandCastle
 			return;
 		auto ins = Instance();
 
+		//Walk each queued element's subtree (canvas children can be canvases
+		//themselves) to collect every ID that is about to be cascade-deleted
+		//by ~UiCanvas. Strip m_layoutUpdate in one pass before any delete,
+		//so descendants can't leave dangling pointers behind.
+		std::unordered_set<UiElem::ID> condemnedIds;
+		std::vector<UiElem*> stack;
+		stack.reserve(m_destroy.size());
+		for (auto* e : m_destroy)
+			stack.push_back(e);
+		while (!stack.empty())
+		{
+			auto* e = stack.back();
+			stack.pop_back();
+			if (e == nullptr)
+				continue;
+			if (!condemnedIds.insert(e->GetID()).second)
+				continue;
+			if (e->GetType() == UiElem::Type::Canvas)
+			{
+				auto c = static_cast<UiCanvas*>(e);
+				for (auto& kvp : c->children)
+					stack.push_back(kvp.second);
+			}
+		}
+
+		auto lu_end = std::remove_if(m_layoutUpdate.begin(), m_layoutUpdate.end(),
+			[&](const UiCanvas* obj)
+			{
+				return obj == nullptr || condemnedIds.count(obj->GetID()) > 0;
+			});
+		m_layoutUpdate.erase(lu_end, m_layoutUpdate.end());
+
 		for (int i = 0; i < m_destroy.size(); i++)
 		{
-			//Remove from layout update
-			auto it_f = std::find_if(m_layoutUpdate.begin(), m_layoutUpdate.end(),
-				[&](const UiCanvas* obj)
-				{
-					return obj->GetID() == m_destroy[i]->GetID();
-				});
-			if (it_f != m_layoutUpdate.end())
-				m_layoutUpdate.erase(it_f);
 			//If it was hovered, remove from hovered.
 			auto f_it = m_hovered.find(m_destroy[i]->GetID());
 			if (f_it != m_hovered.end())
