@@ -326,6 +326,7 @@
     <ClCompile Include="src\Physics\Physics.cpp" />
     <ClCompile Include="src\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="src\Render\AnimationSystem.cpp" />
+    <ClCompile Include="src\Render\ParticleSystem.cpp" />
     <ClCompile Include="src\Render\Bindings.cpp" />
     <ClCompile Include="src\Render\Camera.cpp" />
     <ClCompile Include="src\Render\IndexBuffer.cpp" />
@@ -437,6 +438,9 @@
     <ClInclude Include="include\SandCastle\Physics\PhysicsSystem.h" />
     <ClInclude Include="include\SandCastle\Render.h" />
     <ClInclude Include="include\SandCastle\Render\AnimationSystem.h" />
+    <ClInclude Include="include\SandCastle\Render\Beziers.h" />
+    <ClInclude Include="include\SandCastle\Render\Particle.h" />
+    <ClInclude Include="include\SandCastle\Render\ParticleSystem.h" />
     <ClInclude Include="include\SandCastle\Render\Buffer.h" />
     <ClInclude Include="include\SandCastle\Render\Camera.h" />
     <ClInclude Include="include\SandCastle\Render\Writer.h" />

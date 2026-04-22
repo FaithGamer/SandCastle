@@ -12,6 +12,7 @@
 #include "SandCastle/Render/SpriteRenderSystem.h"
 #include "SandCastle/Render/LineRendererSystem.h"
 #include "SandCastle/Render/WireRenderSystem.h"
+#include "SandCastle/Render/ParticleSystem.h"
 #include "SandCastle/Physics/PhysicsSystem.h"
 #include "SandCastle/Physics/Physics.h"
 #include "SandCastle/Audio/Audio.h"
@@ -64,6 +65,7 @@ namespace SandCastle
 		Systems::Push<WireRenderSystem>();
 		Systems::Push<AnimationSystem>();
 		Systems::Push<PhysicsSystem>();
+		Systems::Push<ParticleSystem>();
 
 		init = true;
 	}

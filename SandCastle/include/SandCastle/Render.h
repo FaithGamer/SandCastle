@@ -18,3 +18,6 @@
 #include "SandCastle/Render/RenderTexture.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Render/Writer.h"
+#include "SandCastle/Render/Beziers.h"
+#include "SandCastle/Render/Particle.h"
+#include "SandCastle/Render/ParticleSystem.h"
