@@ -57,6 +57,8 @@ namespace SandCastle
 			int                   padding  = 0;
 			int                   frameOffsetX = 0; // aseprite-reported offset of the first frame within its cell
 			int                   frameOffsetY = 0;
+			float                 originX  = 0.0f;
+			float                 originY  = 0.0f;
 			std::vector<FrameInfo> frames;
 			std::vector<TagInfo>   tags;
 			bool                   includeAnim = false;
@@ -73,8 +75,10 @@ namespace SandCastle
 			char asepriteDir [k_pathBufSize] = {};
 			char textureDir  [k_pathBufSize] = {};
 			char animationDir[k_pathBufSize] = {};
-			int  innerPadding = 2;
-			int  maxColumns   = 0;
+			int   innerPadding = 2;
+			int   maxColumns   = 0;
+			float originX      = 0.0f;
+			float originY      = 0.0f;
 
 			std::string status;
 			bool        statusOk = true;
@@ -139,6 +143,8 @@ namespace SandCastle
 			CopyTo(st.animationDir, k_pathBufSize, cfg.animationDir);
 			st.innerPadding = cfg.innerPadding;
 			st.maxColumns   = cfg.maxColumns;
+			st.originX      = cfg.originX;
+			st.originY      = cfg.originY;
 		}
 
 		std::string QuoteArg(const std::string& s) { return "\"" + s + "\""; }
@@ -314,7 +320,9 @@ namespace SandCastle
 			f << j.dump(4);
 		}
 
-		void WriteTextureFile(const std::filesystem::path& path, int frameW, int frameH, int padding)
+		void WriteTextureFile(const std::filesystem::path& path,
+		                      int frameW, int frameH, int padding,
+		                      float originX, float originY)
 		{
 			Json j;
 			j["ImportSettings"] = {
@@ -327,7 +335,7 @@ namespace SandCastle
 			j["Spritesheet"] = {
 				{"Width",   frameW},
 				{"Height",  frameH},
-				{"Origin",  Json::array({0.0f, 0.0f})},
+				{"Origin",  Json::array({originX, originY})},
 				{"Padding", Json::array({(float)padding, (float)padding})},
 			};
 			WriteJsonFile(path, j);
@@ -445,7 +453,8 @@ namespace SandCastle
 				}
 			}
 
-			WriteTextureFile(ex.finalTexture, ex.frameW, ex.frameH, ex.padding);
+			WriteTextureFile(ex.finalTexture, ex.frameW, ex.frameH, ex.padding,
+				ex.originX, ex.originY);
 
 			if (ex.includeAnim)
 			{
@@ -481,6 +490,8 @@ namespace SandCastle
 			ex.textureDir    = std::filesystem::path(st.textureDir);
 			ex.animationDir  = std::filesystem::path(st.animationDir);
 			ex.padding       = st.innerPadding < 0 ? 0 : st.innerPadding;
+			ex.originX       = st.originX;
+			ex.originY       = st.originY;
 			std::string stem = input.stem().generic_string();
 			ex.pngFileName   = stem + ".png";
 			ex.finalPng      = ex.textureDir / ex.pngFileName;
@@ -597,8 +608,14 @@ namespace SandCastle
 		ImGui::InputText("Aseprite exe",   st.asepriteExe,   k_pathBufSize);
 		ImGui::InputText("Texture dir",    st.textureDir,    k_pathBufSize);
 		ImGui::InputText("Animation dir",  st.animationDir,  k_pathBufSize);
-		ImGui::InputInt ("Inner padding",  &st.innerPadding);
-		ImGui::InputInt ("Max columns (0=unlimited)", &st.maxColumns);
+		ImGui::InputInt  ("Inner padding",        &st.innerPadding);
+		ImGui::InputInt  ("Max columns (0=unlimited)", &st.maxColumns);
+		float origin[2] = { st.originX, st.originY };
+		if (ImGui::InputFloat2("Origin (x y)", origin))
+		{
+			st.originX = origin[0];
+			st.originY = origin[1];
+		}
 
 		const bool wantSprite     = ImGui::Button("export sprite");
 		ImGui::SameLine();

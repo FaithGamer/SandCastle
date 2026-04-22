@@ -23,6 +23,10 @@ namespace SandCastle
 		int         innerPadding = 2;
 		/// Maximum columns in the exported spritesheet. 0 = unlimited.
 		int         maxColumns   = 0;
+		/// Sprite origin in normalized [0..1] coordinates (written to .texture).
+		/// (0,0) = top-left, (0.5,0.5) = center, (1,1) = bottom-right.
+		float       originX      = 0.0f;
+		float       originY      = 0.0f;
 	};
 
 	/// @brief Renders an inline ImGui widget that exports an Aseprite file
