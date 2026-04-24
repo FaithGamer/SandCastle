@@ -566,7 +566,7 @@ namespace SandCastle
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, batch.textureSlots[i]);
 		}
-		glEnable(GL_DEPTH_TEST);
+
 		//Issue the draw call after binding adequat context
 		batch.layer.target->Bind();
 		batch.vertexArray->Bind();
