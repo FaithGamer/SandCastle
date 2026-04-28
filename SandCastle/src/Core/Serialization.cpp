@@ -113,10 +113,10 @@ namespace SandCastle
 	{
 		return m_json.find(name) != m_json.end();
 	}
-	float Serialized::GetFloat(String name)
+	double Serialized::GetFloat(String name)
 	{
-		float value;
-		if (SafeGet<float>(name.c_str(), value))
+		double value;
+		if (SafeGet<double>(name.c_str(), value))
 		{
 			return value;
 		}

@@ -38,7 +38,7 @@ namespace SandCastle
 		/// @param name Name of the object
 		/// @return true if it exists
 		bool HaveField(String name);
-		float GetFloat(String name);
+		double GetFloat(String name);
 		int64_t GetInt(String name);
 		bool GetBool(String name);
 
