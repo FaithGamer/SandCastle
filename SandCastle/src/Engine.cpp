@@ -97,6 +97,7 @@ namespace SandCastle
 
 		Inputs::Kill();
 		Systems::Kill();
+		Ui::Kill();
 		Renderer2D::Kill();
 		Window::Kill();
 #ifdef SC_IMGUI
