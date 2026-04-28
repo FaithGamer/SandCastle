@@ -30,6 +30,7 @@ namespace SandCastle
 		std::deque<double> m_samples;
 		double m_sampleSum = 0.;
 		size_t m_sampleMax = 100;
+		size_t m_sampleMin = 100;
 		double m_autoMaxPeriod = 0.;
 		double m_autoMaxTimer = 0.;
 		size_t m_autoMaxCount = 0;

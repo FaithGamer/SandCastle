@@ -6,6 +6,7 @@ namespace SandCastle
 	Rate::Rate(double period, size_t sampleMax, double autoMaxPeriod, double rateUpdatePeriod) :
 		m_period(period),
 		m_sampleMax(sampleMax),
+		m_sampleMin(sampleMax),
 		m_autoMaxPeriod(autoMaxPeriod),
 		m_rateUpdatePeriod(rateUpdatePeriod)
 	{
@@ -24,7 +25,7 @@ namespace SandCastle
 			m_autoMaxTimer += (double)delta;
 			if (m_autoMaxTimer >= m_autoMaxPeriod)
 			{
-				size_t newMax = m_autoMaxCount > 0 ? m_autoMaxCount : 1;
+				size_t newMax = std::max(m_autoMaxCount, m_sampleMin);
 				newMax = std::min(newMax, (size_t)ABSOLUTE_MAX);
 				if (newMax != m_sampleMax)
 				{
