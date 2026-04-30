@@ -64,7 +64,9 @@ namespace SandCastle
 
 		void Queue(sptr<OpaqueTask> task);
 
+		/// @brief True if at least one task is queued or being executed.
 		bool HaveTask();
+		/// @brief Number of queued tasks (excludes the one currently executing).
 		size_t TaskCount();
 
 		/// @brief Block the calling thread until there's no more task to process

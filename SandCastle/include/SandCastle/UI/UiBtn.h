@@ -11,12 +11,16 @@
 namespace SandCastle
 {
 	class Ui;
+	/// @brief Frame-based UI button with idle/hover/pressed/disabled visuals and an optional press/release sound.
+	/// Subscribe to ListenClickReleased on the base UiElem to react to clicks.
 	class UiBtn : public UiElem
 	{
 	public:
 		virtual ~UiBtn();
 		UiElem::Type GetType() const override;
+		/// @brief Tint the button's frames with `color`.
 		void SetColor(const Color& color);
+		/// @brief Recompute the geometry of all four frame states (idle/hover/pressed/disabled).
 		void UpdateFrames();
 	protected:
 		virtual void OnHover() override;

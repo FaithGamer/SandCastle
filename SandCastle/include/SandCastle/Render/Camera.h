@@ -5,9 +5,14 @@
 
 namespace SandCastle
 {
+	/// @brief View/projection generator used by the renderer.
+	/// Defaults to an orthographic 2D camera. Provides yaw/pitch/roll, target
+	/// look-at, and a "Constraints" struct for pixel-perfect rendering. The
+	/// active camera is referenced by Renderer2D via Camera::main.
 	class Camera
 	{
 	public:
+		/// @brief Optional render-area constraints. Use SetDefault() for a 16:9 360p pixel-perfect setup.
 		struct Constraints
 		{
 			/// @brief pxStep 
@@ -37,15 +42,22 @@ namespace SandCastle
 
 		Camera();
 		~Camera();
+		/// @brief Switch between orthographic (default, 2D) and perspective (3D) projection.
 		void SetOrthographic(bool orthographic);
+		/// @brief Set world-space position of the camera.
 		void SetPosition(Vec3f position);
+		/// @brief Set the camera rotation as Euler angles in degrees.
 		void SetRotation(Vec3f eulerAngles);
+		/// @brief Aim the camera at the given world-space target point.
 		void SetTarget(Vec3f target);
 		void SetPosition(float x, float y, float z);
 		void SetRotation(float x, float y, float z);
 		void SetTarget(float x, float y, float z);
+		/// @brief Vertical field of view in degrees (perspective only).
 		void SetFieldOfView(float fieldOfView);
+		/// @brief Override the projection aspect ratio (width/height).
 		void SetAspectRatio(float aspectRatio);
+		/// @brief Override the projection aspect ratio from a Vec2u dimension pair.
 		void SetAspectRatio(Vec2u xOverY);
 		void SetNearClippingPlane(float nearClippingPlane);
 		void SetFarClippingPlane(float farClippingPlane);
@@ -59,32 +71,47 @@ namespace SandCastle
 		/// @param constraints 
 		void SetConstraints(Constraints constraints);
 
+		/// @brief Translate the camera in world space by `offset`.
 		void MoveWorld(Vec3f offset);
 		void MoveWorld(float x, float y, float z);
+		/// @brief Translate along the camera's local X axis.
 		void MoveLocalX(float offset);
+		/// @brief Translate along the camera's local Z axis (forward/back).
 		void MoveLocalZ(float offset);
+		/// @brief Rotate around the local Y axis (degrees, additive).
 		void Yaw(float yaw);
+		/// @brief Rotate around the local X axis (degrees, additive).
 		void Pitch(float pitch);
+		/// @brief Rotate around the local Z axis (degrees, additive).
 		void Roll(float roll);
 		void SetYaw(float yaw);
 		void SetPitch(float pitch);
 		void SetRoll(float roll);
-		
+
 		Vec3f GetPosition() const;
 		float GetAspectRatio() const;
+		/// @brief View matrix (world -> camera space).
 		Mat4 GetViewMatrix() const;
+		/// @brief Projection matrix (camera -> clip space).
 		Mat4 GetProjectionMatrix() const;
+		/// @brief View matrix derived from SetTarget instead of yaw/pitch/roll.
 		Mat4 GetTargetViewMatrix() const;
 		float GetNearClippingPlane();
 		float GetFarClippingPlane();
+		/// @brief Pixel-perfect target render size derived from constraints + window size.
 		Vec2u GetTargetSize() const;
+		/// @brief Reduction factor applied to zoom by pixel-perfect constraints.
 		float GetReduction() const;
 		Constraints GetConstraints() const;
 
+		/// @brief Project a world-space position to screen-space pixel coordinates.
 		Vec2f WorldToScreen(Vec3f worldPosition, Vec2u screenSize) const;
+		/// @brief Unproject a screen-space pixel position back to world space.
 		Vec3f ScreenToWorld(Vec2f screenPosition, Vec2u screenSize) const;
 
+		/// @brief Zoom multiplier (1 = no zoom).
 		float zoom;
+		/// @brief Global pointer to the camera the renderer should sample from.
 		static Camera* main;
 
 	private:

@@ -14,15 +14,20 @@ namespace SandCastle
 	class Serialized
 	{
 	public:
+		/// @brief Empty document.
 		Serialized();
+		/// @brief Construct from a JSON file on disk; check HadLoadError()/HadParseError() afterwards.
 		Serialized(String path);
+		/// @brief Wrap an existing nlohmann::json value, remembering its source path for error messages.
 		Serialized(Json&& json, String rpath);
 
+		/// @brief Reload contents from a JSON file on disk. Sets HadLoadError/HadParseError on failure.
 		void LoadFromDisk(String path);
 		void SetJson(Json& json);
 		void SetJson(Json& json, String rpath);
 		void SetJson(Json&& json);
 		void SetJson(Json&& json, String rpath);
+		/// @brief Pretty-print and write the JSON to disk at the given path.
 		void WriteOnDisk(String path);
 		/// @brief Set the HadGetError flag to false
 		/// useful if you handled the error and want to check for 
@@ -38,12 +43,18 @@ namespace SandCastle
 		/// @param name Name of the object
 		/// @return true if it exists
 		bool HaveField(String name);
+		/// @brief Read a number field as double. Sets HadGetError() if missing or wrong type.
 		double GetFloat(String name);
+		/// @brief Read an integer field. Sets HadGetError() if missing or wrong type.
 		int64_t GetInt(String name);
+		/// @brief Read a boolean field. Sets HadGetError() if missing or wrong type.
 		bool GetBool(String name);
 
+		/// @brief Read a string field. Sets HadGetError() if missing or wrong type.
 		String GetString(String name);
+		/// @brief Read a nested object field as another Serialized.
 		Serialized GetObj(String name);
+		/// @brief Read an array of objects as a vector of Serialized.
 		std::vector<Serialized> GetObjArray(String name);
 		/// @brief Where this config has been loaded from disk
 		/// @return empty string if not loaded from disk
@@ -59,6 +70,7 @@ namespace SandCastle
 		/// @brief Return true if any of the Get method couldn't find a parameter.
 		bool HadGetError() const;
 
+		/// @brief Try to read a typed field; returns false if missing or wrong type, without raising HadGetError unless a parse exception occurred.
 		template <class T>
 		bool TryGet(String name, T& value)
 		{
@@ -85,6 +97,7 @@ namespace SandCastle
 				return false;
 			}
 		}
+		/// @brief Read an array field of typed values. Returns an empty vector on error.
 		template <class T>
 		std::vector<T> GetArray(String name)
 		{
@@ -158,6 +171,9 @@ namespace SandCastle
 		friend void to_json(Json& j, const Serialized& s);
 	};
 
+	/// @brief Interface for any type that can be saved/loaded as a Serialized JSON document.
+	/// Implementations expose a pair of Serialize()/Deserialize() functions; the engine
+	/// uses this to persist EngineSettings, TextureImportSettings, animation files, etc.
 	class Serializable
 	{
 	public:

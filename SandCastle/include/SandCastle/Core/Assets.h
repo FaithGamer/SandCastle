@@ -18,6 +18,10 @@ namespace SandCastle
 	class Assets;
 	class Engine;
 
+	/// @brief Type-erased base for any asset stored by the Assets singleton.
+	/// Used so heterogeneous assets (textures, sprites, shaders, animations,
+	/// localized text) can live in a single container and be discriminated
+	/// by their GetType() id.
 	class OpaqueAsset
 	{
 	public:
@@ -26,6 +30,8 @@ namespace SandCastle
 	protected:
 	};
 
+	/// @brief Strongly typed wrapper around an asset of type T owned by the Assets store.
+	/// Non-copyable: the asset is stored once and accessed through Ptr().
 	template<class T>
 	class Asset : public OpaqueAsset
 	{
@@ -59,18 +65,33 @@ namespace SandCastle
 
 	};
 
+	/// @brief Central asset registry: scans the asset folder, parses metadata,
+	/// loads textures/sprites/shaders/animations/localized text, and serves
+	/// them by name. Supports localization (per-language asset overrides) and
+	/// HotReload() during development. Access via Assets::Instance() or the
+	/// static Get<T>(name) helper.
 	class Assets : public Singleton<Assets>
 	{
 	public:
 
 		Assets();
+		/// @brief Set the root asset folder and the default language, then load
+		/// every asset found under it. Called by Engine::Init().
 		void Init(const String& folder, const String& defaultLang);
 
+		/// @brief Re-scan the asset folder and reload changed assets in place.
 		void HotReload();
+		/// @brief Root asset folder (e.g. "assets/").
 		static String GetFolder();
+		/// @brief Switch the active language; localized assets are swapped in atomically.
 		static void SetLang(const String& lang);
+		/// @brief Currently selected language id.
 		static String GetLang();
+		/// @brief Every language id discovered while scanning the asset folder.
 		static std::vector<String> GetAvailableLangs();
+		/// @brief Fetch a typed asset by its filename (e.g. "ship.png", "explosion.anim").
+		/// Specialized for Sprite, Texture, Shader, Animation, Textual; using any
+		/// other type triggers a runtime error.
 		template <class T>
 		inline static T* Get(const String& name)
 		{

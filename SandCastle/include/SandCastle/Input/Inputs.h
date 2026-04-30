@@ -10,6 +10,7 @@
 namespace SandCastle
 {
 	class Systems;
+	/// @brief Internal owner of all InputMaps registered with the engine.
 	struct InputMapContainer
 	{
 		sptr<InputMap> Add(std::string name);
@@ -20,9 +21,14 @@ namespace SandCastle
 		std::vector<std::string> names;
 	};
 
+	/// @brief Engine-wide input registry and SDL event router.
+	/// Holds every InputMap, drives the rebinding workflow, and tracks whether
+	/// the player last interacted using mouse/keyboard or gamepad. Access via
+	/// Inputs::Instance() or its many static helpers.
 	class Inputs : public Singleton<Inputs>
 	{
 	public:
+		/// @brief Bitmask of peripherals to listen to during a rebinding session.
 		enum PeripheralFlag : int
 		{
 			Mouse = 1,
@@ -51,7 +57,9 @@ namespace SandCastle
 		static void AddForbiddenBinding(Gamepad::Trigger trigger);
 		/// @brief Add a button that will be ignored during the rebinding, this will reset after a call to EndRebind
 		static void AddForbiddenBinding(Mouse::Button mouse);
+		/// @brief True if a rebinding session is currently in progress.
 		static bool IsRebinding();
+		/// @brief Get the input being rebound (or nullptr).
 		static sptr<Input> GetRebindingInput();
 		/// @brief Create an input map with a default name "InputMap_0, 1, 2..."
 		/// @return shared pointer to the created input map
@@ -65,8 +73,11 @@ namespace SandCastle
 
 		/// @brief Get an input from one of the input maps;
 		static sptr<Input> Get(String mapName, String inputName);
+		/// @brief Direct vector access to every input map (advanced).
 		static std::vector<sptr<InputMap>>& GetInputMaps();
+		/// @brief Find a map by name; nullptr if unknown.
 		static sptr<InputMap> GetInputMap(std::string name);
+		/// @brief Snapshot of every map name currently registered.
 		static std::vector<std::string> GetInputMapNameList();
 		/// @brief Used to check what peripheral has been used last, mouse&keyboard or controller
 		bool controllerUsedLast = false;  // to do, private + accessor

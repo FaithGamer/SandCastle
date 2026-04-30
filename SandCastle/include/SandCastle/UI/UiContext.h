@@ -9,6 +9,7 @@
 namespace SandCastle
 {	
 	struct Animation;
+	/// @brief Styling for UiBtn: font, label colors, padding, the four frame templates, and optional press/release sounds.
 	struct ButtonContext
 	{
 		String fontName;
@@ -23,6 +24,7 @@ namespace SandCastle
 		Sound* releaseSound = nullptr;
 	};
 
+	/// @brief Styling for UiAnimBtn: one Animation per state.
 	struct AnimButtonContext
 	{
 		Animation* idle = nullptr;
@@ -31,11 +33,13 @@ namespace SandCastle
 		Animation* disabled = nullptr;
 	};
 
+	/// @brief Styling for UiCheckbox: the 3-sprite texture used for unchecked/hovered/checked.
 	struct CheckboxContext
 	{
 		String texture = "";
 	};
 
+	/// @brief Styling and layout rules for UiCanvas: spacing, padding, child alignment and direction, optional background frame.
 	struct CanvasContext
 	{
 		Vec2f spacing = 0.f;
@@ -46,6 +50,7 @@ namespace SandCastle
 		UiFrame::Template* frame = nullptr;
 	};
 
+	/// @brief Styling for UiTxt: font, color, and horizontal alignment.
 	struct TextContext
 	{
 		String fontName;
@@ -53,6 +58,7 @@ namespace SandCastle
 		TextAlign align = TextAlign::Left;
 	};
 
+	/// @brief How a UiLoadBar formats its label: hide it, show "NN%", or show "current/goal".
 	enum class LoadBarTextMode
 	{
 		None,
@@ -60,6 +66,7 @@ namespace SandCastle
 		ValueGoal
 	};
 
+	/// @brief Styling for UiLoadBar: contour and filling frames, fill margin, fill color, label mode/font/color.
 	struct LoadBarContext
 	{
 		UiFrame::Template* frameContour = nullptr;
@@ -71,6 +78,8 @@ namespace SandCastle
 		Color textColor;
 	};
 
+	/// @brief Top-level styling state used by Ui at element-creation time.
+	/// Set via Ui::Set* helpers; snapshot/restore via SnapshotContext/Context.
 	struct UiContext
 	{
 		CanvasContext canvas;

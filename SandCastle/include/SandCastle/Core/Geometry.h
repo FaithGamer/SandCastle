@@ -5,6 +5,7 @@
 
 namespace SandCastle
 {
+	/// @brief 2D geometry helpers (line/segment intersections, etc.).
 	namespace Geometry
 	{
 		/// @brief Calculate intersection point between two line (even if line are too short)

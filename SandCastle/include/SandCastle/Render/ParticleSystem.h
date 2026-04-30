@@ -9,6 +9,7 @@ namespace SandCastle
 {
 	class Sprite;
 
+	/// @brief Built-in trajectory shapes Make() can build for you.
 	enum class ParticleTraj
 	{
 		Straight,
@@ -17,6 +18,9 @@ namespace SandCastle
 		CubicInOut
 	};
 
+	/// @brief Engine system that spawns and updates Particle entities.
+	/// Configure once with SetDefaultSprite()/SetLimit(), then call Make() per
+	/// spawn. Particles are destroyed automatically when they reach t = 1.
 	class ParticleSystem : public System
 	{
 	public:

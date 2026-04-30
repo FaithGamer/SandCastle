@@ -4,6 +4,8 @@
 
 namespace SandCastle
 {
+	/// @brief 8-bit RGBA color with conversion helpers to/from packed uint32 and Vec4f (0..1).
+	/// Used as a tint by SpriteRender, UI elements, particles, and text.
 	class Color
 	{
 	public:

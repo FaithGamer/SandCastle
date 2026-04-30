@@ -1,5 +1,10 @@
 #pragma once
 
+/// @file Core.h
+/// @brief Aggregate include for the Core module: foundational utilities used
+/// throughout the engine and exposed to user code (Assets, containers, math,
+/// signals/delegates, threading, RNG, time, vectors, serialization, etc.).
+
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/Core/Delegate.h"

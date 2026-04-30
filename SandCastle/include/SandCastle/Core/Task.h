@@ -4,13 +4,16 @@
 
 namespace SandCastle
 {
+	/// @brief Type-erased unit of work. Any Task<...> can be queued as an OpaqueTask.
 	class OpaqueTask
 	{
 	public:
 		virtual ~OpaqueTask() {};
+		/// @brief Run the wrapped delegate once.
 		virtual void Perform() = 0;
 	};
 
+	/// @brief Concrete task that wraps a Delegate so it can be enqueued on a WorkerThread.
 	template<typename Obj = FunctionDelegate, typename... Args>
 	class Task : public OpaqueTask
 	{

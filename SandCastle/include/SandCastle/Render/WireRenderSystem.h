@@ -4,6 +4,7 @@
 
 namespace SandCastle
 {
+	/// @brief Engine system that submits every WireRender + Transform pair to the renderer each frame.
 	class WireRenderSystem : public System
 	{
 	public:

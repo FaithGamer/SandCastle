@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/dev/meat/src/**)",
+      "Read(//c/dev/meat/assets/**)"
+    ]
+  }
+}

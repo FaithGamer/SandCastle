@@ -9,6 +9,9 @@
 namespace SandCastle
 {
 	class Ui;
+	/// @brief Layout container holding child UiElems. Children are arranged
+	/// according to the canvas's CanvasContext (padding/spacing/direction/alignment).
+	/// Root canvases (no parent) honor the rootAnchor; nested canvases anchor top-left.
 	class UiCanvas : public UiElem
 	{
 	public:

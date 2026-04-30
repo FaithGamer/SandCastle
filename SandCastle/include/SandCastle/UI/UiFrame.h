@@ -14,6 +14,10 @@ namespace SandCastle
 	class Ui;
 	class UiElem;
 
+	/// @brief 9-slice resizable frame used to draw canvas backgrounds, button
+	/// backgrounds, load-bar frames, etc. A Template holds the 4 corner sprites
+	/// plus the repeating border textures; a UiFrame instances that template at
+	/// a specific size and updates the geometry when the size changes.
 	class UiFrame
 	{
 	public:
@@ -35,6 +39,7 @@ namespace SandCastle
 			std::vector<BorderSprite> sprites;
 		};
 
+		/// @brief Reusable 9-slice description: 4 corner sprites + repeating border textures. Build with MakeTemplate.
 		struct Template
 		{
 			//3x3 stretchable sprites.
@@ -65,9 +70,13 @@ namespace SandCastle
 			BotRight
 		};
 
+		/// @brief Build a Template from a 3x3 spritesheet on disk. fixedStep clamps growth to multiples of the border textures.
 		static void MakeTemplate(Template& templ, const std::string& texture, bool fixedStep);
+		/// @brief Tint every slice with `color`.
 		void SetColor(Color color);
+		/// @brief Set the alpha channel only.
 		void SetAlpha(unsigned int alpha);
+		/// @brief Recompute the frame geometry to fit `elem` at depth z.
 		Vec2f Update(UiElem* elem, float z);
 	public:
 		Entity root;

@@ -7,6 +7,9 @@
 
 namespace SandCastle
 {
+	/// @brief Thin wrapper around an integer treated as a bitfield.
+	/// Provides AddFlag/RemoveFlag/Contains in terms of bitwise OR/AND/NOT.
+	/// Used heavily by the physics layer for collision masks.
 	template <typename T>
 	class Bitmask
 	{
@@ -19,18 +22,22 @@ namespace SandCastle
 		{
 
 		}
+		/// @brief Reset every bit to 0.
 		void Clear()
 		{
 			flags = 0;
 		}
+		/// @brief Set the bits of `flag`.
 		void AddFlag(T flag)
 		{
 			flags = flags | flag;
 		}
+		/// @brief Clear the bits of `flag`.
 		void RemoveFlag(T flag)
 		{
 			flags = flags & ~flag;
 		}
+		/// @brief True if every bit of `flag` is set.
 		bool Contains(T flag)
 		{
 			return (flags & flag) == flag;
@@ -38,9 +45,13 @@ namespace SandCastle
 		T flags;
 	};
 
+	/// @brief 8-bit bitmask alias.
 	typedef Bitmask<uint8_t> Bitmask8;
+	/// @brief 16-bit bitmask alias (matches Box2D's collision filter width).
 	typedef Bitmask<uint16_t> Bitmask16;
+	/// @brief 32-bit bitmask alias.
 	typedef Bitmask<uint32_t> Bitmask32;
+	/// @brief 64-bit bitmask alias.
 	typedef Bitmask<uint64_t> Bitmask64;
 
 	/*class Bitmask16
@@ -133,10 +144,11 @@ namespace SandCastle
 
 
 	/// @brief Dynamic collection of named flags, enabling the generation of bitmasks with custom names for each flag
-	class Filter16 
+	class Filter16
 	{
 	public:
 		Filter16();
+		/// @brief Register a new named flag and assign it the next free bit (max 16).
 		void AddFlag(String name);
 
 		/// @brief Generate a bitmask for the given flags names. 
@@ -154,6 +166,7 @@ namespace SandCastle
 			return m_flags;
 		}
 
+		/// @brief True if `mask` has the bit registered for the given flag name set.
 		bool BitmaskContains(Bitmask16 mask, String flag);
 
 	private:

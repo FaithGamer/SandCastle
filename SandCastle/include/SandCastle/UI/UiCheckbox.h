@@ -6,14 +6,20 @@
 namespace SandCastle
 {
 	class Ui;
+	/// @brief Three-sprite checkbox (unchecked / hovered / checked).
+	/// If a bool* is bound at creation, the engine reads it back every frame
+	/// so external code can drive the visual state. checkSignal fires whenever
+	/// the checked state flips.
 	class UiCheckbox : public UiElem
 	{
 	public:
 		UiElem::Type GetType() const override;
+		/// @brief True if currently checked.
 		inline bool IsChecked() const
 		{
 			return checked;
 		}
+		/// @brief Broadcast every time the checked state flips.
 		Signal<UiCheckbox*> checkSignal;
 	protected:
 		typedef enum

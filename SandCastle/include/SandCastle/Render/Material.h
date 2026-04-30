@@ -30,9 +30,14 @@ namespace SandCastle
 		std::vector<int> i;
 		std::vector<float> f;
 	};
+	/// @brief A Shader plus a named-uniform value table.
+	/// Materials are created by Renderer2D::CreateMaterial and shared between
+	/// SpriteRender components / UI elements. Setters return false when the
+	/// uniform doesn't exist or has the wrong type.
 	class Material
 	{
 	public:
+		/// @brief Set a float uniform by name. Returns false if no such uniform.
 		bool SetFloat(String name, float value);
 		bool SetInt(String name, int value);
 		bool SetVec2f(String name, Vec2f value);
@@ -40,11 +45,13 @@ namespace SandCastle
 		bool SetVec4f(String name, Vec4f value);
 		bool SetFloatArray(String name, const std::vector<float>& value);
 		bool SetIntArray(String name, const std::vector<int>& value);
-		
+
+		/// @brief Bind this material's shader and upload all of its uniform values.
 		void Bind() const;
 		MaterialID GetID() const;
 		Shader* GetShader() const;
 		RenderOptions* GetRenderOptions() const;
+		/// @brief True if this material is meant to composite a render layer (vs. drawing quads).
 		bool IsLayer() const;
 	private:
 		friend Renderer2D;

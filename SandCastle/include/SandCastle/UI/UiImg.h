@@ -8,12 +8,15 @@
 namespace SandCastle
 {
 	class Sprite;
+	/// @brief UI widget displaying a single Sprite. Size auto-derives from the
+	/// sprite's world dimensions; SetSprite swaps the visual at runtime.
 	class UiImg : public UiElem
 	{
 
 	public:
 		UiElem::Type GetType() const override;
 		void SetPosition(Vec2f pos) override;
+		/// @brief Replace the displayed sprite.
 		void SetSprite(Sprite* sprite);
 
 	private:

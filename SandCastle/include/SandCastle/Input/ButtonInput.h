@@ -24,6 +24,9 @@ namespace SandCastle
 		float pressedAmount = 0.0f;
 	};
 
+	/// @brief Pressable input mapped to keys/mouse/gamepad buttons/triggers.
+	/// Subscribe to its `signal` to receive ButtonInputState payloads on press
+	/// and/or release. SetSignalOnPress/Release toggles which transitions fire.
 	class ButtonInput : public Input
 	{
 	public:

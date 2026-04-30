@@ -6,8 +6,11 @@
 namespace SandCastle
 {
 
+	/// @brief Alias for glm::vec4 (4 floats).
 	typedef glm::vec4 Vec4f;
+	/// @brief Alias for glm::mat4 (4x4 float matrix).
 	typedef glm::mat4 Mat4;
+	/// @brief Alias for glm::mat3 (3x3 float matrix).
 	typedef glm::mat3 Mat3;
 
 	//////////
@@ -16,6 +19,9 @@ namespace SandCastle
 	//
 	//////////
 
+	/// @brief 3-component vector with engine-friendly methods (Magnitude, Normalize, Dot, etc.).
+	/// Implicitly converts to glm::vec3 and Box2D's b2Vec2.
+	/// Common typedefs: Vec3f, Vec3i, Vec3u.
 	template <class T>
 	class Vec3
 	{
@@ -174,6 +180,9 @@ namespace SandCastle
 	//
 	///////////
 
+	/// @brief 2-component vector with engine-friendly methods (Magnitude, Normalize, Dot, etc.).
+	/// Implicitly converts to glm::vec2, Vec3<T> (z=0), and Box2D's b2Vec2.
+	/// Common typedefs: Vec2f, Vec2i, Vec2u.
 	template <class T>
 	class Vec2
 	{
@@ -416,20 +425,23 @@ namespace SandCastle
 		return { lhs.x - rhs.x, lhs.y - rhs.y, lhs.z, lhs.w };
 	}
 
-	//Static vector methods
+	/// @brief Free-function-style helpers that operate on Vec2/Vec3 inputs (Distance, Lerp, ...).
 	class Vec
 	{
 	public:
+		/// @brief Euclidean distance between two 3D points.
 		template <class T>
 		inline static float Distance(Vec3<T> lhs, Vec3<T> rhs)
 		{
 			return Vec3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z).Magnitude();
 		}
+		/// @brief Euclidean distance between two 2D points.
 		template <class T>
 		inline static float Distance(Vec2<T> lhs, Vec2<T> rhs)
 		{
 			return Vec2<T>(lhs.x - rhs.x, lhs.y - rhs.y).Magnitude();
 		}
+		/// @brief Component-wise linear interpolation between two 3D vectors.
 		template <class T>
 		inline static Vec3<T> Lerp(Vec3<T> min, Vec3<T> max, float t)
 		{
@@ -441,12 +453,18 @@ namespace SandCastle
 		}
 	};
 
+	/// @brief 3D vector of floats. Engine default for world positions.
 	typedef Vec3<float> Vec3f;
+	/// @brief 3D vector of signed integers (e.g. tile coordinates).
 	typedef Vec3<int> Vec3i;
+	/// @brief 3D vector of unsigned integers (e.g. dimensions).
 	typedef Vec3<unsigned int> Vec3u;
 
+	/// @brief 2D vector of floats. Engine default for screen/UI positions.
 	typedef Vec2<float> Vec2f;
+	/// @brief 2D vector of signed integers (e.g. mouse pixel position).
 	typedef Vec2<int> Vec2i;
+	/// @brief 2D vector of unsigned integers (e.g. window size).
 	typedef Vec2<unsigned int> Vec2u;
 
 }

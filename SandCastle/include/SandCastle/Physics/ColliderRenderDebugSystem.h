@@ -4,6 +4,8 @@
 
 namespace SandCastle
 {
+	/// @brief Debug system that draws collider wireframes for every Body in the world.
+	/// Push it via Systems::Push<ColliderRenderDebugSystem>() during development.
 	class ColliderRenderDebugSystem : public System
 	{
 	public:

@@ -11,6 +11,7 @@ namespace SandCastle
 {
 	//To do: serialization
 
+	/// @brief One physical activation source for a ButtonInput: either a key, a mouse button, a controller button, or a controller trigger. Only one of the four fields is meaningful at a time.
 	struct Button : Serializable
 	{
 		Button() {}
@@ -56,6 +57,7 @@ namespace SandCastle
 		Vec2f currentDirection = Vec2f(0, 0);
 	};
 
+	/// @brief One way to drive a DirectionalInput: a set of directional buttons and/or a controller stick.
 	struct Direction
 	{
 		Direction() {}
@@ -70,12 +72,14 @@ namespace SandCastle
 	/// Bindings ///
 	////////////////
 
+	/// @brief Multi-binding for a DirectionalInput: each Direction is a parallel way to provide the 2D vector.
 	struct DirectionalBindings
-	{	
+	{
 		//To do: optimize by having the bindings sorted by their event type
 		std::vector<Direction> directions;
 	};
 
+	/// @brief Multi-binding for a ButtonInput: each Button is a parallel way to trigger it.
 	struct ButtonBindings : Serializable
 	{
 		//Serializable

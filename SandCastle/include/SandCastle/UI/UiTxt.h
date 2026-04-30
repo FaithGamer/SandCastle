@@ -10,6 +10,7 @@
 namespace SandCastle
 {
 
+	/// @brief UI text widget. Supports static strings, localized strings (via Assets::Get<Textual>), and live data binding through std::format placeholders.
 	class UiTxt : public UiElem
 	{
 	public:

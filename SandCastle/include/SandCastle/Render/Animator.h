@@ -4,6 +4,7 @@
 
 namespace SandCastle
 {
+	/// @brief One named animation slot inside an Animator: the Animation, whether it loops, an optional transition state, and per-frame signals.
 	struct AnimationState
 	{
 		template <typename ListenerType, typename SignalType>
@@ -39,8 +40,12 @@ namespace SandCastle
 		String transition = "";
 		std::vector<Signal<KeyframeSignal>> signals;
 	};
+	/// @brief ECS component that drives sprite animation playback.
+	/// Holds a map of named AnimationStates, the current state, playback speed and
+	/// looping flag. The AnimationSystem advances time and swaps SpriteRender frames.
 	struct Animator
 	{
+		/// @brief Switch to a previously added animation state by name.
 		void SetAnimation(String animation);
 		/// @brief Add an animation to be played later at any time.
 		/// @param stateName The state name to reference this animation

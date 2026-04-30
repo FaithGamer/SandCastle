@@ -5,6 +5,9 @@
 
 namespace SandCastle
 {
+    /// @brief Cubic Bezier curve defined by four control points.
+    /// Used by ParticleSystem trajectories. Static factories produce ready-made
+    /// curves: Straight, CubicIn (bend early), CubicOut (bend late), CubicInOut (symmetric).
     class Beziers
     {
     public:
@@ -75,7 +78,7 @@ namespace SandCastle
 
             return Beziers(start, c1, c2, end);
         }
-        // Evaluate position at t in [0..1]
+        /// @brief Evaluate the curve at parameter t in [0,1]. Clamped if outside.
         Vec2f Step(float t) const {
             t = std::clamp(t, 0.0f, 1.0f);
 
@@ -90,6 +93,7 @@ namespace SandCastle
                 + p3 * (tt * t);
         }
 
+        /// @brief Cheap length approximation: average of the chord and the control-net length. Lower-bound clamped to 1.
         float LengthFast() const
         {
             float chord = (p3 - p0).Magnitude();

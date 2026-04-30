@@ -12,6 +12,7 @@
 
 namespace SandCastle
 {
+	/// @brief Dispatch order used by Signal listeners. Higher priority listeners run first.
 	enum class SignalPriority : int
 	{
 		high = 0,
@@ -28,18 +29,25 @@ namespace SandCastle
 	{
 	public:
 
+		/// @brief Subscribe a member function. Duplicate (object,method) pairs are silently ignored.
 		template <typename Obj>
 		void Listen(void (Obj::* method)(T), Obj* const listener = nullptr, SignalPriority priority = SignalPriority::medium);
+		/// @brief Subscribe a free function or static method.
 		void Listen(void (*callback)(T), SignalPriority priority = SignalPriority::medium);
 
+		/// @brief Unsubscribe every listener bound to the given object instance.
 		template <typename Obj>
 		void StopListen(Obj* const listener);
+		/// @brief Unsubscribe a free function listener.
 		void StopListen(void (*callback)(T));
 		//to do add removeListener for object specific function
 
+		/// @brief Broadcast signalData to every listener, in priority order.
 		void Send(T& signalData);
+		/// @brief Broadcast an rvalue payload to every listener, in priority order.
 		void Send(T&& signalData);
 
+		/// @brief Number of currently subscribed listeners.
 		int GetListenerCount();
 	private:
 		struct OpaqueCallback

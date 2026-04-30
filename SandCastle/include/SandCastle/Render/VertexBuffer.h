@@ -5,12 +5,16 @@
 
 namespace SandCastle
 {
+	/// @brief Tagged enum of GLSL attribute scalar/vector/matrix types.
 	enum class ShaderDataType
 	{
 		None = 0, Float, Vec2f, Vec3f, Vec4f, Mat3, Mat4, Int, Vec2i, Vec3i, Vec4i, Bool
 	};
+	/// @brief Byte size of one element of the given shader type.
 	GLint ShaderDataTypeSize(ShaderDataType type);
+	/// @brief Number of scalar components per element (e.g. Vec3f -> 3).
 	GLint ShaderDataTypeCount(ShaderDataType type);
+	/// @brief OpenGL primitive type matching ShaderDataType (GL_FLOAT, GL_INT, ...).
 	GLenum ShaderDataTypeGLType(ShaderDataType type);
 
 	/////////////////////////

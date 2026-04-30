@@ -25,6 +25,10 @@ namespace SandCastle
 
 	//To do: enable serialization/deserialization
 	//To do: take into consideration JoyId for multiple controller connected
+	/// @brief A named collection of Inputs sharing a lifetime and an active flag.
+	/// Typical usage: one map per gameplay context (gameplay, menu, dialog) so
+	/// you can SetActive(false) on one map while another is foreground.
+	/// Created and owned by the Inputs singleton via Inputs::CreateInputMap.
 	class InputMap : Serializable
 	{
 	public:
@@ -45,6 +49,7 @@ namespace SandCastle
 		/// @param name input name
 		/// @return shared_ptr to the created input
 		sptr<ButtonInput> CreateButtonInput(std::string name);
+		/// @brief Create a DirectionalInput in this map. Use SetBindings/BindWASD/BindStick to configure it.
 		sptr<DirectionalInput> CreateDirectionalInput(std::string name);
 		/// @brief Set wether or not this InputMap is used by the InputSystem
 		/// @param active 
@@ -56,7 +61,9 @@ namespace SandCastle
 		/// @param name Name of the Input to delete
 		void DestroyInput(std::string name);
 
+		/// @brief Internal: dispatch an SDL event to inputs in this map. Returns true if any input consumed it.
 		bool OnEvent(const SDL_Event& e);
+		/// @brief Internal: mark an input as needing event-listener bookkeeping refresh.
 		void OnInputEventModified(sptr<Input> input);
 
 		/// @brief Should this input map be used or not.
@@ -67,6 +74,7 @@ namespace SandCastle
 		std::unordered_map<std::string, sptr<Input>> GetInputs();
 		/// @brief Get the name of this InputMap
 		std::string GetName() const;
+		/// @brief True if an input with this name exists in the map.
 		bool HaveInput(std::string name) const;
 
 	private:

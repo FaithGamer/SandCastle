@@ -7,10 +7,15 @@ namespace SandCastle
 {
 	class Entity;
 
+	/// @brief Base class for game logic. Override the lifecycle hooks below
+	/// (Start/Update/FixedUpdate/LateUpdate/OnEvent/OnImGui/OnRemove) and push
+	/// the system into the scheduler with Systems::Push<Type>(). Override
+	/// GetUsedMethod() to opt into only the hooks you need.
 	class System
 	{
 	public:
 
+		/// @brief Bitmask values matching the System's hook methods, returned by GetUsedMethod().
 		typedef enum
 		{
 			Updt = 1,

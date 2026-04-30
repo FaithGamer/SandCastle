@@ -126,23 +126,35 @@ namespace SandCastle
 		RenderLayer layer;
 		Material* material;
 	};
+	/// @brief Threaded 2D batched renderer.
+	/// Quads are pushed via PushQuad (or by SpriteRenderSystem/LineRendererSystem),
+	/// sorted per-layer, batched per material/texture, and submitted from a
+	/// dedicated render thread. Supports up to MAX_LAYERS visible layers and
+	/// MAX_OFF_LAYERS offscreen layers (e.g. for normal maps or post-processing).
 	class Renderer2D : public Singleton<Renderer2D>
 	{
 	public:
+		/// @brief Per-frame counters exposed for debug overlays.
 		struct Statistics
 		{
 			uint32_t drawCalls = 0;
 			uint32_t quadCount = 0;
 		};
 
+		/// @brief Initialize GL state and the render thread. Called by Engine::Init().
 		void Init();
+		/// @brief Hook called once Assets have been loaded so the renderer can pick up its default shaders/materials.
 		void PostAssetInit();
 
 		~Renderer2D();
+		/// @brief Replace the current render target (Window or RenderTexture).
 		void SetRenderTarget(sptr<RenderTarget> target);
+		/// @brief Create a Material owned by the renderer. `layer=true` marks it as a per-layer compositing material.
 		static Material* CreateMaterial(Shader* shader, bool layer = false);
+		/// @brief Create a sub-texture sharing GPU memory with `source` over the given region. Thread-safe with the render thread.
 		static Texture* CreateSubTexture(const Texture* source, Rect region);
 
+		/// @brief Push a quad to be rendered at the next Process(). Thread-safe.
 		inline void PushQuad(QuadRenderData&& quad)
 		{
 			m_queue.Push(std::move(quad));
@@ -201,11 +213,14 @@ namespace SandCastle
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
 
+		/// @brief Internal: forwarded by Window when its pixel size changes.
 		void OnWindowResize(Vec2u size);
 		//System:
 
+		/// @brief Block the calling thread until the render thread is idle.
 		void Wait();
 
+		/// @brief Kick the render thread to consume the queued quads and present a frame.
 		void Process();
 	private:
 		friend Engine;

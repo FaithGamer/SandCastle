@@ -7,20 +7,27 @@
 
 namespace SandCastle
 {
+	/// @brief General-purpose math helpers. The engine uses degrees for angles
+	/// at the public API level; convert with Radians()/Degrees() when interacting
+	/// with raw glm/std math.
 	namespace Math
 	{
+		/// @brief Absolute value (integer overload).
 		inline int Abs(int value)
 		{
 			return std::abs(value);
 		}
+		/// @brief Absolute value (float overload).
 		inline float Abs(float value)
 		{
 			return std::abs(value);
 		}
+		/// @brief Convert radians to degrees.
 		inline float Degrees(float radians)
 		{
 			return glm::degrees(radians);
 		}
+		/// @brief Convert degrees to radians.
 		inline float Radians(float degrees)
 		{
 			return glm::radians(degrees);
@@ -47,28 +54,33 @@ namespace SandCastle
 			return glm::degrees(atan2(vector.y, vector.x)) - 90;
 		}
 
+		/// @brief Smaller of two values.
 		template <typename T>
 		inline constexpr T Min(T lhs, T rhs)
 		{
 			return std::min(lhs, rhs);
 		}
 
+		/// @brief Greater of two values.
 		template <typename T>
 		inline constexpr T Max(T lhs, T rhs)
 		{
 			return std::max(lhs, rhs);
 		}
 
+		/// @brief Sine of an angle expressed in degrees.
 		inline float Sin(float degrees)
 		{
 			return std::sin(glm::radians(degrees));
 		}
 
+		/// @brief Cosine of an angle expressed in degrees.
 		inline float Cos(float degrees)
 		{
 			return std::cos(glm::radians(degrees));
 		}
 
+		/// @brief Linear interpolation between min and max (no clamping). t=0 -> min, t=1 -> max.
 		inline float Lerp(float min, float max, float t)
 		{
 			return min * (1 - t) + max * t;
@@ -91,11 +103,13 @@ namespace SandCastle
 				min.z * (1 - t) + max.z * t);
 		}
 
+		/// @brief Clamp value into [min, max].
 		inline float Clamp(float value, float min, float max)
 		{
 			const float t = value < min ? min : value;
 			return t > max ? max : t;
 		}
+		/// @brief Clamp value into [0, 1].
 		inline float Clamp01(float value)
 		{
 			const float t = value < 0 ? 0 : value;
@@ -106,6 +120,7 @@ namespace SandCastle
 		{
 			return Clamp(t - std::floor(t / length) * length, 0.0f, length);
 		}
+		/// @brief Sign of value: -1, 0, or 1.
 		template <typename T>
 		inline int Sign(T val)
 		{
@@ -119,12 +134,14 @@ namespace SandCastle
 				delta -= 360.0F;
 			return delta;
 		}
+		/// @brief Step current toward target by at most maxDelta. Snaps to target when within range.
 		inline float MoveTowards(float current, float target, float maxDelta)
 		{
 			if (abs(target - current) <= maxDelta)
 				return target;
 			return current + Sign(target - current) * maxDelta;
 		}
+		/// @brief MoveTowards in angle space (degrees), taking the shortest direction across the 360° wrap.
 		inline float MoveTowardsAngle(float current, float target, float maxDelta)
 		{
 			float deltaAngle = DeltaAngle(current, target);
@@ -133,6 +150,7 @@ namespace SandCastle
 			target = current + deltaAngle;
 			return MoveTowards(current, target, maxDelta);
 		}
+		/// @brief Round input to the nearest multiple of step. Returns step if input < step.
 		template <typename T>
 		inline T NearestMultiple(T input, T step)
 		{
@@ -143,6 +161,7 @@ namespace SandCastle
 			T quotient = static_cast<T>(std::round(static_cast<double>(input) / step));
 			return quotient * step;
 		}
+		/// @brief Floor input to the nearest multiple of step (toward zero). Returns step if input < step.
 		template <typename T>
 		inline T FloorMultiple(T input, T step)
 		{
@@ -153,6 +172,7 @@ namespace SandCastle
 			T quotient = input / step;
 			return quotient * step;
 		}
+		/// @brief Ceil input to the nearest multiple of step (away from zero). Returns step if input < step.
 		template <typename T>
 		inline T CeilMultiple(T input, T step)
 		{
@@ -229,6 +249,7 @@ namespace SandCastle
 
 			return result;
 		}
+		/// @brief Floor value to the nearest even integer (decreases odd values by 1).
 		template <typename T>
 		T FloorToEven(T value)
 		{
@@ -426,9 +447,12 @@ namespace SandCastle
 				return { buf, 4 };
 			}
 		}
+		/// @brief Integer overload of FormatCompact (no decimals).
 		inline std::string FormatCompact(int64_t value) { return FormatCompact((double)value, 0); }
+		/// @brief Integer overload of FormatCompact (no decimals).
 		inline std::string FormatCompact(int     value) { return FormatCompact((double)value, 0); }
 
+		/// @brief Format a double with a fixed number of decimal places.
 		inline String ToString(double value, int precision = 0)
 		{
 			std::ostringstream out;
@@ -436,6 +460,7 @@ namespace SandCastle
 			return out.str();
 		}
 
+		/// @brief Format a float with a fixed number of decimal places.
 		inline String ToString(float value, int precision = 0)
 		{
 			std::ostringstream out;

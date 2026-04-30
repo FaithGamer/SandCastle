@@ -3,6 +3,7 @@
 
 namespace SandCastle
 {
+	/// @brief Gamepad-related enums (Axis, Button, Trigger, Stick) and name lookup helpers.
 	namespace Gamepad
 	{
 		enum class Axis
@@ -72,12 +73,18 @@ namespace SandCastle
 			static const Stick Right;
 		};
 
+		/// @brief Human-readable name for a gamepad button.
 		std::string ButtonName(Button button);
+		/// @brief Human-readable name for a stick (e.g. "Left").
 		std::string StickName(Stick stick);
+		/// @brief Human-readable name for a trigger ("Left"/"Right").
 		std::string TriggerName(Trigger trigger);
 
+		/// @brief Reverse lookup: button enum from its readable name.
 		SDL_GamepadButton ButtonFromName(std::string name);
+		/// @brief Reverse lookup: stick from its readable name.
 		Stick StickFromName(std::string name);
+		/// @brief Reverse lookup: trigger from its readable name.
 		Trigger TriggerFromName(std::string name);
 	}
 }

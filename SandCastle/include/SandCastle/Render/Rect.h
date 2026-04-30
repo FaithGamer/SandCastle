@@ -4,6 +4,9 @@
 
 namespace SandCastle
 {
+	/// @brief Axis-aligned rectangle with Y+ up convention.
+	/// `top` is the rectangle's larger Y, `Bottom()` is the smaller Y.
+	/// Used for sprite atlas regions, hitboxes, etc.
 	class Rect
 	{
 	public:
@@ -12,11 +15,15 @@ namespace SandCastle
 		Rect(float Left, float Top, float Width, float Height)
 			: left(Left), top(Top), width(Width), height(Height)
 		{}
+		/// @brief True when the point is within the rectangle bounds.
 		bool PointInside(Vec2f point) const;
 		bool PointInside(float x, float y) const;
+		/// @brief Right edge X coordinate.
 		inline float Right() const { return left + width; }
+		/// @brief Bottom edge Y coordinate (smaller Y, since the engine uses Y+ up).
 		inline float Bottom() const { return top - height; } // Y+ up => bottom is smaller Y
 
+		/// @brief True if `inner` is fully contained inside `outer` (Y+ up convention).
 		static inline bool Inside(const Rect& outer, const Rect& inner)
 		{
 			// X: same as usual

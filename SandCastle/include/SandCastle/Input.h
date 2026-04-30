@@ -1,5 +1,12 @@
 #pragma once
 
+/// @file Input.h
+/// @brief Aggregate include for the Input module.
+/// User code creates an InputMap, adds named ButtonInput / DirectionalInput
+/// entries with one or more bindings (Keys, Mouse, Gamepad), and listens to
+/// each Input's signal to react. Inputs is the global registry; Bindings.h
+/// describes the data model used by SetBindings.
+
 #include "SandCastle/Input/Input.h"
 #include "SandCastle/Input/Bindings.h"
 #include "SandCastle/Input/ButtonInput.h"

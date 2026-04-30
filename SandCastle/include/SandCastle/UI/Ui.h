@@ -24,11 +24,16 @@ namespace SandCastle
 	class UiLoadBar;
 	struct InputSignal;
 
+	/// @brief Payload broadcast when an interaction group is enabled or disabled.
 	struct UiGroupSignal
 	{
 		bool ennabled = false;
 		int group = 0;
 	};
+	/// @brief UI singleton: builds canvases, text, buttons and other widgets,
+	/// owns the styling context stack (fonts, colors, frame templates), runs
+	/// the hover/click hit-testing, and dispatches localization signals.
+	/// All ui-creation methods are static and operate on the singleton.
 	class Ui : public Singleton<Ui>
 	{
 	public:
@@ -64,6 +69,9 @@ namespace SandCastle
 
 		/*---Ui creation---*/
 
+		/// @brief Open a new canvas (a layout container). Children created until the matching End() will be parented to this canvas.
+		/// @param size Override size; (0,0) auto-sizes to fit children.
+		/// @param frame Draw the background frame (using the current canvas frame template).
 		static UiCanvas* Begin(Vec2f size = { 0, 0 }, bool frame = true);
 		static UiTxt* Text(std::string_view utf8, float width = -1.f)
 		{
@@ -83,19 +91,31 @@ namespace SandCastle
 
 			return text;
 		}
+		/// @brief Localized text: looks up the Textual asset under `key` and updates automatically when the language changes.
 		static UiTxt* TextLoc(const String& utf8, float width = -1.f);
+		/// @brief Text bound to live data via std::format placeholders. Each arg must be a pointer to the value to display; the text re-formats whenever a value changes.
 		template <typename... Ts>
 		static UiTxt* Text(std::string_view utf8, float width = -1.f, Ts... args);
+		/// @brief Localized + data-bound text. Combines TextLoc and the formatted Text overload.
 		template <typename... Ts>
 		static UiTxt* TextLoc(const String& key, float width = -1.f, Ts... args);
+		/// @brief Image element loading the sprite from the Assets store by name.
 		static UiImg* Image(String sprite);
+		/// @brief Image element using an existing Sprite pointer.
 		static UiImg* Image(Sprite* sprite);
+		/// @brief Button with a text label.
 		static UiBtn* Button(std::string_view utf8);
+		/// @brief Button whose label is localized through Assets.
 		static UiBtn* ButtonLoc(const String& key);
+		/// @brief Animated button (sprite-based, no frame).
 		static UiAnimBtn* AnimButton(std::string_view utf8);
+		/// @brief Localized animated button.
 		static UiAnimBtn* AnimButtonLoc(const String& key);
+		/// @brief Checkbox optionally bound to an external bool*.
 		static UiCheckbox* Checkbox(bool* value = nullptr);
+		/// @brief Progress bar widget. `current` and `goal` set the initial value.
 		static UiLoadBar* LoadBar(Vec2f size, double goal = 1.0, double current = 0.0);
+		/// @brief Close the canvas opened by the most recent Begin().
 		static void End();
 		static void Destroy(UiElem*& elem);
 		static void Destroy(UiCanvas*& elem);

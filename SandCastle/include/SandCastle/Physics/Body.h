@@ -12,6 +12,7 @@ namespace SandCastle
 	class Collider;
 	class PhysicsSystem;
 
+	/// @brief Output of Physics::RaycastClosest / RaycastAll. `hit` indicates whether the ray hit anything; the bool conversion lets `if (result)` work directly.
 	struct RaycastResult
 	{
 		EntityId entityId = EntityId(0);
@@ -27,6 +28,7 @@ namespace SandCastle
 		}
 	};
 
+	/// @brief Output of overlap queries (CircleOverlap, BodyOverlap, PointInside): identifies the entity, optional distance, and the layer it sits on.
 	struct OverlapResult
 	{
 		EntityId entityId;
@@ -94,10 +96,15 @@ namespace SandCastle
 		/// @param yIsZ 
 		void SetYisZ(bool yIsZ);
 
+		/// @brief Bits identifying which layer(s) this body occupies.
 		Bitmask16 GetLayer() const;
+		/// @brief Bits identifying which layers this body collides against.
 		Bitmask16 GetLayerMask() const;
+		/// @brief Underlying Box2D body (advanced usage: forces, joints, etc.).
 		b2Body* GetB2Body();
+		/// @brief All colliders attached to this body.
 		const std::vector<sptr<Collider>>* GetColliders();
+		/// @brief Combined AABB of every collider on this body.
 		b2AABB GetAABB();
 
 	public:

@@ -7,6 +7,9 @@
 namespace SandCastle
 {
 	class Ui;
+	/// @brief Variant of UiBtn whose four states (idle/hover/pressed/disabled)
+	/// are sprite animations rather than 9-slice frames. Configure via
+	/// Ui::SetAnimBtnIdle / Hover / Pressed / Disabled in a context.
 	class UiAnimBtn : public UiBtn
 	{
 	public:

@@ -68,18 +68,24 @@ namespace SandCastle
 		Vec3f originalPosition{ 0,0,0 };
 	};
 
+	/// @brief Text rasterizer + atlas packer built on FreeType.
+	/// Loads TTF/OTF fonts via MakeFont, lazily bakes glyphs into shared atlas pages,
+	/// and Write() builds an entity-based Sentence that renders through the regular
+	/// quad pipeline. Mostly used through Ui::Text but exposed for non-UI use cases.
 	class Writer
 	{
 	public:
-		
+
 		~Writer();
 
+		/// @brief Load a TTF/OTF font and return its FontID. Glyphs are baked lazily on first use.
 		FontID MakeFont(const String& filename,
 			int size,
 			float scale = 1.f,
 			float lineHeight = 1.f,
 			float outlineThickness = 0.f,
 			Vec4f outlineColor = { 0,0,0,1 });
+		/// @brief Register an inline icon sprite that can be referenced from text by `id`.
 		void AddIcon(String id, Sprite* sprite, Vec2f offset = 0.f);
 		/// @brief Give a fancy name to the font to find it easily later 
 		/// across all your project.
@@ -97,6 +103,7 @@ namespace SandCastle
 		void SetPPU(float ppu);
 		/// @brief Set the material that will be used for every subsequent MakeFont
 		void SetMaterial(Material* material);
+		/// @brief Cap the atlas page size in pixels (default 4096). Pages overflow into additional textures.
 		void SetMaxAtlasSize(int pixels);
 		/// @brief Set an offset for the line height.
 		/// 0.f = normal
@@ -106,12 +113,15 @@ namespace SandCastle
 		void SetLayer(LayerID layer);
 
 		
+		/// @brief Lay out and create entities for a UTF-8 string using the currently selected font/material/layer.
+		/// @param width Maximum line width in world units (-1 = unbounded).
 		Sentence Write(std::string_view utf8,
 			float width = -1.f,
 			const Color& color = Color(255, 255, 255, 255),
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
+		/// @brief Lay out and create entities, overriding font/material/layer for this call only.
 		Sentence Write(std::string_view utf8,
 			const FontID font,
 			const Color& color,
@@ -121,11 +131,17 @@ namespace SandCastle
 			TextAlign textAlign = TextAlign::Left,
 			float lineSpacing = 1.0f);
 
+		/// @brief Currently configured text color.
 		Color GetColor() const;
+		/// @brief World-space pixel height of a font given the current PPU.
 		float GetFontWorldSize(FontID font);
+		/// @brief Currently configured pixel-per-unit setting.
 		float GetPPU() const;
+		/// @brief Resolve a font by its fancy name (and optional language).
 		const Font* GetFont(const String& fancyName, const String& lang = "");
+		/// @brief Resolve a font by its FontID.
 		const Font* GetFont(FontID font) const;
+		/// @brief Resolve a fancy-name+lang pair to its FontID.
 		FontID GetFontID(const String& name, const String& lang = "");
 
 	private:

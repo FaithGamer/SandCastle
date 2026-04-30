@@ -9,16 +9,21 @@ namespace SandCastle
 {
 	class UiCanvas;
 	class Ui;
+	/// @brief Base class for every UI widget (Canvas, Text, Button, AnimButton, Image, Checkbox, LoadBar).
+	/// Provides position/size, parent/child links, hover/click hit-testing, and Disable/Enable.
+	/// Subscribe to ListenHover / ListenClickPressed / ListenClickReleased to react to user input.
 	class UiElem
 	{
 	public:
 		typedef uint32_t ID;
+		/// @brief Interaction state of a widget.
 		enum class State
 		{
 			Idle,
 			Hovered,
 			Pressed
 		};
+		/// @brief Concrete widget kind, returned by GetType().
 		enum class Type
 		{
 			Canvas,

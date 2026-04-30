@@ -22,6 +22,11 @@ namespace SandCastle
 		EntityId parent;
 	};
 
+	/// @brief Lightweight handle to an EnTT entity in the engine's main registry.
+	/// Holds an EntityId plus a validity flag. Components are added with Add<T>(),
+	/// fetched with Get<T>(), and the entity is destroyed (along with children)
+	/// via Destroy(). Parent/child links use AddChild/RemoveChild and propagate
+	/// through the Transform component when present.
 	class Entity
 	{
 	public:
@@ -32,7 +37,9 @@ namespace SandCastle
 		Entity(EntityId entityId);
 		/// @brief Create an entity in the main world
 		static Entity Create();
+		/// @brief Total entity count in the registry (alive + reserved).
 		static size_t Count();
+		/// @brief Number of entities owning the given component(s).
 		template<typename ...Component>
 		inline size_t CountOf()
 		{
@@ -59,10 +66,13 @@ namespace SandCastle
 		}
 
 		/// @brief The child's transform become affected by the parent's transform
-		/// @param entity 
+		/// @param entity
 		void AddChild(Entity entity);
+		/// @brief Detach a specific child from this entity. Returns the iterator past the removed child for safe iteration.
 		std::optional<std::unordered_set<EntityId>::iterator> RemoveChild(EntityId entity);
+		/// @brief Detach every child from this entity.
 		void RemoveAllChildren();
+		/// @brief Detach this entity from its current parent.
 		void Unparent();
 
 		/// @brief Check validity of entity.
@@ -86,6 +96,7 @@ namespace SandCastle
 			}
 			return &registry.get_or_emplace<Component>(m_id, std::forward<Args>(args)...);
 		}
+		/// @brief Add a component constructed from `args`. No-op if the component already exists.
 		template<typename Component, typename... Args>
 		void Add(Args&&... args)
 		{
@@ -126,6 +137,7 @@ namespace SandCastle
 		{
 			return m_id;
 		}
+		/// @brief Shortcut for Get<Transform>(): returns the entity's Transform if any.
 		Transform* gtr();
 
 		/// @brief Destroy the entity and it's components, and does the same for every children

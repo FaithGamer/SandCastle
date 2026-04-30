@@ -11,6 +11,11 @@ namespace SandCastle
 	class Assets;
 	class Engine;
 	class Systems;
+	/// @brief Audio backend singleton wrapping miniaudio.
+	/// Manages a hierarchy of named channels (with per-channel volume), creates
+	/// Sound and HighrateSound assets, and exposes a low-level SoundHandle API
+	/// for direct playback. Built-in spike-protection ducks output if a runaway
+	/// volume spike is detected.
 	class Audio : public Singleton<Audio>
 	{
 	public:
@@ -23,7 +28,9 @@ namespace SandCastle
 		/// @param parent The name of the parent audio channel, example "Master"
 		/// @return a unique identifier. (low level API only)
 		static void AddChannel(const String& channel, const String& parent = "");
+		/// @brief Set the volume of a named channel; cascades to its children.
 		static void SetChannelVolume(const String& channel, float volume);
+		/// @brief Resolve a channel name to its underlying numeric id.
 		static unsigned int GetChannel(const String& channel);
 		//High level API
 		/// @brief Every sound used in game must first be created with this method.
@@ -39,6 +46,7 @@ namespace SandCastle
 		/// @param channel 
 		/// @return 
 		static HighrateSound* MakeHighrateSound(const String& filename, const String& channel);
+		/// @brief Resolve a sound's filename to its absolute path on disk.
 		static String Path(const String& filename);
 		/// @brief Low level API, most likely you don't need this
 		static SoundHandle MakeHandle(const String& path, bool play = true);

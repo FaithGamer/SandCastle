@@ -4,18 +4,23 @@
 
 namespace SandCastle
 {
+	/// @brief GL texture filtering mode (Linear smooths, Nearest preserves pixels).
 	typedef enum : GLint
 	{
 		Linear = GL_LINEAR,
 		Nearest = GL_NEAREST
 	}TextureFiltering;
 
+	/// @brief GL texture wrap mode for UVs outside [0,1].
 	typedef enum : GLint
 	{
 		Clamp = GL_CLAMP_TO_EDGE,
 		Repeat = GL_REPEAT
 	}TextureWrapping;
 
+	/// @brief Per-texture import options serialized as JSON in `.texture` files.
+	/// Controls filtering, wrapping, pixel-per-unit, mipmap generation, and
+	/// whether to keep the CPU-side pixel buffer accessible after upload.
 	struct TextureImportSettings : public Serializable
 	{
 		static TextureImportSettings defaultSettings;

@@ -9,16 +9,25 @@
 namespace SandCastle
 {
 
+	/// @brief A subregion of a Texture plus an origin (pivot) and cached UVs.
+	/// Sprites are typically loaded by the Assets store from a `.texture` file
+	/// describing their atlas layout. They are immutable from the renderer's
+	/// point of view: once created, only their `orgX/orgY` origin can change.
 	class Sprite
 	{
 	public:
 		//To do add pivot point
 		Sprite() {};
+		/// @brief Sprite covering the full texture.
 		Sprite(const Texture* texture);
+		/// @brief Sprite cropped to `textureRect` (in texture pixels).
 		Sprite(const Texture* texture, Rect textureRect);
+		/// @brief Sprite cropped to `textureRect` with a normalized origin (ox, oy).
 		Sprite(const Texture* texture, Rect textureRect, numeric::float16_t ox, numeric::float16_t oy);
 
+		/// @brief Compute UVs for the four quad vertices given a pixel rect; resolution factor scales the rect for hi-DPI variants.
 		void TextureCoordsRelative(Vec2f* coords, Rect rect, float resFactor = 1.f);
+		/// @brief Recompute world-space dimensions from the texture's pixel-per-unit and rect.
 		void ComputeDimensions();
 
 		/// @brief Set the texture rect to crop the texture

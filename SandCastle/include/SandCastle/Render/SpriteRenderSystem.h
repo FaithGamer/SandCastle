@@ -7,6 +7,7 @@
 
 namespace SandCastle
 {
+	/// @brief Engine system that submits every (Transform, SpriteRender) pair to the renderer each frame.
 	class SpriteRenderSystem : public System
 	{
 	public:
@@ -17,8 +18,10 @@ namespace SandCastle
 		void SetZSort(bool sort);
 		bool GetZSort();
 		void LateUpdate() override;
+		/// @brief Internal: invoked when Renderer2D wipes its batches (e.g. on resize).
 		void OnClearBatches();
 		int GetUsedMethod() override;
+		/// @brief Build the quad render payload for a single sprite/transform pair.
 		static QuadRenderData MakeQuadRenderDataFromSpriteRender(const SpriteRender* render, const Transform* transform);
 	private:
 		bool m_zSort = false;

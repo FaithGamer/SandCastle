@@ -4,6 +4,8 @@
 
 namespace SandCastle
 {
+	/// @brief Engine system that steps the Box2D world and syncs Body positions
+	/// back to entity Transforms each frame. Push it via Systems::Push<PhysicsSystem>().
 	class PhysicsSystem : public System
 	{
 	public:

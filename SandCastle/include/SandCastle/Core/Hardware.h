@@ -5,9 +5,12 @@
 
 namespace SandCastle
 {
+	/// @brief Hardware/platform detection helpers.
+	/// Useful for conditional UI scaling, default key bindings, etc.
 	class Hardware
 	{
 	public:
+		/// @brief True when the game is running on a Steam Deck (detected through DMI vendor/product strings under Proton).
 		static bool IsSteamDeck()
 		{
 			// Proton maps the Linux root as Z:

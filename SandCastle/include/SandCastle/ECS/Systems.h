@@ -47,6 +47,10 @@ namespace SandCastle
 		}
 	};
 
+	/// @brief Game-loop scheduler holding every active System.
+	/// Call Push<T>() to add a system, Get<T>() to retrieve it, Remove<T>() to
+	/// remove it. The engine drives Start/Update/FixedUpdate/LateUpdate/OnEvent/
+	/// OnImGui at the right times based on each system's GetUsedMethod() bitmask.
 	class Systems : public Singleton<Systems>
 	{
 
@@ -76,6 +80,7 @@ namespace SandCastle
 			Systems::Instance()->m_pendingSystemIn.push_back(SystemIdPriority(system, TypeId::GetId<SystemType>(), system->GetPriority()));
 			return system;
 		}
+		/// @brief Default-construct a System and queue it for insertion. The actual insertion happens at the next safe point in the loop.
 		template <typename SystemType>
 		static SystemType* Push()
 		{
@@ -88,6 +93,7 @@ namespace SandCastle
 			Systems::Instance()->m_pendingSystemIn.push_back(SystemIdPriority(system, TypeId::GetId<SystemType>(), system->GetPriority()));
 			return system;
 		}
+		/// @brief Retrieve a previously pushed system by type. Errors if the system is not present.
 		template <typename SystemType>
 		static SystemType* Get()
 		{
@@ -97,11 +103,13 @@ namespace SandCastle
 			ASSERT_LOG_ERROR((system != ins->m_allSystems.end()), "System doesn't exists!");
 			return static_cast<SystemType*>(system->second);
 		}
+		/// @brief Queue a system for removal at the next safe point in the loop.
 		template <typename SystemType>
 		static void Remove()
 		{
 			Systems::Instance()->m_pendingSystemOut.push_back(TypeId::GetId<SystemType>());
 		}
+		/// @brief True if the scheduler currently holds a system of this type.
 		template <typename SystemType>
 		static bool HasSystem()
 		{

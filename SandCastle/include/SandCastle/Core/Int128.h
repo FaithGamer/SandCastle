@@ -3,6 +3,7 @@
 
 namespace SandCastle
 {
+	/// @brief 128-bit signed integer (alias for boost::int128_t). Used where 64 bits is too small (idle/incremental counters, big economies).
 	typedef boost::int128::int128_t Int128;
 }
 

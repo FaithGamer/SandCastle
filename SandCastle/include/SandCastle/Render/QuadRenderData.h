@@ -9,6 +9,9 @@
 
 namespace SandCastle
 {
+	/// @brief Wire-format payload pushed into the renderer's queue for one quad.
+	/// Built by SpriteRenderSystem (or directly via Renderer2D::PushQuad) and
+	/// consumed by the render thread to emit batched draw calls.
 	struct QuadRenderData
 	{
 		/// @brief this data structure must remain <= 64bytes for cache speed
