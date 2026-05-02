@@ -33,7 +33,7 @@ Foundation utilities used everywhere. Aggregate include: [Core.h](../include/San
 | [Profiling.h](../include/SandCastle/Core/Profiling.h) | `Profiling::StartClock/StopClock/LogAllClocks/GetLastCycleMs`, `START_PROFILING`/`STOP_PROFILING` macros | Macros compile out unless `SC_PROFILING` defined. |
 | [Random.h](../include/SandCastle/Core/Random.h) | `Random::Seed`, `Range(min,max)` (int/uint64/int64/float/double/Int128), `Pick`, `PickAndRemove` | `Range` bounds inclusive. |
 | [Rate.h](../include/SandCastle/Core/Rate.h) | `Rate { rate, minRate, Tick(amount), Update(delta), SetSampleMax/AutoMaxPeriod/RateUpdatePeriod }` | Smoothed events-per-window tracker. Drives `HighrateSound` crossfades. |
-| [Roaming.h](../include/SandCastle/Core/Roaming.h) | `Roaming::AddPath/GetPath/RoamingFolder` | Per-user save folder helpers (`%APPDATA%` on Windows). |
+| [Roaming.h](../include/SandCastle/Core/Roaming.h) | `Roaming(subPath)` | Absolute path under per-user save folder for this app (`%LOCALAPPDATA%Low/<appName>/...` on Windows). |
 | [Serialization.h](../include/SandCastle/Core/Serialization.h) | `Serialized` (json wrapper), `Serializable` interface, `Json` alias for `nlohmann::json` | `LoadFromDisk`, `WriteOnDisk`, typed `Get*`/`TryGet`/`GetArray`, `HadLoadError`/`HadParseError`/`HadGetError`. |
 | [Signal.h](../include/SandCastle/Core/Signal.h) | `Signal<T>`, `SignalPriority` | `Listen(method, obj, prio)` / `Listen(fn, prio)` / `Send(payload)`. Duplicate (obj,method) ignored. |
 | [Task.h](../include/SandCastle/Core/Task.h) | `OpaqueTask`, `Task<Obj, Args...>` | Type-erased Delegate wrapper for `WorkerThread`. |

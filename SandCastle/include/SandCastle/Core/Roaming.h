@@ -4,20 +4,12 @@
 
 namespace SandCastle
 {
-	/// @brief Helper for resolving paths inside the per-user roaming/save folder
-	/// (e.g. %APPDATA% on Windows). Register named subfolders once with AddPath()
-	/// then resolve them anywhere with GetPath().
-	class Roaming
-	{
-	public:
-		/// @brief Register a named path relative to the roaming folder.
-		static void AddPath(const String& id, const String& path);
-		/// @brief Get the absolute path previously registered under id.
-		static String GetPath(const String& id);
-		/// @brief Absolute path of the application's roaming/save folder.
-		static std::string RoamingFolder();
-	private:
-		static std::unordered_map<String, String> paths;
-	};
-}
+	/// @brief Resolve a path inside the per-user roaming/save folder
+	/// for this application (e.g. %LOCALAPPDATA%Low/<appName>/<subPath> on Windows).
+	/// Spaces in the application name are stripped when forming the folder name.
+	/// The application name is captured from EngineSettings::appName at Engine::Init.
+	String Roaming(const String& subPath);
 
+	/// @brief Set the application name used by Roaming(). Called by Engine::Init.
+	void SetRoamingApp(const String& appName);
+}

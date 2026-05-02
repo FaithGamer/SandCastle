@@ -169,7 +169,7 @@ Engine types implementing `Serializable`: `EngineSettings`, `TextureImportSettin
 
 `Versioning::Push(version)` before `Engine::Init` records your build version. The engine bakes it into the window title (`appName - <version>`). Use `Versioning::GetAll()` for save-file migration logic.
 
-Save folder: `Roaming::RoamingFolder()` returns the platform's per-user save root. Register named subpaths via `Roaming::AddPath(id, rel)` once at startup, retrieve with `Roaming::GetPath(id)`.
+Save folder: `Roaming(subPath)` returns an absolute path under the platform's per-user save root for this app (e.g. `%LOCALAPPDATA%Low/<appName>/<subPath>` on Windows). The app name comes from `EngineSettings::appName`, with spaces stripped.
 
 ## Logging
 

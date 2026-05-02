@@ -18,6 +18,7 @@
 #include "SandCastle/Audio/Audio.h"
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/Versioning.h"
+#include "SandCastle/Core/Roaming.h"
 
 namespace SandCastle
 {
@@ -31,6 +32,8 @@ namespace SandCastle
 		LOG_INFO("Engine start.");
 
 		TextureImportSettings::defaultSettings = settings.textureImport;
+
+		SetRoamingApp(settings.appName);
 
 		LOG_INFO("Creating window...");
 		String windowName = settings.appName + " - " + Versioning::Get();

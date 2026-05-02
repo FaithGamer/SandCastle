@@ -94,6 +94,6 @@ Conclusion: do not reference `Assets::Get<Shader>` from `Renderer2D::Init`-time 
 
 ## Persistent / save folder
 
-Use `Roaming::AddPath(id, relPath)` once at startup, then `Roaming::GetPath(id)` to resolve absolute paths under the platform's roaming/save folder. `Roaming::RoamingFolder()` returns the absolute folder path (e.g. `%APPDATA%/<appName>` on Windows).
+Call `Roaming(subPath)` to resolve an absolute path under the platform's roaming/save folder for this app (e.g. `%LOCALAPPDATA%Low/<appName>/<subPath>` on Windows). The app name is captured from `EngineSettings::appName` at `Engine::Init`.
 
 Per-platform implementation in [Internal/PersistentDataPath.h](../include/SandCastle/Internal/PersistentDataPath.h).
