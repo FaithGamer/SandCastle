@@ -19,6 +19,7 @@ namespace SandCastle
 		{
 			return checked;
 		}
+		void SetChecked(bool checked);
 		/// @brief Broadcast every time the checked state flips.
 		Signal<UiCheckbox*> checkSignal;
 	protected:
@@ -34,7 +35,6 @@ namespace SandCastle
 		void OnClickReleased() override;
 		void UpdateVisual();
 		void Show(Entity& entt, bool show);
-		void SetChecked(bool checked);
 		
 	protected:
 		friend Ui;
