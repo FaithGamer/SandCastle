@@ -27,6 +27,7 @@
 #include "SandCastle/Core/Fancy.h"
 #include "SandCastle/Core/Versioning.h"
 #include "SandCastle/Core/Roaming.h"
+#include "SandCastle/Core/Platform.h"
 #include "SandCastle/Core/Rate.h"
 #include "SandCastle/Core/Int128.h"
 

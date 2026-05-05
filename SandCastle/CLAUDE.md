@@ -48,6 +48,10 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 - Never commit unless explicitly asked.
 - No worktrees.
 
+## Build rules
+
+- Never try to build the project (no MSBuild, no compile invocations). The user builds in the IDE.
+
 ---
 
 ## "Where do I find...?"
