@@ -53,6 +53,8 @@ namespace SandCastle
 		auto i = Instance();
 		i->m_channels.emplace_back(new ma_sound_group);
 		i->m_channelNames.emplace_back(channel);
+		i->m_muteWhenMinimized.emplace_back(true);
+		i->m_preMinimizeVolumes.emplace_back(0.f);
 		ma_sound_group* parentPtr = NULL;
 		if (parent != "")
 		{
@@ -197,9 +199,29 @@ namespace SandCastle
 
 	}
 
+	void Audio::SetMuteWhenMinmized(const String& channel, bool mute)
+	{
+		auto i = Instance();
+		auto ch = i->GetChannel(channel);
+		i->m_muteWhenMinimized[ch] = mute;
+	}
+
 	void Audio::OnMinimized(bool minimized)
 	{
-
+		for (size_t ch = 0; ch < m_channels.size(); ch++)
+		{
+			if (!m_muteWhenMinimized[ch])
+				continue;
+			if (minimized)
+			{
+				m_preMinimizeVolumes[ch] = ma_sound_group_get_volume(m_channels[ch]);
+				ma_sound_group_set_volume(m_channels[ch], 0.f);
+			}
+			else
+			{
+				ma_sound_group_set_volume(m_channels[ch], m_preMinimizeVolumes[ch]);
+			}
+		}
 	}
 
 	void Audio::OnFocus(bool focus)

@@ -30,6 +30,9 @@ namespace SandCastle
 		static void AddChannel(const String& channel, const String& parent = "");
 		/// @brief Set the volume of a named channel; cascades to its children.
 		static void SetChannelVolume(const String& channel, float volume);
+		/// @brief When enabled, the named channel is muted while the window is minimized
+		/// and restored to its previous volume when the window is un-minimized.
+		static void SetMuteWhenMinmized(const String& channel, bool mute = true);
 		/// @brief Resolve a channel name to its underlying numeric id.
 		static unsigned int GetChannel(const String& channel);
 		//High level API
@@ -76,6 +79,8 @@ namespace SandCastle
 		//collection
 		std::unordered_map<String, String> m_filenameToPath;
 		std::vector<String> m_channelNames;
+		std::vector<bool> m_muteWhenMinimized;
+		std::vector<float> m_preMinimizeVolumes;
 		std::vector<Sound> m_sounds;
 		std::vector<HighrateSound> m_hrSounds;
 	
