@@ -141,6 +141,24 @@ namespace SandCastle
 			CopyTo(st.asepriteDir,  k_pathBufSize, cfg.asepriteDir);
 			CopyTo(st.textureDir,   k_pathBufSize, cfg.textureDir);
 			CopyTo(st.animationDir, k_pathBufSize, cfg.animationDir);
+
+			// Prefill the aseprite file field with the absolute asepriteDir + '/'
+			// so the user only has to type the file name.
+			if (!cfg.asepriteDir.empty())
+			{
+				std::error_code ec;
+				std::filesystem::path p(cfg.asepriteDir);
+				if (p.is_relative())
+					p = std::filesystem::absolute(p, ec);
+				if (!ec)
+				{
+					std::string prefix = p.generic_string();
+					if (!prefix.empty() && prefix.back() != '/')
+						prefix.push_back('/');
+					CopyTo(st.asepriteFile, k_pathBufSize, prefix);
+				}
+			}
+
 			st.innerPadding = cfg.innerPadding;
 			st.maxColumns   = cfg.maxColumns;
 			st.originX      = cfg.originX;
