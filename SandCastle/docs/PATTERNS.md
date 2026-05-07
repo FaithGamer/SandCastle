@@ -22,7 +22,7 @@ Log
             ├─ ImGuiLoader (when SC_IMGUI)
             └─ default ECS systems pushed:
                SpriteRenderSystem, LineRendererSystem, WireRenderSystem,
-               AnimationSystem, PhysicsSystem, ParticleSystem
+               AnimationSystem, PhysicsSystem, ParticleSystem, States
 ```
 
 Then `Engine::Launch()` runs `Systems::Update()` until `Engine::Stop()`. Shutdown order:

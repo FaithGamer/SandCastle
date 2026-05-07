@@ -129,7 +129,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 
 ### Default systems pushed by `Engine::Init`
 
-After client-side `Init()` returns, the engine pushes (in this order): `SpriteRenderSystem`, `LineRendererSystem`, `WireRenderSystem`, `AnimationSystem`, `PhysicsSystem`, `ParticleSystem`. Client systems pushed *before* `Engine::Init` end up scheduled before these.
+After client-side `Init()` returns, the engine pushes (in this order): `SpriteRenderSystem`, `LineRendererSystem`, `WireRenderSystem`, `AnimationSystem`, `PhysicsSystem`, `ParticleSystem`, `States`. Client systems pushed *before* `Engine::Init` end up scheduled before these.
 
 ### Render layers (concept)
 
