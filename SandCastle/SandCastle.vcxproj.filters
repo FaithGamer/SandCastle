@@ -81,6 +81,9 @@
     <ClCompile Include="src\ECS\SpriteRenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ECS\States.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\ECS\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -360,6 +363,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\ECS\EntityId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\ECS\GameSys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\ECS\StateMachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\ECS\States.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Render\LineRendererSystem.h">

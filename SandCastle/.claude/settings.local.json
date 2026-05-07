@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Read(//c/dev/meat/src/**)",
-      "Read(//c/dev/meat/assets/**)"
+      "Read(//c/dev/meat/assets/**)",
+      "Read(//c/dev/meat/**)",
+      "Read(//c/dev/**)",
+      "Bash(rm 'c:\\\\dev\\\\meat\\\\src\\\\States.h' 'c:\\\\dev\\\\meat\\\\src\\\\States.cpp' 'c:\\\\dev\\\\meat\\\\src\\\\StateMachine.h' 'c:\\\\dev\\\\meat\\\\src\\\\StateSys.h' 'c:\\\\dev\\\\meat\\\\src\\\\GameSys.h' 'c:\\\\dev\\\\meat\\\\src\\\\GameSys.cpp' && ls 'c:\\\\dev\\\\meat\\\\src' | grep -E \"\\(States|StateMachine|StateSys|GameSys\\)\")"
     ]
   }
 }

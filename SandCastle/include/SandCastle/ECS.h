@@ -9,3 +9,6 @@
 #include "SandCastle/ECS/Systems.h"
 #include "SandCastle/ECS/System.h"
 #include "SandCastle/ECS/Entity.h"
+#include "SandCastle/ECS/StateMachine.h"
+#include "SandCastle/ECS/States.h"
+#include "SandCastle/ECS/GameSys.h"

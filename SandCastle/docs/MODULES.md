@@ -104,6 +104,9 @@ EnTT-backed. Aggregate: [ECS.h](../include/SandCastle/ECS.h).
 | [Components.h](../include/SandCastle/ECS/Components.h) | `PointableComponent` macro | Add to a component for stable pointers (`in_place_delete = true`). |
 | [System.h](../include/SandCastle/ECS/System.h) | `System` base, `System::Method` bitmask | Override `Start`, `PostStart`, `Update`, `FixedUpdate`, `LateUpdate`, `OnImGui`, `OnEvent(SDL_Event)`, `OnRemove`. Override `GetUsedMethod()` to opt-in only what you use. **`OnImGui` runs on the render thread.** |
 | [Systems.h](../include/SandCastle/ECS/Systems.h) | `Systems` (singleton), `SystemIdPriority` | `Push<T>(args...)`, `Get<T>`, `Remove<T>`, `HasSystem<T>`, `SetFixedUpdateTime`, `SetTimeScale`. Priority-ordered; priority 0 → assigned in push order. |
+| [StateMachine.h](../include/SandCastle/ECS/StateMachine.h) | `StateMachine<T>`, `StateMachineOpaque` | Per-enum FSM. `SetState`, `GetState`, `PushEnter/Exit/Update/LateUpdate/FixedUpdate(state, &C::method, this)`. Driven by `States`. |
+| [States.h](../include/SandCastle/ECS/States.h) | `States` (System) | Static registry of `StateMachine<T>` keyed by `TypeId`. `Push<T>()`, `Get<T>()`, `Set<T>(value)`, `Fetch<T>()`. Push the system into `Systems` to drive every machine. |
+| [GameSys.h](../include/SandCastle/ECS/GameSys.h) | `GameSys<D, A>`, `NoData`, `NoAsset` | System base bundling a per-run data entity (`_d : D*`) and an assets entity (`_a : A*`). Override `LoadAssets`/`LinkCallbacks`/`OnStart`. `PushEnter/Exit/Update/LateUpdate/FixedUpdate(state, method)` forwards to the matching `StateMachine<T>`. Inherits `Serializable` (no-op defaults). |
 
 ---
 

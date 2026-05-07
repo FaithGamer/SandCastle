@@ -87,7 +87,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 |---|---|---|
 | Core | [Core.h](include/SandCastle/Core.h) | Assets, Container, Delegate, Easing, Files, Log, Math, Noise, Random, Serialization, Signal, Task/Worker, Time, TypeId, Vec, Bitmask, Profiling, Versioning, Roaming, Rate, Int128, Geometry, Hardware, Fancy, std_macros |
 | Render | [Render.h](include/SandCastle/Render.h) | Renderer2D, Camera, Shader, Material, RenderOptions, Texture, Sprite, Animation/Animator, SpriteRender, LineRenderer, WireRender, Particle, ParticleSystem, Writer (text), Window, RenderTarget/RenderTexture, VertexBuffer/IndexBuffer/UniformBuffer/VertexArray, Rect, Color, Layer, Beziers |
-| ECS | [ECS.h](include/SandCastle/ECS.h) | `Entity`, `EntityId`, `System`, `Systems`, `PointableComponent` macro |
+| ECS | [ECS.h](include/SandCastle/ECS.h) | `Entity`, `EntityId`, `System`, `Systems`, `PointableComponent` macro, `StateMachine<T>`, `States`, `GameSys<D, A>` |
 | Input | [Input.h](include/SandCastle/Input.h) | `Inputs`, `InputMap`, `Input`/`ButtonInput`/`DirectionalInput`/`TextualInput`, `Bindings`, `Key`/`Mouse`/`Gamepad` namespaces |
 | Physics | [PhysicsEngine.h](include/SandCastle/PhysicsEngine.h) | `Physics`, `Body` (+ Static/Kinematic), `Collider` (`Box2D`/`Circle2D`/`Polygon2D`), AABB queries, `PhysicsSystem`, `ColliderRenderDebugSystem` |
 | UI | [UIheader.h](include/SandCastle/UIheader.h) | `Ui` builder + `UiCanvas`/`UiTxt`/`UiBtn`/`UiAnimBtn`/`UiImg`/`UiCheckbox`/`UiLoadBar`/`UiFrame` widgets, `UiContext` |
