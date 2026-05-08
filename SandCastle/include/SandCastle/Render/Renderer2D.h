@@ -190,6 +190,13 @@ namespace SandCastle
 		/// Must be comprised in between 1 and 15.
 		static LayerID AddOffscreenLayer(std::string name, uint32_t sampler2DIndex, Material* material = nullptr);
 
+		/// @brief Bind a layer's depth attachment to a sampler unit during the composite pass of every layer.
+		/// Lets layer compositors read another layer's (or their own) per-pixel depth for occlusion.
+		/// Sampling returns the depth value in [0,1] in the .r channel.
+		/// @param layer LayerID whose depth texture should be exposed.
+		/// @param sampler2DIndex Texture unit (1..15) the depth texture will be bound to.
+		static void BindLayerDepth(LayerID layer, uint32_t sampler2DIndex);
+
 		/// @brief Set the space the layer take up on the screen,
 		/// @param screenSpace  normalized screen space (vector must be of size 4)
 		static void SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace);
@@ -288,6 +295,8 @@ namespace SandCastle
 		std::vector<RenderLayer> m_layers;
 		std::vector<OffscreenRenderLayer> m_offscreenLayers;
 		std::vector<RenderLayer*> m_renderLayers;
+		struct LayerDepthBinding { LayerID layer; uint32_t samplerIndex; };
+		std::vector<LayerDepthBinding> m_layerDepthBindings;
 		Material* m_defaultLayerMaterial;
 		//LayerID m_layerMax = 0;
 

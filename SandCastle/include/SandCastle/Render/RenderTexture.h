@@ -15,6 +15,9 @@ namespace SandCastle
 		RenderTexture(Vec2u size);
 		/// @brief Bind the underlying color texture to a sampler slot.
 		void BindTexture(uint32_t);
+		/// @brief Bind the underlying depth texture to a sampler slot.
+		///        Returns a value in [0,1] sampled as .r in shaders.
+		void BindDepthTexture(uint32_t);
 		void Bind() override;
 		void Clear() override;
 		/// @brief Resize the framebuffer (reallocates the GL textures).
@@ -25,7 +28,7 @@ namespace SandCastle
 		sptr<Texture> GetTexture(float pixelPerUnit) const;
 	private:
 		GLuint m_frameBufferId;
-		GLuint m_renderBufferId;
+		GLuint m_depthTextureId;
 		GLuint m_textureId;
 		Vec2u m_size;
 	};

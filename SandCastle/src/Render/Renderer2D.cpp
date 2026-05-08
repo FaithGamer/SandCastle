@@ -219,6 +219,21 @@ namespace SandCastle
 		return AddLayer(name, 0, material);
 	}
 
+	void Renderer2D::BindLayerDepth(LayerID layer, uint32_t sampler2DIndex)
+	{
+		auto ins = Instance();
+		ASSERT_LOG_ERROR(bool(sampler2DIndex > 0 && sampler2DIndex < MAX_TEXTURE_INDEX), "sampler2DIndex must be comprised between 1 and 15");
+		for (auto& b : ins->m_layerDepthBindings)
+		{
+			if (b.layer == layer)
+			{
+				b.samplerIndex = sampler2DIndex;
+				return;
+			}
+		}
+		ins->m_layerDepthBindings.push_back({ layer, sampler2DIndex });
+	}
+
 	LayerID Renderer2D::AddOffscreenLayer(std::string name, uint32_t sampler2DIndex, Material* material)
 	{
 		auto ins = Instance();
@@ -537,6 +552,18 @@ namespace SandCastle
 		for (auto& offscreenLayer : m_offscreenLayers)
 		{
 			offscreenLayer.target->BindTexture(offscreenLayer.textureUnit);
+		}
+
+		//Expose registered layer depth attachments to additional sampler units.
+		for (auto& depthBind : m_layerDepthBindings)
+		{
+			if (depthBind.layer >= (LayerID)m_layers.size())
+				continue;
+			auto& src = m_layers[depthBind.layer];
+			auto rt = std::dynamic_pointer_cast<RenderTexture>(src.target);
+			if (!rt)
+				continue;
+			rt->BindDepthTexture(depthBind.samplerIndex);
 		}
 
 		//Draw every layers

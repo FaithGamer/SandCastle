@@ -15,7 +15,7 @@ namespace SandCastle
 		glGenFramebuffers(1, &m_frameBufferId);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
 
-		//Texture buffer attachment
+		//Color texture attachment
 		glGenTextures(1, &m_textureId);
 		glBindTexture(GL_TEXTURE_2D, m_textureId);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -23,11 +23,16 @@ namespace SandCastle
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_textureId, 0);
 
-		//Render buffer attachement for depth and stencil testing
-		glGenRenderbuffers(1, &m_renderBufferId);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferId);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferId); // now actually attach it
+		//Depth texture attachment (sampleable). Stencil is dropped - not used by the engine.
+		glGenTextures(1, &m_depthTextureId);
+		glBindTexture(GL_TEXTURE_2D, m_depthTextureId);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureId, 0);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
@@ -43,6 +48,12 @@ namespace SandCastle
 		glBindTexture(GL_TEXTURE_2D, m_textureId);
 	}
 
+	void RenderTexture::BindDepthTexture(uint32_t textureUnit)
+	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		glBindTexture(GL_TEXTURE_2D, m_depthTextureId);
+	}
+
 	void RenderTexture::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
@@ -54,31 +65,37 @@ namespace SandCastle
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
 		glClearColor(0, 0, 0, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void RenderTexture::SetSize(Vec2u size)
 	{
 		m_size = size;
-		//Delete frame/render buffer (because I'm not sure resizing would work otherwise)
+		//Delete existing GL objects (resizing them isn't a thing for textures and FBO attachments)
 		glDeleteFramebuffers(1, &m_frameBufferId);
-		glDeleteRenderbuffers(1, &m_renderBufferId);
+		glDeleteTextures(1, &m_depthTextureId);
 
-		//Resizing the texture (should be fine for the texture)
+		//Resize the color texture in place
 		glBindTexture(GL_TEXTURE_2D, m_textureId);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-		//Regen frame/render buffer
+		//Regen FBO
 		glGenFramebuffers(1, &m_frameBufferId);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
 
-		glGenRenderbuffers(1, &m_renderBufferId);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferId);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y); // use a single renderbuffer object for both a depth AND stencil buffer.
+		//Regen depth texture
+		glGenTextures(1, &m_depthTextureId);
+		glBindTexture(GL_TEXTURE_2D, m_depthTextureId);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
-		//Attach texture and frame buffer
+		//Attach color texture and depth texture
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_textureId, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferId);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureId, 0);
 	}
 
 	sptr<Texture> RenderTexture::GetTexture() const
