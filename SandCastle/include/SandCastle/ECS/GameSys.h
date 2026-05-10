@@ -15,7 +15,8 @@ namespace SandCastle
     struct NoAsset {};
 
     /// @brief Convenience System base that pairs the system with two component
-    /// payloads: a data entity (D, recreated per run) and an assets entity
+    /// payloads: a data entity (D, often recreated per run depending on the scope of 
+    /// the system) and an assets entity
     /// (A, created once at startup). Subclasses override OnStart/LoadAssets/
     /// LinkCallbacks to wire themselves up, and use PushEnter/PushExit/
     /// PushUpdate/PushLateUpdate/PushFixedUpdate to attach callbacks to a
