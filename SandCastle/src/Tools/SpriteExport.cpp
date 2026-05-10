@@ -391,10 +391,10 @@ namespace SandCastle
 			if (fps < 1) fps = 1;
 
 			const int cellW = ex.frameW + ex.padding * 2;
-			// Engine flips rows (stbi_set_flip_vertically_on_load): bottom sheet
-			// row becomes engine row 0.
-			int engineRow = (ex.totalRows > 0 ? ex.totalRows - 1 : 0) - tag.sheetRow;
-			if (engineRow < 0) engineRow = 0;
+			// Assets::GenerateSprites names rows as `(rows-1) - y` over the
+			// stbi-flipped buffer, so the two flips cancel: sprite `_0_*` is the
+			// top sheet row (Aseprite's first tag). Use sheetRow directly.
+			int engineRow = tag.sheetRow;
 
 			Json frames = Json::array();
 			for (int idx : order)
