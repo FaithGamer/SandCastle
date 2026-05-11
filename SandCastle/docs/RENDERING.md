@@ -122,7 +122,58 @@ Both are component types; the matching engine systems (`LineRendererSystem`/`Wir
 
 ## Particles
 
-`ParticleSystem` (engine) spawns and updates `Particle` entities. `Make(p1, p2, ...)` builds a Bezier from `p1` to `p2` based on `ParticleTraj` and the curve intensity. Default sprite via `SetDefaultSprite`; per-spawn override via `MakeWithSprite`.
+`ParticleSystem` (engine, pushed by `Engine::Init`) spawns and updates `Particle` entities. `Make(p1, p2, ...)` and `MakeWithSprite(sprite, p1, p2, ...)` build a Bezier trajectory from `p1` to `p2` and tween a single sprite along it. A particle dies automatically when its parametric `t` reaches `1.0`.
+
+### Setup
+
+- `SetDefaultSprite(sprite)` once during system init — without it, `Make()` returns an invalid `Entity` (use `MakeWithSprite` to bypass).
+- `SetLimit(n)` caps live particles (default `1000`). **Spawns above the limit are silently dropped** — bump the limit for bursty effects, or check `GetCount()` if you need to gate the call yourself.
+- `Activate(false)` destroys every live particle and stops further spawns until re-enabled.
+
+### Key parameters on `Make()` / `MakeWithSprite()`
+
+- `speed` — t-rate multiplier. `1.0` ≈ 1 second to traverse `p1→p2`. Higher = faster = shorter lifetime.
+- `traj` — `ParticleTraj` shape:
+
+  | Value | Feel |
+  |---|---|
+  | `Straight` | constant velocity |
+  | `CubicOut` | snappy decel — fast start, slow finish |
+  | `CubicIn` | slow start, fast finish |
+  | `CubicInOut` | smooth ease in and out |
+
+- `curveIntensity` — Bezier control-point offset (default `0.3`). `0` collapses to a straight line.
+- `fade` — signed alpha ramp as a fraction of lifetime: positive fades out over the final portion, negative fades in over the initial portion, `0` = no fade.
+- `easing` — optional `double(double)` curve applied to `t` before sampling the trajectory (helpers in [Core/Easing.h](../include/SandCastle/Core/Easing.h)).
+- `color`, `scale` — tint and size override on the sprite.
+
+### Patterns
+
+**Radial burst** — N particles emanating outward from `origin`:
+
+```cpp
+auto* ps = Systems::Get<ParticleSystem>();
+for (int i = 0; i < count; ++i)
+{
+    float angle = Random::Range(0.f, 360.f);
+    float dist  = Random::Range(20.f, 60.f);
+    Vec2f end   = origin + Math::AngleToVec(angle) * dist;
+    ps->MakeWithSprite(spark, origin, end,
+        Random::Range(2.f, 4.f), Color::White,
+        ParticleTraj::CubicOut, 0.3f, 0.5f);
+}
+```
+
+**Trail** — one particle per frame behind a moving entity, drifting backward:
+
+```cpp
+Vec3f tip  = entity.gtr()->position;
+Vec3f back = tip - Vec3f(velocity.x, velocity.y, 0.f) * 0.04f;
+Systems::Get<ParticleSystem>()->Make(tip, back,
+    1.5f, Color::White, ParticleTraj::Straight, 0.f, 0.3f);
+```
+
+For bursty effects, raise `SetLimit` once at startup rather than per-spawn — silently dropped particles are the most common surprise.
 
 ## Text
 

@@ -497,6 +497,11 @@ namespace SandCastle
 		bool StartExport(ToolState& st, bool withAnim, std::string& err)
 		{
 			std::filesystem::path input(st.asepriteFile);
+			{
+				auto ext = input.extension().generic_string();
+				if (ext != ".aseprite" && ext != ".ase")
+					input.replace_extension(".aseprite");
+			}
 			if (input.empty() || !std::filesystem::exists(input))
 			{
 				err = "Aseprite file does not exist: " + input.generic_string();

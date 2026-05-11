@@ -41,8 +41,14 @@ namespace SandCastle
 		void SetDefaultSprite(Sprite* sprite) { m_defaultSprite = sprite; }
 		Sprite* GetDefaultSprite() const { return m_defaultSprite; }
 
-		/// @brief Spawn a particle moving from p1 to p2.
-		/// Uses the system's default sprite. If none is set, returns an invalid Entity.
+		/// @brief Spawn a particle moving from p1 to p2. Uses the system's default sprite;
+		/// returns an invalid Entity if no default sprite is set or if the live-particle
+		/// count is already at the limit.
+		/// @param speed t-rate multiplier — 1.0 ≈ 1 second to traverse p1→p2.
+		/// Higher = faster = shorter lifetime. Particle dies when t reaches 1.
+		/// @param fade signed alpha ramp as a fraction of lifetime: positive fades out
+		/// over the final portion, negative fades in over the initial portion, 0 = no fade.
+		/// @param easing optional curve applied to t before sampling the trajectory.
 		Entity Make(Vec3f p1,
 			Vec3f p2,
 			float speed = 1.f,
@@ -68,6 +74,8 @@ namespace SandCastle
 		}
 
 		/// @brief Spawn a particle using an explicit sprite (overrides the default).
+		/// Same parameter semantics as Make(); returns an invalid Entity if the
+		/// live-particle count is already at the limit.
 		Entity MakeWithSprite(Sprite* sprite,
 			Vec3f p1,
 			Vec3f p2,
