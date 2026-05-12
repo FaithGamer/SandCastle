@@ -28,5 +28,7 @@ namespace SandCastle
 		bool fullscreen;
 		TextureImportSettings textureImport;
 		String defaultLang;
+		/// Max frames per second. 0 = unlimited.
+		int frameCap = 0;
 	};
 }

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <thread>
 
 #include "SandCastle/Engine.h"
 #include "SandCastle/ECS/Systems.h"
@@ -25,6 +26,7 @@ namespace SandCastle
 {
 	bool Engine::play = true;
 	bool Engine::init = false;
+	int  Engine::frameCap = 0;
 
 	void Engine::Init(EngineSettings settings)
 	{
@@ -72,6 +74,7 @@ namespace SandCastle
 		Systems::Push<ParticleSystem>();
 		Systems::Push<States>();
 
+		frameCap = settings.frameCap;
 		init = true;
 	}
 
@@ -93,9 +96,23 @@ namespace SandCastle
 	void Engine::Launch()
 	{
 		play = true;
+		using Clock = std::chrono::steady_clock;
+		const bool hasCap = frameCap > 0;
+		const auto targetFrame = hasCap
+			? std::chrono::duration_cast<Clock::duration>(
+				std::chrono::duration<double>(1.0 / frameCap))
+			: Clock::duration::zero();
+
 		while (play)
 		{
+			auto frameStart = Clock::now();
 			Systems::Instance()->Update();
+			if (hasCap)
+			{
+				auto elapsed = Clock::now() - frameStart;
+				if (elapsed < targetFrame)
+					std::this_thread::sleep_for(targetFrame - elapsed);
+			}
 		}
 
 		Renderer2D::Instance()->Wait();

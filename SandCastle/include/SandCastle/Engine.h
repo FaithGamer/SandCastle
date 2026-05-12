@@ -27,5 +27,6 @@ namespace SandCastle
 	private:
 		static bool init;
 		static bool play;
+		static int  frameCap;
 	};
 }
