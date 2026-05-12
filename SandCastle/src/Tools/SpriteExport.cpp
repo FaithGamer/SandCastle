@@ -137,10 +137,20 @@ namespace SandCastle
 
 		void InitializeFromConfig(ToolState& st, const SpriteExportConfig& cfg)
 		{
+			auto resolveAbsolute = [](const std::string& s) -> std::string
+			{
+				if (s.empty()) return s;
+				std::error_code ec;
+				std::filesystem::path p(s);
+				if (p.is_relative())
+					p = std::filesystem::absolute(p, ec);
+				return ec ? s : p.generic_string();
+			};
+
 			CopyTo(st.asepriteExe,  k_pathBufSize, cfg.asepriteExe);
 			CopyTo(st.asepriteDir,  k_pathBufSize, cfg.asepriteDir);
-			CopyTo(st.textureDir,   k_pathBufSize, cfg.textureDir);
-			CopyTo(st.animationDir, k_pathBufSize, cfg.animationDir);
+			CopyTo(st.textureDir,   k_pathBufSize, resolveAbsolute(cfg.textureDir));
+			CopyTo(st.animationDir, k_pathBufSize, resolveAbsolute(cfg.animationDir));
 
 			// Prefill the aseprite file field with the absolute asepriteDir + '/'
 			// so the user only has to type the file name.

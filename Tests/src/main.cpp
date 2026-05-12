@@ -1,3 +1,4 @@
+#include "SpriteExportTool.h"
 #include "Launch.h"
 #include "DrawSprite.h"
 #include "DrawAnimation.h"
@@ -25,6 +26,7 @@ using namespace SandCastle;
 
 int main()
 {
+	SpriteExportTool();
 	//Launch();
 	//DrawSprite();
 	//DrawAnimation();
@@ -46,5 +48,5 @@ int main()
 	//UiTest2();
 	//RateTest();
 	//SoundTest();
-	MaskTest();
+	//MaskTest();
 }
