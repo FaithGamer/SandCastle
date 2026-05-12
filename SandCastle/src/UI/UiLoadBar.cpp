@@ -76,6 +76,12 @@ namespace SandCastle
 		// Apply filling color (Update() rebuilds all entities, color must be re-applied)
 		frameFilling.SetColor(context.fillingColor);
 
+		// Hack: hide filling entirely when current is effectively zero. UiFrame always
+		// instances its corners/borders at a minimum size, so a tiny progress would
+		// still leave visible artefacts regardless of the frame template used.
+		if (current < 0.01)
+			frameFilling.SetAlpha(0);
+
 		// Reposition filling frame to account for margin
 		if (frameFilling.root.Valid())
 		{
