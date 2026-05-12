@@ -12,6 +12,11 @@ namespace SandCastle
 	/// the checked state flips.
 	class UiCheckbox : public UiElem
 	{
+		struct Shown
+		{
+			Entity entt;
+			bool shown = true;
+		};
 	public:
 		UiElem::Type GetType() const override;
 		/// @brief True if currently checked.
@@ -34,11 +39,11 @@ namespace SandCastle
 		void OnClickPressed() override;
 		void OnClickReleased() override;
 		void UpdateVisual();
-		void Show(Entity& entt, bool show);
+		void Show(Shown& entt, bool show);
 		
 	protected:
 		friend Ui;
-		std::vector<Entity> sprites;
+		std::vector<Shown> sprites;
 		bool checked = false;
 		bool* value = nullptr;
 	};

@@ -26,7 +26,7 @@ namespace SandCastle
 		auto uiLayer = Renderer2D::AddLayer("ui");
 		Renderer2D::SetLayerSortZ(uiLayer, true);
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
-		uiMat->GetRenderOptions()->SetDepthTest(false);
+		//uiMat->GetRenderOptions()->SetDepthTest(false);
 		uiMat->SetFloat("uPpu", m_ppu * 2.f);
 		m_defaultMaterial = uiMat;
 		m_context.material = uiMat;
@@ -628,13 +628,13 @@ namespace SandCastle
 			Vec3f offset = {
 			((float)spr->orgX + 0.5f) * dim.x,
 			((float)spr->orgY - 0.5f) * dim.y,
-			0.f
+			(1+j)*-3.f
 			};
 			entt.gtr()->Move(offset);
-			checkbox->sprites.emplace_back(entt);
+			checkbox->sprites.emplace_back(UiCheckbox::Shown{ entt, true });
 			checkbox->root.AddChild(entt);
 		}
-		auto rd = checkbox->sprites[0].Get<SpriteRender>();
+		auto rd = checkbox->sprites[0].entt.Get<SpriteRender>();
 		auto spr = rd->GetSprite();
 		checkbox->size = spr->GetDimensions();
 		checkbox->margin = i->m_context.margin;

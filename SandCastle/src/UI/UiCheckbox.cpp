@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SandCastle/UI/UiCheckbox.h"
 #include "SandCastle/Render/SpriteRender.h"
+#include "SandCastle/Render/Transform.h"
 
 namespace SandCastle
 {
@@ -76,9 +77,21 @@ namespace SandCastle
 			break;
 		}
 	}
-	void UiCheckbox::Show(Entity& entt, bool show)
+	void UiCheckbox::Show(Shown& sprite, bool show)
 	{
-		auto rd = entt.Get<SpriteRender>();
+		if (show == sprite.shown)
+			return;
+		auto rd = sprite.entt.Get<SpriteRender>();
 		rd->color.a = show ? 255 : 0;
+		sprite.shown = show;
+		/*if (show)
+		{
+			sprite.entt.gtr()->Move(999999, 999999, 0);
+		}
+		else
+		{
+			sprite.entt.gtr()->Move(-999999, -999999, 0);
+
+		}*/
 	}
 }
