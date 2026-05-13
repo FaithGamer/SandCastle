@@ -9,20 +9,22 @@
 #include "SandCastle/UI/UiFrame.h"
 #include "SandCastle/UI/UiEnum.h"
 #include "SandCastle/UI/UiContext.h"
+#include "SandCastle/UI/UiElem.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Core/Textual.h"
+#include "SandCastle/ECS/Entity.h"
 
 namespace SandCastle
 {
 	class UiSystem;
 	class UiCanvas;
-	class UiElem;
 	class UiImg;
 	class UiBtn;
 	class UiAnimBtn;
 	class UiCheckbox;
 	class UiLoadBar;
-	struct InputSignal;
+	class Sprite;
+	class InputSignal;
 
 	/// @brief Payload broadcast when an interaction group is enabled or disabled.
 	struct UiGroupSignal
@@ -249,6 +251,46 @@ namespace SandCastle
 		/// @brief Set the material to default material.
 		static void ResetMaterial(Material* material);
 
+		/*---Gamepad navigation---*/
+
+		/// @brief Set the texture used to draw the gamepad-navigation selector ring.
+		/// The texture must split into exactly 4 sprites (a 2x2 grid via its .texture
+		/// file). Logs an error and does nothing if the texture is missing or has the
+		/// wrong layout. The 4 sprites are placed at the four corners of the
+		/// currently navigated UiElem; the texture's natural cell layout maps to
+		/// position (top row → top corners, bottom row → bottom corners).
+		/// `margin` is the gap (in UI units) between the navigated element and the
+		/// selector ring on each side.
+		static void SetGamepadSelector(const String& texture, Vec2f margin = Vec2f(2.f, 2.f));
+		/// @brief Move the selector ring onto `elem`. Pass nullptr to clear.
+		/// Same effect as calling elem->Navigate(). The selector is only drawn when
+		/// gamepad/keyboard was the last input used.
+		static void SetNavigated(UiElem* elem);
+		/// @brief The currently-navigated UiElem, or nullptr.
+		static UiElem* GetNavigated();
+		/// @brief When true, listeners registered via ListenClickPressed/Released
+		/// also fire when Select is pressed/released on the navigated element.
+		/// Off by default.
+		static void ClickIsSelect(bool enabled);
+		/// @brief Current ClickIsSelect setting (used internally by UiElem dispatch).
+		static bool IsClickIsSelect();
+
+		/// @brief Send a Left navigation step to the navigated UiElem. Designed
+		/// to be wired to a ButtonInput via input->signal.Listen(&Ui::NavigateLeft).
+		/// On press: moves the selector to the navigated element's Left nav target
+		/// (if any) and fires its ListenNavPressed(Left) listeners. On release:
+		/// fires ListenNavReleased(Left).
+		static void NavigateLeft(InputSignal* signal);
+		static void NavigateRight(InputSignal* signal);
+		static void NavigateUp(InputSignal* signal);
+		static void NavigateDown(InputSignal* signal);
+		/// @brief Send a Select press/release to the navigated UiElem. Reads the
+		/// pressed/released state from the InputSignal so the input should be
+		/// configured with both SetSignalOnPress(true) and SetSignalOnRelease(true).
+		static void Select(InputSignal* signal);
+		/// @brief Send a Cancel press/release to the navigated UiElem.
+		static void Cancel(InputSignal* signal);
+
 		/*---Utility---*/
 
 		/// @brief Enable an interaction group
@@ -310,11 +352,15 @@ namespace SandCastle
 		void DestroyUpdate();
 		void HoverableUpdate();
 		void ValuesUpdate();
+		void SelectorUpdate();
 		bool OnClick(bool pressed);
 		void OnCanvasMustUpdate(UiCanvas* canvas);
 		void OnDestroy(UiElem* elem);
 		void OnTxtLang(UiTxt* txt);
 		void OnBtnLang(UiBtn* btn);
+		void NavigateInDir(NavDir dir, bool pressed);
+		void RebuildSelector();
+		void DestroySelector();
 		//Helper
 		Writer* m_writer = nullptr;
 
@@ -344,6 +390,17 @@ namespace SandCastle
 		//Signal
 		Signal<UiGroupSignal> uiGroupSignal;
 
+		//Gamepad selector
+		Sprite* m_selectorCorners[4] = { nullptr, nullptr, nullptr, nullptr };
+		Vec2f m_selectorMargin = Vec2f(2.f, 2.f);
+		UiElem* m_navigated = nullptr;
+		Entity m_selectorEntity;
+		Vec3f m_selectorLastPos = Vec3f(0.f, 0.f, 0.f);
+		Vec2f m_selectorLastSize = Vec2f(0.f, 0.f);
+		float m_selectorBlinkElapsed = 0.f;
+		bool m_selectorTextureValid = false;
+		bool m_clickIsSelect = false;
+		bool m_selectorWasGamepadMode = false;
 	};
 	template<typename ...Ts>
 	inline UiTxt* Ui::Text(std::string_view utf8, float width, Ts ...args)

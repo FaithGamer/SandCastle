@@ -97,6 +97,11 @@ namespace SandCastle
 		{
 			ASSERT_LOG_ERROR(false, "Asset type non implemented.");
 		}
+		/// @brief Check whether a sprite with this name was registered (no assert if absent).
+		inline static bool HasSprite(const String& name)
+		{
+			return Instance()->m_sprites.find(name) != Instance()->m_sprites.end();
+		}
 		template <>
 		inline static Sprite* Get(const String& name);
 		template <>

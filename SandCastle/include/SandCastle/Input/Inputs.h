@@ -6,6 +6,7 @@
 #include "SandCastle/Input/Gamepad.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Input/Keyboard.h"
+#include "SandCastle/Core/Signal.h"
 
 namespace SandCastle
 {
@@ -71,6 +72,15 @@ namespace SandCastle
 		/// @param name Name on the input map
 		static void DestroyInputMap(std::string name);
 
+		/// @brief Create the default UI gamepad-navigation bindings on the given map.
+		/// Adds six ButtonInputs ("ui_left", "ui_right", "ui_up", "ui_down",
+		/// "ui_select", "ui_cancel") bound to the D-pad + South/East and to
+		/// arrow keys + Enter/Escape, then wires them to Ui::NavigateLeft / ... /
+		/// Ui::Select / Ui::Cancel. Select and Cancel fire on both press and
+		/// release; the four directions fire on press only.
+		/// Logs an error and does nothing if the map doesn't exist.
+		static void CreateDefaultGamepadNav(const String& mapName);
+
 		/// @brief Get an input from one of the input maps;
 		static sptr<Input> Get(String mapName, String inputName);
 		/// @brief Direct vector access to every input map (advanced).
@@ -79,13 +89,39 @@ namespace SandCastle
 		static sptr<InputMap> GetInputMap(std::string name);
 		/// @brief Snapshot of every map name currently registered.
 		static std::vector<std::string> GetInputMapNameList();
-		/// @brief Used to check what peripheral has been used last, mouse&keyboard or controller
-		bool controllerUsedLast = false;  // to do, private + accessor
+
+		/*---Input mode (gamepad vs mouse/keyboard)---*/
+
+		/// @brief True when the player is in gamepad mode. The engine defaults
+		/// to gamepad mode at launch if a controller is plugged in or if running
+		/// on a Steam Deck; otherwise it defaults to mouse/keyboard mode and
+		/// flips automatically based on real input events (see AutoToggleGamepadMode).
+		/// In gamepad mode the OS cursor is hidden and Ui draws the gamepad-nav
+		/// selector around the navigated UiElem.
+		static bool IsGamepadMode();
+		/// @brief Force gamepad mode on or off. Sends gamepadModeSignal and
+		/// hides/shows the cursor. Note that if AutoToggleGamepadMode is left
+		/// at its default (true), the next real input event may flip the mode
+		/// back — call AutoToggleGamepadMode(false) first to lock it.
+		static void SetGamepadMode(bool gamepad);
+		/// @brief When true (default), gamepad mode flips automatically as the
+		/// player switches between controller and mouse/keyboard. Pass false for
+		/// games that never want gamepad navigation even if a controller is
+		/// connected, or that drive the mode entirely through SetGamepadMode.
+		static void AutoToggleGamepadMode(bool autoToggle);
+		/// @brief Current AutoToggleGamepadMode setting.
+		static bool IsAutoToggleGamepadMode();
+		/// @brief Broadcast on every gamepad-mode flip. Payload is the new
+		/// mode (true = gamepad, false = mouse/keyboard).
+		Signal<bool> gamepadModeSignal;
 	private:
 		friend Systems;
 		bool Rebind(SDL_Event& e);
 		void InitGamepad(SDL_JoystickID id);
 		bool OnEvent(SDL_Event& event);
+		void AutoDetectGamepadModeFromEvent(const SDL_Event& event);
+		void SetGamepadModeInternal(bool gamepad);
+		void ApplyGamepadMode(bool gamepad);
 	private:
 		friend Engine;
 		InputMapContainer m_inputMaps;
@@ -98,6 +134,9 @@ namespace SandCastle
 		std::vector<Gamepad::Button> m_forbiddenButtons;
 		std::vector<Gamepad::Trigger> m_forbiddenTriggers;
 		std::vector<Mouse::Button> m_forbiddenMouses;
-		
+
+		//Input mode
+		bool m_gamepadMode = false;
+		bool m_autoToggleGamepadMode = true;
 	};
 }

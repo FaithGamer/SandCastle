@@ -14,8 +14,12 @@
 #include "SandCastle/UI/UiCheckbox.h"
 #include "SandCastle/UI/UiLoadBar.h"
 #include "SandCastle/Input/Mouse.h"
+#include "SandCastle/Input/Inputs.h"
+#include "SandCastle/Input/Input.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Render/Camera.h"
+#include "SandCastle/Core/Time.h"
+#include "SandCastle/Core/Math.h"
 
 namespace SandCastle
 {
@@ -65,6 +69,7 @@ namespace SandCastle
 		ValuesUpdate();
 		DestroyUpdate();
 		LayoutUpdate();
+		SelectorUpdate();
 	}
 
 	void Ui::LayoutUpdate()
@@ -188,6 +193,12 @@ namespace SandCastle
 
 		RemoveHelper(m_hoverables, id);
 		RemoveHelper(m_values, id);
+
+		if (m_navigated == elem)
+		{
+			m_navigated = nullptr;
+			DestroySelector();
+		}
 	}
 
 	void Ui::OnTxtLang(UiTxt* txt)
@@ -1200,5 +1211,261 @@ namespace SandCastle
 			return;
 		}
 		*frame = &it->second;
+	}
+
+	/*---Gamepad selector---*/
+
+	void Ui::SetGamepadSelector(const String& texture, Vec2f margin)
+	{
+		auto i = Instance();
+		const String names[4] = {
+			texture + "_1_0", // top-left  (top row, left col)
+			texture + "_1_1", // top-right
+			texture + "_0_0", // bottom-left
+			texture + "_0_1", // bottom-right
+		};
+		for (int k = 0; k < 4; k++)
+		{
+			if (!Assets::HasSprite(names[k]))
+			{
+				LOG_ERROR("Ui::SetGamepadSelector: texture '{0}' must decompose into 4 sprites (2x2 grid). Missing '{1}'.", texture, names[k]);
+				i->m_selectorTextureValid = false;
+				for (int j = 0; j < 4; j++) i->m_selectorCorners[j] = nullptr;
+				return;
+			}
+		}
+		// Reject textures with more than 4 sprites (must be exactly 2x2).
+		if (Assets::HasSprite(texture + "_0_2") || Assets::HasSprite(texture + "_2_0"))
+		{
+			LOG_ERROR("Ui::SetGamepadSelector: texture '{0}' has more than 4 sprites. Set the .texture file so the spritesheet is exactly 2x2.", texture);
+			i->m_selectorTextureValid = false;
+			for (int j = 0; j < 4; j++) i->m_selectorCorners[j] = nullptr;
+			return;
+		}
+		for (int k = 0; k < 4; k++)
+			i->m_selectorCorners[k] = Assets::Get<Sprite>(names[k]);
+		i->m_selectorMargin = margin;
+		i->m_selectorTextureValid = true;
+		// Rebuild now if a target is already set.
+		i->DestroySelector();
+	}
+
+	void Ui::SetNavigated(UiElem* elem)
+	{
+		auto i = Instance();
+		if (i->m_navigated == elem)
+			return;
+		i->m_navigated = elem;
+		// destroySignal is already wired to Ui::OnDestroy for every UiElem
+		// (see NewElem), which clears m_navigated when needed.
+		i->DestroySelector(); // force rebuild on next SelectorUpdate
+	}
+
+	UiElem* Ui::GetNavigated()
+	{
+		return Instance()->m_navigated;
+	}
+
+	void Ui::ClickIsSelect(bool enabled)
+	{
+		Instance()->m_clickIsSelect = enabled;
+	}
+
+	bool Ui::IsClickIsSelect()
+	{
+		return Instance()->m_clickIsSelect;
+	}
+
+	void Ui::NavigateInDir(NavDir dir, bool pressed)
+	{
+		auto target = m_navigated;
+		if (!target)
+			return;
+		if (pressed)
+		{
+			target->NavPressed(dir);
+			UiElem* next = target->GetNav(dir);
+			if (next && !next->IsDestroyed())
+				SetNavigated(next);
+		}
+		else
+		{
+			target->NavReleased(dir);
+		}
+	}
+
+	void Ui::NavigateLeft(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		Instance()->NavigateInDir(NavDir::Left, signal->GetBool());
+	}
+	void Ui::NavigateRight(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		Instance()->NavigateInDir(NavDir::Right, signal->GetBool());
+	}
+	void Ui::NavigateUp(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		Instance()->NavigateInDir(NavDir::Up, signal->GetBool());
+	}
+	void Ui::NavigateDown(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		Instance()->NavigateInDir(NavDir::Down, signal->GetBool());
+	}
+	void Ui::Select(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		auto target = Instance()->m_navigated;
+		if (!target) return;
+		if (signal->GetBool())
+			target->SelectPressed();
+		else
+			target->SelectReleased();
+	}
+	void Ui::Cancel(InputSignal* signal)
+	{
+		if (signal == nullptr) return;
+		auto target = Instance()->m_navigated;
+		if (!target) return;
+		if (signal->GetBool())
+			target->CancelPressed();
+		else
+			target->CancelReleased();
+	}
+
+	void Ui::SelectorUpdate()
+	{
+		bool gamepadMode = Inputs::IsGamepadMode();
+		// On input-mode flip from gamepad → mouse, drop the visual but keep
+		// m_navigated so re-entering gamepad mode restores the ring.
+		if (m_selectorWasGamepadMode && !gamepadMode)
+		{
+			DestroySelector();
+		}
+		m_selectorWasGamepadMode = gamepadMode;
+
+		if (!gamepadMode || !m_selectorTextureValid || m_navigated == nullptr)
+		{
+			if (m_selectorEntity.Valid())
+				DestroySelector();
+			return;
+		}
+
+		// Poll target position + size; rebuild if changed (or first build).
+		auto tr = m_navigated->root.gtr();
+		if (!tr) return;
+		Vec3f pos = tr->GetPosition();
+		Vec2f size = m_navigated->GetSize();
+		if (size.x <= 0.f || size.y <= 0.f)
+		{
+			// Element has no layout yet — wait.
+			if (m_selectorEntity.Valid())
+				DestroySelector();
+			return;
+		}
+
+		bool needRebuild = !m_selectorEntity.Valid()
+			|| std::abs(pos.x - m_selectorLastPos.x) > 0.5f
+			|| std::abs(pos.y - m_selectorLastPos.y) > 0.5f
+			|| std::abs(pos.z - m_selectorLastPos.z) > 0.5f
+			|| std::abs(size.x - m_selectorLastSize.x) > 0.5f
+			|| std::abs(size.y - m_selectorLastSize.y) > 0.5f;
+		if (needRebuild)
+		{
+			m_selectorLastPos = pos;
+			m_selectorLastSize = size;
+			RebuildSelector();
+		}
+
+		// Tick blink.
+		if (m_selectorEntity.Valid())
+		{
+			static constexpr float kPeriod = 1.2f;
+			static constexpr float kMinAlpha = 0.35f;
+			static constexpr float kMaxAlpha = 1.0f;
+			m_selectorBlinkElapsed += Time::UnscaledDelta();
+			float angleDeg = m_selectorBlinkElapsed * (360.f / kPeriod);
+			float t = 0.5f + 0.5f * Math::Cos(angleDeg);
+			float a = kMinAlpha + (kMaxAlpha - kMinAlpha) * t;
+			uint8_t alpha = (uint8_t)Math::Clamp(a * 255.f, 0.f, 255.f);
+			auto children = m_selectorEntity.Get<Children>();
+			if (children)
+			{
+				for (auto childId : children->children)
+				{
+					Entity child(childId);
+					if (auto sr = child.Get<SpriteRender>())
+						sr->color = Color(255, 255, 255, alpha);
+				}
+			}
+		}
+	}
+
+	void Ui::RebuildSelector()
+	{
+		DestroySelector();
+		if (!m_navigated || !m_selectorTextureValid) return;
+
+		Vec3f pos = m_selectorLastPos;
+		Vec2f size = m_selectorLastSize;
+
+		// Center the ring on the navigated element. UiElem (non-canvas) anchors
+		// top-left, so the transform position is the element's top-left corner.
+		// UiCanvas's transform position is already the anchored top-left after
+		// SetPosition runs. Either way, center = (pos.x + size.x/2, pos.y - size.y/2).
+		float cx = pos.x + size.x * 0.5f;
+		float cy = pos.y - size.y * 0.5f;
+		// Z: behind canvas frame so canvas children stay on top; in front of
+		// standalone elements so the ring is visible.
+		bool isCanvas = m_navigated->GetType() == UiElem::Type::Canvas;
+		float hz = isCanvas ? (pos.z - 2.f) : (pos.z + 2.f);
+
+		LayerID layer = m_context.layer;
+		Material* mat = m_context.material;
+		MaterialID matId = mat ? mat->GetID() : 0;
+
+		m_selectorEntity = Entity::Create();
+		m_selectorEntity.Add<Transform>();
+		if (auto trRoot = m_selectorEntity.gtr())
+			trRoot->SetPosition(cx, cy, hz);
+
+		const Vec2f outer = size + m_selectorMargin * 2.f;
+		// Corner index order: 0 = TL, 1 = TR, 2 = BL, 3 = BR.
+		const Vec2f sign[4] = {
+			{ -1.f, +1.f },
+			{ +1.f, +1.f },
+			{ -1.f, -1.f },
+			{ +1.f, -1.f },
+		};
+
+		for (int k = 0; k < 4; k++)
+		{
+			Sprite* spr = m_selectorCorners[k];
+			if (!spr) continue;
+			Vec2f dim = spr->GetDimensions();
+			Entity corner = Entity::CreateSprite(spr);
+			m_selectorEntity.AddChild(corner);
+			if (auto trC = corner.gtr())
+			{
+				float lx = sign[k].x * (outer.x * 0.5f - dim.x * 0.5f);
+				float ly = sign[k].y * (outer.y * 0.5f - dim.y * 0.5f);
+				trC->SetPosition(lx, ly, 0.f);
+			}
+			if (auto sr = corner.Get<SpriteRender>())
+			{
+				sr->SetLayer(layer);
+				if (matId) sr->SetMaterial(matId);
+			}
+		}
+		m_selectorBlinkElapsed = 0.f;
+	}
+
+	void Ui::DestroySelector()
+	{
+		if (m_selectorEntity.Valid())
+			m_selectorEntity.Destroy();
+		m_selectorEntity = Entity();
 	}
 }

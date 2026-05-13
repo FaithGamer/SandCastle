@@ -2,6 +2,7 @@
 #include "SandCastle/UI/UiElem.h"
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/UI/UiCanvas.h"
+#include "SandCastle/UI/Ui.h"
 namespace SandCastle
 {
 	UiElem::~UiElem()
@@ -160,5 +161,45 @@ namespace SandCastle
 			OnClickReleased();
 			clickReleasedSignal.Send(this);
 		}
+	}
+	void UiElem::AddNav(NavDir dir, UiElem* target)
+	{
+		navTargets[(int)dir] = target;
+	}
+	UiElem* UiElem::GetNav(NavDir dir) const
+	{
+		return navTargets[(int)dir];
+	}
+	void UiElem::Navigate()
+	{
+		Ui::SetNavigated(this);
+	}
+	void UiElem::NavPressed(NavDir dir)
+	{
+		navPressSignals[(int)dir].Send(this);
+	}
+	void UiElem::NavReleased(NavDir dir)
+	{
+		navReleaseSignals[(int)dir].Send(this);
+	}
+	void UiElem::SelectPressed()
+	{
+		selectPressSignal.Send(this);
+		if (Ui::IsClickIsSelect() && clickable && !disabled)
+			clickPressSignal.Send(this);
+	}
+	void UiElem::SelectReleased()
+	{
+		selectReleaseSignal.Send(this);
+		if (Ui::IsClickIsSelect() && clickable && !disabled)
+			clickReleasedSignal.Send(this);
+	}
+	void UiElem::CancelPressed()
+	{
+		cancelPressSignal.Send(this);
+	}
+	void UiElem::CancelReleased()
+	{
+		cancelReleaseSignal.Send(this);
 	}
 }

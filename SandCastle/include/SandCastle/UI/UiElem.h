@@ -9,9 +9,22 @@ namespace SandCastle
 {
 	class UiCanvas;
 	class Ui;
+	/// @brief Cardinal direction for gamepad/keyboard UI navigation.
+	/// Pass to UiElem::AddNav and the per-direction Listen helpers.
+	enum class NavDir : uint8_t
+	{
+		Left = 0,
+		Right,
+		Up,
+		Down,
+		Count
+	};
 	/// @brief Base class for every UI widget (Canvas, Text, Button, AnimButton, Image, Checkbox, LoadBar).
 	/// Provides position/size, parent/child links, hover/click hit-testing, and Disable/Enable.
 	/// Subscribe to ListenHover / ListenClickPressed / ListenClickReleased to react to user input.
+	/// For gamepad navigation: AddNav wires per-direction targets, Navigate moves
+	/// the Ui selector here, and the ListenNav* / ListenSelect* / ListenCancel* helpers
+	/// fire when the matching Ui::Navigate* / Ui::Select / Ui::Cancel handler runs.
 	class UiElem
 	{
 	public:
@@ -90,6 +103,47 @@ namespace SandCastle
 			clickable = true;
 			Ui::RegisterHoverable(this);
 		}
+
+		/// @brief Set the element to navigate to when `dir` is pressed while this one is selected.
+		/// Pass nullptr to clear the binding. Bindings are one-directional.
+		void AddNav(NavDir dir, UiElem* target);
+		/// @brief Get the element registered for direction `dir`, or nullptr if unset.
+		UiElem* GetNav(NavDir dir) const;
+		/// @brief Make this element the currently-navigated one (moves the Ui selector here).
+		/// No-op if no gamepad selector texture has been set via Ui::SetGamepadSelector.
+		void Navigate();
+
+		template<typename T>
+		void ListenNavPressed(NavDir dir, void(T::* listener)(UiElem* signal), T* obj)
+		{
+			navPressSignals[(int)dir].Listen(listener, obj);
+		}
+		template<typename T>
+		void ListenNavReleased(NavDir dir, void(T::* listener)(UiElem* signal), T* obj)
+		{
+			navReleaseSignals[(int)dir].Listen(listener, obj);
+		}
+		template<typename T>
+		void ListenSelectPressed(void(T::* listener)(UiElem* signal), T* obj)
+		{
+			selectPressSignal.Listen(listener, obj);
+		}
+		template<typename T>
+		void ListenSelectReleased(void(T::* listener)(UiElem* signal), T* obj)
+		{
+			selectReleaseSignal.Listen(listener, obj);
+		}
+		template<typename T>
+		void ListenCancelPressed(void(T::* listener)(UiElem* signal), T* obj)
+		{
+			cancelPressSignal.Listen(listener, obj);
+		}
+		template<typename T>
+		void ListenCancelReleased(void(T::* listener)(UiElem* signal), T* obj)
+		{
+			cancelReleaseSignal.Listen(listener, obj);
+		}
+
 		Signal<UiElem*> destroySignal;
 		/// @brief Use at your own risk
 		Entity root;
@@ -108,6 +162,12 @@ namespace SandCastle
 		void UnHover();
 		void ClickPressed();
 		void ClickReleased();
+		void NavPressed(NavDir dir);
+		void NavReleased(NavDir dir);
+		void SelectPressed();
+		void SelectReleased();
+		void CancelPressed();
+		void CancelReleased();
 
 	protected:
 		bool disabled = false;
@@ -137,5 +197,13 @@ namespace SandCastle
 		Signal<UiElem*> unhoverSignal;
 		Signal<UiElem*> clickPressSignal;
 		Signal<UiElem*> clickReleasedSignal;
+
+		UiElem* navTargets[(int)NavDir::Count] = { nullptr, nullptr, nullptr, nullptr };
+		Signal<UiElem*> navPressSignals[(int)NavDir::Count];
+		Signal<UiElem*> navReleaseSignals[(int)NavDir::Count];
+		Signal<UiElem*> selectPressSignal;
+		Signal<UiElem*> selectReleaseSignal;
+		Signal<UiElem*> cancelPressSignal;
+		Signal<UiElem*> cancelReleaseSignal;
 	};
 }

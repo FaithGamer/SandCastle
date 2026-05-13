@@ -5,6 +5,11 @@
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/Input/ButtonInput.h"
 #include "SandCastle/Input/DirectionalInput.h"
+#include "SandCastle/Input/Keyboard.h"
+#include "SandCastle/Core/Hardware.h"
+#include "SandCastle/Core/Math.h"
+#include "SandCastle/Render/Window.h"
+#include "SandCastle/UI/Ui.h"
 
 namespace SandCastle
 {
@@ -63,10 +68,19 @@ namespace SandCastle
 		{
 			InitGamepad(joystickArray[i]);
 		}
+		// Default to gamepad mode when a controller is plugged in at launch, or
+		// when running on a Steam Deck (which has no separate mouse). Any later
+		// real input event will switch us appropriately via OnEvent.
+		bool initialGamepad = (count > 0) || Hardware::IsSteamDeck();
+		if (joystickArray) SDL_free(joystickArray);
+		m_gamepadMode = initialGamepad;
+		ApplyGamepadMode(m_gamepadMode);
 	}
 
 	bool Inputs::OnEvent(SDL_Event& event)
 	{
+		AutoDetectGamepadModeFromEvent(event);
+
 		bool eventConsumed = false;
 		if (m_rebind != nullptr)
 		{
@@ -362,5 +376,116 @@ namespace SandCastle
 		auto instance = Inputs::Instance();
 
 		return instance->m_inputMaps.names;
+	}
+
+	bool Inputs::IsGamepadMode()
+	{
+		return Instance()->m_gamepadMode;
+	}
+
+	void Inputs::SetGamepadMode(bool gamepad)
+	{
+		Instance()->SetGamepadModeInternal(gamepad);
+	}
+
+	void Inputs::AutoToggleGamepadMode(bool autoToggle)
+	{
+		Instance()->m_autoToggleGamepadMode = autoToggle;
+	}
+
+	bool Inputs::IsAutoToggleGamepadMode()
+	{
+		return Instance()->m_autoToggleGamepadMode;
+	}
+
+	void Inputs::AutoDetectGamepadModeFromEvent(const SDL_Event& event)
+	{
+		if (!m_autoToggleGamepadMode)
+			return;
+		switch (event.type)
+		{
+		// Gamepad activity → gamepad mode.
+		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+		case SDL_EVENT_GAMEPAD_BUTTON_UP:
+			SetGamepadModeInternal(true);
+			break;
+		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+			// Ignore noise below the standard 15% deadzone — sticks idle near zero.
+			if (Math::Abs(event.gaxis.value / 32767.f) > 0.15f)
+				SetGamepadModeInternal(true);
+			break;
+
+		// Deliberate mouse/keyboard activity → mouse mode.
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_WHEEL:
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+			SetGamepadModeInternal(false);
+			break;
+
+		// Mouse motion: ignore zero-delta events (SDL fires one on window focus
+		// at launch, which would otherwise flip us out of gamepad mode before
+		// the player has done anything).
+		case SDL_EVENT_MOUSE_MOTION:
+			if (event.motion.xrel != 0.f || event.motion.yrel != 0.f)
+				SetGamepadModeInternal(false);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	void Inputs::SetGamepadModeInternal(bool gamepad)
+	{
+		if (gamepad == m_gamepadMode)
+			return;
+		m_gamepadMode = gamepad;
+		ApplyGamepadMode(gamepad);
+		gamepadModeSignal.Send(gamepad);
+	}
+
+	void Inputs::ApplyGamepadMode(bool gamepad)
+	{
+		Window::ShowCursor(!gamepad);
+	}
+
+	void Inputs::CreateDefaultGamepadNav(const String& mapName)
+	{
+		auto map = Instance()->m_inputMaps.Get(mapName);
+		if (!map)
+		{
+			LOG_ERROR("Inputs::CreateDefaultGamepadNav: input map '{0}' doesn't exist.", mapName);
+			return;
+		}
+
+		struct Bind
+		{
+			const char* name;
+			Gamepad::Button pad;
+			Key::Scancode key;
+			bool onPress;
+			bool onRelease;
+			void (*handler)(InputSignal*);
+		};
+		const Bind binds[] = {
+			{ "ui_left",   Gamepad::Button::PadLeft,  Key::Scancode::Left,   true, false, &Ui::NavigateLeft  },
+			{ "ui_right",  Gamepad::Button::PadRight, Key::Scancode::Right,  true, false, &Ui::NavigateRight },
+			{ "ui_up",     Gamepad::Button::PadUp,    Key::Scancode::Up,     true, false, &Ui::NavigateUp    },
+			{ "ui_down",   Gamepad::Button::PadDown,  Key::Scancode::Down,   true, false, &Ui::NavigateDown  },
+			{ "ui_select", Gamepad::Button::South,    Key::Scancode::Return, true, true,  &Ui::Select        },
+			{ "ui_cancel", Gamepad::Button::East,     Key::Scancode::Escape, true, true,  &Ui::Cancel        },
+		};
+		for (const auto& b : binds)
+		{
+			auto in = map->CreateButtonInput(b.name);
+			if (!in) continue;
+			in->BindGamepadButton(b.pad);
+			in->BindKey(b.key);
+			in->SetSignalOnPress(b.onPress);
+			in->SetSignalOnRelease(b.onRelease);
+			in->signal.Listen(b.handler);
+		}
 	}
 }

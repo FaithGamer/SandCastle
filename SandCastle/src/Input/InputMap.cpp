@@ -3,7 +3,6 @@
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/Input/ButtonInput.h"
 #include "SandCastle/Input/DirectionalInput.h"
-#include "SandCastle/Input/Inputs.h"
 namespace SandCastle
 {
 	InputMap::InputMap(std::string name) : m_name(name), m_mustUpdate(false), m_isActive(true), m_passThroughImGui(false)
@@ -167,7 +166,6 @@ namespace SandCastle
 				if (input->KeyPressed(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_KEY_UP:
 			for (auto& input : m_byEvents[(int)EventType::Key])
@@ -175,7 +173,6 @@ namespace SandCastle
 				if (input->KeyReleased(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			for (auto& input : m_byEvents[(int)EventType::MouseBtn])
@@ -183,7 +180,6 @@ namespace SandCastle
 				if (input->MouseButtonPressed(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			for (auto& input : m_byEvents[(int)EventType::MouseBtn])
@@ -191,7 +187,6 @@ namespace SandCastle
 				if (input->MouseButtonReleased(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_MOUSE_WHEEL:
 			for (auto& input : m_byEvents[(int)EventType::MouseWheel])
@@ -199,7 +194,6 @@ namespace SandCastle
 				if (input->MouseWheelMoved(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
 			for (auto& input : m_byEvents[(int)EventType::MouseMove])
@@ -207,7 +201,6 @@ namespace SandCastle
 				if (input->MouseMoved(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = false;
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 			for (auto& input : m_byEvents[(int)EventType::GamepadBtn])
@@ -215,7 +208,6 @@ namespace SandCastle
 				if (input->GamepadButtonPressed(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = true;
 			break;
 		case SDL_EVENT_GAMEPAD_BUTTON_UP:
 			for (auto& input : m_byEvents[(int)EventType::GamepadBtn])
@@ -223,7 +215,6 @@ namespace SandCastle
 				if (input->GamepadButtonReleased(e))
 					eventHandled = true;
 			}
-			Inputs::Instance()->controllerUsedLast = true;
 			break;
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
 
@@ -237,10 +228,6 @@ namespace SandCastle
 					if (input->GamepadStickMoved(e))
 						eventHandled = true;
 				}
-				if (e.gaxis.value / 32767.f > 0.15f)
-				{
-					Inputs::Instance()->controllerUsedLast = true;
-				}
 			}
 			else
 			{
@@ -248,10 +235,6 @@ namespace SandCastle
 				{
 					if (input->GamepadTriggerMoved(e))
 						eventHandled = true;
-				}
-				if (e.gaxis.value / 32767.f > 0.15f)
-				{
-					Inputs::Instance()->controllerUsedLast = true;
 				}
 			}
 			break;
@@ -261,9 +244,6 @@ namespace SandCastle
 				if (input->TextEntered(e))
 					eventHandled = true;
 			}
-		
-			Inputs::Instance()->controllerUsedLast = false;
-			
 			break;
 
 		case SDL_EVENT_TEXT_EDITING:
