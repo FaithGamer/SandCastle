@@ -9,7 +9,7 @@ namespace SandCastle
 	{
 		const Stick Stick::None = Stick(Axis::Invalid, Axis::Invalid);
 		const Stick Stick::Left = Stick(Axis::LeftX, Axis::LeftY);
-		const Stick Stick::Right = Stick(Axis::RightX, Axis::LeftY);
+		const Stick Stick::Right = Stick(Axis::RightX, Axis::RightY);
 
 		Stick::Stick()
 			: xAxis(Axis::Invalid), yAxis(Axis::Invalid)
