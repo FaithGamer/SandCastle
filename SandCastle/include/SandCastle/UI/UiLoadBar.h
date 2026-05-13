@@ -21,7 +21,7 @@ namespace SandCastle
 		/// @brief Tint applied to the filling frame.
 		void SetFillingColor(Color color);
 		/// @brief Use Math::FormatCompact (e.g. "1.5k") for the value label.
-		void SetUseCompact(bool useCompact);
+		void SetCompact(bool compact);
 		/// @brief Suffix appended to the value label (e.g. " HP").
 		void SetSuffix(String Suffix);
 		/// @brief current / goal in [0, 1].
@@ -43,6 +43,6 @@ namespace SandCastle
 		String suffix="";
 		double current = 0.0;
 		double goal = 1.0;
-		bool useCompactFormat = false;
+		bool compact = false;
 	};
 }

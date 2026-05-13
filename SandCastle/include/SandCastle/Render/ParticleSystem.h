@@ -4,23 +4,94 @@
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Vec.h"
 #include "SandCastle/Render/Color.h"
+#include "SandCastle/Render/Particle.h"
 
 namespace SandCastle
 {
 	class Sprite;
 
-	/// @brief Built-in trajectory shapes Make() can build for you.
-	enum class ParticleTraj
+	/// @brief Lightweight wrapper returned by ParticleSystem::MakeEmitter().
+	/// Stores only the Entity — the ParticleEmitter component pointer is fetched
+	/// fresh on every setter call, so the handle stays valid across frames even
+	/// if EnTT relocates components. Safe to store as a member.
+	///
+	/// Every chainable setter from ParticleEmitter is mirrored here and returns
+	/// `EmitterHandle&`, so the entire chain uses `.` — no mix of `->` and `.`:
+	/// @code
+	/// sys(ParticleSystem)->MakeEmitter({x, y, 0.f})
+	///     .UseSprite(s)
+	///     .Tint(Palette::Green1)
+	///     .Distance(40.f, 80.f)
+	///     .CountPerBurst(8, 12)
+	///     .Lifetime(0.6f, 1.0f)
+	///     .BurstRate(10.f);
+	/// @endcode
+	/// `operator->` and `operator*` are still available for direct read access
+	/// to the component (e.g. `h->countMin`). Use `entity.Destroy()` to remove
+	/// the emitter.
+	struct EmitterHandle
 	{
-		Straight,
-		CubicIn,
-		CubicOut,
-		CubicInOut
+		Entity entity{};
+
+		inline ParticleEmitter* operator->() { return entity.Get<ParticleEmitter>(); }
+		inline ParticleEmitter& operator*()  { return *entity.Get<ParticleEmitter>(); }
+		inline bool Valid() { return entity.Valid() && entity.Get<ParticleEmitter>() != nullptr; }
+
+		// Forwarders to ParticleEmitter's fluent setters. Each one re-resolves the
+		// component pointer per call so no reference is held across statements.
+#define SC_EMITTER_FWD0(NAME)         inline EmitterHandle& NAME()           { if (auto* em = entity.Get<ParticleEmitter>()) em->NAME();    return *this; }
+#define SC_EMITTER_FWD1(NAME, T1)     inline EmitterHandle& NAME(T1 a)       { if (auto* em = entity.Get<ParticleEmitter>()) em->NAME(a);   return *this; }
+#define SC_EMITTER_FWD2(NAME, T1, T2) inline EmitterHandle& NAME(T1 a, T2 b) { if (auto* em = entity.Get<ParticleEmitter>()) em->NAME(a, b); return *this; }
+
+		SC_EMITTER_FWD1(UseSprite, Sprite*)
+		SC_EMITTER_FWD1(OnLayer, LayerID)
+		SC_EMITTER_FWD1(WithMaterial, MaterialID)
+		SC_EMITTER_FWD1(Trajectory, ParticleTraj)
+		SC_EMITTER_FWD2(Curve, float, float)
+		SC_EMITTER_FWD1(Curve, float)
+		inline EmitterHandle& Curve(std::initializer_list<float> ch) { if (auto* em = entity.Get<ParticleEmitter>()) em->Curve(ch);              return *this; }
+		inline EmitterHandle& Curve(std::vector<float> ch)           { if (auto* em = entity.Get<ParticleEmitter>()) em->Curve(std::move(ch)); return *this; }
+		SC_EMITTER_FWD1(CurveBothSides, bool)
+		SC_EMITTER_FWD2(Distance, float, float)
+		SC_EMITTER_FWD1(Distance, float)
+		SC_EMITTER_FWD2(Angle, float, float)
+		SC_EMITTER_FWD1(Angle, float)
+		SC_EMITTER_FWD2(Lifetime, float, float)
+		SC_EMITTER_FWD1(Lifetime, float)
+		SC_EMITTER_FWD2(Scale, float, float)
+		SC_EMITTER_FWD1(Scale, float)
+		SC_EMITTER_FWD1(Fade, float)
+		SC_EMITTER_FWD1(Tint, Color)
+		SC_EMITTER_FWD2(Tint, Color, Color)
+		inline EmitterHandle& Tint(std::initializer_list<WeightedColor> ch) { if (auto* em = entity.Get<ParticleEmitter>()) em->Tint(ch);              return *this; }
+		inline EmitterHandle& Tint(std::vector<WeightedColor> ch)           { if (auto* em = entity.Get<ParticleEmitter>()) em->Tint(std::move(ch)); return *this; }
+		SC_EMITTER_FWD1(EasingFn, ParticleEasingFn)
+		SC_EMITTER_FWD2(BurstRate, float, float)
+		SC_EMITTER_FWD1(BurstRate, float)
+		SC_EMITTER_FWD2(CountPerBurst, int, int)
+		SC_EMITTER_FWD1(CountPerBurst, int)
+		SC_EMITTER_FWD1(Bursts, int)
+		inline EmitterHandle& DestroyWhenDone(bool b = true) { if (auto* em = entity.Get<ParticleEmitter>()) em->DestroyWhenDone(b); return *this; }
+		SC_EMITTER_FWD0(Play)
+		SC_EMITTER_FWD0(Pause)
+		SC_EMITTER_FWD0(BurstOnce)
+
+#undef SC_EMITTER_FWD0
+#undef SC_EMITTER_FWD1
+#undef SC_EMITTER_FWD2
 	};
 
-	/// @brief Engine system that spawns and updates Particle entities.
-	/// Configure once with SetDefaultSprite()/SetLimit(), then call Make() per
-	/// spawn. Particles are destroyed automatically when they reach t = 1.
+	/// @brief Engine system that spawns and updates particles, and now drives
+	/// ParticleEmitter components.
+	///
+	/// Two usage styles, both available concurrently:
+	///   1. **Imperative** — call Make(p1, p2, ...) per particle to fire one-off shots.
+	///   2. **Component-driven** — call MakeEmitter() to attach a configurable
+	///      ParticleEmitter to an entity; the system bursts particles for you
+	///      every frame based on the emitter's rules.
+	///
+	/// Configure once with SetDefaultSprite()/SetLimit(). Particles are destroyed
+	/// automatically when they reach t = 1. Emitters honor the same global limit.
 	class ParticleSystem : public System
 	{
 	public:
@@ -28,18 +99,22 @@ namespace SandCastle
 		void Update() override;
 		int GetUsedMethod() override;
 
-		/// @brief Enable or disable the system. When disabled all particles are destroyed.
+		/// @brief Enable or disable the system. When disabled all particles and emitter scheduling are cleared.
 		void Activate(bool on);
 		bool IsActive() const { return m_on; }
 
-		/// @brief Maximum live particles. Any Make() call above the limit is dropped.
+		/// @brief Maximum live particles. Any Make()/emitter burst above the limit is dropped.
 		void SetLimit(int limit) { m_limit = limit; }
 		int GetLimit() const { return m_limit; }
 		int GetCount() const { return m_count; }
 
-		/// @brief Sprite used by Make() when no sprite is passed in explicitly.
+		/// @brief Sprite used by Make() and ParticleEmitter when no sprite is set explicitly.
 		void SetDefaultSprite(Sprite* sprite) { m_defaultSprite = sprite; }
 		Sprite* GetDefaultSprite() const { return m_defaultSprite; }
+
+		// ============================================================
+		//   Imperative API (kept stable for older projects)
+		// ============================================================
 
 		/// @brief Spawn a particle moving from p1 to p2. Uses the system's default sprite;
 		/// returns an invalid Entity if no default sprite is set or if the live-particle
@@ -87,7 +162,54 @@ namespace SandCastle
 			double(*easing)(double) = nullptr,
 			float scale = 0.f);
 
+		// ============================================================
+		//   Emitter API
+		// ============================================================
+
+		/// @brief Create a new entity at `position` with Transform + ParticleEmitter,
+		/// then return an EmitterHandle for fluent setup. The handle stores only
+		/// the entity; every chained setter re-resolves the component, so it's
+		/// safe to keep around across frames.
+		///
+		/// Example: spawn green confetti every 100ms forever from (x, y):
+		/// @code
+		/// sys(ParticleSystem)->MakeEmitter({x, y, 0.f})
+		///     .UseSprite(Assets::Get<Sprite>("square.png_0_0"))
+		///     .Tint(Palette::Green1)
+		///     .Distance(40.f, 80.f)
+		///     .Angle(0.f, 360.f)
+		///     .CountPerBurst(8, 12)
+		///     .Lifetime(0.6f, 1.0f)
+		///     .BurstRate(10.f)
+		///     .Fade(0.4f)
+		///     .Scale(1.5f, 2.5f);
+		/// @endcode
+		EmitterHandle MakeEmitter(Vec3f position = Vec3f(0.f, 0.f, 0.f));
+		inline EmitterHandle MakeEmitter(Vec2f position)
+		{
+			return MakeEmitter(Vec3f(position.x, position.y, 0.f));
+		}
+
+		/// @brief Attach a ParticleEmitter to an existing entity that already has a Transform.
+		/// Returns a handle whose `entity` is the passed-in one. Configure via the fluent setters.
+		EmitterHandle MakeEmitter(Entity entity);
+
+		/// @brief Spawn one burst at `position` using the supplied (temporary) emitter spec.
+		/// Useful for one-shot effects when you don't need a persistent emitter entity.
+		/// Returns the number of particles actually spawned (may be less than requested
+		/// when the live-particle limit is reached).
+		int Burst(Vec3f position, const ParticleEmitter& spec);
+		inline int Burst(Vec2f position, const ParticleEmitter& spec)
+		{
+			return Burst(Vec3f(position.x, position.y, 0.f), spec);
+		}
+
 	private:
+		/// @brief Spawns a single particle around `origin` according to `spec`'s rules. Returns true on spawn.
+		bool SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec);
+		/// @brief Drives every ParticleEmitter component: accumulates time, fires bursts.
+		void UpdateEmitters(float delta);
+
 		Sprite* m_defaultSprite = nullptr;
 		bool m_on = true;
 		int m_limit = 1000;

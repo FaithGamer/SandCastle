@@ -122,15 +122,20 @@ Both are component types; the matching engine systems (`LineRendererSystem`/`Wir
 
 ## Particles
 
-`ParticleSystem` (engine, pushed by `Engine::Init`) spawns and updates `Particle` entities. `Make(p1, p2, ...)` and `MakeWithSprite(sprite, p1, p2, ...)` build a Bezier trajectory from `p1` to `p2` and tween a single sprite along it. A particle dies automatically when its parametric `t` reaches `1.0`.
+`ParticleSystem` (engine, pushed by `Engine::Init`) spawns and updates `Particle` entities. Two ways to use it, both available at the same time:
+
+1. **Imperative** — `Make(p1, p2, ...)` / `MakeWithSprite(sprite, p1, p2, ...)` build a Bezier trajectory from `p1` to `p2` and tween a single sprite along it. Good for one-off shots.
+2. **Component-driven** — `MakeEmitter(pos)` returns an `EmitterHandle` you configure with a fluent chain. The system bursts particles every frame based on the emitter's rules. Good for sustained effects, randomized look, persistent sources.
+
+A particle dies automatically when its parametric `t` reaches `1.0`.
 
 ### Setup
 
-- `SetDefaultSprite(sprite)` once during system init — without it, `Make()` returns an invalid `Entity` (use `MakeWithSprite` to bypass).
-- `SetLimit(n)` caps live particles (default `1000`). **Spawns above the limit are silently dropped** — bump the limit for bursty effects, or check `GetCount()` if you need to gate the call yourself.
-- `Activate(false)` destroys every live particle and stops further spawns until re-enabled.
+- `SetDefaultSprite(sprite)` once during system init — without it, `Make()` and emitters without an explicit `UseSprite` produce nothing.
+- `SetLimit(n)` caps live particles (default `1000`). **Spawns above the limit are silently dropped**, including emitter bursts — bump the limit for bursty effects, or check `GetCount()` if you need to gate the call yourself.
+- `Activate(false)` destroys every live particle and resets every emitter's timer until re-enabled.
 
-### Key parameters on `Make()` / `MakeWithSprite()`
+### Imperative API — key parameters on `Make()` / `MakeWithSprite()`
 
 - `speed` — t-rate multiplier. `1.0` ≈ 1 second to traverse `p1→p2`. Higher = faster = shorter lifetime.
 - `traj` — `ParticleTraj` shape:
@@ -147,9 +152,55 @@ Both are component types; the matching engine systems (`LineRendererSystem`/`Wir
 - `easing` — optional `double(double)` curve applied to `t` before sampling the trajectory (helpers in [Core/Easing.h](../include/SandCastle/Core/Easing.h)).
 - `color`, `scale` — tint and size override on the sprite.
 
+### Emitter API — `MakeEmitter(pos)` / `EmitterHandle`
+
+`MakeEmitter(pos)` creates an entity with `Transform + ParticleEmitter` and returns an `EmitterHandle`. The handle stores **only the entity** — every chained setter re-resolves the component, so storing the handle as a class member is safe across frames and EnTT relocations (no `PointableComponent` needed).
+
+The whole chain is dot-style; `operator->` and `operator*` exist for read access to the component, but every fluent setter (`UseSprite`, `Trajectory`, `Curve`, `Distance`, `Angle`, `Lifetime`, `Scale`, `Fade`, `Tint`, `EasingFn`, `BurstRate`, `CountPerBurst`, `Bursts`, `Play`/`Pause`, `BurstOnce`, `DestroyWhenDone`) is mirrored on `EmitterHandle` and returns `EmitterHandle&`.
+
+| Group | Setters | Notes |
+|---|---|---|
+| Visual | `UseSprite(Sprite*)`, `OnLayer(LayerID)`, `WithMaterial(MaterialID)` | Falls back to `ParticleSystem::GetDefaultSprite()` / `SpriteRender::defaultLayer` / `0` if unset. |
+| Trajectory | `Trajectory(ParticleTraj)`, `Curve(min,max)` / `Curve(v)` / `Curve({-0.5f, 0.5f})` / `Curve(std::vector<float>)`, `CurveBothSides(bool)` | Range form: random in `[min,max]`. List form: discrete pick — supersedes range and `curveBothSides`. |
+| Travel | `Distance(min,max)` / `Distance(v)`, `Angle(min,max)` / `Angle(v)`, `Lifetime(min,max)` / `Lifetime(v)`, `Scale(min,max)` / `Scale(v)` | Angle is in degrees, `0°` points up, clockwise. |
+| Look | `Fade(f)`, `Tint(c)` / `Tint(a, b)` / `Tint({ {color, weight}, ... })`, `EasingFn(fn)` | `Tint(a, b)` lerps per-particle through `[a, b]` component-wise. List form: weighted random pick — weights are relative, plain `Color` entries default to weight 1, supersedes the gradient. |
+| Scheduling | `BurstRate(min,max)` / `BurstRate(v)` (bursts per second), `CountPerBurst(min,max)` / `CountPerBurst(v)`, `Bursts(n)`, `Play()` / `Pause()`, `BurstOnce()`, `DestroyWhenDone(bool=true)` | First burst fires on the next `Update()` with no warm-up. Rate `<= 0` idles the emitter without flipping `playing`. `Bursts(-1)` = infinite (default). `BurstOnce()` fires immediately regardless of timer. |
+
+`Burst(pos, spec)` fires one burst from a temporary `ParticleEmitter` value without creating an entity — handy when the source isn't long-lived.
+
 ### Patterns
 
-**Radial burst** — N particles emanating outward from `origin`:
+**Confetti emitter** (sustained, dot-chain):
+
+```cpp
+sys(ParticleSystem)->MakeEmitter({x, y, 0.f})
+    .UseSprite(Assets::Get<Sprite>("square.png_0_0"))
+    .Tint(Palette::Green1, Palette::Green2)
+    .Distance(40.f, 80.f)
+    .Angle(0.f, 360.f)
+    .CountPerBurst(8, 12)
+    .Lifetime(0.6f, 1.0f)
+    .BurstRate(10.f)
+    .Curve({ -2.5f, 2.5f })
+    .Fade(0.4f)
+    .Scale(1.5f, 2.5f);
+```
+
+**One-shot burst** (no persistent entity left behind):
+
+```cpp
+sys(ParticleSystem)->MakeEmitter(pos)
+    .UseSprite(spark)
+    .CountPerBurst(20)
+    .Distance(30.f, 60.f)
+    .Lifetime(0.4f, 0.7f)
+    .Trajectory(ParticleTraj::CubicOut)
+    .Fade(0.5f)
+    .Bursts(1)
+    .DestroyWhenDone();
+```
+
+**Radial burst (imperative form)** — equivalent loop if you don't want an emitter entity:
 
 ```cpp
 auto* ps = Systems::Get<ParticleSystem>();
@@ -167,7 +218,7 @@ for (int i = 0; i < count; ++i)
 **Trail** — one particle per frame behind a moving entity, drifting backward:
 
 ```cpp
-Vec3f tip  = entity.gtr()->position;
+Vec3f tip  = entity.gtr()->GetPosition();
 Vec3f back = tip - Vec3f(velocity.x, velocity.y, 0.f) * 0.04f;
 Systems::Get<ParticleSystem>()->Make(tip, back,
     1.5f, Color::White, ParticleTraj::Straight, 0.f, 0.3f);

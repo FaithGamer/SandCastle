@@ -31,9 +31,9 @@ namespace SandCastle
 			frameFilling.SetColor(color);
 	}
 
-	void UiLoadBar::SetUseCompact(bool useCompact)
+	void UiLoadBar::SetCompact(bool compact)
 	{
-		useCompactFormat = useCompact;
+		this->compact = compact;
 		UpdateLabel();
 	}
 
@@ -106,7 +106,7 @@ namespace SandCastle
 		}
 		else // ValueGoal
 		{
-			if (useCompactFormat)
+			if (compact)
 			{
 				text = Math::FormatCompact(current) + "/" + Math::FormatCompact(goal);
 			}
