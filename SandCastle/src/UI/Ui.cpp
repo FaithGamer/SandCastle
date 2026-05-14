@@ -1219,10 +1219,10 @@ namespace SandCastle
 	{
 		auto i = Instance();
 		const String names[4] = {
-			texture + "_1_0", // top-left  (top row, left col)
-			texture + "_1_1", // top-right
-			texture + "_0_0", // bottom-left
-			texture + "_0_1", // bottom-right
+			texture + "_0_0", // top-left  (top row, left col)
+			texture + "_0_1", // top-right
+			texture + "_1_0", // bottom-left
+			texture + "_1_1", // bottom-right
 		};
 		for (int k = 0; k < 4; k++)
 		{
