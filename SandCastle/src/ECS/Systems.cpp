@@ -303,9 +303,5 @@ namespace SandCastle
 		Time::fixedDelta = seconds;
 	}
 
-	void Systems::SetTimeScale(float scale)
-	{
-		Time::timeScale = scale;
-	}
 }
 

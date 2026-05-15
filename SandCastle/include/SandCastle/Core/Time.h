@@ -7,7 +7,7 @@ namespace SandCastle
 
 	/// @brief Microsecond-precision duration with implicit conversion to seconds (float).
 	/// Use the static Delta()/FixedDelta() inside Update()/FixedUpdate() to step
-	/// game logic. Unscaled* variants ignore Systems::SetTimeScale() (handy for UI).
+	/// game logic. Unscaled* variants ignore Time::SetTimeScale() (handy for UI).
 	class Time
 	{
 	public:
@@ -35,6 +35,11 @@ namespace SandCastle
 		static Time UnscaledDelta();
 		/// @brief Real fixed step, ignoring time scale.
 		static Time UnscaledFixedDelta();
+
+		/// @brief Set a multiplier applied to Delta() and FixedDelta().
+		static void SetTimeScale(float scale);
+		/// @brief Get the current time scale multiplier.
+		static float GetTimeScale();
 
 	private:
 		friend Systems;

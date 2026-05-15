@@ -30,6 +30,16 @@ namespace SandCastle
 		return fixedDelta;
 	}
 
+	void Time::SetTimeScale(float scale)
+	{
+		timeScale = scale;
+	}
+
+	float Time::GetTimeScale()
+	{
+		return timeScale;
+	}
+
 	Time::Time() : m_microseconds(std::chrono::microseconds::zero())
 	{
 

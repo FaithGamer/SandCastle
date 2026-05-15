@@ -122,9 +122,6 @@ namespace SandCastle
 		/// @brief Set the interval between two FixedUpdate call
 		/// @param seconds Interval in seconds
 		static void SetFixedUpdateTime(float seconds);
-
-		/// @brief Set a multiplier to the deltaTime and fixedDeltaTime
-		static void SetTimeScale(float scale);
 	private:
 
 		friend Engine;
