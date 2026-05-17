@@ -66,6 +66,9 @@ namespace SandCastle
 		inline EmitterHandle& Tint(std::initializer_list<WeightedColor> ch) { if (auto* em = entity.Get<ParticleEmitter>()) em->Tint(ch);              return *this; }
 		inline EmitterHandle& Tint(std::vector<WeightedColor> ch)           { if (auto* em = entity.Get<ParticleEmitter>()) em->Tint(std::move(ch)); return *this; }
 		SC_EMITTER_FWD1(EasingFn, ParticleEasingFn)
+		SC_EMITTER_FWD2(SpawnArea, float, float)
+		inline EmitterHandle& SpawnArea(const Rect& area) { if (auto* em = entity.Get<ParticleEmitter>()) em->SpawnArea(area); return *this; }
+		SC_EMITTER_FWD0(NoSpawnArea)
 		SC_EMITTER_FWD2(BurstRate, float, float)
 		SC_EMITTER_FWD1(BurstRate, float)
 		SC_EMITTER_FWD2(CountPerBurst, int, int)

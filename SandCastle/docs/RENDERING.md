@@ -156,7 +156,7 @@ A particle dies automatically when its parametric `t` reaches `1.0`.
 
 `MakeEmitter(pos)` creates an entity with `Transform + ParticleEmitter` and returns an `EmitterHandle`. The handle stores **only the entity** — every chained setter re-resolves the component, so storing the handle as a class member is safe across frames and EnTT relocations (no `PointableComponent` needed).
 
-The whole chain is dot-style; `operator->` and `operator*` exist for read access to the component, but every fluent setter (`UseSprite`, `Trajectory`, `Curve`, `Distance`, `Angle`, `Lifetime`, `Scale`, `Fade`, `Tint`, `EasingFn`, `BurstRate`, `CountPerBurst`, `Bursts`, `Play`/`Pause`, `BurstOnce`, `DestroyWhenDone`) is mirrored on `EmitterHandle` and returns `EmitterHandle&`.
+The whole chain is dot-style; `operator->` and `operator*` exist for read access to the component, but every fluent setter (`UseSprite`, `Trajectory`, `Curve`, `Distance`, `Angle`, `Lifetime`, `Scale`, `Fade`, `Tint`, `EasingFn`, `SpawnArea`/`NoSpawnArea`, `BurstRate`, `CountPerBurst`, `Bursts`, `Play`/`Pause`, `BurstOnce`, `DestroyWhenDone`) is mirrored on `EmitterHandle` and returns `EmitterHandle&`.
 
 | Group | Setters | Notes |
 |---|---|---|
@@ -164,6 +164,7 @@ The whole chain is dot-style; `operator->` and `operator*` exist for read access
 | Trajectory | `Trajectory(ParticleTraj)`, `Curve(min,max)` / `Curve(v)` / `Curve({-0.5f, 0.5f})` / `Curve(std::vector<float>)`, `CurveBothSides(bool)` | Range form: random in `[min,max]`. List form: discrete pick — supersedes range and `curveBothSides`. |
 | Travel | `Distance(min,max)` / `Distance(v)`, `Angle(min,max)` / `Angle(v)`, `Lifetime(min,max)` / `Lifetime(v)`, `Scale(min,max)` / `Scale(v)` | Angle is in degrees, `0°` points up, clockwise. |
 | Look | `Fade(f)`, `Tint(c)` / `Tint(a, b)` / `Tint({ {color, weight}, ... })`, `EasingFn(fn)` | `Tint(a, b)` lerps per-particle through `[a, b]` component-wise. List form: weighted random pick — weights are relative, plain `Color` entries default to weight 1, supersedes the gradient. |
+| Spawn area | `SpawnArea(w, h)` / `SpawnArea(Rect)` / `NoSpawnArea()` | Each particle picks its own uniform random point in the box (one burst scatters across the whole area). `(w,h)` centers the box on the emitter; `Rect` is an arbitrary offset box relative to the emitter position. Default = point emission. |
 | Scheduling | `BurstRate(min,max)` / `BurstRate(v)` (bursts per second), `CountPerBurst(min,max)` / `CountPerBurst(v)`, `Bursts(n)`, `Play()` / `Pause()`, `BurstOnce()`, `DestroyWhenDone(bool=true)` | First burst fires on the next `Update()` with no warm-up. Rate `<= 0` idles the emitter without flipping `playing`. `Bursts(-1)` = infinite (default). `BurstOnce()` fires immediately regardless of timer. |
 
 `Burst(pos, spec)` fires one burst from a temporary `ParticleEmitter` value without creating an entity — handy when the source isn't long-lived.

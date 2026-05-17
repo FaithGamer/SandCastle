@@ -231,8 +231,19 @@ namespace SandCastle
 		float distance = RandRange(spec.distanceMin, spec.distanceMax);
 		Vec2f dir = Math::AngleToVec(angle);
 
-		Vec3f p1 = origin;
-		Vec3f p2(origin.x + dir.x * distance, origin.y + dir.y * distance, origin.z);
+		// Per-particle spawn point: offset by a uniform random point inside the
+		// spawn-area box (relative to the emitter origin). A zero-size box keeps
+		// every particle exactly at the origin.
+		Vec3f base = origin;
+		const Rect& sa = spec.spawnArea;
+		if (sa.width != 0.f || sa.height != 0.f)
+		{
+			base.x += RandRange(sa.left, sa.left + sa.width);
+			base.y += RandRange(sa.Bottom(), sa.top);
+		}
+
+		Vec3f p1 = base;
+		Vec3f p2(base.x + dir.x * distance, base.y + dir.y * distance, base.z);
 
 		float curve;
 		if (!spec.curveChoices.empty())

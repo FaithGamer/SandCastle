@@ -6,6 +6,7 @@
 #include "SandCastle/Render/Color.h"
 #include "SandCastle/Render/Layer.h"
 #include "SandCastle/Render/Material.h"
+#include "SandCastle/Render/Rect.h"
 
 namespace SandCastle
 {
@@ -120,6 +121,17 @@ namespace SandCastle
 		/// @brief Easing curve applied to t before sampling the trajectory (shared across particles).
 		ParticleEasingFn easing = nullptr;
 
+		// === Spawn area ===
+
+		/// @brief Spawn-area box, expressed as an offset rect relative to the emitter's
+		/// Transform position. Each particle samples its own uniform random point inside
+		/// this box at spawn time, so a single burst scatters across the whole area
+		/// instead of all originating from one point. A zero-size rect (the default)
+		/// means point emission at the emitter origin. Configure via SpawnArea() — pass
+		/// a (width, height) for a box centered on the emitter, or a Rect for an
+		/// arbitrary (possibly off-center) offset box.
+		Rect spawnArea = Rect(0.f, 0.f, 0.f, 0.f);
+
 		// === Burst scheduling ===
 
 		/// @brief Bursts per second, sampled per burst in [burstRateMin, burstRateMax].
@@ -169,6 +181,9 @@ namespace SandCastle
 		inline ParticleEmitter& Tint(std::initializer_list<WeightedColor> choices) { colorChoices.assign(choices);     return *this; }
 		inline ParticleEmitter& Tint(std::vector<WeightedColor> choices)           { colorChoices = std::move(choices); return *this; }
 		inline ParticleEmitter& EasingFn(ParticleEasingFn e)      { easing = e;                                 return *this; }
+		inline ParticleEmitter& SpawnArea(float w, float h)       { spawnArea = Rect(-w * 0.5f, h * 0.5f, w, h); return *this; }
+		inline ParticleEmitter& SpawnArea(const Rect& area)       { spawnArea = area;                           return *this; }
+		inline ParticleEmitter& NoSpawnArea()                     { spawnArea = Rect(0.f, 0.f, 0.f, 0.f);       return *this; }
 		inline ParticleEmitter& BurstRate(float mn, float mx)     { burstRateMin = mn; burstRateMax = mx;       return *this; }
 		inline ParticleEmitter& BurstRate(float v)                { burstRateMin = v;  burstRateMax = v;        return *this; }
 		inline ParticleEmitter& CountPerBurst(int mn, int mx)     { countMin = mn; countMax = mx;               return *this; }
