@@ -102,6 +102,17 @@ namespace SandCastle
 
 				if (p.t >= 1.f)
 				{
+					if (p.destroyCb != 0)
+					{
+						auto it = m_destroyCallbacks.find(p.destroyCb);
+						if (it != m_destroyCallbacks.end())
+						{
+							if (it->second.fn)
+								it->second.fn(ParticleSignal{ Vec3f(pos.x, pos.y, z) });
+							if (--it->second.refCount <= 0)
+								m_destroyCallbacks.erase(it);
+						}
+					}
 					e.Destroy();
 					return;
 				}
@@ -116,12 +127,16 @@ namespace SandCastle
 		if (!on)
 		{
 			Entity::DestroyAll<Particle>();
+			// Hard reset: particles were dropped without running their destroy
+			// callbacks, so wipe the table and clear cached ids too.
+			m_destroyCallbacks.clear();
 			// Reset emitter timers so they don't burst-catch-up on re-activation.
 			auto view = Entity::View<ParticleEmitter>();
 			view.each([](ParticleEmitter& em)
 				{
 					em._accum = 0.f;
 					em._nextInterval = -1.f;
+					em._callbackId = 0;
 				});
 		}
 	}
@@ -202,7 +217,35 @@ namespace SandCastle
 		return EmitterHandle{ entity };
 	}
 
+	std::uint32_t ParticleSystem::RegisterDestroyCallback(const std::function<void(const ParticleSignal&)>& fn)
+	{
+		if (!fn) return 0;
+		std::uint32_t id = m_nextCallbackId++;
+		if (m_nextCallbackId == 0) m_nextCallbackId = 1; // skip the 0 sentinel on wrap
+		m_destroyCallbacks[id].fn = fn;
+		return id;
+	}
+
+	void ParticleSystem::ReleaseDestroyCallback(std::uint32_t id)
+	{
+		if (id == 0) return;
+		auto it = m_destroyCallbacks.find(id);
+		if (it != m_destroyCallbacks.end() && --it->second.refCount <= 0)
+			m_destroyCallbacks.erase(it);
+	}
+
 	int ParticleSystem::Burst(Vec3f position, const ParticleEmitter& spec)
+	{
+		// Temporary-spec path: no persistent emitter, so register the callback (if any)
+		// for just this burst. Particles ref-count it; if none spawn, drop it again.
+		std::uint32_t cid = RegisterDestroyCallback(spec.onParticleDestroy);
+		int spawned = Burst(position, spec, cid);
+		if (cid != 0 && spawned == 0)
+			m_destroyCallbacks.erase(cid);
+		return spawned;
+	}
+
+	int ParticleSystem::Burst(Vec3f position, const ParticleEmitter& spec, std::uint32_t cid)
 	{
 		if (!m_on) return 0;
 		int count = RandRange(spec.countMin, spec.countMax);
@@ -211,13 +254,13 @@ namespace SandCastle
 		for (int i = 0; i < count; ++i)
 		{
 			if (m_count >= m_limit) break;
-			if (SpawnFromEmitter(position, spec))
+			if (SpawnFromEmitter(position, spec, cid))
 				++spawned;
 		}
 		return spawned;
 	}
 
-	bool ParticleSystem::SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec)
+	bool ParticleSystem::SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec, std::uint32_t cid)
 	{
 		Sprite* sprite = spec.sprite != nullptr ? spec.sprite : m_defaultSprite;
 		if (sprite == nullptr)
@@ -296,6 +339,15 @@ namespace SandCastle
 		if (!e.Valid())
 			return false;
 
+		if (cid != 0)
+		{
+			if (auto prt = e.Get<Particle>())
+			{
+				prt->destroyCb = cid;
+				++m_destroyCallbacks[cid].refCount;
+			}
+		}
+
 		if (spec.layer != ParticleEmitter::kKeepLayer || spec.material != 0)
 		{
 			if (auto sr = e.Get<SpriteRender>())
@@ -333,11 +385,27 @@ namespace SandCastle
 
 				Vec3f origin = tr.GetPosition();
 
+				// Resolve this emitter's destroy-callback id. Register lazily and
+				// re-register if the cached entry was already freed (its previous
+				// generation of particles all died). Bounded: one entry per emitter.
+				std::uint32_t cid = 0;
+				if (em.onParticleDestroy)
+				{
+					if (em._callbackId == 0 ||
+						m_destroyCallbacks.find(em._callbackId) == m_destroyCallbacks.end())
+						em._callbackId = RegisterDestroyCallback(em.onParticleDestroy);
+					cid = em._callbackId;
+				}
+				else
+				{
+					em._callbackId = 0;
+				}
+
 				// Manual one-off burst, regardless of timer / remainingBursts.
 				if (em.burstNow)
 				{
 					em.burstNow = false;
-					Burst(origin, em);
+					Burst(origin, em, cid);
 				}
 
 				if (!em.playing) return;
@@ -348,7 +416,7 @@ namespace SandCastle
 				// used purely as a sentinel: <0 = never run yet, >=0 = running.
 				if (em._nextInterval < 0.f)
 				{
-					Burst(origin, em);
+					Burst(origin, em, cid);
 					if (em.remainingBursts > 0)
 						--em.remainingBursts;
 					em._accum = 0.f;
@@ -378,9 +446,22 @@ namespace SandCastle
 					}
 					if (em._accum < interval) break;
 					em._accum -= interval;
-					Burst(origin, em);
+					Burst(origin, em, cid);
 					if (em.remainingBursts > 0)
 						--em.remainingBursts;
+				}
+
+				// Drop a freshly-registered entry that no particle ended up
+				// referencing (e.g. burst hit the live-particle limit), so an idle
+				// emitter doesn't keep a dead entry around.
+				if (cid != 0)
+				{
+					auto it = m_destroyCallbacks.find(cid);
+					if (it != m_destroyCallbacks.end() && it->second.refCount <= 0)
+					{
+						m_destroyCallbacks.erase(it);
+						em._callbackId = 0;
+					}
 				}
 
 				if (em.remainingBursts == 0 && em.destroyOnFinish)

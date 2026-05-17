@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <initializer_list>
+#include <functional>
+#include <cstdint>
+#include "SandCastle/Core/Vec.h"
 #include "SandCastle/Render/Beziers.h"
 #include "SandCastle/Render/Color.h"
 #include "SandCastle/Render/Layer.h"
@@ -14,6 +17,14 @@ namespace SandCastle
 
 	/// @brief Easing function pointer used to shape particle interpolation. See Easing namespace.
 	using ParticleEasingFn = double(*)(double);
+
+	/// @brief Payload passed to a ParticleEmitter::onParticleDestroy callback.
+	/// Currently carries the particle's final world position; wrapped in a struct
+	/// so new fields can be added later without changing the callback signature.
+	struct ParticleSignal
+	{
+		Vec3f position;
+	};
 
 	/// @brief Color + relative weight used by ParticleEmitter::Tint() for weighted random pick.
 	/// Implicitly constructible from a plain Color (weight defaults to 1) so a weighted list
@@ -48,6 +59,10 @@ namespace SandCastle
 		float scale = 0.f;
 		Beziers trajectory;
 		ParticleEasingFn easing = nullptr;
+		/// @brief Handle into ParticleSystem's destroy-callback table (0 = none). The
+		/// callback lives in that table, ref-counted by live particles, so it fires
+		/// independently of the emitter's lifetime. Managed by ParticleSystem.
+		std::uint32_t destroyCb = 0;
 	};
 
 	/// @brief ECS component that turns its entity into a particle emitter.
@@ -121,6 +136,16 @@ namespace SandCastle
 		/// @brief Easing curve applied to t before sampling the trajectory (shared across particles).
 		ParticleEasingFn easing = nullptr;
 
+		/// @brief Optional callback fired once per particle, with that particle's final
+		/// world position, just before it is destroyed at end of life. ParticleSystem
+		/// copies it once into a ref-counted runtime table (not per particle); particles
+		/// hold only a small id into that table. The callback therefore keeps firing for
+		/// in-flight particles even after the emitter is destroyed — it lives until the
+		/// last referencing particle dies. Also works with the temporary-spec Burst()
+		/// overload. Leave empty (default) for no callback. Set via OnParticleDestroy();
+		/// a handy "do X where the particle landed" trigger.
+		std::function<void(const ParticleSignal&)> onParticleDestroy;
+
 		// === Spawn area ===
 
 		/// @brief Spawn-area box, expressed as an offset rect relative to the emitter's
@@ -184,6 +209,7 @@ namespace SandCastle
 		inline ParticleEmitter& SpawnArea(float w, float h)       { spawnArea = Rect(-w * 0.5f, h * 0.5f, w, h); return *this; }
 		inline ParticleEmitter& SpawnArea(const Rect& area)       { spawnArea = area;                           return *this; }
 		inline ParticleEmitter& NoSpawnArea()                     { spawnArea = Rect(0.f, 0.f, 0.f, 0.f);       return *this; }
+		inline ParticleEmitter& OnParticleDestroy(std::function<void(const ParticleSignal&)> cb) { onParticleDestroy = std::move(cb); return *this; }
 		inline ParticleEmitter& BurstRate(float mn, float mx)     { burstRateMin = mn; burstRateMax = mx;       return *this; }
 		inline ParticleEmitter& BurstRate(float v)                { burstRateMin = v;  burstRateMax = v;        return *this; }
 		inline ParticleEmitter& CountPerBurst(int mn, int mx)     { countMin = mn; countMax = mx;               return *this; }
@@ -197,5 +223,8 @@ namespace SandCastle
 		// Internal scheduling state — managed by ParticleSystem.
 		float _accum = 0.f;
 		float _nextInterval = -1.f;
+		/// @brief Cached id of this emitter's onParticleDestroy entry in
+		/// ParticleSystem's table (0 = not registered). Managed by ParticleSystem.
+		std::uint32_t _callbackId = 0;
 	};
 }

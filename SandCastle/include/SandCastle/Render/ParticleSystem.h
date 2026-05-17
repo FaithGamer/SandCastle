@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <functional>
+#include <unordered_map>
 #include "SandCastle/ECS/System.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Core/Vec.h"
@@ -69,6 +72,7 @@ namespace SandCastle
 		SC_EMITTER_FWD2(SpawnArea, float, float)
 		inline EmitterHandle& SpawnArea(const Rect& area) { if (auto* em = entity.Get<ParticleEmitter>()) em->SpawnArea(area); return *this; }
 		SC_EMITTER_FWD0(NoSpawnArea)
+		inline EmitterHandle& OnParticleDestroy(std::function<void(const ParticleSignal&)> cb) { if (auto* em = entity.Get<ParticleEmitter>()) em->OnParticleDestroy(std::move(cb)); return *this; }
 		SC_EMITTER_FWD2(BurstRate, float, float)
 		SC_EMITTER_FWD1(BurstRate, float)
 		SC_EMITTER_FWD2(CountPerBurst, int, int)
@@ -201,6 +205,8 @@ namespace SandCastle
 		/// Useful for one-shot effects when you don't need a persistent emitter entity.
 		/// Returns the number of particles actually spawned (may be less than requested
 		/// when the live-particle limit is reached).
+		/// If `spec.onParticleDestroy` is set, it is registered in the runtime
+		/// callback table for the lifetime of this burst's particles.
 		int Burst(Vec3f position, const ParticleEmitter& spec);
 		inline int Burst(Vec2f position, const ParticleEmitter& spec)
 		{
@@ -209,9 +215,31 @@ namespace SandCastle
 
 	private:
 		/// @brief Spawns a single particle around `origin` according to `spec`'s rules. Returns true on spawn.
-		bool SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec);
+		/// `cid` (0 = none) is stamped onto the particle and ref-counts the destroy-callback entry.
+		bool SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec, std::uint32_t cid);
+		/// @brief Shared burst path: spawns `count` particles, each ref-counting `cid`.
+		int Burst(Vec3f position, const ParticleEmitter& spec, std::uint32_t cid);
 		/// @brief Drives every ParticleEmitter component: accumulates time, fires bursts.
 		void UpdateEmitters(float delta);
+
+		/// @brief Copy `fn` into the table, return its new id (0 if `fn` is empty).
+		/// The entry starts at refCount 0 — callers must ref it via spawned particles
+		/// or release it explicitly if nothing ended up referencing it.
+		std::uint32_t RegisterDestroyCallback(const std::function<void(const ParticleSignal&)>& fn);
+		/// @brief Decrement an entry's refCount; erase it when it reaches 0. No-op for id 0.
+		void ReleaseDestroyCallback(std::uint32_t id);
+
+		/// @brief Runtime destroy-callback table. Keyed by a small id stored on
+		/// emitters (cached) and particles (per spawn). Ref-counted by the number
+		/// of live particles pointing at it, so a callback outlives its emitter and
+		/// is freed once its last particle dies.
+		struct DestroyCallback
+		{
+			std::function<void(const ParticleSignal&)> fn;
+			int refCount = 0;
+		};
+		std::unordered_map<std::uint32_t, DestroyCallback> m_destroyCallbacks;
+		std::uint32_t m_nextCallbackId = 1;
 
 		Sprite* m_defaultSprite = nullptr;
 		bool m_on = true;
