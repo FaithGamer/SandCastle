@@ -3,6 +3,7 @@
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/UI/UiElem.h"
 #include "SandCastle/Core/Bitmask.h"
+#include "SandCastle/Render/Color.h"
 
 
 namespace SandCastle
@@ -18,6 +19,8 @@ namespace SandCastle
 		void SetPosition(Vec2f pos) override;
 		/// @brief Replace the displayed sprite.
 		void SetSprite(Sprite* sprite);
+		/// @brief Tint the displayed sprite.
+		void SetColor(const Color& color);
 
 	private:
 		friend Ui;
