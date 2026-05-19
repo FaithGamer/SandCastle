@@ -39,6 +39,9 @@ namespace SandCastle
 		/// @brief Spacing between element inside the canvas
 		void SetSpacing(Vec2f spacing);
 		void SetMargin(Vec2f margin);
+		/// @brief Set the canvas size. A positive component fixes that axis to
+		/// the given size; a component <= 0 lets that axis stretch to fit content.
+		void SetSize(Vec2f size);
 		
 	public:
 		Signal<UiCanvas*> mustUpdateSignal;

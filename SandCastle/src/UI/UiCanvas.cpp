@@ -453,4 +453,30 @@ namespace SandCastle
 		margin = Margin;
 		SetPosition(position);
 	}
+	void UiCanvas::SetSize(Vec2f Size)
+	{
+		if (Size.x > 0.f)
+		{
+			fixedSize.AddFlag(UiCanvas::Horizontal);
+			sizeLimit.x = Size.x;
+			size.x = Size.x;
+		}
+		else
+		{
+			fixedSize.RemoveFlag(UiCanvas::Horizontal);
+			sizeLimit.x = 9999999.f;
+		}
+		if (Size.y > 0.f)
+		{
+			fixedSize.AddFlag(UiCanvas::Vertical);
+			sizeLimit.y = Size.y;
+			size.y = Size.y;
+		}
+		else
+		{
+			fixedSize.RemoveFlag(UiCanvas::Vertical);
+			sizeLimit.y = 9999999.f;
+		}
+		MustUpdate();
+	}
 }

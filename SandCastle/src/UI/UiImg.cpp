@@ -42,4 +42,8 @@ namespace SandCastle
 		sprite = spr;
 		SetPosition(position);
 	}
+	void UiImg::SetColor(const Color& color)
+	{
+		root.Get<SpriteRender>()->color = color;
+	}
 }
