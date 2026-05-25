@@ -398,6 +398,16 @@ namespace SandCastle
 		return Instance()->m_autoToggleGamepadMode;
 	}
 
+	void Inputs::SetHideCursorOnGamepadMode(bool hide)
+	{
+		Instance()->m_hideCursorOnGamepadMode = hide;
+	}
+
+	bool Inputs::IsHideCursorOnGamepadMode()
+	{
+		return Instance()->m_hideCursorOnGamepadMode;
+	}
+
 	void Inputs::AutoDetectGamepadModeFromEvent(const SDL_Event& event)
 	{
 		if (!m_autoToggleGamepadMode)
@@ -448,6 +458,8 @@ namespace SandCastle
 
 	void Inputs::ApplyGamepadMode(bool gamepad)
 	{
+		if (!m_hideCursorOnGamepadMode)
+			return;
 		Window::ShowCursor(!gamepad);
 	}
 

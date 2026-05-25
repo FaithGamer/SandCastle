@@ -96,8 +96,9 @@ namespace SandCastle
 		/// to gamepad mode at launch if a controller is plugged in or if running
 		/// on a Steam Deck; otherwise it defaults to mouse/keyboard mode and
 		/// flips automatically based on real input events (see AutoToggleGamepadMode).
-		/// In gamepad mode the OS cursor is hidden and Ui draws the gamepad-nav
-		/// selector around the navigated UiElem.
+		/// In gamepad mode the OS cursor is hidden (unless disabled via
+		/// SetHideCursorOnGamepadMode) and Ui draws the gamepad-nav selector
+		/// around the navigated UiElem.
 		static bool IsGamepadMode();
 		/// @brief Force gamepad mode on or off. Sends gamepadModeSignal and
 		/// hides/shows the cursor. Note that if AutoToggleGamepadMode is left
@@ -111,6 +112,14 @@ namespace SandCastle
 		static void AutoToggleGamepadMode(bool autoToggle);
 		/// @brief Current AutoToggleGamepadMode setting.
 		static bool IsAutoToggleGamepadMode();
+		/// @brief When true (default), entering gamepad mode hides the OS cursor
+		/// and leaving it shows the cursor again. Pass false for games that
+		/// want to keep the cursor visible regardless of the input mode (e.g.
+		/// games using a custom OS cursor where stray gamepad noise would
+		/// otherwise blink it off).
+		static void SetHideCursorOnGamepadMode(bool hide);
+		/// @brief Current SetHideCursorOnGamepadMode setting.
+		static bool IsHideCursorOnGamepadMode();
 		/// @brief Broadcast on every gamepad-mode flip. Payload is the new
 		/// mode (true = gamepad, false = mouse/keyboard).
 		Signal<bool> gamepadModeSignal;
@@ -138,5 +147,6 @@ namespace SandCastle
 		//Input mode
 		bool m_gamepadMode = false;
 		bool m_autoToggleGamepadMode = true;
+		bool m_hideCursorOnGamepadMode = true;
 	};
 }
