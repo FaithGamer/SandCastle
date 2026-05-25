@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SandCastle/UI/UiTxt.h"
+#include "SandCastle/UI/Ui.h"
 #include "SandCastle/Core/LangSignal.h"
 #include "SandCastle/Core/Assets.h"
 namespace SandCastle
@@ -24,6 +25,15 @@ namespace SandCastle
 	String UiTxt::GetUtf8() const
 	{
 		return utf8;
+	}
+
+	void UiTxt::SetColor(const Color& color)
+	{
+		const Color& c = context.color;
+		if (c.r == color.r && c.g == color.g && c.b == color.b && c.a == color.a)
+			return;
+		context.color = color;
+		Ui::UpdateText(this, utf8, false); //re-render glyphs with the new color
 	}
 
 }

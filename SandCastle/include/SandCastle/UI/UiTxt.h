@@ -39,6 +39,9 @@ namespace SandCastle
 				data->Invalidate();
 		}
 
+		/// @brief Recolor the text at runtime (re-renders the glyphs).
+		void SetColor(const Color& color);
+
 		Signal<UiTxt*> langSignal;
 		String GetUtf8() const;
 	protected:
