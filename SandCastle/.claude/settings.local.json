@@ -7,7 +7,10 @@
       "Read(//c/dev/**)",
       "Bash(rm 'c:\\\\dev\\\\meat\\\\src\\\\States.h' 'c:\\\\dev\\\\meat\\\\src\\\\States.cpp' 'c:\\\\dev\\\\meat\\\\src\\\\StateMachine.h' 'c:\\\\dev\\\\meat\\\\src\\\\StateSys.h' 'c:\\\\dev\\\\meat\\\\src\\\\GameSys.h' 'c:\\\\dev\\\\meat\\\\src\\\\GameSys.cpp' && ls 'c:\\\\dev\\\\meat\\\\src' | grep -E \"\\(States|StateMachine|StateSys|GameSys\\)\")",
       "Bash(identify C:/dev/madman/assets/textures/gamepad_selector.png)",
-      "Bash(python -c \"from PIL import Image; im = Image.open\\('C:/dev/madman/assets/textures/gamepad_selector.png'\\); print\\(im.size\\)\")"
+      "Bash(python -c \"from PIL import Image; im = Image.open\\('C:/dev/madman/assets/textures/gamepad_selector.png'\\); print\\(im.size\\)\")",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout *)"
     ]
   }
 }

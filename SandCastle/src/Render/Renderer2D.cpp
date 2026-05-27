@@ -412,6 +412,9 @@ namespace SandCastle
 
 #endif
 
+		// Software cursor overlay (used when capture software is detected — see
+		// Window::SetCursor docstring). No-op in the common case.
+		Window::Instance()->RenderCursorOverlay();
 		Window::RenderWindow();
 		m_queue.Clear();
 		STOP_PROFILING("cpu_render");

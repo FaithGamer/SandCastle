@@ -8,8 +8,10 @@ namespace SandCastle
 {
 	Window::~Window()
 	{
-		if (m_cursor)
-			SDL_DestroyCursor(m_cursor);
+		// Cursor GL resources (texture/shader/VAO/VBO) live on the render
+		// context. By the time the Window singleton runs its destructor the
+		// render thread is already gone, so we deliberately leak them — the
+		// process is exiting anyway and the driver reclaims everything.
 		SDL_GL_DestroyContext(m_initContext);
 		SDL_GL_DestroyContext(m_renderContext);
 		SDL_DestroyWindow(m_window);
@@ -121,11 +123,8 @@ namespace SandCastle
 		if (texturePath.empty())
 		{
 			instance->m_cursorPath.clear();
-			if (instance->m_cursor)
-			{
-				SDL_DestroyCursor(instance->m_cursor);
-				instance->m_cursor = nullptr;
-			}
+			instance->DestroyCursorTexture();
+			SDL_ShowCursor();
 			SDL_SetCursor(SDL_GetDefaultCursor());
 			return;
 		}
@@ -134,6 +133,8 @@ namespace SandCastle
 		instance->m_cursorHotX = hotX;
 		instance->m_cursorHotY = hotY;
 		instance->RefreshCursor();
+		// Hide the OS cursor over the window: we draw our own each frame.
+		SDL_HideCursor();
 	}
 
 	void Window::RefreshCursor()
@@ -159,25 +160,236 @@ namespace SandCastle
 			return;
 		}
 
-		SDL_Cursor* newCursor = SDL_CreateColorCursor(scaled, m_cursorHotX * scale, m_cursorHotY * scale);
+		m_cursorScale = scale;
+		UploadCursorTexture(scaled);
 		SDL_DestroySurface(scaled);
+	}
 
-		if (!newCursor)
-		{
-			LOG_ERROR("Window::SetCursor: SDL_CreateColorCursor failed: {0}", SDL_GetError());
+	void Window::UploadCursorTexture(SDL_Surface* surface)
+	{
+		if (!surface)
 			return;
+		// Normalize to RGBA8 so glTexImage2D upload is straightforward.
+		SDL_Surface* rgba = surface;
+		bool ownsRgba = false;
+		if (surface->format != SDL_PIXELFORMAT_RGBA32)
+		{
+			rgba = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+			if (!rgba)
+			{
+				LOG_ERROR("Window::UploadCursorTexture: SDL_ConvertSurface failed: {0}", SDL_GetError());
+				return;
+			}
+			ownsRgba = true;
 		}
 
-		if (m_cursor)
-			SDL_DestroyCursor(m_cursor);
+		if (m_cursorTex == 0)
+			glGenTextures(1, &m_cursorTex);
+		glBindTexture(GL_TEXTURE_2D, m_cursorTex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, rgba->w, rgba->h, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, rgba->pixels);
+		// Make sure the render thread will see the upload.
+		glFinish();
+		m_cursorTexWidth = rgba->w;
+		m_cursorTexHeight = rgba->h;
 
-		m_cursor = newCursor;
-		SDL_SetCursor(newCursor);
+		if (ownsRgba)
+			SDL_DestroySurface(rgba);
+	}
+
+	void Window::DestroyCursorTexture()
+	{
+		if (m_cursorTex != 0)
+		{
+			glDeleteTextures(1, &m_cursorTex);
+			m_cursorTex = 0;
+		}
+		m_cursorTexWidth = 0;
+		m_cursorTexHeight = 0;
 	}
 
 	void Window::OnCursorResize(Vec2u size)
 	{
 		RefreshCursor();
+	}
+
+	void Window::RenderCursorOverlay()
+	{
+		if (m_cursorTex == 0)
+			return;
+		if (GetMinimized())
+			return;
+
+		// Lazy GL init on the render thread. VAOs and program objects must be
+		// created in the context that will use them (m_renderContext).
+		if (m_cursorShader == 0)
+		{
+			static const char* kVs =
+				"#version 330 core\n"
+				"layout(location=0) in vec2 aPos;\n"
+				"layout(location=1) in vec2 aUv;\n"
+				"uniform vec4 uTransform; // xy = offset (NDC), zw = scale (NDC)\n"
+				"out vec2 vUv;\n"
+				"void main(){\n"
+				"  vec2 p = aPos * uTransform.zw + uTransform.xy;\n"
+				"  vUv = aUv;\n"
+				"  gl_Position = vec4(p, 0.0, 1.0);\n"
+				"}\n";
+			static const char* kFs =
+				"#version 330 core\n"
+				"in vec2 vUv;\n"
+				"uniform sampler2D uTex;\n"
+				"out vec4 fColor;\n"
+				"void main(){\n"
+				"  vec4 c = texture(uTex, vUv);\n"
+				"  if (c.a < 0.01) discard;\n"
+				"  fColor = c;\n"
+				"}\n";
+
+			auto compile = [](GLenum stage, const char* src) -> GLuint {
+				GLuint s = glCreateShader(stage);
+				glShaderSource(s, 1, &src, nullptr);
+				glCompileShader(s);
+				GLint ok = GL_FALSE;
+				glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
+				if (!ok)
+				{
+					char log[1024]{};
+					glGetShaderInfoLog(s, sizeof(log), nullptr, log);
+					LOG_ERROR("Window cursor shader compile failed: {0}", log);
+					glDeleteShader(s);
+					return 0;
+				}
+				return s;
+			};
+
+			GLuint vs = compile(GL_VERTEX_SHADER, kVs);
+			GLuint fs = compile(GL_FRAGMENT_SHADER, kFs);
+			if (!vs || !fs)
+			{
+				if (vs) glDeleteShader(vs);
+				if (fs) glDeleteShader(fs);
+				return;
+			}
+			m_cursorShader = glCreateProgram();
+			glAttachShader(m_cursorShader, vs);
+			glAttachShader(m_cursorShader, fs);
+			glLinkProgram(m_cursorShader);
+			glDeleteShader(vs);
+			glDeleteShader(fs);
+			GLint linked = GL_FALSE;
+			glGetProgramiv(m_cursorShader, GL_LINK_STATUS, &linked);
+			if (!linked)
+			{
+				char log[1024]{};
+				glGetProgramInfoLog(m_cursorShader, sizeof(log), nullptr, log);
+				LOG_ERROR("Window cursor shader link failed: {0}", log);
+				glDeleteProgram(m_cursorShader);
+				m_cursorShader = 0;
+				return;
+			}
+			m_cursorUTransform = glGetUniformLocation(m_cursorShader, "uTransform");
+			GLint uTex = glGetUniformLocation(m_cursorShader, "uTex");
+			glUseProgram(m_cursorShader);
+			glUniform1i(uTex, 0);
+
+			// Quad: pos.xy in [0,1], uv in [0,1]. UV V is NOT flipped: the
+			// negative ndcScaleY below already inverts Y at the NDC stage, so
+			// straight-through UVs give us the image right-side-up.
+			const float kQuad[] = {
+				// pos      uv
+				0.f, 0.f,  0.f, 0.f,
+				1.f, 0.f,  1.f, 0.f,
+				1.f, 1.f,  1.f, 1.f,
+
+				0.f, 0.f,  0.f, 0.f,
+				1.f, 1.f,  1.f, 1.f,
+				0.f, 1.f,  0.f, 1.f,
+			};
+			glGenVertexArrays(1, &m_cursorVao);
+			glGenBuffers(1, &m_cursorVbo);
+			glBindVertexArray(m_cursorVao);
+			glBindBuffer(GL_ARRAY_BUFFER, m_cursorVbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(kQuad), kQuad, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
+			glBindVertexArray(0);
+		}
+
+		// Mouse position is in points, not pixels. Convert to pixels using
+		// window scale, since the cursor texture size is in pixels too.
+		float mxPoints = 0.f, myPoints = 0.f;
+		SDL_GetMouseState(&mxPoints, &myPoints);
+		int pointW = 0, pointH = 0;
+		SDL_GetWindowSize(m_window, &pointW, &pointH);
+		int pixelW = 0, pixelH = 0;
+		SDL_GetWindowSizeInPixels(m_window, &pixelW, &pixelH);
+		if (pointW <= 0 || pointH <= 0 || pixelW <= 0 || pixelH <= 0)
+			return;
+		float sx = (float)pixelW / (float)pointW;
+		float sy = (float)pixelH / (float)pointH;
+		float mxPx = mxPoints * sx;
+		float myPx = myPoints * sy;
+
+		// Top-left of cursor quad in pixels (subtract hotspot, scaled the
+		// same way the BMP was scaled in RefreshCursor).
+		float hotPxX = (float)(m_cursorHotX * m_cursorScale);
+		float hotPxY = (float)(m_cursorHotY * m_cursorScale);
+		float quadPxX = mxPx - hotPxX;
+		float quadPxY = myPx - hotPxY;
+
+		// Convert pixel rect to NDC. Y is flipped because OpenGL NDC has +Y up
+		// while SDL mouse coords have +Y down.
+		float ndcOffsetX = (quadPxX / (float)pixelW) * 2.f - 1.f;
+		float ndcOffsetY = 1.f - (quadPxY / (float)pixelH) * 2.f;
+		float ndcScaleX = ((float)m_cursorTexWidth / (float)pixelW) * 2.f;
+		float ndcScaleY = -((float)m_cursorTexHeight / (float)pixelH) * 2.f;
+
+		// Set GL state. We don't need depth, and we want straight alpha
+		// blending (texture pixels are unpremultiplied RGBA from SDL).
+		GLboolean wasBlend = glIsEnabled(GL_BLEND);
+		GLboolean wasDepth = glIsEnabled(GL_DEPTH_TEST);
+		GLint prevProgram = 0;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
+		GLint prevVao = 0;
+		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &prevVao);
+		GLint prevActiveTex = 0;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &prevActiveTex);
+		GLint prevTex0 = 0;
+		glActiveTexture(GL_TEXTURE0);
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex0);
+		GLint prevBlendSrcRGB = 0, prevBlendDstRGB = 0, prevBlendSrcA = 0, prevBlendDstA = 0;
+		glGetIntegerv(GL_BLEND_SRC_RGB, &prevBlendSrcRGB);
+		glGetIntegerv(GL_BLEND_DST_RGB, &prevBlendDstRGB);
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &prevBlendSrcA);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &prevBlendDstA);
+
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		glViewport(0, 0, pixelW, pixelH);
+
+		glUseProgram(m_cursorShader);
+		glUniform4f(m_cursorUTransform, ndcOffsetX, ndcOffsetY, ndcScaleX, ndcScaleY);
+		glBindVertexArray(m_cursorVao);
+		glBindTexture(GL_TEXTURE_2D, m_cursorTex);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		// Restore.
+		glBindTexture(GL_TEXTURE_2D, (GLuint)prevTex0);
+		glActiveTexture((GLenum)prevActiveTex);
+		glBindVertexArray((GLuint)prevVao);
+		glUseProgram((GLuint)prevProgram);
+		glBlendFuncSeparate(prevBlendSrcRGB, prevBlendDstRGB, prevBlendSrcA, prevBlendDstA);
+		if (!wasBlend) glDisable(GL_BLEND);
+		if (wasDepth) glEnable(GL_DEPTH_TEST);
 	}
 
 	void Window::SetRenderWhenMinimized(bool renderWhenMinimized)

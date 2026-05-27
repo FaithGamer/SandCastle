@@ -26,10 +26,14 @@ namespace SandCastle
 		static void RenderWindow();
 		static void SetClearColor(Vec4f color);
 		static void ShowCursor(bool showCursor);
-		/// @brief Set the OS cursor image from a BMP file. The OS renders this cursor independently
-		/// of the game loop, so there is zero latency between mouse movement and the visible cursor.
+		/// @brief Set a custom cursor from a BMP file. The OS cursor is hidden
+		/// over the window and the engine draws the cursor texture itself as a
+		/// quad in the render thread, just before the swap. This works around
+		/// the known WGC-vs-OpenGL bug where the OS cursor becomes invisible to
+		/// the user in borderless fullscreen while a capture session is active
+		/// (OBS, Streamlabs...), at the cost of one frame of cursor latency.
 		/// hotX/hotY are the cursor hotspot in pixels from the top-left of the image.
-		/// Pass an empty string to restore the default system cursor.
+		/// Pass an empty string to restore the default OS cursor.
 		static void SetCursor(const std::string& texturePath, int hotX = 0, int hotY = 0);
 		static void SetRenderWhenMinimized(bool renderWhenMinimized);
 		static bool IsInitialized();
@@ -76,6 +80,10 @@ namespace SandCastle
 		void Clear() override;
 		void OnSDLPixelSizeChanged(SDL_Event& event);
 		void OnSDLWindowResized(SDL_Event& event);
+		/// @brief Called once per frame on the render thread by Renderer2D,
+		/// right before SDL_GL_SwapWindow. Draws the custom cursor on top of
+		/// the final framebuffer if one was set via SetCursor.
+		void RenderCursorOverlay();
 
 		Signal<Vec2u> ResizeSignal;
 		Signal<bool> FocusSignal;
@@ -87,16 +95,27 @@ namespace SandCastle
 		void Init(std::string name, Vec2u size);
 		void RefreshCursor();
 		void OnCursorResize(Vec2u size);
+		void UploadCursorTexture(SDL_Surface* rgbaSurface);
+		void DestroyCursorTexture();
 		bool m_initialized = false;
 		bool m_renderWhenMiminized = false;
 		SDL_Window* m_window = nullptr;
 		SDL_GLContext m_initContext = nullptr;
 		SDL_GLContext m_renderContext = nullptr;
-		SDL_Cursor* m_cursor = nullptr;
 		std::string m_cursorPath;
 		int m_cursorHotX = 0;
 		int m_cursorHotY = 0;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
+		// Custom-cursor GL state. Texture uploaded from main thread; shader
+		// and VAO/VBO lazily created on the render thread on first draw.
+		GLuint m_cursorTex = 0;
+		int m_cursorTexWidth = 0;
+		int m_cursorTexHeight = 0;
+		int m_cursorScale = 1;
+		GLuint m_cursorShader = 0;
+		GLuint m_cursorVao = 0;
+		GLuint m_cursorVbo = 0;
+		GLint m_cursorUTransform = -1;
 	};
 }
