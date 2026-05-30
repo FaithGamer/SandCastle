@@ -46,6 +46,10 @@ namespace SandCastle
 		unsigned int height = 0;
 		bool active = false;
 		bool offscreen = false;
+		//When a post-process chain is active, layers flagged here are NOT fed
+		//through it: they composite straight onto the window after the chain, so
+		//they sit crisp on top of the post-processed scene (e.g. UI/HUD).
+		bool excludeFromPost = false;
 	};
 	class RenderQueue
 	{
@@ -202,6 +206,33 @@ namespace SandCastle
 		static void SetLayerScreenSpace(LayerID layer, const std::vector<Vec2f>& screenSpace);
 		/// @brief Set the shader used to render a layer.
 		static void SetLayerMaterial(LayerID layer, Material* material);
+		/// @brief When a post pass runs relative to the post-excluded layers (UI/HUD).
+		///   Scene = before the excluded layers are composited, so it processes only
+		///           the game scene (e.g. vignette that must not touch the UI).
+		///   Frame = after the excluded layers are composited, so it processes the
+		///           whole frame including the UI (e.g. noise/grain over everything).
+		/// With no excluded layers the two stages are equivalent (Scene then Frame).
+		enum class PostStage { Scene, Frame };
+
+		/// @brief Full-screen post-processing chain, applied after every layer has been
+		/// composited. Each material is one fullscreen pass: the previous result is
+		/// bound to sampler slot 0 (uTextures[0]); sample it, transform it, write the
+		/// result. The pipeline is: composite non-excluded layers -> run Scene passes
+		/// -> composite excluded layers (UI) on top -> run Frame passes -> window.
+		/// Within a stage, passes run in the order added. Note: layer 0 ("Window")
+		/// content bypasses the chain, as it draws straight to the window.
+		///
+		/// Set replaces the WHOLE chain with a single material (nullptr clears it);
+		/// Add appends one pass to the given stage; Clear empties both stages.
+		static void SetPostProcessMaterial(Material* material, PostStage stage = PostStage::Scene);
+		static void AddPostProcessMaterial(Material* material, PostStage stage = PostStage::Scene);
+		static void ClearPostProcessMaterials();
+		/// @brief Keep a layer out of the Scene-stage post passes. While a post chain
+		/// is active, excluded layers are composited on top of the Scene-processed
+		/// image (so e.g. a vignette won't darken them), then Frame-stage passes still
+		/// apply to them. No effect when no post chain is set. Only meaningful for top
+		/// layers (UI/HUD), since excluded layers are lifted above the rest.
+		static void SetLayerExcludeFromPost(LayerID layer, bool exclude);
 		/// @brief Set the layer height (width will be calculated to fit the aspect ratio of the window)
 		static void SetLayerHeight(LayerID layer, unsigned int height);
 
@@ -256,6 +287,16 @@ namespace SandCastle
 		void AllocateQuadBatch(QuadBatch& batch);
 		void CreateQuadBatchThread(RenderLayer& layer, Material* material);
 		void RenderLayers();
+		void CompositeExcludedLayers();
+		void BindAuxLayerTextures();
+		void CompositeLayer(RenderLayer& layer);
+		void PostProcessPass();
+		//Run a ping-pong fullscreen-pass chain. `src` is sampled by the first pass
+		//(bound to slot 0); passes alternate between m_postTarget/m_postTargetB.
+		//If `endOnWindow` the last pass targets the window, else it targets the
+		//buffer that isn't `src` and that buffer is returned. Returns the texture
+		//holding the final result (nullptr when endOnWindow).
+		sptr<RenderTexture> RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow);
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace, LayerID layer);
 	private:
@@ -292,6 +333,16 @@ namespace SandCastle
 
 		//Layers
 		sptr<RenderTarget> m_target;
+		//Full-frame post-processing chain (opt-in via *PostProcessMaterial).
+		//Two stages around the excluded-layer (UI) composite:
+		//  m_postScene   runs before excluded layers -> processes the game scene only.
+		//  m_postOverlay runs after excluded layers   -> processes the whole frame.
+		//When either is non-empty, all non-excluded layers composite into m_postTarget;
+		//passes ping-pong between m_postTarget and m_postTargetB.
+		std::vector<Material*> m_postScene;
+		std::vector<Material*> m_postOverlay;
+		sptr<RenderTexture> m_postTarget = nullptr;
+		sptr<RenderTexture> m_postTargetB = nullptr;
 		std::vector<RenderLayer> m_layers;
 		std::vector<OffscreenRenderLayer> m_offscreenLayers;
 		std::vector<RenderLayer*> m_renderLayers;

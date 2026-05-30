@@ -321,6 +321,42 @@ namespace SandCastle
 		ins->m_layers[layer].material = material;
 	}
 
+	void Renderer2D::SetPostProcessMaterial(Material* material, PostStage stage)
+	{
+		// The uTextures sampler array is configured on the render thread when the
+		// material is created (CreateMaterial -> CreateQuadBatchThread), so we only
+		// need to record the material here.
+		auto ins = Instance();
+		ins->m_postScene.clear();
+		ins->m_postOverlay.clear();
+		if (material)
+			(stage == PostStage::Frame ? ins->m_postOverlay : ins->m_postScene).push_back(material);
+	}
+
+	void Renderer2D::AddPostProcessMaterial(Material* material, PostStage stage)
+	{
+		if (material)
+		{
+			auto ins = Instance();
+			(stage == PostStage::Frame ? ins->m_postOverlay : ins->m_postScene).push_back(material);
+		}
+	}
+
+	void Renderer2D::ClearPostProcessMaterials()
+	{
+		auto ins = Instance();
+		ins->m_postScene.clear();
+		ins->m_postOverlay.clear();
+	}
+
+	void Renderer2D::SetLayerExcludeFromPost(LayerID layer, bool exclude)
+	{
+		auto ins = Instance();
+		if (layer >= (LayerID)ins->m_layers.size())
+			return;
+		ins->m_layers[layer].excludeFromPost = exclude;
+	}
+
 	void Renderer2D::SetLayerHeight(LayerID layer, unsigned int height)
 	{
 		auto ins = Instance();
@@ -440,6 +476,10 @@ namespace SandCastle
 				layer.target->SetSize({ width, layer.height });
 			}
 		}
+		if (m_postTarget)
+			m_postTarget->SetSize((Vec2u)windowSize);
+		if (m_postTargetB)
+			m_postTargetB->SetSize((Vec2u)windowSize);
 	}
 	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material)
 	{
@@ -512,7 +552,17 @@ namespace SandCastle
 			layer.active = false;
 		}
 
-		SetRenderTarget(Window::Instance());
+		if (!m_postScene.empty() || !m_postOverlay.empty())
+		{
+			if (!m_postTarget)
+				m_postTarget = makesptr<RenderTexture>(Window::GetSize());
+			m_postTarget->Clear();
+			SetRenderTarget(m_postTarget);
+		}
+		else
+		{
+			SetRenderTarget(Window::Instance());
+		}
 		//Scene data
 		m_sceneUniform.camProjView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 		m_sceneUniform.camZoom = camera->zoom * 2.f;
@@ -539,18 +589,89 @@ namespace SandCastle
 	{
 		FlushBatches();
 		RenderLayers();
+		if ((!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget)
+			PostProcessPass();
 		m_rendering = false;
 	}
 
-	void Renderer2D::RenderLayers()
+	sptr<RenderTexture> Renderer2D::RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow)
 	{
-		//Premultiplied alpha for nice blending between layers
-		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
-			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		//Bind target framebuffer
+		//Each pass covers the full screen and fully replaces its target
+		//(GL_ONE, GL_ZERO), so no per-target clear is needed. GL_BLEND stays
+		//enabled with a replace func; Begin() resets the func next frame so normal
+		//layer rendering is unaffected.
+		glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
 
-		m_target->Bind();
+		//Reuse the screen layer's fullscreen NDC quad to drive every pass.
+		auto& screenLayer = m_layers[0];
+		GLuint indicesCount = screenLayer.vertexArray->GetIndexBuffer()->GetCount();
 
+		size_t count = chain.size();
+		sptr<RenderTexture> cur = src;
+
+		for (size_t i = 0; i < count; i++)
+		{
+			bool last = (i + 1 == count);
+			bool toWindow = last && endOnWindow;
+
+			sptr<RenderTexture> dst = nullptr;
+			if (toWindow)
+			{
+				Window::Instance()->Bind();
+			}
+			else
+			{
+				if (!m_postTargetB)
+					m_postTargetB = makesptr<RenderTexture>(Window::GetSize());
+				dst = (cur == m_postTarget) ? m_postTargetB : m_postTarget;
+				dst->Bind();
+			}
+
+			cur->BindTexture(0);
+			screenLayer.vertexArray->Bind();
+			chain[i]->Bind();
+			glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
+
+			if (!toWindow)
+				cur = dst;
+		}
+
+		return endOnWindow ? nullptr : cur;
+	}
+
+	void Renderer2D::PostProcessPass()
+	{
+		//Pipeline: non-excluded layers are already composited into m_postTarget.
+		//  Scene passes  -> excluded-layer (UI) composite -> Frame passes -> window.
+		//Vignette-style Scene passes never touch the UI; noise-style Frame passes do.
+		bool hasScene = !m_postScene.empty();
+		bool hasOverlay = !m_postOverlay.empty();
+
+		if (hasOverlay)
+		{
+			//Scene chain must leave its result in a buffer so we can composite the UI
+			//on top before the Frame chain processes the whole thing.
+			sptr<RenderTexture> cur = m_postTarget;
+			if (hasScene)
+				cur = RunEffectChain(m_postScene, m_postTarget, false);
+
+			cur->Bind();
+			CompositeExcludedLayers();
+
+			RunEffectChain(m_postOverlay, cur, true);
+		}
+		else
+		{
+			//No Frame stage: Scene chain writes straight to the window, then the UI
+			//composites on top, unprocessed.
+			RunEffectChain(m_postScene, m_postTarget, true);
+			Window::Instance()->Bind();
+			CompositeExcludedLayers();
+		}
+	}
+
+	void Renderer2D::BindAuxLayerTextures()
+	{
 		//Put offscreen layer in according texture slots
 		for (auto& offscreenLayer : m_offscreenLayers)
 		{
@@ -568,18 +689,61 @@ namespace SandCastle
 				continue;
 			rt->BindDepthTexture(depthBind.samplerIndex);
 		}
+	}
+
+	void Renderer2D::CompositeLayer(RenderLayer& layer)
+	{
+		std::static_pointer_cast<RenderTexture>(layer.target)->BindTexture(0);
+		layer.vertexArray->Bind();
+		layer.material->Bind();
+		GLuint indicesCount = layer.vertexArray->GetIndexBuffer()->GetCount();
+		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
+	}
+
+	void Renderer2D::RenderLayers()
+	{
+		//Premultiplied alpha for nice blending between layers
+		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		//Bind target framebuffer (the post target when a chain is active, else window)
+		m_target->Bind();
+
+		BindAuxLayerTextures();
+
+		//When a post chain is active, post-excluded layers are composited later,
+		//after the Scene-stage passes (see CompositeExcludedLayers / PostProcessPass).
+		bool postActive = (!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget;
 
 		//Draw every layers
 		for (auto layer = m_layers.rbegin(); layer != m_layers.rend(); layer++)
 		{
 			if (!layer->active || layer->index == 0 || layer->offscreen)
 				continue;
+			if (postActive && layer->excludeFromPost)
+				continue;
 
-			std::static_pointer_cast<RenderTexture>(layer->target)->BindTexture(0);
-			layer->vertexArray->Bind();
-			layer->material->Bind();
-			GLuint indicesCount = layer->vertexArray->GetIndexBuffer()->GetCount();
-			glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
+			CompositeLayer(*layer);
+		}
+	}
+
+	void Renderer2D::CompositeExcludedLayers()
+	{
+		//Composite post-excluded layers (UI/HUD) onto the currently bound framebuffer,
+		//on top of the Scene-processed image. Premultiplied alpha, like the normal pass.
+		//The caller binds the target FB beforehand.
+		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
+			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+		BindAuxLayerTextures();
+
+		for (auto layer = m_layers.rbegin(); layer != m_layers.rend(); layer++)
+		{
+			if (!layer->active || layer->index == 0 || layer->offscreen)
+				continue;
+			if (!layer->excludeFromPost)
+				continue;
+
+			CompositeLayer(*layer);
 		}
 	}
 

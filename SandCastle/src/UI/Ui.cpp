@@ -29,6 +29,9 @@ namespace SandCastle
 	{
 		auto uiLayer = Renderer2D::AddLayer("ui");
 		Renderer2D::SetLayerSortZ(uiLayer, true);
+		//Keep the UI out of the Scene-stage post chain by default so effects like a
+		//vignette don't darken the HUD; Frame-stage passes still apply over it.
+		Renderer2D::SetLayerExcludeFromPost(uiLayer, true);
 		auto uiMat = Renderer2D::CreateMaterial(Assets::Get<Shader>("ui.shader"));
 		//uiMat->GetRenderOptions()->SetDepthTest(false);
 		uiMat->SetFloat("uPpu", m_ppu * 2.f);

@@ -32,9 +32,9 @@ public:
 			float       originY = 0.0f;
 		};*/
 		SpriteExportConfig cfg;
-		cfg.asepriteDir = "c:/dev/madman/art";
-		cfg.textureDir = "c:/dev/madman/assets/textures";
-		cfg.animationDir = "c:/dev/madman/assets/animations";
+		cfg.asepriteDir = "c:/dev/TheReclaim/art";
+		cfg.textureDir = "c:/dev/TheReclaim/assets/textures";
+		cfg.animationDir = "c:/dev/TheReclaim/assets/animations";
 		ShowSpriteExport(cfg); 
 	}
 };
