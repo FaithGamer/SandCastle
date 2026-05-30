@@ -278,6 +278,36 @@ namespace SandCastle
 		it_prop->second.f = value;
 		return true;
 	}
+	float Material::GetFloat(const String& name, float fallback) const
+	{
+		auto it = m_properties.find(name);
+		if (it == m_properties.end() || it->second.type != GL_FLOAT) return fallback;
+		return it->second.f;
+	}
+	int Material::GetInt(const String& name, int fallback) const
+	{
+		auto it = m_properties.find(name);
+		if (it == m_properties.end() || it->second.type != GL_INT) return fallback;
+		return it->second.i;
+	}
+	Vec2f Material::GetVec2f(const String& name, Vec2f fallback) const
+	{
+		auto it = m_properties.find(name);
+		if (it == m_properties.end() || it->second.type != GL_FLOAT_VEC2) return fallback;
+		return it->second.vec2;
+	}
+	Vec3f Material::GetVec3f(const String& name, Vec3f fallback) const
+	{
+		auto it = m_properties.find(name);
+		if (it == m_properties.end() || it->second.type != GL_FLOAT_VEC3) return fallback;
+		return it->second.vec3;
+	}
+	Vec4f Material::GetVec4f(const String& name, Vec4f fallback) const
+	{
+		auto it = m_properties.find(name);
+		if (it == m_properties.end() || it->second.type != GL_FLOAT_VEC4) return fallback;
+		return it->second.vec4;
+	}
 	bool Material::SetIntArray(String name, const std::vector<int>& value)
 	{
 		auto it_prop = FindPropertyArray(name);

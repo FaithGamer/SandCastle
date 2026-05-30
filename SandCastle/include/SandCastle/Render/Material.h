@@ -46,6 +46,18 @@ namespace SandCastle
 		bool SetFloatArray(String name, const std::vector<float>& value);
 		bool SetIntArray(String name, const std::vector<int>& value);
 
+		/// @brief Read a uniform value. Returns the fallback if no such uniform
+		/// exists or it has the wrong type. Silent on miss (unlike the setters).
+		float GetFloat(const String& name, float fallback = 0.f) const;
+		int GetInt(const String& name, int fallback = 0) const;
+		Vec2f GetVec2f(const String& name, Vec2f fallback = {0.f, 0.f}) const;
+		Vec3f GetVec3f(const String& name, Vec3f fallback = {0.f, 0.f, 0.f}) const;
+		Vec4f GetVec4f(const String& name, Vec4f fallback = {0.f, 0.f, 0.f, 0.f}) const;
+
+		/// @brief Direct access to the uniform table for generic iteration
+		/// (e.g. dev panels rendering one widget per uniform).
+		const std::unordered_map<String, MaterialProperty>& GetProperties() const { return m_properties; }
+
 		/// @brief Bind this material's shader and upload all of its uniform values.
 		void Bind() const;
 		MaterialID GetID() const;
