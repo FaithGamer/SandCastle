@@ -21,6 +21,10 @@ namespace SandCastle
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		// Clamp so neighborhood-tapping shaders (outline, bloom, blurs) don't
+		// wrap and pull color from the opposite screen edge.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_textureId, 0);
 
 		//Depth texture attachment (sampleable). Stencil is dropped - not used by the engine.
@@ -78,6 +82,10 @@ namespace SandCastle
 		//Resize the color texture in place
 		glBindTexture(GL_TEXTURE_2D, m_textureId);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		// Wrap params survive a glTexImage2D resize, but reassert anyway in case
+		// the texture was ever rebound with REPEAT elsewhere.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		//Regen FBO
 		glGenFramebuffers(1, &m_frameBufferId);
