@@ -27,3 +27,4 @@
 #include "SandCastle/Render/Beziers.h"
 #include "SandCastle/Render/Particle.h"
 #include "SandCastle/Render/ParticleSystem.h"
+#include "SandCastle/Render/GpuParticleSystem.h"

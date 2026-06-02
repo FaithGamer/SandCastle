@@ -138,6 +138,43 @@ namespace SandCastle
 
 	}
 
+	Shader::Shader(std::string vertexSource, std::string fragmentSource, const std::vector<std::string>& feedbackVaryings, bool interleaved, std::string name)
+	{
+		m_name = name;
+		m_id = m_currentId++;
+		const GLchar* vertexSrc = (const GLchar*)vertexSource.c_str();
+		const GLchar* fragmentSrc = (const GLchar*)fragmentSource.c_str();
+
+		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertexShader, 1, &vertexSrc, NULL);
+		glCompileShader(vertexShader);
+		shaderCompilationError(vertexShader, m_name, 0);
+
+		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragmentShader, 1, &fragmentSrc, NULL);
+		glCompileShader(fragmentShader);
+		shaderCompilationError(fragmentShader, m_name, 1);
+
+		m_glid = glCreateProgram();
+		glAttachShader(m_glid, vertexShader);
+		glAttachShader(m_glid, fragmentShader);
+
+		//Transform-feedback outputs MUST be declared before linking.
+		std::vector<const GLchar*> names;
+		names.reserve(feedbackVaryings.size());
+		for (const auto& v : feedbackVaryings)
+			names.push_back((const GLchar*)v.c_str());
+		if (!names.empty())
+			glTransformFeedbackVaryings(m_glid, (GLsizei)names.size(), names.data(),
+				interleaved ? GL_INTERLEAVED_ATTRIBS : GL_SEPARATE_ATTRIBS);
+
+		glLinkProgram(m_glid);
+		programLinkageError(m_glid);
+
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+	}
+
 	Shader::Shader(const Shader& shader)
 	{
 		m_glid = shader.m_glid;

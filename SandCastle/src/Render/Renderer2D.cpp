@@ -17,6 +17,7 @@
 #include "SandCastle/Core/Print.h"
 #include "SandCastle/Core/Profiling.h"
 #include "SandCastle/Core/Math.h"
+#include "SandCastle/Core/Time.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 
 namespace SandCastle
@@ -588,6 +589,7 @@ namespace SandCastle
 	void Renderer2D::End()
 	{
 		FlushBatches();
+		RenderGpuParticles();
 		RenderLayers();
 		if ((!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget)
 			PostProcessPass();
@@ -1018,6 +1020,12 @@ namespace SandCastle
 			return;
 		Wait();
 		m_queue.Swap();
+		//Flip every GPU pool's spawn queue while the render thread is idle, and
+		//snapshot the frame delta the simulation step will integrate with.
+		for (auto& sys : m_gpuSystems)
+			if (sys)
+				sys->SwapSpawns();
+		m_gpuFrameDelta = (float)Time::Delta();
 		m_queue.thread.Queue(&Renderer2D::RenderThread, this);
 	}
 
@@ -1048,5 +1056,156 @@ namespace SandCastle
 		sptr<IndexBuffer> layerIndexBuffer = makesptr<IndexBuffer>(layerIndices, 6, GL_STATIC_DRAW);
 
 		return makesptr<VertexArray>(layerVertexBuffer, layerIndexBuffer);
+	}
+
+	GpuParticleSystemId Renderer2D::CreateGpuParticleSystem(const GpuParticleSystemDesc& desc)
+	{
+		auto ins = Instance();
+		auto system = makesptr<GpuParticleSystem>(desc); // main thread: snapshots the sprite
+
+		//Mutate the systems list only while the render thread is idle (it iterates the
+		//list in RenderGpuParticles / Process), then allocate its GL objects there.
+		ins->Wait();
+		GpuParticleSystemId id = GpuParticleSystemInvalid;
+		for (GpuParticleSystemId i = 0; i < (GpuParticleSystemId)ins->m_gpuSystems.size(); i++)
+		{
+			if (!ins->m_gpuSystems[i])
+			{
+				id = i;
+				break;
+			}
+		}
+		if (id == GpuParticleSystemInvalid)
+		{
+			id = (GpuParticleSystemId)ins->m_gpuSystems.size();
+			ins->m_gpuSystems.push_back(nullptr);
+		}
+		ins->m_gpuSystems[id] = system;
+
+		ins->m_queue.thread.Queue(&Renderer2D::CreateGpuParticleSystemThread, ins.get(), system);
+		ins->Wait();
+		return id;
+	}
+
+	void Renderer2D::EmitGpuParticle(GpuParticleSystemId id, const GpuParticleSpawn& spawn)
+	{
+		auto ins = Instance();
+		if (id >= (GpuParticleSystemId)ins->m_gpuSystems.size())
+			return;
+		auto& sys = ins->m_gpuSystems[id];
+		if (sys)
+			sys->Emit(spawn);
+	}
+
+	void Renderer2D::DestroyGpuParticleSystem(GpuParticleSystemId id)
+	{
+		auto ins = Instance();
+		if (id >= (GpuParticleSystemId)ins->m_gpuSystems.size())
+			return;
+		ins->Wait();
+		auto sys = ins->m_gpuSystems[id];
+		if (!sys)
+			return;
+		ins->m_gpuSystems[id] = nullptr; // stop iterating it immediately
+		ins->m_queue.thread.Queue(&Renderer2D::DestroyGpuParticleSystemThread, ins.get(), sys);
+		ins->Wait();
+	}
+
+	void Renderer2D::SetGpuParticleGravity(GpuParticleSystemId id, Vec2f gravity)
+	{
+		auto ins = Instance();
+		if (id < (GpuParticleSystemId)ins->m_gpuSystems.size() && ins->m_gpuSystems[id])
+			ins->m_gpuSystems[id]->SetGravity(gravity);
+	}
+
+	void Renderer2D::SetGpuParticleDrag(GpuParticleSystemId id, float drag)
+	{
+		auto ins = Instance();
+		if (id < (GpuParticleSystemId)ins->m_gpuSystems.size() && ins->m_gpuSystems[id])
+			ins->m_gpuSystems[id]->SetDrag(drag);
+	}
+
+	void Renderer2D::SetGpuParticleBlend(GpuParticleSystemId id, GpuParticleBlend blend)
+	{
+		auto ins = Instance();
+		if (id < (GpuParticleSystemId)ins->m_gpuSystems.size() && ins->m_gpuSystems[id])
+			ins->m_gpuSystems[id]->SetBlend(blend);
+	}
+
+	void Renderer2D::SetGpuParticleSizeEase(GpuParticleSystemId id, GpuParticleSizeEase ease)
+	{
+		auto ins = Instance();
+		if (id < (GpuParticleSystemId)ins->m_gpuSystems.size() && ins->m_gpuSystems[id])
+			ins->m_gpuSystems[id]->SetSizeEase(ease);
+	}
+
+	void Renderer2D::SetGpuParticleJitter(GpuParticleSystemId id, float amplitude, float frequency)
+	{
+		auto ins = Instance();
+		if (id < (GpuParticleSystemId)ins->m_gpuSystems.size() && ins->m_gpuSystems[id])
+			ins->m_gpuSystems[id]->SetJitter(amplitude, frequency);
+	}
+
+	void Renderer2D::EnsureGpuParticleShaders()
+	{
+		if (m_gpuShaders.ready)
+			return;
+		m_gpuShaders = GpuParticleSystem::CompileShaders(m_sceneUniformBinding);
+	}
+
+	void Renderer2D::CreateGpuParticleSystemThread(sptr<GpuParticleSystem> system)
+	{
+		EnsureGpuParticleShaders();
+		system->InitGL();
+	}
+
+	void Renderer2D::DestroyGpuParticleSystemThread(sptr<GpuParticleSystem> system)
+	{
+		system->DestroyGL();
+	}
+
+	void Renderer2D::RenderGpuParticles()
+	{
+		//Pure addition: with no pool created the shaders are never compiled and this
+		//returns before touching any GL state, so legacy frames are byte-identical.
+		if (!m_gpuShaders.ready)
+			return;
+
+		bool any = false;
+		for (auto& s : m_gpuSystems)
+			if (s)
+			{
+				any = true;
+				break;
+			}
+		if (!any)
+			return;
+
+		//Particles are painter's-ordered 2D: no depth test/write. Save & restore so
+		//the surrounding pipeline state is left exactly as we found it.
+		GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
+		GLboolean depthMask = GL_TRUE;
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+		for (auto& sys : m_gpuSystems)
+		{
+			if (!sys)
+				continue;
+			LayerID lid = sys->GetLayer();
+			if (lid >= (LayerID)m_layers.size())
+				continue;
+			sys->ApplySpawns();                              // upload pending spawns
+			sys->Update(m_gpuShaders, m_gpuFrameDelta);      // transform-feedback sim
+			sys->Render(m_gpuShaders, m_layers[lid].target); // draw into the layer FBO
+			m_layers[lid].active = true;                     // so RenderLayers composites it
+		}
+
+		if (depthTest)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+		glDepthMask(depthMask);
 	}
 }

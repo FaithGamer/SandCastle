@@ -10,7 +10,10 @@
       "Bash(python -c \"from PIL import Image; im = Image.open\\('C:/dev/madman/assets/textures/gamepad_selector.png'\\); print\\(im.size\\)\")",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(python -c \"import json; json.load\\(open\\('assets/balance/weapons.json'\\)\\); print\\('JSON valid'\\)\")",
+      "Bash(sed -n '60,90p' src/system/DevSys.cpp)",
+      "Bash(sed -n '1,20p' src/system/DevSys.cpp)"
     ]
   }
 }

@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <string>
+#include <vector>
 #include "SandCastle/Core/Vec.h"
 
 
@@ -21,6 +23,12 @@ namespace SandCastle
 		Shader(std::string vertexSource, std::string fragmentSource, std::string name);
 		/// @brief Compile a vertex+geometry+fragment shader trio.
 		Shader(std::string vertexSource, std::string geometrySource, std::string fragmentSource, std::string name);
+		/// @brief Compile a vertex+fragment program that captures the listed vertex-shader
+		/// outputs via transform feedback. `feedbackVaryings` are the `out` names to record,
+		/// in capture order; `interleaved` selects GL_INTERLEAVED_ATTRIBS (one buffer) over
+		/// GL_SEPARATE_ATTRIBS. glTransformFeedbackVaryings is called before linking. Pair
+		/// with GL_RASTERIZER_DISCARD when the fragment stage is a stub (GPU particle sim).
+		Shader(std::string vertexSource, std::string fragmentSource, const std::vector<std::string>& feedbackVaryings, bool interleaved, std::string name);
 		Shader(const Shader& shader);
 		/// @brief Free the underlying GL program.
 		void Destroy();

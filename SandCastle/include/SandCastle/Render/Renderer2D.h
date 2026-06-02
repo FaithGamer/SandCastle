@@ -17,6 +17,7 @@
 #include "SandCastle/Render/Material.h"
 #include "SandCastle/Core/Worker.h"
 #include "SandCastle/Render/Layer.h"
+#include "SandCastle/Render/GpuParticleSystem.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 #define MAX_LAYERS 32
@@ -164,6 +165,23 @@ namespace SandCastle
 			m_queue.Push(std::move(quad));
 		}
 
+		/// @brief Create a GPU-resident particle pool (transform-feedback simulated,
+		/// geometry-shader expanded). Particles never become ECS entities and don't
+		/// count against ParticleSystem's limit. Blocks until the render thread has
+		/// allocated the GL buffers. Returns a handle for Emit/Destroy. The pool
+		/// renders onto desc.layer (use a real layer >= 1); see GpuParticleSystem.h.
+		static GpuParticleSystemId CreateGpuParticleSystem(const GpuParticleSystemDesc& desc);
+		/// @brief Queue one particle into a GPU pool for the next frame. Cheap; main-thread only.
+		static void EmitGpuParticle(GpuParticleSystemId id, const GpuParticleSpawn& spawn);
+		/// @brief Free a GPU particle pool. Blocks until the render thread releases its GL objects.
+		static void DestroyGpuParticleSystem(GpuParticleSystemId id);
+		/// @brief Live-tweak a GPU pool's simulation/look. Cheap, main-thread, takes effect next frame.
+		static void SetGpuParticleGravity(GpuParticleSystemId id, Vec2f gravity);
+		static void SetGpuParticleDrag(GpuParticleSystemId id, float drag);
+		static void SetGpuParticleBlend(GpuParticleSystemId id, GpuParticleBlend blend);
+		static void SetGpuParticleSizeEase(GpuParticleSystemId id, GpuParticleSizeEase ease);
+		static void SetGpuParticleJitter(GpuParticleSystemId id, float amplitude, float frequency);
+
 		/// @brief Line and wire on the same layer as quad/sprites aren't guaranteed to respect Z ordering
 		/// even with depth test enabled.
 		void DrawLine(LineRenderer& line, Transform& transform, LayerID layer);
@@ -291,6 +309,14 @@ namespace SandCastle
 		void BindAuxLayerTextures();
 		void CompositeLayer(RenderLayer& layer);
 		void PostProcessPass();
+
+		//GPU particles (transform feedback). All run on the render thread.
+		void EnsureGpuParticleShaders();                            // lazy-compile the shared programs
+		void CreateGpuParticleSystemThread(sptr<GpuParticleSystem> system);
+		void DestroyGpuParticleSystemThread(sptr<GpuParticleSystem> system);
+		//Simulate + draw every live GPU pool into its layer's framebuffer. No-op
+		//(touches zero GL state) when no pool exists, so legacy frames are unchanged.
+		void RenderGpuParticles();
 		//Run a ping-pong fullscreen-pass chain. `src` is sampled by the first pass
 		//(bound to slot 0); passes alternate between m_postTarget/m_postTargetB.
 		//If `endOnWindow` the last pass targets the window, else it targets the
@@ -359,6 +385,11 @@ namespace SandCastle
 
 		//Wire
 		Shader* m_defaultWireShader;
+
+		//GPU particles (transform-feedback pools). Empty unless a game opts in.
+		std::vector<sptr<GpuParticleSystem>> m_gpuSystems;
+		GpuParticleShaders m_gpuShaders;
+		float m_gpuFrameDelta = 0.f;
 
 		//Others
 		LayerID m_lastLayerAdded = 0;
