@@ -401,18 +401,20 @@ namespace SandCastle
 			if (fps < 1) fps = 1;
 
 			const int cellW = ex.frameW + ex.padding * 2;
+			const int cellH = ex.frameH + ex.padding * 2;
 			// Assets::GenerateSprites names rows as `(rows-1) - y` over the
 			// stbi-flipped buffer, so the two flips cancel: sprite `_0_*` is the
-			// top sheet row (Aseprite's first tag). Use sheetRow directly.
-			int engineRow = tag.sheetRow;
+			// top sheet row. Compute per-frame so tagless exports that span
+			// multiple sheet rows still resolve correctly.
 
 			Json frames = Json::array();
 			for (int idx : order)
 			{
 				int col = cellW > 0 ? (ex.frames[idx].x - ex.frameOffsetX) / cellW : 0;
+				int row = cellH > 0 ? (ex.frames[idx].y - ex.frameOffsetY) / cellH : 0;
 				Json frame;
 				frame["sprite"] = pngFileName + "_" +
-					std::to_string(engineRow) + "_" + std::to_string(col);
+					std::to_string(row) + "_" + std::to_string(col);
 				if (ex.frames[idx].duration != baseDuration)
 				{
 					float multiplier = (float)ex.frames[idx].duration / (float)baseDuration;
@@ -442,7 +444,9 @@ namespace SandCastle
 				for (auto& t : ex.tags)
 				{
 					auto p = ex.animationDir /
-						(pngStem + "_" + SanitizeFileName(t.name) + ".anim");
+						(t.name.empty()
+							? (pngStem + ".anim")
+							: (pngStem + "_" + SanitizeFileName(t.name) + ".anim"));
 					ex.animPaths.push_back(p);
 					if (std::filesystem::exists(p))
 						ex.conflicts.push_back(p);
@@ -552,6 +556,19 @@ namespace SandCastle
 			{
 				CleanupTemps(ex);
 				return false;
+			}
+
+			// No tags + anim requested: synthesize one tag covering all frames,
+			// named "" so the output file is just "<stem>.anim".
+			if (ex.includeAnim && ex.tags.empty() && !ex.frames.empty())
+			{
+				TagInfo ti;
+				ti.name      = std::string();
+				ti.from      = 0;
+				ti.to        = (int)ex.frames.size() - 1;
+				ti.direction = "forward";
+				ti.sheetRow  = 0;
+				ex.tags.push_back(ti);
 			}
 
 			ComputeOutputsAndConflicts(ex);
