@@ -122,6 +122,25 @@ namespace SandCastle
 		/// @brief Set the interval between two FixedUpdate call
 		/// @param seconds Interval in seconds
 		static void SetFixedUpdateTime(float seconds);
+
+		/// @brief Per-system timing for one frame, in milliseconds.
+		/// fixedMs is the total spent across every FixedUpdate substep of the frame.
+		struct SystemProfile
+		{
+			std::string name;
+			int priority = 0;
+			float updateMs = 0.f;
+			float fixedMs = 0.f;
+			float lateMs = 0.f;
+		};
+
+		/// @brief Turn per-system update/fixedupdate/lateupdate timing on or off.
+		/// Off by default; only adds a high-resolution Clock per system per phase while on.
+		static void SetProfilingEnabled(bool enabled);
+		/// @brief True while per-system timing is being recorded.
+		static bool IsProfilingEnabled();
+		/// @brief Snapshot of the last frame's per-system phase timings, ordered by run priority.
+		static std::vector<SystemProfile> GetProfiles();
 	private:
 
 		friend Engine;
@@ -134,6 +153,10 @@ namespace SandCastle
 		void RemovePending();
 		void RemovePending(std::vector<SystemIdPriority>& systems, int32_t system, std::set<SystemIdPriority, CompareSystemId>& toDelete);
 		bool HasSystem(int32_t typeId);
+		SystemProfile& ProfileFor(const SystemIdPriority& system);
+
+		bool m_profilingEnabled = false;
+		std::unordered_map<int32_t, SystemProfile> m_profiles;
 
 		Clock m_updateClock;
 		Clock m_fixedUpdateClock;

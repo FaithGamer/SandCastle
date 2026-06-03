@@ -12,6 +12,7 @@
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Audio/Audio.h"
+#include <typeinfo>
 
 namespace SandCastle
 {
@@ -104,6 +105,13 @@ namespace SandCastle
 			}
 		}
 
+#ifndef SANDCASTLE_DISTRIB
+		// fixedMs accumulates across every substep below, so reset it once per frame.
+		if (m_profilingEnabled)
+			for (auto& kvp : m_profiles)
+				kvp.second.fixedMs = 0.f;
+#endif
+
 		m_fixedUpdateAccumulator += m_fixedUpdateClock.Restart();
 		int i = 0;
 		while (m_fixedUpdateAccumulator >= Time::fixedDelta)
@@ -111,6 +119,15 @@ namespace SandCastle
 			m_fixedUpdateAccumulator -= Time::fixedDelta;
 			for (auto& system : m_fixedUpdateSystems)
 			{
+#ifndef SANDCASTLE_DISTRIB
+				if (m_profilingEnabled)
+				{
+					Clock c;
+					system.system->FixedUpdate();
+					ProfileFor(system).fixedMs += (float)c.GetElapsed() * 1000.f;
+					continue;
+				}
+#endif
 				system.system->FixedUpdate();
 			}
 			if (++i > m_maxFixedUpdate)
@@ -121,12 +138,30 @@ namespace SandCastle
 		}
 		for (auto& system : m_updateSystems)
 		{
+#ifndef SANDCASTLE_DISTRIB
+			if (m_profilingEnabled)
+			{
+				Clock c;
+				system.system->Update();
+				ProfileFor(system).updateMs = (float)c.GetElapsed() * 1000.f;
+				continue;
+			}
+#endif
 			system.system->Update();
 		}
 		Ui::Instance()->Update();
 		Audio::Instance()->Update();
 		for (auto& system : m_lateUpdateSystems)
 		{
+#ifndef SANDCASTLE_DISTRIB
+			if (m_profilingEnabled)
+			{
+				Clock c;
+				system.system->LateUpdate();
+				ProfileFor(system).lateMs = (float)c.GetElapsed() * 1000.f;
+				continue;
+			}
+#endif
 			system.system->LateUpdate();
 		}
 
@@ -301,6 +336,43 @@ namespace SandCastle
 	void Systems::SetFixedUpdateTime(float seconds)
 	{
 		Time::fixedDelta = seconds;
+	}
+
+	Systems::SystemProfile& Systems::ProfileFor(const SystemIdPriority& system)
+	{
+		SystemProfile& p = m_profiles[system.typeId];
+		if (p.name.empty())
+		{
+			// typeid gives e.g. "class HordeSys" on MSVC; keep only the type name.
+			std::string raw = typeid(*system.system).name();
+			size_t space = raw.find_last_of(' ');
+			p.name = (space != std::string::npos) ? raw.substr(space + 1) : raw;
+		}
+		p.priority = system.priority;
+		return p;
+	}
+
+	void Systems::SetProfilingEnabled(bool enabled)
+	{
+		Instance()->m_profilingEnabled = enabled;
+	}
+
+	bool Systems::IsProfilingEnabled()
+	{
+		return Instance()->m_profilingEnabled;
+	}
+
+	std::vector<Systems::SystemProfile> Systems::GetProfiles()
+	{
+		auto ins = Instance();
+		std::vector<SystemProfile> out;
+		out.reserve(ins->m_profiles.size());
+		for (auto& kvp : ins->m_profiles)
+			out.push_back(kvp.second);
+		// Higher priority runs first inside each phase; mirror that ordering here.
+		std::sort(out.begin(), out.end(),
+			[](const SystemProfile& a, const SystemProfile& b) { return a.priority > b.priority; });
+		return out;
 	}
 
 }
