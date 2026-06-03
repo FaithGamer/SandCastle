@@ -420,8 +420,8 @@ namespace SandCastle
 			SetGamepadModeInternal(true);
 			break;
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-			// Ignore noise below the standard 15% deadzone — sticks idle near zero.
-			if (Math::Abs(event.gaxis.value / 32767.f) > 0.15f)
+			// Ignore noise below the standard 20% deadzone — sticks idle near zero.
+			if (Math::Abs(event.gaxis.value / 32767.f) > 0.2f)
 				SetGamepadModeInternal(true);
 			break;
 
