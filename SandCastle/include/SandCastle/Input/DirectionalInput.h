@@ -54,11 +54,9 @@ namespace SandCastle
 		/// @brief Remove a binding
 		/// @param version Binding version
 		void RemoveBinding(int version);
-		/// @brief Set stick deadzone
-		/// @param deadzone range from 0.0 to 1.0, where 1.0 = 100% deadzone
-		void SetStickDeadZone(float deadzone);
 		/// @brief Set trigger deadzone
 		/// @param deadzone range from 0.0 to 1.0, where 1.0 = 100% deadzone
+		/// @note The stick deadzone is global; set it via Inputs::SetStickDeadzone.
 		void SetTriggerDeadZone(float deadzone);
 
 		/// @brief Check if the stick is used in any of the bindings
@@ -100,7 +98,6 @@ namespace SandCastle
 		DirectionalInputState m_state;
 		bool m_mouseWheel;
 		float m_triggerDeadzone;
-		float m_stickDeadzone;
 
 	};
 }

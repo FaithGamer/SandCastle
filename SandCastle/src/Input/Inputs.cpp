@@ -408,6 +408,16 @@ namespace SandCastle
 		return Instance()->m_hideCursorOnGamepadMode;
 	}
 
+	void Inputs::SetStickDeadzone(float deadzone)
+	{
+		Instance()->m_stickDeadzone = glm::clamp(deadzone, 0.0f, 1.0f);
+	}
+
+	float Inputs::GetStickDeadzone()
+	{
+		return Instance()->m_stickDeadzone;
+	}
+
 	void Inputs::AutoDetectGamepadModeFromEvent(const SDL_Event& event)
 	{
 		if (!m_autoToggleGamepadMode)
@@ -420,8 +430,8 @@ namespace SandCastle
 			SetGamepadModeInternal(true);
 			break;
 		case SDL_EVENT_GAMEPAD_AXIS_MOTION:
-			// Ignore noise below the standard 20% deadzone — sticks idle near zero.
-			if (Math::Abs(event.gaxis.value / 32767.f) > 0.2f)
+			// Ignore noise below the global stick deadzone — sticks idle near zero.
+			if (Math::Abs(event.gaxis.value / 32767.f) > m_stickDeadzone)
 				SetGamepadModeInternal(true);
 			break;
 

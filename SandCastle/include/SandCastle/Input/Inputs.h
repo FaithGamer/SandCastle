@@ -120,6 +120,19 @@ namespace SandCastle
 		static void SetHideCursorOnGamepadMode(bool hide);
 		/// @brief Current SetHideCursorOnGamepadMode setting.
 		static bool IsHideCursorOnGamepadMode();
+
+		/*---Stick deadzone---*/
+
+		/// @brief Set the global analog-stick deadzone. Applies to every
+		/// DirectionalInput stick reading (values below it read as zero, the
+		/// remainder is rescaled to 0..1) and to the gamepad-mode
+		/// auto-detection threshold (stick motion below it won't flip the
+		/// player into gamepad mode).
+		/// @param deadzone range from 0.0 to 1.0, where 1.0 = 100% deadzone
+		static void SetStickDeadzone(float deadzone);
+		/// @brief Current global analog-stick deadzone (defaults to 0.1).
+		static float GetStickDeadzone();
+
 		/// @brief Broadcast on every gamepad-mode flip. Payload is the new
 		/// mode (true = gamepad, false = mouse/keyboard).
 		Signal<bool> gamepadModeSignal;
@@ -148,5 +161,8 @@ namespace SandCastle
 		bool m_gamepadMode = false;
 		bool m_autoToggleGamepadMode = true;
 		bool m_hideCursorOnGamepadMode = true;
+
+		//Stick deadzone (shared by all stick input and gamepad-mode detection)
+		float m_stickDeadzone = 0.1f;
 	};
 }

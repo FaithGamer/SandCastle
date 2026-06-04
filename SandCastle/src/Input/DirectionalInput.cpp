@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "SandCastle/Input/DirectionalInput.h"
+#include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Core/Container.h"
 #include "SandCastle/Core/Math.h"
 
 namespace SandCastle
 {
 	DirectionalInput::DirectionalInput(std::string name)
-		: m_name(name), m_triggerDeadzone(0.1f), m_stickDeadzone(0.1f), m_mouseWheel(false)
+		: m_name(name), m_triggerDeadzone(0.1f), m_mouseWheel(false)
 	{
 	}
 
@@ -99,11 +100,6 @@ namespace SandCastle
 			LOG_WARN("DirectionalInput::RemoveBinding -> version does not exists.");
 		}
 		UpdateEventListened();
-	}
-
-	void DirectionalInput::SetStickDeadZone(float deadzone)
-	{
-		m_stickDeadzone = deadzone;
 	}
 
 	void DirectionalInput::SetTriggerDeadZone(float deadzone)
@@ -350,10 +346,11 @@ namespace SandCastle
 	{
 		//value = Math::ScaleRangeTo(value, -1.0f, 1.0f, -32768.f, 32767.f);
 		value /= 32767.f;
+		float deadzone = Inputs::GetStickDeadzone();
 		float absValue = std::fabs(value);
-		if (absValue > m_stickDeadzone)
+		if (absValue > deadzone)
 		{
-			absValue = Math::ScaleRangeTo(absValue, m_stickDeadzone, 1.0f, 0.0f, 1.0f);
+			absValue = Math::ScaleRangeTo(absValue, deadzone, 1.0f, 0.0f, 1.0f);
 
 			if (value < 0.f)
 				value = -absValue;
