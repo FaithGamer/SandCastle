@@ -65,5 +65,6 @@ namespace SandCastle
 		float nextFrame = 0;
 		float speed = 1;
 		bool loop = true;
+		bool unscaled = false; // tick with Time::UnscaledDelta() so the anim keeps playing when the game's time scale is 0 (UI buttons, paused menus)
 	};
 }

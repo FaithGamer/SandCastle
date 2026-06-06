@@ -583,6 +583,7 @@ namespace SandCastle
 		render->SetLayer(i->m_context.layer);
 		render->SetMaterial(i->m_context.material->GetID());
 		auto animator = button->root.AddGet<Animator>();
+		animator->unscaled = true; // UI button anims keep playing when the game is paused (time scale 0)
 		auto& animContext = i->m_context.animButton;
 		ASSERT_LOG_ERROR((animContext.idle != nullptr), "Trying to create anim button without at least an idle animation context.");
 		animator->AddAnimation("idle", animContext.idle);

@@ -11,12 +11,14 @@ namespace SandCastle
 	//Animation System
 	void AnimationSystem::Update()
 	{
-		auto delta = Time::Delta();
+		float scaled = (float)Time::Delta();
+		float unscaled = (float)Time::UnscaledDelta();
 		auto group = Entity::View<Animator, SpriteRender, Transform>();
 		group.each([&](Animator& animator, SpriteRender& sprite, Transform& transform)
 			{
 				if (animator.currentState == nullptr)
 					return;
+				float delta = animator.unscaled ? unscaled : scaled;
 
 				auto anim = animator.currentState->animation;
 				auto* frame = &animator.currentKeyFrame;
@@ -56,7 +58,7 @@ namespace SandCastle
 					animator.accumulator = std::max(animator.accumulator - frameTime, 0.f);
 				}
 				sprite.SetSprite(anim->frames[*frame].sprite);
-				animator.accumulator += (float)delta * animator.speed;
+				animator.accumulator += delta * animator.speed;
 
 				//Despite having the callback at the end, it is NOT safe to destroy the entity within the callback
 				for (auto& c : calls)

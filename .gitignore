@@ -2,3 +2,4 @@ bin/
 .vs/
 logfile.txt
 imgui.ini
+.tmp.driveupload
