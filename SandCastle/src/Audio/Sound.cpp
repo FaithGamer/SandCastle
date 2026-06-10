@@ -109,8 +109,10 @@ namespace SandCastle
 			}
 			else
 			{
+				bool fading = false;
 				if (m_fadeOut > 0.f)
 				{
+					fading  = true;
 					float min = m_fadeOut * delta;
 					m_fadeVolume -= min;
 					if (m_fadeVolume > 0)
@@ -120,6 +122,7 @@ namespace SandCastle
 				}
 				else if (m_fadeIn > 0.f && m_fadeVolume < m_volume)
 				{
+					fading = true;
 					float plus = m_fadeIn * delta;
 					m_fadeVolume += plus;
 					if (m_fadeVolume >= m_volume)
@@ -133,6 +136,11 @@ namespace SandCastle
 					}
 
 				}
+				if (!fading && m_volumeChanged)
+				{
+					it->SetVolume(m_volume);
+				}
+
 				it++;
 			}
 		}
@@ -154,6 +162,7 @@ namespace SandCastle
 	void Sound::SetVolume(float volume)
 	{
 		m_volume = volume;
+		m_volumeChanged = true;
 	}
 
 	bool Sound::IsPlaying()

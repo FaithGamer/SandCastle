@@ -52,5 +52,6 @@ namespace SandCastle
 		float m_volume = 1.f;
 		float m_timeBetweenPlay = 0.05f;
 		bool m_playedThisIteration = false;
+		bool m_volumeChanged = false;
 	};
 }

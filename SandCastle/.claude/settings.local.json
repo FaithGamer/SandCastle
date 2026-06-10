@@ -13,7 +13,10 @@
       "Bash(git checkout *)",
       "Bash(python -c \"import json; json.load\\(open\\('assets/balance/weapons.json'\\)\\); print\\('JSON valid'\\)\")",
       "Bash(sed -n '60,90p' src/system/DevSys.cpp)",
-      "Bash(sed -n '1,20p' src/system/DevSys.cpp)"
+      "Bash(sed -n '1,20p' src/system/DevSys.cpp)",
+      "Bash(Get-ChildItem -Path \"C:\\\\dev\\\\SandCastle\\\\SandCastle\\\\sandcastle_audit\" -Recurse)",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Format-Table -AutoSize)"
     ]
   }
 }
