@@ -82,7 +82,7 @@ namespace SandCastle
 		std::mutex m_doneMutex;
 		std::vector<sptr<OpaqueTask>> m_queue[2];
 		std::thread m_thread;
-		bool m_currentQueue;
+		bool m_currentQueue;  // guarded by m_waiterMutex (flipped in Thread, read in Queue)
 		bool m_taskAvailable;
 		std::atomic<bool> m_haveTask;
 		std::atomic<bool> m_threadRunning;

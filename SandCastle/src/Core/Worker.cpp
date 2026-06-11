@@ -35,10 +35,14 @@ namespace SandCastle
 
 	void WorkerThread::Queue(sptr<OpaqueTask> task)
 	{
-		std::unique_lock queueLock(m_queueMutex[!m_currentQueue]);
+		// Lock m_waiterMutex BEFORE reading m_currentQueue: Thread() flips it
+		// under that mutex, so reading it first could pick (and lock) one queue
+		// while emplacing into the other — the one the worker is iterating.
 		std::unique_lock waiterLock(m_waiterMutex);
+		const size_t back = (size_t)!m_currentQueue;
+		std::unique_lock queueLock(m_queueMutex[back]);
 
-		m_queue[(size_t)!m_currentQueue].emplace_back(task);
+		m_queue[back].emplace_back(task);
 
 		m_taskAvailable = true;
 		m_haveTask = true;
@@ -56,6 +60,7 @@ namespace SandCastle
 
 	size_t WorkerThread::TaskCount()
 	{
+		std::scoped_lock lock(m_queueMutex[0], m_queueMutex[1]);
 		return m_queue[0].size() + m_queue[1].size();
 	}
 
@@ -88,7 +93,14 @@ namespace SandCastle
 			}
 
 			m_queue[m_currentQueue].clear();
-			m_haveTask = !(m_queue[0].empty() && m_queue[1].empty());
+			{
+				// The back buffer may be receiving a concurrent Queue(); lock it
+				// so the emptiness check can't read the vector mid-mutation and
+				// wrongly report "done" while a task is pending. The current
+				// buffer was just cleared under its (held) mutex.
+				std::lock_guard backLock(m_queueMutex[(size_t)!m_currentQueue]);
+				m_haveTask = !m_queue[(size_t)!m_currentQueue].empty();
+			}
 
 			if (!m_haveTask)
 			{
