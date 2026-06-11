@@ -139,6 +139,10 @@ namespace SandCastle
 			m_properties.insert(std::make_pair(name, property));
 		}
 		break;
+		case GL_SAMPLER_2D:
+			//Sampler set by the renderer, not a material property
+			//(Mesa on Steam Deck reports the uTextures array with size 1)
+			break;
 		default:
 			LOG_ERROR("Unsupported uniform type in shader {0} type GLenum: {1}, name: {2}", m_shader->GetName(), type, name);
 			break;
