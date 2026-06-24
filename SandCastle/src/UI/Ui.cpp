@@ -476,7 +476,10 @@ namespace SandCastle
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label.root.Destroy();
 		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
-		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -3.f);
+		// Label sits at z -4 to clear every frame layer (UpdateFrames places the
+		// frames at 0/-1/-2/-3); must match Ui::Button. -3 would be coplanar with
+		// the disabled frame and the glyphs would z-fight (flicker) when disabled.
+		button->label.root.Get<Transform>()->Move(button->context.padding.x, -button->context.padding.y, -4.f);
 		button->root.AddChild(button->label.root);
 		button->size.x = button->label.size.x + button->context.padding.x * 2;
 		button->size.y = button->label.size.y + button->context.padding.y * 2;
