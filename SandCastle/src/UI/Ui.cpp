@@ -1262,6 +1262,8 @@ namespace SandCastle
 		auto i = Instance();
 		if (i->m_navigated == elem)
 			return;
+		if (i->m_navigated != nullptr)
+			i->m_navigated->ResetPress(); // drop a held press when focus leaves
 		i->m_navigated = elem;
 		// destroySignal is already wired to Ui::OnDestroy for every UiElem
 		// (see NewElem), which clears m_navigated when needed.

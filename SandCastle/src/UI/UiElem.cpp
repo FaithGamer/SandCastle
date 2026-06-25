@@ -182,17 +182,40 @@ namespace SandCastle
 	{
 		navReleaseSignals[(int)dir].Send(this);
 	}
+	void UiElem::ResetPress()
+	{
+		if (!pressed)
+			return;
+		// Return to the resting visual without firing the released callback: navigating
+		// away from a held button cancels the press, it doesn't trigger the action.
+		state = State::Idle;
+		pressed = false;
+		OnUnHover();
+	}
 	void UiElem::SelectPressed()
 	{
 		selectPressSignal.Send(this);
 		if (Ui::IsClickIsSelect() && clickable && !disabled)
+		{
+			// Mirror ClickPressed so the pressed visual frame shows in gamepad mode.
+			state = State::Pressed;
+			pressed = true;
+			OnClickPressed();
 			clickPressSignal.Send(this);
+		}
 	}
 	void UiElem::SelectReleased()
 	{
 		selectReleaseSignal.Send(this);
-		if (Ui::IsClickIsSelect() && clickable && !disabled)
+		if (Ui::IsClickIsSelect() && clickable && !disabled && pressed)
+		{
+			// A navigated element rests on the idle frame (the selector ring marks
+			// navigation), so return to Idle rather than Hovered like the mouse path.
+			state = State::Idle;
+			pressed = false;
+			OnClickReleased();
 			clickReleasedSignal.Send(this);
+		}
 	}
 	void UiElem::CancelPressed()
 	{

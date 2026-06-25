@@ -164,6 +164,9 @@ namespace SandCastle
 		void ClickReleased();
 		void NavPressed(NavDir dir);
 		void NavReleased(NavDir dir);
+		/// @brief Cancel an in-progress press (visual reset only, no released callback).
+		/// Used when the gamepad selector navigates away from a held-down element.
+		void ResetPress();
 		void SelectPressed();
 		void SelectReleased();
 		void CancelPressed();
