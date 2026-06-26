@@ -459,13 +459,10 @@ namespace SandCastle
 				ppu = font.atlases.empty() ? (1.0f / std::max(1, font.size)) : font.atlases[0]->GetPixelPerUnit();
 				icon = true;
 				String iconId;
-				while (i < cps.size())
-				{
-					i++;
-					if (cps[i] == (uint32_t)'|')
-						break;
+				// Pre-increment and bounds-check together: an unbalanced or
+				// trailing '|' (no closing pipe) must not read cps[i] past the end.
+				while (++i < cps.size() && cps[i] != (uint32_t)'|')
 					iconId += cps[i];
-				}
 				int image = 0;
 				auto it_id = m_icons.find(iconId);
 				if (it_id == m_icons.end())
