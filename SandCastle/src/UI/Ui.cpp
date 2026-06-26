@@ -251,6 +251,13 @@ namespace SandCastle
 	{
 		for (int i = 0; i < m_values.size(); i++)
 		{
+			//Skip elements queued for destruction: Ui::Destroy is deferred
+			//(reaped in DestroyUpdate, which runs after this), but the data
+			//a UiTxt is bound to may already be freed by the time it's marked
+			//destroyed (e.g. a HUD canvas destroyed alongside its run Data on
+			//exit-to-menu). Dereferencing those bound pointers here is UB.
+			if (m_values[i]->IsDestroyed())
+				continue;
 			if (m_values[i]->DataChanged())
 			{
 				UpdateText(m_values[i], m_values[i]->Format(), false);
@@ -1205,7 +1212,30 @@ namespace SandCastle
 			return;
 		if (elem->IsDestroyed())
 			return;
-		elem->destroyed = true;
+
+		//Mark the whole subtree destroyed now, even though the actual delete
+		//is deferred to DestroyUpdate (only the top element is queued; children
+		//are reaped via the ~UiCanvas cascade). Without this, a condemned child
+		//(e.g. a data-bound UiTxt under a destroyed canvas) stays unmarked in
+		//m_values during the deferral window, and ValuesUpdate would deref the
+		//data its owner already freed — UB on exit-to-menu.
+		std::vector<UiElem*> stack;
+		stack.push_back(elem);
+		while (!stack.empty())
+		{
+			auto* e = stack.back();
+			stack.pop_back();
+			if (e == nullptr)
+				continue;
+			e->destroyed = true;
+			if (e->GetType() == UiElem::Type::Canvas)
+			{
+				auto c = static_cast<UiCanvas*>(e);
+				for (auto& kvp : c->children)
+					stack.push_back(kvp.second);
+			}
+		}
+
 		Instance()->m_destroy.emplace_back(elem);
 	}
 
