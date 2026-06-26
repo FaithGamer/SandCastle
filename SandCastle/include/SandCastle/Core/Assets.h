@@ -102,6 +102,11 @@ namespace SandCastle
 		{
 			return Instance()->m_sprites.find(name) != Instance()->m_sprites.end();
 		}
+		/// @brief Check whether a localized textual with this name was registered (no assert if absent).
+		inline static bool HasTextual(const String& name)
+		{
+			return Instance()->m_textuals.find(name) != Instance()->m_textuals.end();
+		}
 		template <>
 		inline static Sprite* Get(const String& name);
 		template <>
