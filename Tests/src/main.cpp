@@ -26,7 +26,7 @@ using namespace SandCastle;
 
 int main()
 {
-	SpriteExportTool();
+	//SpriteExportTool();
 	//Launch();
 	//DrawSprite();
 	//DrawAnimation();
@@ -35,7 +35,7 @@ int main()
 	//WindowEvents();
 	//Serialization();
 	//Benchmark1();
-	//Benchmark2(); //~190 -> 210
+	Benchmark2(); //~190 -> 210
 	//Delegates();
 	//Signals();
 	//FontTest();

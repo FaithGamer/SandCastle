@@ -91,7 +91,7 @@ namespace SandCastle
 
 		m_rendering = false;
 		//Limitations
-		m_maxQuads = 100000;
+		m_maxQuads = 10000;
 		m_maxVertices = m_maxQuads * 4;
 		m_maxIndices = m_maxQuads * 6;
 
