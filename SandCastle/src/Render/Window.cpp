@@ -47,6 +47,7 @@ namespace SandCastle
 		m_clearColor = Vec4f(0.1, 0.1, 0.1, 1);
 		m_initialized = true;
 		m_pixelSize = GetSize();
+		m_windowedSize = size;
 		ResizeSignal.Listen(&Window::OnCursorResize, this);
 	}
 
@@ -57,16 +58,75 @@ namespace SandCastle
 			LOG_ERROR("Window SetSize({0}, {1}) failed: {2}", size.x, size.y, SDL_GetError());
 		}
 		m_pixelSize = GetSize();
+		if (!m_fullscreen)
+			m_windowedSize = size;
 	}
 
 	void Window::SetFullScreen(bool fullscreen)
 	{
-		SDL_Window* window = Instance()->m_window;
-		//Borderless by default
-		if(!SDL_SetWindowFullscreen(window, fullscreen))
+		auto self = Instance();
+		self->m_fullscreen = fullscreen;
+		self->ApplyWindowMode();
+	}
+
+	void Window::SetCompositedFullscreen(bool enabled)
+	{
+		auto self = Instance();
+		if (self->m_compositedFullscreen == enabled)
+			return;
+		self->m_compositedFullscreen = enabled;
+		// Re-apply live so toggling it during a run switches style immediately.
+		if (self->m_fullscreen)
+			self->ApplyWindowMode();
+	}
+
+	void Window::ApplyWindowMode()
+	{
+		SDL_Window* window = m_window;
+
+		if (!m_fullscreen)
 		{
-			LOG_ERROR("Window fullscreen({0}) failed: {1}",fullscreen, SDL_GetError());
+			// Windowed: leave any fullscreen style and restore the border plus
+			// the last windowed size (the composited path below resizes the
+			// window, so we can't rely on SDL remembering it).
+			SDL_SetWindowFullscreen(window, false);
+			SDL_SetWindowBordered(window, true);
+			SDL_SetWindowSize(window, m_windowedSize.x, m_windowedSize.y);
+			return;
 		}
+
+		if (!m_compositedFullscreen)
+		{
+			// Fast path: real borderless-desktop fullscreen. The driver may
+			// promote this to independent flip (direct scanout), which freezes
+			// DWM's cached copy of the window so screenshots/thumbnails go stale.
+			if (!SDL_SetWindowFullscreen(window, true))
+				LOG_ERROR("Window fullscreen(true) failed: {0}", SDL_GetError());
+			return;
+		}
+
+		// Capture-friendly fullscreen: a borderless window at the EXACT native
+		// size (so the engine renders identically to real fullscreen — any size
+		// mismatch folds the render), but shifted 1px up so the window rectangle
+		// doesn't exactly match the monitor. Independent flip requires an exact
+		// screen-matching rect, so this shift alone keeps the window on the DWM
+		// composited path and screen-capture reads live frames. The top row
+		// spills 1px off-screen and a 1px desktop strip shows at the bottom.
+		SDL_SetWindowFullscreen(window, false);
+		SDL_DisplayID display = SDL_GetDisplayForWindow(window);
+		SDL_Rect bounds{};
+		if (!SDL_GetDisplayBounds(display, &bounds))
+		{
+			LOG_ERROR("Composited fullscreen: SDL_GetDisplayBounds failed: {0}", SDL_GetError());
+			// Don't leave a half-configured window — fall back to normal fullscreen.
+			if (!SDL_SetWindowFullscreen(window, true))
+				LOG_ERROR("Window fullscreen(true) fallback failed: {0}", SDL_GetError());
+			return;
+		}
+		SDL_SetWindowBordered(window, false);
+		SDL_SetWindowSize(window, bounds.w, bounds.h+2);
+		SDL_SetWindowPosition(window, bounds.x, bounds.y);
+		SDL_RaiseWindow(window);
 	}
 
 	void Window::SetVsync(bool vsync)
@@ -423,11 +483,9 @@ namespace SandCastle
 
 	bool Window::GetFullScreen()
 	{
-		auto i = Instance();
-		SDL_WindowFlags flags = SDL_GetWindowFlags(i->m_window);
-		if ((flags & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN)
-			return true;
-		return false;
+		// Logical fullscreen state: the composited path is a borderless window,
+		// not an SDL fullscreen flag, so we can't read it off SDL_GetWindowFlags.
+		return Instance()->m_fullscreen;
 	}
 
 	Vec2i Window::GetSize()

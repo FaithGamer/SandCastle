@@ -21,6 +21,18 @@ namespace SandCastle
 		/// PixelMatchPoint() to know if pixel match points.
 		static void SetSize(unsigned int width, unsigned int height);
 		static void SetFullScreen(bool fullscreen);
+		/// @brief Choose how fullscreen is presented. Disabled (default) uses a
+		/// real borderless-desktop fullscreen the driver may promote to
+		/// independent flip — fast, but DWM's cached copy of the window freezes,
+		/// so screenshots, Alt-Tab thumbnails and capture tools show a stale
+		/// frame until the window is recomposited. Enabled instead uses a
+		/// borderless window at the exact native size but shifted 1px in
+		/// position, so its rectangle no longer matches the monitor exactly —
+		/// that keeps it out of independent flip and on the DWM composited path
+		/// so captures stay live, with no resize (the render is unchanged), at
+		/// the cost of the flip fast-path and a 1px desktop strip at the screen
+		/// edge. Safe to toggle at runtime.
+		static void SetCompositedFullscreen(bool enabled);
 		static void SetVsync(bool vsync);
 		static void ClearWindow();
 		static void RenderWindow();
@@ -93,12 +105,17 @@ namespace SandCastle
 		friend Singleton<Window>;
 		Window() = default;
 		void Init(std::string name, Vec2u size);
+		// Apply m_fullscreen / m_compositedFullscreen to the SDL window.
+		void ApplyWindowMode();
 		void RefreshCursor();
 		void OnCursorResize(Vec2u size);
 		void UploadCursorTexture(SDL_Surface* rgbaSurface);
 		void DestroyCursorTexture();
 		bool m_initialized = false;
 		bool m_renderWhenMiminized = false;
+		bool m_fullscreen = false;
+		bool m_compositedFullscreen = false;
+		Vec2u m_windowedSize;
 		SDL_Window* m_window = nullptr;
 		SDL_GLContext m_initContext = nullptr;
 		SDL_GLContext m_renderContext = nullptr;
