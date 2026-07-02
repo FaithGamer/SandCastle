@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SandCastle/UI/UiBtn.h"
 #include "SandCastle/UI/Ui.h"
+#include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/Core/Assets.h"
 
 namespace SandCastle
@@ -27,6 +28,19 @@ namespace SandCastle
 		frameHover.Update(this, -2.f);
 		frameDisabled.Update(this, -3.f);
 		ShowHideFrame();
+	}
+	void UiBtn::SetWidth(float width)
+	{
+		float natural = label.size.x + context.padding.x * 2;
+		if (width <= natural)
+			return;
+		size.x = width;
+		// Re-center the label within the wider button (frames grow from the
+		// top-left, so without this the label would stay left-aligned).
+		label.root.gtr()->SetPosition((width - label.size.x) * 0.5f, -context.padding.y, -4.f);
+		UpdateFrames();
+		if (parent != nullptr)
+			parent->MustUpdate();
 	}
 	void UiBtn::OnHover()
 	{

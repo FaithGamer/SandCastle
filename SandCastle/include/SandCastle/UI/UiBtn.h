@@ -22,6 +22,11 @@ namespace SandCastle
 		void SetColor(const Color& color);
 		/// @brief Recompute the geometry of all four frame states (idle/hover/pressed/disabled).
 		void UpdateFrames();
+		/// @brief Force the button's width, re-centering the label and rebuilding the
+		/// frames. Height stays label-driven. Use to give a column of buttons a uniform
+		/// width (e.g. size them all to the widest). No-op if `width` is smaller than the
+		/// button's natural (label + padding) width.
+		void SetWidth(float width);
 	protected:
 		virtual void OnHover() override;
 		virtual void OnUnHover() override;
