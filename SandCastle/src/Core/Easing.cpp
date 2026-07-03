@@ -30,7 +30,13 @@ namespace SandCastle
 	}
 	double Easing::CubicInOut(double t)
 	{
-		return t < 0.5 ? 4 * t * t * t : 1 + (--t) * (2 * (--t)) * (2 * t);
+		// 4t^3 below the midpoint, 1 + 4(t-1)^3 above. (The old one-liner decremented
+		// t twice via two unsequenced (--t), returning values far outside [0,1] for
+		// t just past 0.5 — anything lerped with it overshot wildly at mid-curve.)
+		if (t < 0.5)
+			return 4 * t * t * t;
+		const double f = t - 1;
+		return 1 + 4 * f * f * f;
 	}
 	double Easing::CubicIn(double t)
 	{
@@ -38,7 +44,9 @@ namespace SandCastle
 	}
 	double Easing::CubicOut(double t)
 	{
-		return 1 + (--t) * t * t;
+		// 1 + (t-1)^3, without the unsequenced (--t) of the old one-liner.
+		const double f = t - 1;
+		return 1 + f * f * f;
 	}
 	double Easing::CircInOut(double t)
 	{
