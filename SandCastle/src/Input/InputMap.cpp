@@ -231,7 +231,7 @@ namespace SandCastle
 			}
 			else
 			{
-				for (auto& input : m_byEvents[(int)EventType::GamepadStick])
+				for (auto& input : m_byEvents[(int)EventType::GamepadTrigger])
 				{
 					if (input->GamepadTriggerMoved(e))
 						eventHandled = true;
