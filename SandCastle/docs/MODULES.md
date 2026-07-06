@@ -178,6 +178,16 @@ miniaudio wrapper. Aggregate: [Audioheader.h](../include/SandCastle/Audioheader.
 
 ---
 
+## Steam (`include/SandCastle/Steam/`)
+
+Optional Steamworks integration. Opt-in at runtime: call `Steam::Init(SteamSettings)` before `Engine::Launch`, or never touch the class and the game has no Steam dependency (the object file and import stubs are dropped at link time, no DLL needed). `vendor/steam_api64.lib` is merged into `SandCastle.lib`, so games using Steam only ship `vendor/steam_api64.dll` next to the executable (plus `steam_appid.txt` for dev runs launched outside Steam — never ship that file).
+
+| Header | Key types | Notes |
+|---|---|---|
+| [Steam.h](../include/SandCastle/Steam/Steam.h) | `Steam` (static class), `SteamSettings` | `Init` handles `RestartAppIfNecessary` + optional basic DRM (`stopOnInitFail`); returns false when the game must exit. Achievements (`UnlockAchievement`, `IsAchievementUnlocked`, `ShowAchievementProgress`, `ResetAllAchievements`), int stats (`SetStat`/`GetStat`/`StoreStats` + periodic auto-upload), `GetPlayerId`/`GetPlayerName`, `GetLanguage` (mapped to engine lang codes) / `GetSteamLanguage` (raw), DLC/app queries (`IsDlcInstalled`, `IsSubscribed`, `IsAppInstalled`, `GetAppInstallDir`), `IsOnSteamDeck`, `OpenUrlOverlay`. Every call is a safe no-op when Steam is disabled. Internal `SteamSystem` (defined in [src/Steam/Steam.cpp](../src/Steam/Steam.cpp)) pumps `SteamAPI_RunCallbacks` on FixedUpdate and calls `SteamAPI_Shutdown` on engine shutdown. |
+
+---
+
 ## Tools (`include/SandCastle/Tools/`)
 
 | Header | Key types | Notes |

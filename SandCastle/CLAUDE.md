@@ -15,9 +15,9 @@ SandCastle/
 │   │   │ PhysicsEngine.h, UIheader.h, Audioheader.h
 │   │   ├── Engine.h, EngineSettings.h, Entt.h
 │   │   ├── Core/   Render/  ECS/  Input/
-│   │   ├── Physics/  UI/  Audio/  Tools/  Internal/
+│   │   ├── Physics/  UI/  Audio/  Steam/  Tools/  Internal/
 │   ├── KHR/  PerlinNoise/  SDL3/  boost/  box2d/  earcut/  entt/
-│   ├── freetype/  glad/  glm/  imgui/  json/  miniaudio/  spdlog/  stb/
+│   ├── freetype/  glad/  glm/  imgui/  json/  miniaudio/  spdlog/  stb/  steam/
 │   └── float16_t.hpp, ft2build.h
 ├── src/                      ← implementation, mirrors include layout
 ├── vendor/                   ← compiled .lib for vendored dependencies
@@ -92,6 +92,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | Physics | [PhysicsEngine.h](include/SandCastle/PhysicsEngine.h) | `Physics`, `Body` (+ Static/Kinematic), `Collider` (`Box2D`/`Circle2D`/`Polygon2D`), AABB queries, `PhysicsSystem`, `ColliderRenderDebugSystem` |
 | UI | [UIheader.h](include/SandCastle/UIheader.h) | `Ui` builder + `UiCanvas`/`UiTxt`/`UiBtn`/`UiAnimBtn`/`UiImg`/`UiCheckbox`/`UiLoadBar`/`UiFrame` widgets, `UiContext` |
 | Audio | [Audioheader.h](include/SandCastle/Audioheader.h) | `Audio`, `Sound`, `HighrateSound`, `SoundHandle` |
+| Steam | [Steam/Steam.h](include/SandCastle/Steam/Steam.h) | `Steam` static class + `SteamSettings` — optional Steamworks (achievements, stats, player id/name, language, DLC, overlay, Steam Deck). Opt-in via `Steam::Init` before `Engine::Launch`; every call safe no-op when disabled. `steam_api64.lib` is merged into `SandCastle.lib`; games using it only ship `vendor/steam_api64.dll`. |
 | Tools | [Tools/SpriteExport.h](include/SandCastle/Tools/SpriteExport.h) | `ShowSpriteExport()` ImGui widget (Aseprite → spritesheet) |
 | Internal | `Internal/` | `Singleton<T>` CRTP, `ImGuiLoader`, `PersistentDataPath`, `PlatformDetection` |
 
@@ -149,7 +150,7 @@ Details in [docs/ASSETS.md](docs/ASSETS.md).
 
 ### Vendored dependencies (under `include/`)
 
-SDL3, glad (OpenGL 3.3 loader), glm, EnTT, Box2D, miniaudio, FreeType, Dear ImGui (with SDL3+OpenGL3 backends), nlohmann/json, spdlog, stb (image), PerlinNoise, earcut, boost int128, float16_t. All ship as headers + prebuilt `.lib` in `vendor/`. See [docs/BUILD.md#vendored](docs/BUILD.md#vendored).
+SDL3, glad (OpenGL 3.3 loader), glm, EnTT, Box2D, miniaudio, FreeType, Dear ImGui (with SDL3+OpenGL3 backends), nlohmann/json, spdlog, stb (image), PerlinNoise, earcut, boost int128, float16_t, Steamworks SDK (`include/steam/`, opt-in — see Steam module). All ship as headers + prebuilt `.lib` in `vendor/`. See [docs/BUILD.md#vendored](docs/BUILD.md#vendored).
 
 ### Preprocessor defines
 

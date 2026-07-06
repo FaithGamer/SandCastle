@@ -99,6 +99,9 @@
     <ClCompile Include="src\EngineSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Steam\Steam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\Input\ButtonInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -289,6 +292,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\UI\UiAnimBtn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\GpuParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -533,6 +539,9 @@
     <ClInclude Include="include\SandCastle\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SandCastle\Steam\Steam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\SandCastle\EngineSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -660,6 +669,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Core\Int128.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SandCastle\Render\GpuParticleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

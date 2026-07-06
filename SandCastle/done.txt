@@ -718,3 +718,7 @@ thoughts:
 >Serialized, Get error must propagate to all parents?
 >Transform rotation should loop at 360/-360? Because we could potentially break the float limit.
 But I'm not happy with the additional processing required, so I'm letting the user do that if they want.
+
+2026 july 6
+
+-added optional Steamworks integration: Steam static class + SteamSettings (Steam/Steam.h), vendored Steamworks SDK headers in include/steam/, steam_api64.lib+dll in vendor/. Opt-in via Steam::Init, no link dependency when unused.

@@ -45,8 +45,11 @@ All shipped under `include/` (headers) + `vendor/` (prebuilt `.lib`). No package
 | earcut | Polygon triangulation (used by `Polygon2D`) | `include/earcut/` |
 | boost int128 | 128-bit integer (`Int128`) | `include/boost/` |
 | float16_t | 16-bit float for sprite origin packing | `include/float16_t.hpp` |
+| Steamworks SDK | Optional Steam integration (`Steam` class) | `include/steam/` |
 
 Updating a dependency: drop new headers under `include/`, rebuild the dep's `.lib` into `vendor/`, and update `done.txt`.
+
+Steamworks is opt-in per game: `vendor/steam_api64.lib` is merged into `SandCastle.lib` by the Librarian step, so games never link it themselves. Games that call `Steam::*` only need to ship `vendor/steam_api64.dll` next to the executable (plus a `steam_appid.txt` for dev runs launched outside Steam). Games that never reference the class have no Steam dependency (the linker drops the object and the import stubs).
 
 ## Engine settings
 

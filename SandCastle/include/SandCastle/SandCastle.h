@@ -15,4 +15,5 @@
 #include "SandCastle/PhysicsEngine.h"
 #include "SandCastle/UIheader.h"
 #include "SandCastle/Audioheader.h"
+#include "SandCastle/Steam/Steam.h"
 #include "SandCastle/Tools/SpriteExport.h"

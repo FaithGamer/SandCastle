@@ -24,6 +24,9 @@ namespace SandCastle
 
 	std::shared_ptr<spdlog::logger> Log::GetLogger()
 	{
+		//Logging can happen before Engine::Init (e.g. Steam::Init): boot the sinks lazily.
+		if (m_logger == nullptr)
+			Init();
 		return m_logger;
 	}
 }
