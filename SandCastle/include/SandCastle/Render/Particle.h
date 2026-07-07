@@ -50,13 +50,16 @@ namespace SandCastle
 
 	/// @brief ECS component holding per-particle state used by ParticleSystem.
 	/// `t` walks from 0 to 1 along `trajectory`, modulated by `easing`. `fade`
-	/// fades out alpha over the lifetime, `scale` linearly grows/shrinks size.
+	/// fades out alpha over the lifetime, `scale` linearly grows/shrinks size,
+	/// `rotSpeed` spins the sprite (degrees/second, sign = direction).
 	struct Particle
 	{
 		float t = 0.f;
 		float speed = 1.f;
 		float fade = 0.f;
 		float scale = 0.f;
+		float rotSpeed = 0.f;
+		float rot = 0.f; // current angle in degrees, advanced by rotSpeed
 		Beziers trajectory;
 		ParticleEasingFn easing = nullptr;
 		/// @brief Handle into ParticleSystem's destroy-callback table (0 = none). The
@@ -83,6 +86,10 @@ namespace SandCastle
 
 		/// @brief Sprite each particle uses. nullptr falls back to ParticleSystem::GetDefaultSprite().
 		Sprite* sprite = nullptr;
+		/// @brief Discrete sprite options. When non-empty, supersedes `sprite` — the
+		/// system picks one uniformly at random per particle. Entries must be
+		/// non-null (filter missing frames before assigning).
+		std::vector<Sprite*> spriteChoices;
 		/// @brief Render layer override applied to spawned particles. Use kKeepLayer to keep SpriteRender::defaultLayer.
 		LayerID layer = kKeepLayer;
 		/// @brief Material override applied to spawned particles. 0 = default material.
@@ -118,6 +125,16 @@ namespace SandCastle
 		/// @brief Scale modulation passed to Particle::scale (0 = no scaling, >1 = grow-and-shrink envelope).
 		float scaleMin = 0.f;
 		float scaleMax = 0.f;
+
+		/// @brief Spin in degrees/second, sampled per particle in [spinMin, spinMax].
+		/// With `spinBothSides` (default) the sampled value is randomly flipped per
+		/// particle, so Spin(720, 1080) spins fast in BOTH directions with no slow
+		/// spinners — mirrors curveBothSides. A non-zero spin also randomizes the
+		/// particle's initial angle in [0, 360) so a burst doesn't start
+		/// phase-locked. 0 (default) = no spin.
+		float spinMin = 0.f;
+		float spinMax = 0.f;
+		bool  spinBothSides = true;
 
 		/// @brief Alpha ramp applied to every particle. >0 fades out near end of life, <0 fades in at start.
 		float fade = 0.f;
@@ -183,7 +200,9 @@ namespace SandCastle
 
 		// === Fluent setters — all return *this for chaining ===
 
-		inline ParticleEmitter& UseSprite(Sprite* s)              { sprite = s;                                 return *this; }
+		inline ParticleEmitter& UseSprite(Sprite* s)              { sprite = s;                   spriteChoices.clear(); return *this; }
+		inline ParticleEmitter& UseSprite(std::initializer_list<Sprite*> choices) { spriteChoices.assign(choices);     return *this; }
+		inline ParticleEmitter& UseSprite(std::vector<Sprite*> choices)           { spriteChoices = std::move(choices); return *this; }
 		inline ParticleEmitter& OnLayer(LayerID l)                { layer = l;                                  return *this; }
 		inline ParticleEmitter& WithMaterial(MaterialID m)        { material = m;                               return *this; }
 		inline ParticleEmitter& Trajectory(ParticleTraj t)        { traj = t;                                   return *this; }
@@ -200,6 +219,9 @@ namespace SandCastle
 		inline ParticleEmitter& Lifetime(float v)                 { lifetimeMin = v;  lifetimeMax = v;          return *this; }
 		inline ParticleEmitter& Scale(float mn, float mx)         { scaleMin = mn; scaleMax = mx;               return *this; }
 		inline ParticleEmitter& Scale(float v)                    { scaleMin = v;  scaleMax = v;                return *this; }
+		inline ParticleEmitter& Spin(float mn, float mx)          { spinMin = mn; spinMax = mx;                 return *this; }
+		inline ParticleEmitter& Spin(float v)                     { spinMin = v;  spinMax = v;                  return *this; }
+		inline ParticleEmitter& SpinBothSides(bool b)             { spinBothSides = b;                          return *this; }
 		inline ParticleEmitter& Fade(float f)                     { fade = f;                                   return *this; }
 		inline ParticleEmitter& Tint(Color c)                     { colorA = c; colorB = c; colorChoices.clear(); return *this; }
 		inline ParticleEmitter& Tint(Color a, Color b)            { colorA = a; colorB = b; colorChoices.clear(); return *this; }

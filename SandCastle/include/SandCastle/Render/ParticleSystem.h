@@ -47,6 +47,8 @@ namespace SandCastle
 #define SC_EMITTER_FWD2(NAME, T1, T2) inline EmitterHandle& NAME(T1 a, T2 b) { if (auto* em = entity.Get<ParticleEmitter>()) em->NAME(a, b); return *this; }
 
 		SC_EMITTER_FWD1(UseSprite, Sprite*)
+		inline EmitterHandle& UseSprite(std::initializer_list<Sprite*> ch) { if (auto* em = entity.Get<ParticleEmitter>()) em->UseSprite(ch);            return *this; }
+		inline EmitterHandle& UseSprite(std::vector<Sprite*> ch)           { if (auto* em = entity.Get<ParticleEmitter>()) em->UseSprite(std::move(ch)); return *this; }
 		SC_EMITTER_FWD1(OnLayer, LayerID)
 		SC_EMITTER_FWD1(WithMaterial, MaterialID)
 		SC_EMITTER_FWD1(Trajectory, ParticleTraj)
@@ -63,6 +65,9 @@ namespace SandCastle
 		SC_EMITTER_FWD1(Lifetime, float)
 		SC_EMITTER_FWD2(Scale, float, float)
 		SC_EMITTER_FWD1(Scale, float)
+		SC_EMITTER_FWD2(Spin, float, float)
+		SC_EMITTER_FWD1(Spin, float)
+		SC_EMITTER_FWD1(SpinBothSides, bool)
 		SC_EMITTER_FWD1(Fade, float)
 		SC_EMITTER_FWD1(Tint, Color)
 		SC_EMITTER_FWD2(Tint, Color, Color)

@@ -96,6 +96,12 @@ namespace SandCastle
 					tr.SetScale(scale, scale);
 				}
 
+				if (p.rotSpeed != 0.f)
+				{
+					p.rot += p.rotSpeed * delta;
+					tr.SetRotation(p.rot);
+				}
+
 				Vec2f pos = p.trajectory.Step(t);
 				float z = tr.GetPosition().z;
 				tr.SetPosition(pos.x, pos.y, z);
@@ -263,6 +269,8 @@ namespace SandCastle
 	bool ParticleSystem::SpawnFromEmitter(Vec3f origin, const ParticleEmitter& spec, std::uint32_t cid)
 	{
 		Sprite* sprite = spec.sprite != nullptr ? spec.sprite : m_defaultSprite;
+		if (!spec.spriteChoices.empty())
+			sprite = spec.spriteChoices[RandRange(0, (int)spec.spriteChoices.size() - 1)];
 		if (sprite == nullptr)
 			return false;
 
@@ -338,6 +346,22 @@ namespace SandCastle
 			curve, spec.fade, spec.easing, scale);
 		if (!e.Valid())
 			return false;
+
+		// Spin: per-particle rate plus a random initial angle so a burst doesn't
+		// start phase-locked. Applied every frame in Update.
+		float spin = RandRange(spec.spinMin, spec.spinMax);
+		if (spec.spinBothSides && Random::Range(0.f, 1.f) < 0.5f)
+			spin = -spin;
+		if (spin != 0.f)
+		{
+			if (auto prt = e.Get<Particle>())
+			{
+				prt->rotSpeed = spin;
+				prt->rot = Random::Range(0.f, 360.f);
+				if (auto tr = e.Get<Transform>())
+					tr->SetRotation(prt->rot);
+			}
+		}
 
 		if (cid != 0)
 		{
