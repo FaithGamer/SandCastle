@@ -62,7 +62,9 @@ namespace SandCastle
 		void SetNearClippingPlane(float nearClippingPlane);
 		void SetFarClippingPlane(float farClippingPlane);
 		/// @brief Pixel perfect zoom according to constraints.
-		/// unzooming will be limited depending on window resolution
+		/// The zoom snaps to values keeping a whole number of screen pixels per
+		/// texel (integers when zooming in, multiples of 1/(targetHeight/pxStep)
+		/// when unzooming). Unzooming is limited by the window resolution.
 		/// your textures should be 1 PPU.
 		void SetPxZoom(float scale);
 
