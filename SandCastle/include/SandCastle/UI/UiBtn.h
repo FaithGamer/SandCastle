@@ -27,6 +27,9 @@ namespace SandCastle
 		/// width (e.g. size them all to the widest). No-op if `width` is smaller than the
 		/// button's natural (label + padding) width.
 		void SetWidth(float width);
+		/// @brief Tint the button's label glyphs with `color`. Persists until the next
+		/// enable/disable (which reset the label to the context's text colour).
+		void SetLabelColor(Color color);
 	protected:
 		virtual void OnHover() override;
 		virtual void OnUnHover() override;
@@ -37,7 +40,6 @@ namespace SandCastle
 		void OnLang(LangSignal* signal);
 		void ShowHideFrame();
 		void ResetLabelOffset();
-		void SetLabelColor(Color color);
 		Signal<UiBtn*> langSignal;
 
 	protected:
