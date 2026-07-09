@@ -134,6 +134,7 @@ namespace SandCastle
 		std::string m_cursorPath;
 		int m_cursorHotX = 0;
 		int m_cursorHotY = 0;
+		bool m_cursorVisible = true;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
 		// Letterbox scissor rect (pixels, GL bottom-left origin). Inactive by

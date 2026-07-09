@@ -170,6 +170,19 @@ namespace SandCastle
 
 	void Window::ShowCursor(bool showCursor)
 	{
+		auto instance = Instance();
+		instance->m_cursorVisible = showCursor;
+
+		// A custom cursor is drawn by RenderCursorOverlay each frame; the OS
+		// cursor stays hidden either way (showing it would draw the OS arrow on
+		// top of our overlay). Visibility is gated by m_cursorVisible, which the
+		// overlay honors.
+		if (instance->m_cursorTex != 0)
+		{
+			SDL_HideCursor();
+			return;
+		}
+
 		if (showCursor)
 			SDL_ShowCursor();
 		else
@@ -281,6 +294,8 @@ namespace SandCastle
 	void Window::RenderCursorOverlay()
 	{
 		if (m_cursorTex == 0)
+			return;
+		if (!m_cursorVisible)
 			return;
 		if (GetMinimized())
 			return;
