@@ -568,8 +568,13 @@ namespace SandCastle
 	void Window::Clear()
 	{
 		Bind();
+		// Clear the FULL window (bars included) to the clear color, then restore
+		// the letterbox scissor for the actual draws — otherwise the scissor
+		// would leave last frame's content in the bars.
+		glDisable(GL_SCISSOR_TEST);
 		glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		ApplyScissor();
 	}
 
 	void Window::OnSDLPixelSizeChanged(SDL_Event& event)
@@ -589,5 +594,34 @@ namespace SandCastle
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, Math::FloorToEven(m_pixelSize.x), Math::FloorToEven(m_pixelSize.y));
+		ApplyScissor();
+	}
+
+	void Window::SetLetterbox(int x, int y, int width, int height)
+	{
+		auto ins = Instance();
+		ins->m_letterboxActive = true;
+		ins->m_letterboxX = x;
+		ins->m_letterboxY = y;
+		ins->m_letterboxW = width;
+		ins->m_letterboxH = height;
+	}
+
+	void Window::ClearLetterbox()
+	{
+		Instance()->m_letterboxActive = false;
+	}
+
+	void Window::ApplyScissor()
+	{
+		if (m_letterboxActive)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(m_letterboxX, m_letterboxY, m_letterboxW, m_letterboxH);
+		}
+		else
+		{
+			glDisable(GL_SCISSOR_TEST);
+		}
 	}
 }

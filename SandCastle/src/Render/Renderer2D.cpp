@@ -439,6 +439,10 @@ namespace SandCastle
 		}
 		End();
 
+		// The letterbox scissor is a game-scene clip; the dev ImGui overlay and
+		// the software cursor overlay must draw to the full window.
+		glDisable(GL_SCISSOR_TEST);
+
 #ifdef SC_IMGUI
 		if (ImGuiLoader::enabled)
 		{
@@ -568,16 +572,47 @@ namespace SandCastle
 		m_sceneUniform.camProjView = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 		m_sceneUniform.camZoom = camera->zoom * 2.f;
 		m_sceneUniform.camAspectRatio = camera->GetAspectRatio();
-		m_sceneUniform.winSize = (Vec2f)Window::GetSize();
-		m_sceneUniform.targetSize = (Vec2f)camera->GetTargetSize();
-		m_sceneUniform.reduction = camera->GetReduction();
+		// Match the even-floored size the viewport/scissor actually use (see
+		// Window::Bind / RenderTexture::Bind). Feeding the shader the raw window
+		// size instead desyncs the per-fragment band math from the rasterized
+		// rows and splits the bars asymmetrically on odd/scaled pixel sizes
+		// (e.g. Steam Deck 1280x800 via gamescope).
+		Vec2i winPx = { (int)Math::FloorToEven(Window::GetSize().x),
+						(int)Math::FloorToEven(Window::GetSize().y) };
+		Vec2u tgt = camera->GetTargetSize();
 		auto contraints = camera->GetConstraints();
+		m_sceneUniform.winSize = (Vec2f)winPx;
+		m_sceneUniform.targetSize = (Vec2f)tgt;
+		m_sceneUniform.reduction = camera->GetReduction();
 		m_sceneUniform.cropMask = 0;
 		if (contraints.cropH)
 			m_sceneUniform.cropMask |= (1 << 0);
 		if (contraints.cropW)
 			m_sceneUniform.cropMask |= (1 << 1);
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);
+
+		// Authoritative letterbox: a hardware scissor on the centered target
+		// rect, enforced on every window write (layer composite, post-process,
+		// GPU particles, custom shaders). The per-fragment crop in the quad
+		// shaders is now a redundant early-out. Scissor origin is bottom-left,
+		// matching gl_FragCoord, so the band math above and the rect agree.
+		if (contraints.cropW || contraints.cropH)
+		{
+			int x = 0, y = 0, w = winPx.x, h = winPx.y;
+			if (contraints.cropW && (int)tgt.x < winPx.x)
+			{
+				w = (int)tgt.x;
+				x = (winPx.x - w) / 2;
+			}
+			if (contraints.cropH && (int)tgt.y < winPx.y)
+			{
+				h = (int)tgt.y;
+				y = (winPx.y - h) / 2;
+			}
+			Window::SetLetterbox(x, y, w, h);
+		}
+		else
+			Window::ClearLetterbox();
 
 		//ResetStats
 		m_stats.drawCalls = 0;

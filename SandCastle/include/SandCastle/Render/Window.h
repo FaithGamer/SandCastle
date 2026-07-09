@@ -37,6 +37,15 @@ namespace SandCastle
 		static void ClearWindow();
 		static void RenderWindow();
 		static void SetClearColor(Vec4f color);
+		/// @brief Restrict every subsequent window draw to a letterbox rect
+		/// (in pixels, GL bottom-left origin) via glScissor. Set once per frame
+		/// by Renderer2D from the camera constraints. This is the authoritative
+		/// pillar/letterbox enforcement: post-process passes, GPU particles and
+		/// custom shaders alike can't paint into the black bars, regardless of
+		/// whether they carry the per-fragment crop.
+		static void SetLetterbox(int x, int y, int width, int height);
+		/// @brief Remove the letterbox scissor (full-window drawing).
+		static void ClearLetterbox();
 		static void ShowCursor(bool showCursor);
 		/// @brief Set a custom cursor from a BMP file. The OS cursor is hidden
 		/// over the window and the engine draws the cursor texture itself as a
@@ -107,6 +116,9 @@ namespace SandCastle
 		void Init(std::string name, Vec2u size);
 		// Apply m_fullscreen / m_compositedFullscreen to the SDL window.
 		void ApplyWindowMode();
+		// Enable+set or disable the letterbox scissor per m_letterbox*. Called
+		// from Bind()/Clear() so scissor state always tracks the window target.
+		void ApplyScissor();
 		void RefreshCursor();
 		void OnCursorResize(Vec2u size);
 		void UploadCursorTexture(SDL_Surface* rgbaSurface);
@@ -124,6 +136,13 @@ namespace SandCastle
 		int m_cursorHotY = 0;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
+		// Letterbox scissor rect (pixels, GL bottom-left origin). Inactive by
+		// default so games without camera constraints render full-window.
+		bool m_letterboxActive = false;
+		int m_letterboxX = 0;
+		int m_letterboxY = 0;
+		int m_letterboxW = 0;
+		int m_letterboxH = 0;
 		// Custom-cursor GL state. Texture uploaded from main thread; shader
 		// and VAO/VBO lazily created on the render thread on first draw.
 		GLuint m_cursorTex = 0;

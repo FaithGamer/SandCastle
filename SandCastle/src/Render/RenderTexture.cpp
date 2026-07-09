@@ -63,11 +63,15 @@ namespace SandCastle
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
 		glViewport(0, 0, Math::FloorToEven(m_size.x), Math::FloorToEven(m_size.y));
 		//glViewport(0, 0, m_size.x, m_size.y);
+		// Offscreen targets render full-area; the letterbox scissor is a
+		// window-only clip. Leaving it enabled here would crop layer/post FBOs.
+		glDisable(GL_SCISSOR_TEST);
 	}
 
 	void RenderTexture::Clear()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferId);
+		glDisable(GL_SCISSOR_TEST);
 		glClearColor(0, 0, 0, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
