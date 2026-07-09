@@ -125,10 +125,15 @@ namespace SandCastle
 			return;
 		}
 		m_px.pxZoom = scale;
-		float min = 1.f / ((float)m_targetSize.y / (float)m_px.pxStep);
+		//Screen pixels per world unit is zoom * targetSize.y / pxStep: it must
+		//stay a whole number or nearest sampling drops/doubles texel rows.
+		//Unzoom therefore snaps to multiples of 1/(targetSize.y/pxStep) - a
+		//power of two like 0.5 lands on 1.5 px per texel when that quotient is
+		//odd (e.g. 1080p at pxStep 360).
+		float steps = (float)m_targetSize.y / (float)m_px.pxStep;
 		float z = scale;
 		if (scale < 1.f)
-			z = Math::RoundPow2(scale, min);
+			z = std::max(1.f, std::round(scale * steps)) / steps;
 		else
 			z = std::round(z);
 
@@ -341,8 +346,10 @@ namespace SandCastle
 
 	void Camera::ComputePixelPerfect()
 	{
-		unsigned int ww = (unsigned int)Window::GetSize().x;
-		unsigned int wh = (unsigned int)Window::GetSize().y;
+		//Even-floored to match the viewport the renderer actually uses
+		//(Window::Bind / RenderTexture::Bind floor to even).
+		unsigned int ww = (unsigned int)Math::FloorToEven(Window::GetSize().x);
+		unsigned int wh = (unsigned int)Math::FloorToEven(Window::GetSize().y);
 		m_reduction = 1.f; // reset
 		if (m_px.pxStep > 0)
 		{
@@ -395,7 +402,9 @@ namespace SandCastle
 
 	void Camera::ComputeReduction()
 	{
-		m_reduction = (float)m_targetSize.y / (float)Window::GetSize().y;
+		//Even-floored so the reduction cancels exactly against the even-floored
+		//viewport height and the world->pixel scale stays whole.
+		m_reduction = (float)m_targetSize.y / (float)Math::FloorToEven(Window::GetSize().y);
 	}
 
 	void Camera::ComputeProjectionMatrix() const

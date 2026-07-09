@@ -22,6 +22,15 @@
 
 namespace SandCastle
 {
+	//FBO sizes are floored to even so the texture matches the even-floored
+	//viewport (Window::Bind / RenderTexture::Bind). An odd-sized texture
+	//sampled over an even viewport shears every composite by a fraction of
+	//a pixel, which breaks pixel-perfect rendering on odd window sizes.
+	static Vec2u EvenSize(Vec2i size)
+	{
+		return Vec2u((unsigned int)Math::FloorToEven(size.x), (unsigned int)Math::FloorToEven(size.y));
+	}
+
 	Renderer2D::Renderer2D()
 	{
 
@@ -364,7 +373,7 @@ namespace SandCastle
 		ins->m_layers[layer].height = height;
 		auto windowSize = Window::GetSize();
 		unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
-		ins->m_layers[layer].target->SetSize({ width, height });
+		ins->m_layers[layer].target->SetSize(EvenSize(Vec2i(width, height)));
 	}
 
 	void Renderer2D::CreateQuadBatchThread(RenderLayer& layer, Material* material)
@@ -471,20 +480,20 @@ namespace SandCastle
 			if (layer.height == 0)
 			{
 				//The layer fit the window size
-				layer.target->SetSize((Vec2u)windowSize);
+				layer.target->SetSize(EvenSize(windowSize));
 			}
 			else
 			{
 				//The layer has it's own size, but fit the window's aspect ratio
 
 				unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)layer.height);
-				layer.target->SetSize({ width, layer.height });
+				layer.target->SetSize(EvenSize(Vec2i(width, layer.height)));
 			}
 		}
 		if (m_postTarget)
-			m_postTarget->SetSize((Vec2u)windowSize);
+			m_postTarget->SetSize(EvenSize(windowSize));
 		if (m_postTargetB)
-			m_postTargetB->SetSize((Vec2u)windowSize);
+			m_postTargetB->SetSize(EvenSize(windowSize));
 	}
 	void Renderer2D::AddLayerThread(std::string name, unsigned int height, Material* material)
 	{
@@ -499,12 +508,12 @@ namespace SandCastle
 		sptr<RenderTexture> layer;
 		if (height == 0)
 		{
-			layer = makesptr<RenderTexture>(windowSize);
+			layer = makesptr<RenderTexture>(EvenSize(windowSize));
 		}
 		else
 		{
 			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
-			layer = makesptr<RenderTexture>(Vec2u(width, height));
+			layer = makesptr<RenderTexture>(EvenSize(Vec2i(width, height)));
 		}
 		m_layers.push_back(RenderLayer(name, index, layer, material, layerVertexArray, height, false, false));
 		m_renderLayers.push_back(&m_layers.back());
@@ -526,7 +535,7 @@ namespace SandCastle
 		sptr<RenderTexture> layer;
 		/*if (height == 0)
 		{*/
-			layer = makesptr<RenderTexture>(windowSize);
+			layer = makesptr<RenderTexture>(EvenSize(windowSize));
 		/*}
 		else
 		{
@@ -560,7 +569,7 @@ namespace SandCastle
 		if (!m_postScene.empty() || !m_postOverlay.empty())
 		{
 			if (!m_postTarget)
-				m_postTarget = makesptr<RenderTexture>(Window::GetSize());
+				m_postTarget = makesptr<RenderTexture>(EvenSize(Window::GetSize()));
 			m_postTarget->Clear();
 			SetRenderTarget(m_postTarget);
 		}
@@ -590,6 +599,21 @@ namespace SandCastle
 		if (contraints.cropW)
 			m_sceneUniform.cropMask |= (1 << 1);
 		m_sceneUniformBuffer->SetData(&m_sceneUniform, sizeof(SceneBufferData), 0);
+
+		//Pixel-perfect snapping state for DrawQuad. With pxStep constraints the
+		//world->pixel scale is a whole number, but nothing forces quad corners
+		//onto whole pixels: a centered origin on an odd-sized sprite puts the
+		//corners on half units, which lands on half pixels at odd scales (1x,
+		//3x...) and makes nearest sampling drop/double texel rows. DrawQuad
+		//translates each quad to the nearest pixel of its target FBO.
+		m_pxSnap = contraints.pxStep > 0;
+		if (m_pxSnap)
+		{
+			auto camPos = camera->GetPosition();
+			m_pxSnapCam = { camPos.x, camPos.y };
+			m_pxSnapZoomRed = camera->zoom * camera->GetReduction();
+			m_pxSnapWinH = (float)winPx.y;
+		}
 
 		// Authoritative letterbox: a hardware scissor on the centered target
 		// rect, enforced on every window write (layer composite, post-process,
@@ -659,7 +683,7 @@ namespace SandCastle
 			else
 			{
 				if (!m_postTargetB)
-					m_postTargetB = makesptr<RenderTexture>(Window::GetSize());
+					m_postTargetB = makesptr<RenderTexture>(EvenSize(Window::GetSize()));
 				dst = (cur == m_postTarget) ? m_postTargetB : m_postTarget;
 				dst->Bind();
 			}
@@ -882,6 +906,7 @@ namespace SandCastle
 			{-0.5f, 0.5f}
 		};
 		Vec2f origin((float)quad.orgX, (float)quad.orgY);
+		QuadData* firstVertex = batch.quadPtr;
 		for (int i = 0; i < 4; i++)
 		{
 			auto vertPos = (quadVertexPosition[i] - origin);// *m_sceneUniform.reduction;
@@ -892,6 +917,42 @@ namespace SandCastle
 
 			//Incrementing the pointed value of the quad vertex array
 			batch.quadPtr++;
+		}
+
+		if (m_pxSnap && quad.rotation == 0.f)
+		{
+			//Mirror of the GPU mapping (default.vert + ortho projection):
+			//  pxX = 0.5 * VPW - S * (worldX - camX)
+			//  pxY = 0.5 * VPH + S * (worldY - camY)
+			//with S = zoom * reduction * VPH, VP even-floored. The 0.5 * VP terms
+			//are whole pixels, so only the S term decides the fractional part.
+			//The whole quad is translated by the delta of its first corner:
+			//translation-only keeps the quad's size, and since the size maps to
+			//whole pixels every corner aligns.
+			//Only quads that CAN be texel-aligned are snapped: rotated or
+			//fractional-pixel-sized quads (spinning/scaled particles, text
+			//glyphs, load bars) gain nothing and would wobble by a pixel as
+			//their corner drifts across rounding boundaries while moving.
+			float fboH = m_pxSnapWinH;
+			if (quad.layerID < (LayerID)m_layers.size() && m_layers[quad.layerID].height != 0)
+				fboH = (float)Math::FloorToEven(m_layers[quad.layerID].height);
+			float pxPerUnit = m_pxSnapZoomRed * fboH;
+			float pxW = quad.size.x * pxPerUnit;
+			float pxH = quad.size.y * pxPerUnit;
+			bool wholeSize = std::abs(pxW - std::round(pxW)) < 0.001f
+				&& std::abs(pxH - std::round(pxH)) < 0.001f;
+			if (pxPerUnit > 0.f && wholeSize)
+			{
+				float px = -pxPerUnit * (firstVertex->vertexPos.x - m_pxSnapCam.x);
+				float py = pxPerUnit * (firstVertex->vertexPos.y - m_pxSnapCam.y);
+				float dx = -(std::round(px) - px) / pxPerUnit;
+				float dy = (std::round(py) - py) / pxPerUnit;
+				for (int i = 0; i < 4; i++)
+				{
+					firstVertex[i].vertexPos.x += dx;
+					firstVertex[i].vertexPos.y += dy;
+				}
+			}
 		}
 
 		batch.indexCount += 6;

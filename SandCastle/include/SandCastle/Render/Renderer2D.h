@@ -391,6 +391,13 @@ namespace SandCastle
 		GpuParticleShaders m_gpuShaders;
 		float m_gpuFrameDelta = 0.f;
 
+		//Pixel-perfect quad snapping (state captured in Begin from Camera::main;
+		//consumed by DrawQuad on the render thread).
+		bool m_pxSnap = false;
+		Vec2f m_pxSnapCam = { 0.f, 0.f };
+		float m_pxSnapZoomRed = 0.f; //camera zoom * reduction
+		float m_pxSnapWinH = 0.f;    //even-floored window pixel height
+
 		//Others
 		LayerID m_lastLayerAdded = 0;
 		Texture* m_createdTexture = nullptr;
