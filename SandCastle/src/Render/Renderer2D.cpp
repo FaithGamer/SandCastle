@@ -919,7 +919,7 @@ namespace SandCastle
 			batch.quadPtr++;
 		}
 
-		if (m_pxSnap)
+		if (m_pxSnap && quad.rotation == 0.f)
 		{
 			//Mirror of the GPU mapping (default.vert + ortho projection):
 			//  pxX = 0.5 * VPW - S * (worldX - camX)
@@ -927,13 +927,21 @@ namespace SandCastle
 			//with S = zoom * reduction * VPH, VP even-floored. The 0.5 * VP terms
 			//are whole pixels, so only the S term decides the fractional part.
 			//The whole quad is translated by the delta of its first corner:
-			//translation-only keeps the quad's size (and shape under rotation),
-			//and since sprite sizes map to whole pixels every corner aligns.
+			//translation-only keeps the quad's size, and since the size maps to
+			//whole pixels every corner aligns.
+			//Only quads that CAN be texel-aligned are snapped: rotated or
+			//fractional-pixel-sized quads (spinning/scaled particles, text
+			//glyphs, load bars) gain nothing and would wobble by a pixel as
+			//their corner drifts across rounding boundaries while moving.
 			float fboH = m_pxSnapWinH;
 			if (quad.layerID < (LayerID)m_layers.size() && m_layers[quad.layerID].height != 0)
 				fboH = (float)Math::FloorToEven(m_layers[quad.layerID].height);
 			float pxPerUnit = m_pxSnapZoomRed * fboH;
-			if (pxPerUnit > 0.f)
+			float pxW = quad.size.x * pxPerUnit;
+			float pxH = quad.size.y * pxPerUnit;
+			bool wholeSize = std::abs(pxW - std::round(pxW)) < 0.001f
+				&& std::abs(pxH - std::round(pxH)) < 0.001f;
+			if (pxPerUnit > 0.f && wholeSize)
 			{
 				float px = -pxPerUnit * (firstVertex->vertexPos.x - m_pxSnapCam.x);
 				float py = pxPerUnit * (firstVertex->vertexPos.y - m_pxSnapCam.y);

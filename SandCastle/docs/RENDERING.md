@@ -239,7 +239,7 @@ For bursty effects, raise `SetLimit` once at startup rather than per-spawn — s
 - `Camera::main` is the active camera the renderer samples from.
 - Default is orthographic; toggle with `SetOrthographic(false)`.
 - `Camera::Constraints` for pixel-perfect rendering — call `SetDefault()` for a 16:9 360p baseline.
-- With `pxStep` constraints active, the renderer snaps every quad (sprites, text, UI, particles — any material) to the pixel grid of its layer's framebuffer in `DrawQuad`, translation-only. Without this, centered origins on odd-sized sprites put corners on half pixels at odd scales (1x at 360p, 3x at 1080p) and nearest sampling drops/doubles texel rows. `SetPxZoom` also snaps so the screen-pixels-per-texel scale stays whole.
+- With `pxStep` constraints active, the renderer snaps quads to the pixel grid of their layer's framebuffer in `DrawQuad`, translation-only. Without this, centered origins on odd-sized sprites put corners on half pixels at odd scales (1x at 360p, 3x at 1080p) and nearest sampling drops/doubles texel rows. Only quads that can be texel-aligned are snapped — unrotated, whole-pixel size; rotated or fractionally scaled quads (spinning particles, text glyphs) would just wobble. `SetPxZoom` also snaps so the screen-pixels-per-texel scale stays whole.
 - `WorldToScreen` / `ScreenToWorld` for hit testing.
 
 ## Stats
