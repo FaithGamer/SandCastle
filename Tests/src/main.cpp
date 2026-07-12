@@ -21,6 +21,8 @@
 #include "RateTest.h"
 #include "SoundTest.h"
 #include "MaskTest.h"
+#include "PhysicsTest.h"
+#include "PhysicsPlayground.h"
 
 using namespace SandCastle;
 
@@ -35,7 +37,7 @@ int main()
 	//WindowEvents();
 	//Serialization();
 	//Benchmark1();
-	Benchmark2(); //~190 -> 210
+	//Benchmark2(); //~190 -> 210
 	//Delegates();
 	//Signals();
 	//FontTest();
@@ -49,4 +51,6 @@ int main()
 	//RateTest();
 	//SoundTest();
 	//MaskTest();
+	PhysicsTest(); //headless assertions
+	PhysicsPlayground(); //interactive visual test
 }

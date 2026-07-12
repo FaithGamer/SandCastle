@@ -1,6 +1,6 @@
 # SandCastle — AI Index
 
-C++ 2D game engine. Static library (`x64-Debug`, `x64-Release`, `x64-Distrib`). OpenGL 3.3 + SDL3 + EnTT + Box2D + miniaudio + FreeType + Dear ImGui (debug only).
+C++ 2D game engine. Static library (`x64-Debug`, `x64-Release`, `x64-Distrib`). OpenGL 3.3 + SDL3 + EnTT + Box2D v3 + miniaudio + FreeType + Dear ImGui (debug only).
 
 **Read this file before searching.** Every public class / method has a `/// @brief` in its header — open the header, do not grep. This document maps every concept and file so you can navigate without trial-and-error.
 
@@ -89,7 +89,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | Render | [Render.h](include/SandCastle/Render.h) | Renderer2D, Camera, Shader, Material, RenderOptions, Texture, Sprite, Animation/Animator, SpriteRender, LineRenderer, WireRender, Particle/ParticleEmitter, ParticleSystem, Writer (text), Window, RenderTarget/RenderTexture, VertexBuffer/IndexBuffer/UniformBuffer/VertexArray, Rect, Color, Layer, Beziers |
 | ECS | [ECS.h](include/SandCastle/ECS.h) | `Entity`, `EntityId`, `System`, `Systems`, `PointableComponent` macro, `StateMachine<T>`, `States`, `GameSys<D, A>` |
 | Input | [Input.h](include/SandCastle/Input.h) | `Inputs`, `InputMap`, `Input`/`ButtonInput`/`DirectionalInput`/`TextualInput`, `Bindings`, `Key`/`Mouse`/`Gamepad` namespaces |
-| Physics | [PhysicsEngine.h](include/SandCastle/PhysicsEngine.h) | `Physics`, `Body` (+ Static/Kinematic), `Collider` (`Box2D`/`Circle2D`/`Polygon2D`), AABB queries, `PhysicsSystem`, `ColliderRenderDebugSystem` |
+| Physics | [PhysicsEngine.h](include/SandCastle/PhysicsEngine.h) | `Physics`, `Body` (+ Static/Kinematic), `Collider` (`Box2D`/`Circle2D`/`Polygon2D`), raycast/overlap queries, `PhysicsSystem`, `ColliderRenderDebugSystem` — wraps Box2D v3 (id-based C API) |
 | UI | [UIheader.h](include/SandCastle/UIheader.h) | `Ui` builder + `UiCanvas`/`UiTxt`/`UiBtn`/`UiAnimBtn`/`UiImg`/`UiCheckbox`/`UiLoadBar`/`UiFrame` widgets, `UiContext` |
 | Audio | [Audioheader.h](include/SandCastle/Audioheader.h) | `Audio`, `Sound`, `HighrateSound`, `SoundHandle` |
 | Steam | [Steam/Steam.h](include/SandCastle/Steam/Steam.h) | `Steam` static class + `SteamSettings` — optional Steamworks (achievements, stats, player id/name, language, DLC, overlay, Steam Deck). Opt-in via `Steam::Init` before `Engine::Launch`; every call safe no-op when disabled. `steam_api64.lib` is merged into `SandCastle.lib`; games using it only ship `vendor/steam_api64.dll`. |
@@ -150,7 +150,7 @@ Details in [docs/ASSETS.md](docs/ASSETS.md).
 
 ### Vendored dependencies (under `include/`)
 
-SDL3, glad (OpenGL 3.3 loader), glm, EnTT, Box2D, miniaudio, FreeType, Dear ImGui (with SDL3+OpenGL3 backends), nlohmann/json, spdlog, stb (image), PerlinNoise, earcut, boost int128, float16_t, Steamworks SDK (`include/steam/`, opt-in — see Steam module). All ship as headers + prebuilt `.lib` in `vendor/`. See [docs/BUILD.md#vendored](docs/BUILD.md#vendored).
+SDL3, glad (OpenGL 3.3 loader), glm, EnTT, Box2D v3.1.1, miniaudio, FreeType, Dear ImGui (with SDL3+OpenGL3 backends), nlohmann/json, spdlog, stb (image), PerlinNoise, earcut, boost int128, float16_t, Steamworks SDK (`include/steam/`, opt-in — see Steam module). All ship as headers + prebuilt `.lib` in `vendor/`. See [docs/BUILD.md#vendored](docs/BUILD.md#vendored).
 
 ### Preprocessor defines
 

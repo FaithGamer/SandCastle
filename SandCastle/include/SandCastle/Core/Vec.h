@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <math.h>
-#include <box2d/b2_math.h>
+#include <box2d/math_functions.h>
 
 namespace SandCastle
 {
@@ -148,7 +148,7 @@ namespace SandCastle
 		}
 		inline operator b2Vec2() const
 		{
-			return b2Vec2(x, y);
+			return b2Vec2{ (float)x, (float)y };
 		}
 		inline Vec3<T> operator-()
 		{
@@ -306,7 +306,7 @@ namespace SandCastle
 		}
 		inline operator b2Vec2() const
 		{
-			return b2Vec2((float)x, (float)y);
+			return b2Vec2{ (float)x, (float)y };
 		}
 		inline Vec2<T> operator-()
 		{

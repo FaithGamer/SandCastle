@@ -135,9 +135,6 @@
     <ClCompile Include="src\Tools\SpriteExport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\AABBQueries.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Physics\Bitmask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -438,9 +435,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Internal\Singleton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SandCastle\Physics\AABBQueries.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\SandCastle\Core\Bitmask.h">

@@ -722,3 +722,9 @@ But I'm not happy with the additional processing required, so I'm letting the us
 2026 july 6
 
 -added optional Steamworks integration: Steam static class + SteamSettings (Steam/Steam.h), vendored Steamworks SDK headers in include/steam/, steam_api64.lib+dll in vendor/. Opt-in via Steam::Init, no link dependency when unused.
+
+2026 july 12
+
+-upgraded Box2D 2.4.2 to Box2D 3.1.1 (id-based C API). Vendored source in vendor/box2d-3.1.1 with a hand-written box2d.vcxproj (same project GUID, still merged into SandCastle.lib). Rewrote the Physics module on b2WorldId/b2BodyId/b2ShapeId: Body/StaticBody/KinematicBody now hold ids (safe double-destroy/move semantics, Box2D-side userData re-pointed on move, PointableComponent for stable addresses), colliders create v3 shapes and implement PointInside/CircleOverlap/ColliderOverlap for real, queries moved from AABBQueries callback classes into Physics.cpp free callbacks (AABBQueries.h/.cpp deleted). PhysicsSystem now actually syncs KinematicBody to Transform (skips unmoved bodies). Fixed old bugs: raycast distance was scaled by fraction twice, raycast mask-skip reset the ray length, PointInside results missing layer, null b2Body deref in ~Body. World still query-only, never stepped.
+
+-added physics tests to Tests project: PhysicsTest.h (headless assertion suite, ~45 checks over queries/layers/moves/ECS storage) and PhysicsPlayground.h (interactive visual test: mouse-driven kinematic player, overlap/raycast tinting, spawn/despawn boxes, collider toggle, Q/E rotation; visuals are tinted 1px-square/circle sprites scaled to the exact collider dimensions). New circle.png/.texture test asset (64px white circle, 1 world unit).

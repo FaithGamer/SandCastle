@@ -1,12 +1,11 @@
 #pragma once
 
 /// @file PhysicsEngine.h
-/// @brief Aggregate include for the Physics module: a Box2D wrapper exposing
-/// Body components (Static/Kinematic/Dynamic), Colliders (Box2D, Circle2D,
-/// Polygon2D), AABB/raycast/overlap queries, and the PhysicsSystem that steps
-/// the simulation each frame.
+/// @brief Aggregate include for the Physics module: a Box2D (v3) wrapper exposing
+/// Body components (Static/Kinematic), Colliders (Box2D, Circle2D,
+/// Polygon2D), raycast/overlap queries, and the PhysicsSystem that syncs
+/// kinematic bodies with their entity's Transform.
 
-#include "SandCastle/Physics/AABBQueries.h"
 #include "SandCastle/Core/Bitmask.h"
 #include "SandCastle/Physics/Body.h"
 #include "SandCastle/Physics/Physics.h"
