@@ -12,9 +12,6 @@ namespace SandCastle
 		ColliderRenderDebugSystem();
 		void Start() override;
 		void Update() override;
-		/*void LateUpdate() override;
-		int GetUsedMethod() override;
-		void OnRemove() override;*/
 
 		/// @brief Construct the collider render entities that have been queued up.
 		///By default this method is called automatically Update
@@ -26,18 +23,8 @@ namespace SandCastle
 		/// Set to true by default.
 		void UpdateQueueAuto(bool updateQueuAuto);
 
-		/*void OnAddKinematicBody(ComponentSignal signal);
-		void OnAddStaticBody(ComponentSignal signal);
-		void OnRemoveKinematicBody(ComponentSignal signal);
-		void OnRemoveStaticBody(ComponentSignal signal);*/
 	private:
 		bool m_updateQueueAuto;
 		uint32_t m_debugLayer;
-		/*std::unordered_set<EntityId> m_newStaticBodies;
-		std::unordered_set<EntityId> m_newKinematicBodies;
-
-		std::unordered_set<EntityId> m_removedStaticBodies;
-		std::unordered_set<EntityId> m_removedKinematicBodies;*/
 	};
 }
-

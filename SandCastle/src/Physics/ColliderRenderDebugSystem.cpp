@@ -2,6 +2,8 @@
 #include "SandCastle/Physics/ColliderRenderDebugSystem.h"
 #include "SandCastle/Physics/Collider.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/Transform.h"
+#include "SandCastle/ECS/Entity.h"
 #include "SandCastle/Physics/Body.h"
 
 namespace SandCastle
@@ -10,30 +12,13 @@ namespace SandCastle
 	ColliderRenderDebugSystem::ColliderRenderDebugSystem() : m_debugLayer(0), m_updateQueueAuto(true)
 	{
 		SetPriority(-9999);
-
-		//Will add a collider render for each new body
-		//ListenAddGet<KinematicBody>(&ColliderRenderDebugSystem::OnAddKinematicBody);
-		//ListenAddGet<StaticBody>(&ColliderRenderDebugSystem::OnAddStaticBody);
 	}
 
-	void AddColliderRender(Entity bodyEntt, KinematicBody* body)
+	void AddColliderRender(Entity bodyEntt, Body* body)
 	{
 		auto colliders = body->GetColliders();
-		for (int i = 0; i < colliders->size(); i++)
+		for (size_t i = 0; i < colliders->size(); i++)
 		{
-			Entity wireEntt = Entity::Create();
-			wireEntt.AddGet<ColliderRender>(&*(*colliders)[i]);
-			wireEntt.Add<Transform>();
-			bodyEntt.AddChild(wireEntt);
-		}
-	}
-
-	void AddColliderRender(Entity bodyEntt, StaticBody* body)
-	{
-		auto colliders = body->GetColliders();
-		for (int i = 0; i < colliders->size(); i++)
-		{
-			
 			Entity wireEntt = Entity::Create();
 			wireEntt.AddGet<ColliderRender>(&*(*colliders)[i]);
 			wireEntt.Add<Transform>();
@@ -44,16 +29,6 @@ namespace SandCastle
 	void ColliderRenderDebugSystem::Start()
 	{
 		m_debugLayer = Renderer2D::GetLayerId("DebugLayer");
-
-		//Create ColliderRender for every body
-		/*ForeachEntities<KinematicBody>([](Entity entity, KinematicBody& body)
-			{
-				AddColliderRender(entity, &body);
-			});
-		ForeachEntities<StaticBody>([](Entity entity, StaticBody& body)
-			{
-				AddColliderRender(entity, &body);
-			});*/
 	}
 
 	void ColliderRenderDebugSystem::Update()
@@ -63,58 +38,14 @@ namespace SandCastle
 		UpdateQueue();
 	}
 
-	/*void ColliderRenderDebugSystem::LateUpdate()
-	{
-		sptr<Renderer2D> renderer = Renderer2D::Instance();
-		ForeachEntities<ColliderRender, Transform>([&](Entity entity, ColliderRender& collider, Transform& transform)
-			{
-				renderer->DrawWire(*collider.wire, transform, m_debugLayer);
-			});
-	}
-
-	int ColliderRenderDebugSystem::GetUsedMethod()
-	{
-		return System::Method::Render | System::Method::Updt;
-	}
-
-	void ColliderRenderDebugSystem::OnRemove()
-	{
-		StopListenAddGet<Body>();
-		ForeachEntities<ColliderRender>([](Entity entity, ColliderRender& collider)
-			{
-				entity.Destroy();
-			});
-	}*/
-
 	void ColliderRenderDebugSystem::UpdateQueue()
 	{
-		/*for (auto it = m_newKinematicBodies.begin(); it != m_newKinematicBodies.end(); it++)
-		{
-			Entity entity(*it);
-			if (entity.Valid())
-				AddColliderRender(entity, entity.GetNoCheck<KinematicBody>());
-		}
-		for (auto it = m_newStaticBodies.begin(); it != m_newStaticBodies.end(); it++)
-		{
-			Entity entity(*it);
-			if(entity.Valid())
-				AddColliderRender(entity, entity.GetNoCheck<StaticBody>());
-		}
-		m_newKinematicBodies.clear();
-		m_newStaticBodies.clear();*/
+		//Collider render entity creation is currently disabled, pending the
+		//wire rendering path being reactivated (WireRenderSystem).
 	}
 
 	void ColliderRenderDebugSystem::UpdateQueueAuto(bool updateQueueAuto)
 	{
 		m_updateQueueAuto = updateQueueAuto;
 	}
-
-	/*void ColliderRenderDebugSystem::OnAddKinematicBody(ComponentSignal signal)
-	{
-		m_newKinematicBodies.insert(signal.entity);
-	}
-	void ColliderRenderDebugSystem::OnAddStaticBody(ComponentSignal signal)
-	{
-		m_newStaticBodies.insert(signal.entity);
-	}*/
 }

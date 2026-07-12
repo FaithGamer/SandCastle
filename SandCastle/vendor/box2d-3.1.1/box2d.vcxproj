@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Distrib|x64">
+      <Configuration>Distrib</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\aabb.c" />
+    <ClCompile Include="src\arena_allocator.c" />
+    <ClCompile Include="src\array.c" />
+    <ClCompile Include="src\bitset.c" />
+    <ClCompile Include="src\body.c" />
+    <ClCompile Include="src\broad_phase.c" />
+    <ClCompile Include="src\constraint_graph.c" />
+    <ClCompile Include="src\contact.c" />
+    <ClCompile Include="src\contact_solver.c" />
+    <ClCompile Include="src\core.c" />
+    <ClCompile Include="src\distance.c" />
+    <ClCompile Include="src\distance_joint.c" />
+    <ClCompile Include="src\dynamic_tree.c" />
+    <ClCompile Include="src\geometry.c" />
+    <ClCompile Include="src\hull.c" />
+    <ClCompile Include="src\id_pool.c" />
+    <ClCompile Include="src\island.c" />
+    <ClCompile Include="src\joint.c" />
+    <ClCompile Include="src\manifold.c" />
+    <ClCompile Include="src\math_functions.c" />
+    <ClCompile Include="src\motor_joint.c" />
+    <ClCompile Include="src\mouse_joint.c" />
+    <ClCompile Include="src\mover.c" />
+    <ClCompile Include="src\prismatic_joint.c" />
+    <ClCompile Include="src\revolute_joint.c" />
+    <ClCompile Include="src\sensor.c" />
+    <ClCompile Include="src\shape.c" />
+    <ClCompile Include="src\solver.c" />
+    <ClCompile Include="src\solver_set.c" />
+    <ClCompile Include="src\table.c" />
+    <ClCompile Include="src\timer.c" />
+    <ClCompile Include="src\types.c" />
+    <ClCompile Include="src\weld_joint.c" />
+    <ClCompile Include="src\wheel_joint.c" />
+    <ClCompile Include="src\world.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\box2d\base.h" />
+    <ClInclude Include="include\box2d\box2d.h" />
+    <ClInclude Include="include\box2d\collision.h" />
+    <ClInclude Include="include\box2d\id.h" />
+    <ClInclude Include="include\box2d\math_functions.h" />
+    <ClInclude Include="include\box2d\types.h" />
+    <ClInclude Include="src\aabb.h" />
+    <ClInclude Include="src\arena_allocator.h" />
+    <ClInclude Include="src\array.h" />
+    <ClInclude Include="src\atomic.h" />
+    <ClInclude Include="src\bitset.h" />
+    <ClInclude Include="src\body.h" />
+    <ClInclude Include="src\broad_phase.h" />
+    <ClInclude Include="src\constants.h" />
+    <ClInclude Include="src\constraint_graph.h" />
+    <ClInclude Include="src\contact.h" />
+    <ClInclude Include="src\contact_solver.h" />
+    <ClInclude Include="src\core.h" />
+    <ClInclude Include="src\ctz.h" />
+    <ClInclude Include="src\id_pool.h" />
+    <ClInclude Include="src\island.h" />
+    <ClInclude Include="src\joint.h" />
+    <ClInclude Include="src\sensor.h" />
+    <ClInclude Include="src\shape.h" />
+    <ClInclude Include="src\solver.h" />
+    <ClInclude Include="src\solver_set.h" />
+    <ClInclude Include="src\table.h" />
+    <ClInclude Include="src\world.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="src\box2d.natvis" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{d806b2b9-8bef-3370-8310-a4acd0895af9}</ProjectGuid>
+    <RootNamespace>box2d</RootNamespace>
+    <ProjectName>box2d</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\bin\int\box2d\$(Platform)-$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\bin\int\box2d\$(Platform)-$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
+    <OutDir>$(ProjectDir)..\bin\$(Platform)-$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\bin\int\box2d\$(Platform)-$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Distrib|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SandCastle", "SandCastle\Sa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "SandCastle\vendor\imgui-1.92.1\imgui.vcxproj", "{CCAD1A25-CE0C-4179-8C66-6CF7E119053E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "box2d", "SandCastle\vendor\box2d-2.4.2\src\box2d.vcxproj", "{D806B2B9-8BEF-3370-8310-A4ACD0895AF9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "box2d", "SandCastle\vendor\box2d-3.1.1\box2d.vcxproj", "{D806B2B9-8BEF-3370-8310-A4ACD0895AF9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glad", "SandCastle\vendor\glad\glad.vcxproj", "{3A4323E7-9DE1-4F77-A00A-826ACB74F7C6}"
 EndProject

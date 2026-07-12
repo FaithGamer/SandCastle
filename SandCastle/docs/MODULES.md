@@ -131,16 +131,15 @@ Aggregate: [Input.h](../include/SandCastle/Input.h).
 
 ## Physics (`include/SandCastle/Physics/`)
 
-Box2D wrapper. Aggregate: [PhysicsEngine.h](../include/SandCastle/PhysicsEngine.h).
+Box2D v3 wrapper (id-based C API: `b2WorldId`/`b2BodyId`/`b2ShapeId`). Aggregate: [PhysicsEngine.h](../include/SandCastle/PhysicsEngine.h).
 
 | Header | Key types | Notes |
 |---|---|---|
-| [Physics.h](../include/SandCastle/Physics/Physics.h) | `Physics` (singleton) | `RaycastClosest`, `RaycastAll`, `CircleOverlap`, `PointInside`, `BodyOverlap`, `AddLayer(name)`, `GetLayerMask(names...)`, `DrawColliders(bool)`, `GetB2World()`. |
-| [Body.h](../include/SandCastle/Physics/Body.h) | `Body` (component), `StaticBody`, `KinematicBody`, `RaycastResult`, `OverlapResult` | Multi-collider supported. **Set layer/mask BEFORE adding colliders** — current limitation. `Body::Type` enum is currently descriptive only. |
-| [Collider.h](../include/SandCastle/Physics/Collider.h) | `Collider` interface, `Box2D`, `Circle2D`, `Polygon2D`, `Triangle`, `ColliderRender` | `Polygon2D::SetPoints` then `AddCollider`. |
-| [AABBQueries.h](../include/SandCastle/Physics/AABBQueries.h) | Internal Box2D callbacks for raycast/overlap queries | Used by `Physics::Raycast*` etc. — don't call directly. |
-| [PhysicsSystem.h](../include/SandCastle/Physics/PhysicsSystem.h) | `PhysicsSystem` | Auto-pushed by engine. Steps the world, syncs to `Transform`. |
-| [ColliderRenderDebugSystem.h](../include/SandCastle/Physics/ColliderRenderDebugSystem.h) | `ColliderRenderDebugSystem` | Push manually for debug wireframes. `UpdateQueueAuto(false)` for thread-safe deferred construction. |
+| [Physics.h](../include/SandCastle/Physics/Physics.h) | `Physics` (singleton) | `RaycastClosest`, `RaycastAll`, `CircleOverlap`, `PointInside`, `BodyOverlap`, `AddLayer(name)`, `GetLayerMask(names...)`, `DrawColliders(bool)`, `GetB2World()` (returns `b2WorldId`). Query callbacks live in `Physics.cpp`. |
+| [Body.h](../include/SandCastle/Physics/Body.h) | `Body` (component), `StaticBody`, `KinematicBody`, `RaycastResult`, `OverlapResult` | Multi-collider supported. Layer/mask can be changed any time (live shapes updated). `GetB2Body()` returns a `b2BodyId`. `Body::Type` enum is currently descriptive only. |
+| [Collider.h](../include/SandCastle/Physics/Collider.h) | `Collider` interface, `Box2D`, `Circle2D`, `Polygon2D`, `ColliderRender` | `Polygon2D::SetPoints` then `AddCollider`. Overlap/point tests (`PointInside`, `CircleOverlap`, `ColliderOverlap`) are implemented on the base class. |
+| [PhysicsSystem.h](../include/SandCastle/Physics/PhysicsSystem.h) | `PhysicsSystem` | Auto-pushed by engine. Syncs `KinematicBody` to `Transform` each frame. The world is query-only and never stepped. |
+| [ColliderRenderDebugSystem.h](../include/SandCastle/Physics/ColliderRenderDebugSystem.h) | `ColliderRenderDebugSystem` | Push manually for debug wireframes. `UpdateQueueAuto(false)` for thread-safe deferred construction. Wire drawing currently dormant (WireRenderSystem disabled). |
 
 ---
 

@@ -23,6 +23,12 @@
     <ClInclude Include="src\Launch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\PhysicsTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsPlayground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\DrawSprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>

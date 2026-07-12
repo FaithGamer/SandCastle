@@ -34,7 +34,7 @@ All shipped under `include/` (headers) + `vendor/` (prebuilt `.lib`). No package
 | glad | OpenGL 3.3 loader | `include/glad/` |
 | glm | Math (vec / mat / quat) | `include/glm/` |
 | EnTT | ECS registry | `include/entt/` |
-| Box2D | 2D physics | `include/box2d/` |
+| Box2D v3.1.1 | 2D physics (C API, built from `vendor/box2d-3.1.1/box2d.vcxproj`) | `include/box2d/` |
 | miniaudio | Audio engine | `include/miniaudio/` |
 | FreeType | Font rasterizer (used by `Writer`) | `include/freetype/`, `ft2build.h` |
 | Dear ImGui | Debug UI (`SC_IMGUI` only) | `include/imgui/` (with SDL3 + OpenGL3 backends) |

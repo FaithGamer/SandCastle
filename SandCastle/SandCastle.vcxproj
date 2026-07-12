@@ -404,7 +404,6 @@
     <ClCompile Include="src\Input\TextualInput.cpp" />
     <ClCompile Include="src\Internal\ImGuiLoader.cpp" />
     <ClCompile Include="src\Tools\SpriteExport.cpp" />
-    <ClCompile Include="src\Physics\AABBQueries.cpp" />
     <ClCompile Include="src\Physics\Bitmask.cpp" />
     <ClCompile Include="src\Physics\Body.cpp" />
     <ClCompile Include="src\Physics\Collider.cpp" />
@@ -521,7 +520,6 @@
     <ClInclude Include="include\SandCastle\Tools\SpriteExport.h" />
     <ClInclude Include="include\SandCastle\PhysicsEngine.h" />
     <ClInclude Include="include\SandCastle\Steam\Steam.h" />
-    <ClInclude Include="include\SandCastle\Physics\AABBQueries.h" />
     <ClInclude Include="include\SandCastle\Core\Bitmask.h" />
     <ClInclude Include="include\SandCastle\Physics\Body.h" />
     <ClInclude Include="include\SandCastle\Physics\Collider.h" />
@@ -569,7 +567,7 @@
     <None Include="include\SandCastle\Core\Signal.tpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="vendor\box2d-2.4.2\src\box2d.vcxproj">
+    <ProjectReference Include="vendor\box2d-3.1.1\box2d.vcxproj">
       <Project>{d806b2b9-8bef-3370-8310-a4acd0895af9}</Project>
     </ProjectReference>
     <ProjectReference Include="vendor\glad\glad.vcxproj">

@@ -6,139 +6,211 @@
 
 namespace SandCastle
 {
+	//Same tolerance as Box2D's own world overlap queries (0.1 * linear slop)
+	static constexpr float overlapTolerance = 0.0005f;
+
+	b2ShapeProxy GetShapeProxy(b2ShapeId shapeId)
+	{
+		switch (b2Shape_GetType(shapeId))
+		{
+		case b2_circleShape:
+		{
+			b2Circle circle = b2Shape_GetCircle(shapeId);
+			return b2MakeProxy(&circle.center, 1, circle.radius);
+		}
+		case b2_capsuleShape:
+		{
+			b2Capsule capsule = b2Shape_GetCapsule(shapeId);
+			return b2MakeProxy(&capsule.center1, 2, capsule.radius);
+		}
+		case b2_segmentShape:
+		{
+			b2Segment segment = b2Shape_GetSegment(shapeId);
+			return b2MakeProxy(&segment.point1, 2, 0);
+		}
+		case b2_chainSegmentShape:
+		{
+			b2Segment segment = b2Shape_GetChainSegment(shapeId).segment;
+			return b2MakeProxy(&segment.point1, 2, 0);
+		}
+		case b2_polygonShape:
+		{
+			b2Polygon polygon = b2Shape_GetPolygon(shapeId);
+			return b2MakeProxy(polygon.vertices, polygon.count, polygon.radius);
+		}
+		default:
+		{
+			LOG_ERROR("GetShapeProxy: unsupported Box2D shape type.");
+			b2Vec2 zero{ 0, 0 };
+			return b2MakeProxy(&zero, 1, 0);
+		}
+		}
+	}
+
+	bool Collider::ProxyOverlap(const b2ShapeProxy& proxy, b2Transform proxyTransform)
+	{
+		for (auto& shape : m_shapes)
+		{
+			b2DistanceInput input;
+			input.proxyA = proxy;
+			input.proxyB = GetShapeProxy(shape);
+			input.transformA = proxyTransform;
+			input.transformB = b2Body_GetTransform(b2Shape_GetBody(shape));
+			input.useRadii = true;
+
+			b2SimplexCache cache = { 0 };
+			b2DistanceOutput output = b2ShapeDistance(&input, &cache, nullptr, 0);
+			if (output.distance < overlapTolerance)
+				return true;
+		}
+		return false;
+	}
+
+	bool Collider::ColliderOverlap(Collider* collider)
+	{
+		for (auto& shape : collider->m_shapes)
+		{
+			b2ShapeProxy proxy = GetShapeProxy(shape);
+			b2Transform transform = b2Body_GetTransform(b2Shape_GetBody(shape));
+			if (ProxyOverlap(proxy, transform))
+				return true;
+		}
+		return false;
+	}
+
+	bool Collider::CircleOverlap(Vec2f point, float radius)
+	{
+		b2Vec2 center = point;
+		b2ShapeProxy proxy = b2MakeProxy(&center, 1, radius);
+		return ProxyOverlap(proxy, b2Transform_identity);
+	}
+
+	bool Collider::PointInside(Vec2f point)
+	{
+		for (auto& shape : m_shapes)
+		{
+			if (b2Shape_TestPoint(shape, point))
+				return true;
+		}
+		return false;
+	}
+
+	b2AABB Collider::GetAABB()
+	{
+		if (m_shapes.empty())
+		{
+			return b2AABB{ { 0, 0 }, { 0, 0 } };
+		}
+		b2AABB aabb = b2Shape_GetAABB(m_shapes[0]);
+		for (size_t i = 1; i < m_shapes.size(); i++)
+		{
+			aabb = b2AABB_Union(aabb, b2Shape_GetAABB(m_shapes[i]));
+		}
+		return aabb;
+	}
+
+	void Collider::SetBody(Body* body, const b2Filter& filter)
+	{
+		m_body = body;
+		b2ShapeDef def = b2DefaultShapeDef();
+		def.filter = filter;
+		CreateShapes(def);
+	}
+
+	void Collider::SetFilter(const b2Filter& filter)
+	{
+		for (auto& shape : m_shapes)
+		{
+			b2Shape_SetFilter(shape, filter);
+		}
+	}
+
+	void Collider::DestroyShapes()
+	{
+		for (auto& shape : m_shapes)
+		{
+			if (b2Shape_IsValid(shape))
+			{
+				b2DestroyShape(shape, false);
+			}
+		}
+		m_shapes.clear();
+		m_body = nullptr;
+	}
+
+	///
+	///
+	///Box
+	///
+	///
+
 	Box2D::Box2D()
 	{
-		m_shape.SetAsBox(1, 1);
+		m_polygon = b2MakeBox(0.5f, 0.5f);
 	}
 
 	Box2D::Box2D(Vec2f dimensions)
 	{
-		m_shape.SetAsBox(dimensions.x * 0.5f, dimensions.y * 0.5f);
+		m_polygon = b2MakeBox(dimensions.x * 0.5f, dimensions.y * 0.5f);
 	}
 
 	Box2D::Box2D(float width, float height)
 	{
-		m_shape.SetAsBox(width * 0.5f, height * 0.5f);
+		m_polygon = b2MakeBox(width * 0.5f, height * 0.5f);
 	}
 
-	void Box2D::SetBody(Body* body, b2Filter filter, UserData& userData)
+	void Box2D::CreateShapes(const b2ShapeDef& def)
 	{
-		//Create fixture and attach to body
-		b2Body* b2B = body->GetB2Body();
-		b2FixtureDef fixtureDef;
-		fixtureDef.shape = &m_shape;
-		fixtureDef.userData.pointer = (uintptr_t)&userData;
-		auto fixture = b2B->CreateFixture(&fixtureDef);
-
-		fixture->SetFilterData(filter);
-		m_body = body;
-
-	}
-
-	bool Box2D::B2ShapeOverlap(b2Shape* shape, b2Transform& transform)
-	{
-		return b2TestOverlap(&m_shape, 0, shape, 0, m_body->GetB2Body()->GetTransform(), transform);
-	}
-
-	bool Box2D::ColliderOverlap(Collider* collider)
-	{
-		return false;
-	}
-
-	bool Box2D::CircleOverlap(Vec2f point, float radius)
-	{
-		return false;
-	}
-
-	bool Box2D::PointInside(Vec2f point)
-	{
-		return false;
+		m_shapes.emplace_back(b2CreatePolygonShape(m_body->GetB2Body(), &def, &m_polygon));
 	}
 
 	void Box2D::SetupRender(ColliderRender* render)
 	{
-		render->wire = makesptr<WireRender>(6);
-		render->wire->AddPoint(m_shape.m_vertices[0]);
-		render->wire->AddPoint(m_shape.m_vertices[1]);
-		render->wire->AddPoint(m_shape.m_vertices[2]);
-		render->wire->AddPoint(m_shape.m_vertices[3]);
-		render->wire->AddPoint(m_shape.m_vertices[0]);
+		render->wire = makesptr<WireRender>(m_polygon.count + 2);
+		for (int i = 0; i < m_polygon.count; i++)
+		{
+			render->wire->AddPoint(m_polygon.vertices[i]);
+		}
+		render->wire->AddPoint(m_polygon.vertices[0]);
 		render->wire->SetColor(Vec4f(0, 1, 0, 1));
 	}
 
-	b2AABB Box2D::GetAABB()
-	{
-		b2AABB aabb;
-		m_shape.ComputeAABB(&aabb, m_body->GetB2Body()->GetTransform(), 0);
-		return aabb;
-	}
-
 	///
-	/// 
+	///
 	///Circle
 	///
 	///
 
 	Circle2D::Circle2D()
 	{
-		m_shape.m_radius = 1.f;
+		m_circle = b2Circle{ { 0, 0 }, 1.f };
 	}
 	Circle2D::Circle2D(float radius)
 	{
-		m_shape.m_radius = radius;
+		m_circle = b2Circle{ { 0, 0 }, radius };
 	}
 
-	void Circle2D::SetBody(Body* body, b2Filter filter, UserData& userData)
+	void Circle2D::CreateShapes(const b2ShapeDef& def)
 	{
-		b2Body* b2B = body->GetB2Body();
-		b2FixtureDef fixtureDef;
-		fixtureDef.shape = &m_shape;
-		fixtureDef.userData.pointer = (uintptr_t)&userData;
-		auto fixture = b2B->CreateFixture(&fixtureDef);
-		fixture->SetFilterData(filter);
-		m_body = body;
+		m_shapes.emplace_back(b2CreateCircleShape(m_body->GetB2Body(), &def, &m_circle));
 	}
 
-	bool Circle2D::B2ShapeOverlap(b2Shape* shape, b2Transform& transform)
-	{
-		return b2TestOverlap(&m_shape, 0, shape, 0, m_body->GetB2Body()->GetTransform(), transform);
-	}
-	bool Circle2D::ColliderOverlap(Collider* collider)
-	{
-		return false;
-	}
-	bool Circle2D::CircleOverlap(Vec2f point, float radius)
-	{
-		return false;
-	}
-	bool Circle2D::PointInside(Vec2f point)
-	{
-		return false;
-	}
 	void Circle2D::SetupRender(ColliderRender* render)
 	{
 		render->wire = makesptr<WireRender>(21);
 		for (int i = 0; i < 21; i++)
 		{
-			auto dir = Math::AngleToVec((float)i / (float)20 * 360)* m_shape.m_radius;
+			auto dir = Math::AngleToVec((float)i / (float)20 * 360) * m_circle.radius;
 			render->wire->AddPoint(dir);
 		}
 		render->wire->SetColor(Vec4f(0, 1, 0, 1));
 	}
-	b2AABB Circle2D::GetAABB()
-	{
-		b2AABB aabb;
-		m_shape.ComputeAABB(&aabb, m_body->GetB2Body()->GetTransform(), 0);
-		return aabb;
-	}
-
 
 	///
-	/// 
+	///
 	///Polygon
 	///
 	///
-
 
 	Polygon2D::Polygon2D()
 	{
@@ -149,69 +221,49 @@ namespace SandCastle
 		m_points.emplace_back(points);
 	}
 
-	void Polygon2D::SetBody(Body* body, b2Filter filter, UserData& userData)
+	void Polygon2D::CreateShapes(const b2ShapeDef& def)
 	{
-		m_body = body;
-		BakeTriangles();
-		if (m_triangles.size() < 3)
+		std::vector<uint32_t> triangles = BakeTriangles();
+		if (triangles.size() < 3)
 		{
 			LOG_ERROR("Polygon2D collider have less than 3 vertices. Cannot add collider to body.");
 			return;
 		}
-		int i = 0;
 
-		b2FixtureDef def;
-		def.filter = filter;
-		std::vector<Vec2f> debugTriangles; //to do to delete
-
-		while (i * 3 < m_triangles.size())
+		b2BodyId body = m_body->GetB2Body();
+		for (size_t i = 0; i * 3 < triangles.size(); i++)
 		{
-			b2Vec2* vertices = new b2Vec2[3];
-			m_shapes.emplace_back(b2PolygonShape());
-			for (int j = 0; j < 3; j++)
+			b2Vec2 vertices[3];
+			for (size_t j = 0; j < 3; j++)
 			{
-				vertices[j] = m_points[0][m_triangles[i * 3 + j]];
-				debugTriangles.emplace_back(m_points[0][m_triangles[i * 3 + j]]);
+				vertices[j] = m_points[0][triangles[i * 3 + j]];
 			}
-			m_shapes.back().Set(vertices, 3);
-
-
-			def.shape = &m_shapes.back();
-			def.userData.pointer = (uintptr_t)&userData;
-
-			b2Body* b2B = body->GetB2Body();
-			auto fixture = b2B->CreateFixture(&def);
-
-			delete[] vertices;
-			i++;
+			b2Hull hull = b2ComputeHull(vertices, 3);
+			if (hull.count < 3)
+			{
+				//Degenerate (collinear or duplicated points) triangle
+				continue;
+			}
+			b2Polygon polygon = b2MakePolygon(&hull, 0);
+			m_shapes.emplace_back(b2CreatePolygonShape(body, &def, &polygon));
 		}
 	}
-	bool Polygon2D::B2ShapeOverlap(b2Shape* shape, b2Transform& transform)
-	{
-		for (int i = 0; i < m_shapes.size(); i++)
-		{
-			if (b2TestOverlap(&m_shapes[i], 0, shape, 0, m_body->GetB2Body()->GetTransform(), transform))
-				return true;
-		}
-		return false;
-	}
-	bool Polygon2D::ColliderOverlap(Collider* collider)
-	{
-		return false;
-	}
-	bool Polygon2D::CircleOverlap(Vec2f point, float radius)
-	{
-		return false;
-	}
-	bool Polygon2D::PointInside(Vec2f point)
-	{
-		return false;
-	}
+
 	void Polygon2D::SetupRender(ColliderRender* render)
 	{
-		//to do
-		//render->wire
+		auto& points = m_points[0];
+		render->wire = makesptr<WireRender>((unsigned int)points.size() + 2);
+		for (auto& point : points)
+		{
+			render->wire->AddPoint(point);
+		}
+		if (!points.empty())
+		{
+			render->wire->AddPoint(points[0]);
+		}
+		render->wire->SetColor(Vec4f(0, 1, 0, 1));
 	}
+
 	void Polygon2D::AddPoint(Vec2f point)
 	{
 		m_points[0].emplace_back(point);
@@ -220,31 +272,8 @@ namespace SandCastle
 	{
 		m_points[0] = points;
 	}
-	void Polygon2D::BakeTriangles()
+	std::vector<uint32_t> Polygon2D::BakeTriangles()
 	{
-		m_triangles = mapbox::earcut(m_points);
-	}
-
-	b2AABB Polygon2D::GetAABB()
-	{
-		b2AABB aabb;
-		aabb.lowerBound.x = -99999999.f;
-		aabb.lowerBound.y = -99999999.f;
-		aabb.upperBound.x = 99999999.f;
-		aabb.upperBound.y = 99999999.f;
-		for (int i = 1; i < m_shapes.size(); i++)
-		{
-			b2AABB saabb;
-			m_shapes[i].ComputeAABB(&saabb, m_body->GetB2Body()->GetTransform(), 0);
-			if (saabb.lowerBound.x < aabb.lowerBound.x)
-				aabb.lowerBound.x = saabb.lowerBound.x;
-			if (saabb.lowerBound.y < aabb.lowerBound.y)
-				aabb.lowerBound.y = saabb.lowerBound.y;
-			if (saabb.upperBound.x > aabb.upperBound.x)
-				aabb.upperBound.x = saabb.upperBound.x;
-			if (saabb.upperBound.y > aabb.upperBound.y)
-				aabb.upperBound.y = saabb.upperBound.y;
-		}
-		return aabb;
+		return mapbox::earcut(m_points);
 	}
 }

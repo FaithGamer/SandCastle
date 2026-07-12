@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SandCastle/Internal/Singleton.h"
-#include "SandCastle/Physics/AABBQueries.h"
 #include "SandCastle/Core/Bitmask.h"
 #include "SandCastle/Physics/Body.h"
 
@@ -21,16 +20,15 @@ namespace SandCastle
 		static void PointInside(std::vector<OverlapResult>& results, Vec2f pos, Bitmask16 mask = 65535);
 		static void BodyOverlap(std::vector<OverlapResult>& results, Body* body, Bitmask16 mask = 65535);
 		static int GetBodyCount();
-		//static float BodyDistance(Body& lhs, Body& rhs);
 
 		/// @brief Add a collision layer with a custom name
 		/// Generally call this method a bunch of time before launching the engine and creating Bodies
-		/// @param layerName 
+		/// @param layerName
 		static void AddLayer(String layerName)
 		{
 			Instance()->m_layers.AddFlag(layerName);
 		}
-		/// @brief Create a bitmask for the given collision layers. 
+		/// @brief Create a bitmask for the given collision layers.
 		/// Layers must have been added first using AddLayer.
 		/// @return Bitmask16 of layers
 		template <typename ...Str>
@@ -40,12 +38,13 @@ namespace SandCastle
 		}
 
 		/// @brief Enable/Disable drawing the colliders wireframe
-		/// @param draw 
+		/// @param draw
 		static void DrawColliders(bool draw);
-		static b2World* GetB2World();
+		/// @brief Underlying Box2D world id (advanced usage: joints, stepping, etc.).
+		static b2WorldId GetB2World();
 	private:
 
-		b2World* m_world;
+		b2WorldId m_world;
 		friend Singleton<Physics>;
 		Filter16 m_layers;
 	};

@@ -47,6 +47,8 @@
     <ClInclude Include="src\BasicInputs.h" />
     <ClInclude Include="src\LayerTest.h" />
     <ClInclude Include="src\MaskTest.h" />
+    <ClInclude Include="src\PhysicsPlayground.h" />
+    <ClInclude Include="src\PhysicsTest.h" />
     <ClInclude Include="src\PixPerfectGame.h" />
     <ClInclude Include="src\RateTest.h" />
     <ClInclude Include="src\Rotation.h" />
