@@ -117,9 +117,29 @@ mySignal.Send(&p);
 
 ## State machines
 
-Generic `StateMachine<EnumT>` is a client-side pattern — see [meat/src/StateMachine.h](../../../meat/src/StateMachine.h). The engine doesn't ship a state machine class; pick whichever fits your game.
+The engine ships `StateMachine<T>` ([ECS/StateMachine.h](../include/SandCastle/ECS/StateMachine.h)), one per enum type, registered in the global `States` registry ([ECS/States.h](../include/SandCastle/ECS/States.h)) with `States::Push<T>()`. Transition with `States::Set<T>(value)`; read with `States::Get<T>()`. `SetState` fires Exit callbacks on the outgoing state, then Enter callbacks on the incoming one.
 
-The engine's own subsystems (Cash::State, Slave::State, etc. in `meat`) follow the convention of nesting the enum inside the owning component / system (`Cash::State::Cashout`, `Slave::State::Walking`).
+`GameSys<D, A>` ([ECS/GameSys.h](../include/SandCastle/ECS/GameSys.h)) subclasses register per-state callbacks from `LinkCallbacks()` via `PushEnter/PushExit/PushUpdate/PushLateUpdate/PushFixedUpdate(state, &Sys::Method)`.
+
+### Data scope
+
+A `GameSys` can declare the lifetime of its data entity declaratively:
+
+```cpp
+void XSys::LinkCallbacks()
+{
+    SetScope(GameState::Run);                       // single state
+    // SetScope({GameState::Run, GameState::Pause}); // or a set of states
+    PushEnter(GameState::Run, &XSys::OnEnterRun);
+    PushExit(GameState::Run, &XSys::OnExitRun);
+}
+```
+
+The engine then owns `_d`'s lifetime: `CreateData()` runs when the machine enters the scope (before that state's Enter callbacks, so every Enter handler — of any system — can rely on scoped data being alive), and `DeleteData()` runs when it leaves the scope (after the state's Exit callbacks, so Exit handlers can still read `_d`). Transitions between two states of the same scope keep the data alive. If the machine is already in a scope state when `SetScope` is called, the data is created immediately.
+
+Rules: one scope per system, one enum type; a scoped system must not call `CreateData`/`DeleteData` manually. Systems without a scope keep the manual pattern (`CreateData` in an Enter handler or `OnStart`, `DeleteData` in an Exit handler) — nothing changes for them.
+
+Under the hood this is `StateMachine<T>::PushScope(states, onEnterScope, onExitScope)`, usable directly for non-data scope needs.
 
 ## Threading
 

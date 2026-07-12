@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "SandCastle/Core/std_macros.h"
@@ -36,6 +37,8 @@ namespace SandCastle
         inline T GetState() const { return _state; }
 
         /// @brief Switch state. Fires Exit on the old state, then Enter on the new one.
+        /// Scopes losing coverage fire their exit-of-scope callback after Exit; scopes
+        /// gaining coverage fire their enter-of-scope callback before Enter.
         /// No-op if the requested state is already current.
         inline void SetState(T state)
         {
@@ -43,7 +46,14 @@ namespace SandCastle
                 return;
 
             Callback(_state, _exit);
+            for (Scope& scope : _scopes)
+                if (scope.onExitScope && scope.Covers(_state) && !scope.Covers(state))
+                    scope.onExitScope();
+            T previous = _state;
             _state = state;
+            for (Scope& scope : _scopes)
+                if (scope.onEnterScope && scope.Covers(state) && !scope.Covers(previous))
+                    scope.onEnterScope();
             Callback(state, _enter);
         }
 
@@ -85,8 +95,32 @@ namespace SandCastle
             _exit[state].emplace_back(std::bind(method, caller));
         }
 
+        /// @brief Register a scope: a set of states paired with enter/exit-of-scope
+        /// callbacks. `onEnterScope` fires when transitioning from a state outside
+        /// the set to one inside it, before that state's Enter callbacks;
+        /// `onExitScope` fires when transitioning from inside the set to outside,
+        /// after the old state's Exit callbacks. Transitions between two states of
+        /// the set fire neither. If the current state is already inside the set,
+        /// `onEnterScope` fires immediately.
+        void PushScope(std::unordered_set<T> states, std::function<void()> onEnterScope, std::function<void()> onExitScope)
+        {
+            _scopes.emplace_back(Scope{ std::move(states), std::move(onEnterScope), std::move(onExitScope) });
+            Scope& scope = _scopes.back();
+            if (scope.onEnterScope && scope.Covers(_state))
+                scope.onEnterScope();
+        }
+
     private:
         using CallbackMap = std::unordered_map<T, std::vector<std::function<void()>>>;
+
+        struct Scope
+        {
+            std::unordered_set<T> states;
+            std::function<void()> onEnterScope;
+            std::function<void()> onExitScope;
+
+            bool Covers(T state) const { return states.count(state) != 0; }
+        };
 
         void Callback(T state, CallbackMap& cb)
         {
@@ -102,6 +136,7 @@ namespace SandCastle
         CallbackMap _fixed;
         CallbackMap _enter;
         CallbackMap _exit;
+        std::vector<Scope> _scopes;
         T _state = (T)0;
     };
 }

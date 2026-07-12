@@ -1,5 +1,9 @@
 #pragma once
 
+#include <initializer_list>
+#include <unordered_set>
+
+#include "SandCastle/Core/Log.h"
 #include "SandCastle/Core/Serialization.h"
 #include "SandCastle/ECS/Entity.h"
 #include "SandCastle/ECS/States.h"
@@ -20,7 +24,10 @@ namespace SandCastle
     /// (A, created once at startup). Subclasses override OnStart/LoadAssets/
     /// LinkCallbacks to wire themselves up, and use PushEnter/PushExit/
     /// PushUpdate/PushLateUpdate/PushFixedUpdate to attach callbacks to a
-    /// state machine registered with States. Inherits from Serializable so the
+    /// state machine registered with States. SetScope declares the states the
+    /// data entity lives in, letting the engine drive CreateData/DeleteData;
+    /// without it the system manages the data lifetime manually.
+    /// Inherits from Serializable so the
     /// system can be serialized as part of the save/load flow; default Serialize/
     /// Deserialize are no-ops.
     template <class D, class A>
@@ -59,6 +66,20 @@ namespace SandCastle
         template <class T, class C>
         void PushFixedUpdate(T state, void (C::* method)());
 
+        /// @brief Declare the state scope of the data entity: _d exists while the
+        /// StateMachine<T> registered with States is in one of `states`, and is
+        /// deleted outside of them. CreateData runs on entering the scope, before
+        /// the state's Enter callbacks; DeleteData runs on leaving it, after the
+        /// state's Exit callbacks. Transitions between two states of the scope
+        /// keep the data alive. If the machine is already in a scope state, the
+        /// data is created immediately. Call once, from LinkCallbacks; a scoped
+        /// system must not call CreateData/DeleteData manually.
+        template <class T>
+        void SetScope(std::initializer_list<T> states);
+        /// @brief Single-state convenience overload of SetScope.
+        template <class T>
+        void SetScope(T state);
+
         /// @brief Destroy any existing data entity and create a fresh one carrying a default-constructed D.
         void CreateData();
         /// @brief Create the assets entity and attach a default-constructed A to it.
@@ -71,6 +92,9 @@ namespace SandCastle
         Entity _da;
         D* _d = nullptr;
         A* _a = nullptr;
+
+    private:
+        bool _scoped = false;
     };
 
     template <class D, class A>
@@ -143,5 +167,29 @@ namespace SandCastle
     void GameSys<D, A>::PushFixedUpdate(T state, void (C::* method)())
     {
         States::Fetch<T>()->PushFixedUpdate(state, method, static_cast<C*>(this));
+    }
+
+    template <class D, class A>
+    template <class T>
+    void GameSys<D, A>::SetScope(std::initializer_list<T> states)
+    {
+        ASSERT_LOG_ERROR(!_scoped, "SetScope called twice, a system has a single scope.");
+        if (_scoped)
+            return;
+        auto machine = States::Fetch<T>();
+        if (machine == nullptr)
+            return;
+        _scoped = true;
+        machine->PushScope(
+            std::unordered_set<T>(states),
+            [this] { CreateData(); },
+            [this] { DeleteData(); });
+    }
+
+    template <class D, class A>
+    template <class T>
+    void GameSys<D, A>::SetScope(T state)
+    {
+        SetScope(std::initializer_list<T>{ state });
     }
 }
