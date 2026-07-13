@@ -451,6 +451,14 @@ namespace SandCastle
 				min.y * (1 - t) + max.y * t,
 				min.z * (1 - t) + max.z * t);
 		}
+		/// @brief Component-wise linear interpolation between two 2D vectors.
+		template <class T>
+		inline static Vec2<T> Lerp(Vec2<T> min, Vec2<T> max, float t)
+		{
+			return Vec2<T>(
+				min.x * (1 - t) + max.x * t,
+				min.y * (1 - t) + max.y * t);
+		}
 	};
 
 	/// @brief 3D vector of floats. Engine default for world positions.

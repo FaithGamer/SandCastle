@@ -21,6 +21,17 @@ namespace SandCastle
 		static void BodyOverlap(std::vector<OverlapResult>& results, Body* body, Bitmask16 mask = 65535);
 		static int GetBodyCount();
 
+		/// @brief Advance the simulation (moves DynamicBody instances). Called
+		/// automatically by the PhysicsSystem on the fixed timestep; call it
+		/// manually only without the Systems loop (headless tests, tools).
+		static void Step(float deltaTime);
+		/// @brief World gravity in units per second squared, applied to DynamicBody instances. Default {0, -9.81}.
+		static void SetGravity(Vec2f gravity);
+		static Vec2f GetGravity();
+		/// @brief Solver sub-steps per Step call (default 4). More = more accurate stacks/contacts, more CPU.
+		static void SetSubStepCount(int subSteps);
+		static int GetSubStepCount();
+
 		/// @brief Add a collision layer with a custom name
 		/// Generally call this method a bunch of time before launching the engine and creating Bodies
 		/// @param layerName
@@ -45,6 +56,7 @@ namespace SandCastle
 	private:
 
 		b2WorldId m_world;
+		int m_subSteps = 4;
 		friend Singleton<Physics>;
 		Filter16 m_layers;
 	};

@@ -123,6 +123,11 @@ namespace SandCastle
 		/// @param seconds Interval in seconds
 		static void SetFixedUpdateTime(float seconds);
 
+		/// @brief Fraction [0, 1) of the fixed timestep accumulated toward the
+		/// next FixedUpdate at the time of the current Update. Use it to
+		/// interpolate visuals between the last two fixed steps.
+		static float GetFixedUpdateAlpha();
+
 		/// @brief Per-system timing for one frame, in milliseconds.
 		/// fixedMs is the total spent across every FixedUpdate substep of the frame.
 		struct SystemProfile

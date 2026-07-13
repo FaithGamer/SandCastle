@@ -127,11 +127,26 @@ namespace SandCastle
 		return aabb;
 	}
 
+	void Collider::SetMaterial(float density, float friction, float restitution)
+	{
+		if (!m_shapes.empty())
+		{
+			LOG_WARN("Collider::SetMaterial called after the collider was added to a Body: ignored.");
+			return;
+		}
+		m_density = density;
+		m_friction = friction;
+		m_restitution = restitution;
+	}
+
 	void Collider::SetBody(Body* body, const b2Filter& filter)
 	{
 		m_body = body;
 		b2ShapeDef def = b2DefaultShapeDef();
 		def.filter = filter;
+		def.density = m_density;
+		def.material.friction = m_friction;
+		def.material.restitution = m_restitution;
 		CreateShapes(def);
 	}
 

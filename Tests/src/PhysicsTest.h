@@ -376,6 +376,60 @@ inline void PhysicsTest()
 		Check(Physics::GetBodyCount() == 0, "ECS destroy frees Box2D bodies");
 	}
 
+	//Dynamic simulation (headless: the world is stepped manually)
+	{
+		Physics::SetGravity(Vec2f(0, -10));
+		Check(Approx(Physics::GetGravity(), Vec2f(0, -10)), "gravity set/get");
+
+		StaticBody ground(Vec2f(0, 0));
+		ground.AddCollider(makesptr<Box2D>(20.f, 1.f)); //top at y = 0.5
+
+		DynamicBody faller(Vec2f(0, 5));
+		faller.AddCollider(makesptr<Box2D>(1.f, 1.f));
+		Check(Approx(faller.GetPosition(), Vec2f(0, 5)), "dynamic body starts where created");
+
+		for (int i = 0; i < 30; i++) Physics::Step(1.f / 60.f);
+		Check(faller.GetPosition().y < 4.9f, "gravity pulls the body down");
+
+		for (int i = 0; i < 300; i++) Physics::Step(1.f / 60.f);
+		Check(Approx(faller.GetPosition().y, 1.f, 0.1f), "body comes to rest on the ground");
+		Check(Approx(faller.GetVelocity(), Vec2f(0, 0), 0.1f), "resting body has no velocity");
+
+		//Velocity and impulses, isolated from gravity
+		DynamicBody mover(Vec2f(50, 50));
+		mover.AddCollider(makesptr<Box2D>(1.f, 1.f)); //density 1: mass 1
+		mover.SetGravityScale(0.f);
+		Check(Approx(mover.GetMass(), 1.f), "mass computed from collider (density 1)");
+
+		mover.SetVelocity(Vec2f(2, 0));
+		Check(Approx(mover.GetVelocity(), Vec2f(2, 0)), "velocity set/get");
+		for (int i = 0; i < 60; i++) Physics::Step(1.f / 60.f);
+		Check(Approx(mover.GetPosition(), Vec2f(52, 50), 0.15f), "velocity moves the body");
+		Check(Approx(mover.GetPosition().y, 50.f, 0.05f), "gravity scale 0 cancels gravity");
+
+		mover.SetVelocity(Vec2f(0, 0));
+		mover.ApplyImpulse(Vec2f(0, 3));
+		Physics::Step(1.f / 60.f);
+		Check(Approx(mover.GetVelocity(), Vec2f(0, 3), 0.1f), "impulse changes velocity by impulse/mass");
+
+		//Rotation
+		DynamicBody spinner(Vec2f(80, 80));
+		spinner.AddCollider(makesptr<Box2D>(1.f, 1.f));
+		spinner.SetGravityScale(0.f);
+		spinner.SetAngularVelocity(90.f);
+		Check(Approx(spinner.GetAngularVelocity(), 90.f, 0.5f), "angular velocity set/get (degrees)");
+		for (int i = 0; i < 30; i++) Physics::Step(1.f / 60.f);
+		Check(Approx(spinner.GetRotation(), 45.f, 2.f), "angular velocity rotates the body (CCW positive)");
+
+		DynamicBody locked(Vec2f(90, 90));
+		locked.AddCollider(makesptr<Box2D>(1.f, 1.f));
+		locked.SetGravityScale(0.f);
+		locked.SetFixedRotation(true);
+		locked.SetAngularVelocity(90.f);
+		for (int i = 0; i < 30; i++) Physics::Step(1.f / 60.f);
+		Check(Approx(locked.GetRotation(), 0.f), "fixed rotation never rotates");
+	}
+
 	if (failed == 0)
 	{
 		LOG_INFO("--Physics tests: {0} passed, 0 failed--", passed);

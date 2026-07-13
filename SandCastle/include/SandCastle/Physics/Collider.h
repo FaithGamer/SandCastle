@@ -62,6 +62,11 @@ namespace SandCastle
 		};
 		virtual ~Collider() {}
 
+		/// @brief Set the physics material baked into the shapes when the collider
+		/// is added to a Body. Must be called before AddCollider (not retroactive).
+		/// Density drives DynamicBody mass. Defaults: density 1, friction 0.6, restitution 0.
+		void SetMaterial(float density, float friction, float restitution);
+
 		/// @brief For internal use: true if any of this collider's shapes overlaps the given proxy (world space).
 		bool ProxyOverlap(const b2ShapeProxy& proxy, b2Transform proxyTransform);
 		/// @brief True if any shape of `collider` overlaps any shape of this collider. Both must be attached to a Body.
@@ -90,6 +95,10 @@ namespace SandCastle
 
 		Body* m_body = nullptr;
 		std::vector<b2ShapeId> m_shapes;
+		//Box2D defaults, applied to the shape def in SetBody
+		float m_density = 1.f;
+		float m_friction = 0.6f;
+		float m_restitution = 0.f;
 	};
 
 

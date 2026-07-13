@@ -37,9 +37,10 @@ namespace SandCastle
 	};
 
 	/// @brief Wrapper around a Box2D body. Add colliders (Box2D, Circle2D, Polygon2D) to it.
-	/// Use the StaticBody / KinematicBody subclasses to actually create one:
+	/// Use the StaticBody / KinematicBody / DynamicBody subclasses to actually create one:
 	/// - StaticBody sits at a fixed position.
 	/// - KinematicBody follows the entity's Transform (synced by PhysicsSystem).
+	/// - DynamicBody is simulated by Box2D and drives the entity's Transform.
 	/// Set the collision layer/mask any time; live shapes are updated.
 	struct Body
 	{
@@ -47,8 +48,7 @@ namespace SandCastle
 		/// The Box2D side keeps a pointer to `userData`, addresses must be stable.
 		PointableComponent;
 
-		/// @brief Matches Box2D body types. Only Static and Kinematic have
-		/// dedicated subclasses; dynamic simulation is not used by the engine yet.
+		/// @brief Matches Box2D body types. Each has a dedicated subclass.
 		enum class Type
 		{
 			Static, Kinematic, Dynamic
@@ -57,7 +57,7 @@ namespace SandCastle
 		Body(Bitmask16 layer = 1);
 		Body(Body&& body) noexcept;
 		Body& operator=(Body&& body) noexcept;
-		~Body();
+		virtual ~Body();
 		/// @brief Set the layers it's on, shapes already created are updated.
 		/// @param layer
 		void SetLayer(Bitmask16 layer);
@@ -76,11 +76,15 @@ namespace SandCastle
 		/// @param results
 		void OverlappingBodies(std::vector<OverlapResult>& results);
 		/// @brief Teleport the body. Rotation in degrees, counter-clockwise positive (matches the renderer).
-		void UpdateTransform(Vec3f position, float rotation);
+		virtual void UpdateTransform(Vec3f position, float rotation);
 		/// @brief Set true for collision to happen in the X/Z plane
 		/// @param yIsZ
 		void SetYisZ(bool yIsZ);
 
+		/// @brief World position of the body, straight from Box2D.
+		Vec2f GetPosition() const;
+		/// @brief World rotation of the body in degrees, counter-clockwise positive.
+		float GetRotation() const;
 		/// @brief Bits identifying which layer(s) this body occupies.
 		Bitmask16 GetLayer() const;
 		/// @brief Bits identifying which layers this body collides against.
@@ -132,5 +136,53 @@ namespace SandCastle
 		KinematicBody(Bitmask16 layer = 1);
 		KinematicBody(KinematicBody&& body) noexcept;
 		KinematicBody& operator=(KinematicBody&& body) noexcept = default;
+	};
+	/// @brief Fully simulated by Box2D: gravity, forces, impulses, collision response.
+	/// The PhysicsSystem steps the world on the fixed timestep and writes the simulated
+	/// state back to the entity's Transform, interpolated between the last two fixed
+	/// steps so visuals stay smooth at any framerate (at the cost of up to one fixed
+	/// step of latency). Don't parent the transform and don't move it manually: the
+	/// simulation owns it.
+	/// Mass comes from the colliders (density 1). Colliders default friction: 0.6, restitution: 0.
+	class DynamicBody : public Body
+	{
+	public:
+		DynamicBody(Vec2f position, Bitmask16 layer = 1);
+		DynamicBody(DynamicBody&& body) noexcept;
+		DynamicBody& operator=(DynamicBody&& body) noexcept = default;
+
+		/// @brief Teleport the body and reset the visual interpolation to the new state
+		/// (no glide from the old position).
+		void UpdateTransform(Vec3f position, float rotation) override;
+		/// @brief Set the linear velocity, in world units per second. Wakes the body.
+		void SetVelocity(Vec2f velocity);
+		Vec2f GetVelocity() const;
+		/// @brief Set the angular velocity, in degrees per second, counter-clockwise positive. Wakes the body.
+		void SetAngularVelocity(float degreesPerSecond);
+		float GetAngularVelocity() const;
+		/// @brief Apply a force at the center of mass, accumulated until the next step. Wakes the body.
+		void ApplyForce(Vec2f force);
+		/// @brief Apply an instant impulse at the center of mass (velocity change = impulse / mass). Wakes the body.
+		void ApplyImpulse(Vec2f impulse);
+		/// @brief Per-body gravity multiplier: 0 floats, 1 default, negative rises. Wakes the body.
+		void SetGravityScale(float scale);
+		float GetGravityScale() const;
+		/// @brief Prevent the simulation from rotating this body.
+		void SetFixedRotation(bool fixed);
+		/// @brief Velocity decay per second (0 = none). Acts like drag.
+		void SetLinearDamping(float damping);
+		/// @brief Angular velocity decay per second (0 = none).
+		void SetAngularDamping(float damping);
+		/// @brief Mass computed from the colliders.
+		float GetMass() const;
+
+	protected:
+		friend PhysicsSystem;
+		//Simulated state snapshots taken at each fixed step; the PhysicsSystem
+		//interpolates the entity's Transform between them every frame.
+		Vec2f m_prevPosition;
+		Vec2f m_currPosition;
+		float m_prevRotation = 0.f;
+		float m_currRotation = 0.f;
 	};
 }

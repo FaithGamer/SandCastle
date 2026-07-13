@@ -158,6 +158,16 @@ namespace SandCastle
 		m_YisZ = yIsZ;
 	}
 
+	Vec2f Body::GetPosition() const
+	{
+		return b2Body_GetPosition(m_bodyId);
+	}
+
+	float Body::GetRotation() const
+	{
+		return Math::Degrees(b2Rot_GetAngle(b2Body_GetRotation(m_bodyId)));
+	}
+
 	Bitmask16 Body::GetLayer() const
 	{
 		return m_layer;
@@ -209,4 +219,92 @@ namespace SandCastle
 		MoveFrom(std::move(body));
 	}
 
+	DynamicBody::DynamicBody(Vec2f position, Bitmask16 layer) : Body(layer),
+		m_prevPosition(position),
+		m_currPosition(position)
+	{
+		CreateB2Body(b2_dynamicBody, position, layer);
+	}
+	DynamicBody::DynamicBody(DynamicBody&& body) noexcept :
+		m_prevPosition(body.m_prevPosition),
+		m_currPosition(body.m_currPosition),
+		m_prevRotation(body.m_prevRotation),
+		m_currRotation(body.m_currRotation)
+	{
+		MoveFrom(std::move(body));
+	}
+
+	void DynamicBody::UpdateTransform(Vec3f position, float rotation)
+	{
+		Body::UpdateTransform(position, rotation);
+		//Teleport: snap the interpolation to the new state instead of gliding there
+		m_currPosition = GetPosition();
+		m_currRotation = GetRotation();
+		m_prevPosition = m_currPosition;
+		m_prevRotation = m_currRotation;
+	}
+
+	void DynamicBody::SetVelocity(Vec2f velocity)
+	{
+		//Setting the velocity of a sleeping body has no effect until it wakes
+		b2Body_SetAwake(m_bodyId, true);
+		b2Body_SetLinearVelocity(m_bodyId, velocity);
+	}
+
+	Vec2f DynamicBody::GetVelocity() const
+	{
+		return b2Body_GetLinearVelocity(m_bodyId);
+	}
+
+	void DynamicBody::SetAngularVelocity(float degreesPerSecond)
+	{
+		b2Body_SetAwake(m_bodyId, true);
+		b2Body_SetAngularVelocity(m_bodyId, Math::Radians(degreesPerSecond));
+	}
+
+	float DynamicBody::GetAngularVelocity() const
+	{
+		return Math::Degrees(b2Body_GetAngularVelocity(m_bodyId));
+	}
+
+	void DynamicBody::ApplyForce(Vec2f force)
+	{
+		b2Body_ApplyForceToCenter(m_bodyId, force, true);
+	}
+
+	void DynamicBody::ApplyImpulse(Vec2f impulse)
+	{
+		b2Body_ApplyLinearImpulseToCenter(m_bodyId, impulse, true);
+	}
+
+	void DynamicBody::SetGravityScale(float scale)
+	{
+		b2Body_SetAwake(m_bodyId, true);
+		b2Body_SetGravityScale(m_bodyId, scale);
+	}
+
+	float DynamicBody::GetGravityScale() const
+	{
+		return b2Body_GetGravityScale(m_bodyId);
+	}
+
+	void DynamicBody::SetFixedRotation(bool fixed)
+	{
+		b2Body_SetFixedRotation(m_bodyId, fixed);
+	}
+
+	void DynamicBody::SetLinearDamping(float damping)
+	{
+		b2Body_SetLinearDamping(m_bodyId, damping);
+	}
+
+	void DynamicBody::SetAngularDamping(float damping)
+	{
+		b2Body_SetAngularDamping(m_bodyId, damping);
+	}
+
+	float DynamicBody::GetMass() const
+	{
+		return b2Body_GetMass(m_bodyId);
+	}
 }

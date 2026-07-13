@@ -23,6 +23,7 @@
 #include "MaskTest.h"
 #include "PhysicsTest.h"
 #include "PhysicsPlayground.h"
+#include "PhysicsBench.h"
 
 using namespace SandCastle;
 
@@ -52,5 +53,6 @@ int main()
 	//SoundTest();
 	//MaskTest();
 	PhysicsTest(); //headless assertions
-	PhysicsPlayground(); //interactive visual test
+	//PhysicsPlayground(); //interactive visual test
+	PhysicsBench(); //performance / limitations stress test
 }

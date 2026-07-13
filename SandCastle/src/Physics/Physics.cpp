@@ -27,7 +27,7 @@ namespace SandCastle
 	Physics::Physics()
 	{
 		b2WorldDef def = b2DefaultWorldDef();
-		def.gravity = b2Vec2{ 0, -1 };
+		def.gravity = b2Vec2{ 0, -9.81f };
 		m_world = b2CreateWorld(&def);
 	}
 	Physics::~Physics()
@@ -287,6 +287,31 @@ namespace SandCastle
 	int Physics::GetBodyCount()
 	{
 		return b2World_GetCounters(Instance()->m_world).bodyCount;
+	}
+
+	void Physics::Step(float deltaTime)
+	{
+		b2World_Step(Instance()->m_world, deltaTime, Instance()->m_subSteps);
+	}
+
+	void Physics::SetSubStepCount(int subSteps)
+	{
+		Instance()->m_subSteps = subSteps < 1 ? 1 : subSteps;
+	}
+
+	int Physics::GetSubStepCount()
+	{
+		return Instance()->m_subSteps;
+	}
+
+	void Physics::SetGravity(Vec2f gravity)
+	{
+		b2World_SetGravity(Instance()->m_world, gravity);
+	}
+
+	Vec2f Physics::GetGravity()
+	{
+		return b2World_GetGravity(Instance()->m_world);
 	}
 
 	void Physics::DrawColliders(bool draw)

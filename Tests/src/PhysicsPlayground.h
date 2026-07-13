@@ -22,6 +22,10 @@ exactly, so what you see is what the physics sees.
   through the player (layer 2).
 - Left click: place a static copy of the player's current shape, with its
   current rotation.
+- D: drop a dynamic copy of the player's current shape. It falls under
+  gravity, collides with the scene and the other dynamic shapes, and its
+  sprite follows the simulation (DynamicBody, Transform written back by the
+  PhysicsSystem each fixed step). The kinematic player can shove it around.
 - Right click: remove the last placed shape.
 - Space: toggle the player collider between circle and box
   (ClearCollider + AddCollider at runtime).
@@ -56,7 +60,7 @@ namespace PhysicsPlaygroundImpl
 		{
 			LOG_INFO("--Physics playground--");
 			LOG_INFO("Mouse: move the player | Left click: place current shape | Right click: remove last placed");
-			LOG_INFO("Space: toggle player shape circle/box | Q/E: rotate the player");
+			LOG_INFO("Space: toggle player shape circle/box | Q/E: rotate the player | D: drop a dynamic shape");
 			LOG_INFO("Red: overlaps the player | Cyan: under the cursor | Yellow: hit by the ray");
 
 			//Player (z=2) above the ray beam (z=1) above the scene (z=0)
@@ -71,6 +75,7 @@ namespace PhysicsPlaygroundImpl
 			map->GetInput("Despawn")->signal.Listen(&PlaygroundSystem::OnDespawn, this);
 			map->GetInput("ToggleShape")->signal.Listen(&PlaygroundSystem::OnToggleShape, this);
 			map->GetInput("Rotate")->signal.Listen(&PlaygroundSystem::OnRotate, this);
+			map->GetInput("Drop")->signal.Listen(&PlaygroundSystem::OnDrop, this);
 		}
 
 		void Update() override
@@ -94,6 +99,11 @@ namespace PhysicsPlaygroundImpl
 			{
 				m_spawnQueued = false;
 				SpawnShape(mouse, transform->GetRotation());
+			}
+			if (m_dropQueued)
+			{
+				m_dropQueued = false;
+				SpawnDynamic(mouse, transform->GetRotation());
 			}
 			if (m_despawnQueued)
 			{
@@ -347,6 +357,42 @@ namespace PhysicsPlaygroundImpl
 			LOG_INFO("Spawned {0}, body count: {1}", m_playerIsBox ? "box" : "circle", Physics::GetBodyCount());
 		}
 
+		//Drop a simulated copy of the player's current shape: it falls, bounces
+		//off the scene, can be shoved by the player, and its sprite follows the
+		//simulation through the PhysicsSystem transform write-back
+		void SpawnDynamic(Vec3f position, float rotation)
+		{
+			Vec2f pos(position.x, position.y);
+			Entity entity = Entity::CreateSprite(m_playerIsBox ? "square.png_0_0" : "circle.png_0_0");
+			auto* transform = entity.Get<Transform>();
+			transform->SetPosition(pos.x, pos.y, 0);
+			transform->SetScale(m_playerSize, m_playerSize);
+			transform->SetRotation(rotation);
+
+			auto* body = entity.AddGet<DynamicBody>(pos);
+			body->userData.entityId = entity.GetId();
+			if (m_playerIsBox)
+			{
+				body->AddCollider(makesptr<Box2D>(m_playerSize, m_playerSize));
+			}
+			else
+			{
+				body->AddCollider(makesptr<Circle2D>(m_playerSize * 0.5f));
+			}
+			if (rotation != 0.f)
+			{
+				body->UpdateTransform(Vec3f(pos.x, pos.y, 0), rotation);
+			}
+
+			auto* playground = entity.AddGet<PlaygroundBody>();
+			playground->baseColor = Color(245, 245, 245, 255);
+			playground->visuals = { entity.GetId() };
+			entity.Get<SpriteRender>()->color = playground->baseColor;
+
+			m_spawned.emplace_back(entity);
+			LOG_INFO("Dropped dynamic {0}, body count: {1}", m_playerIsBox ? "box" : "circle", Physics::GetBodyCount());
+		}
+
 		void DespawnBox()
 		{
 			if (m_spawned.empty())
@@ -372,6 +418,10 @@ namespace PhysicsPlaygroundImpl
 		{
 			m_rotateDir = signal->GetVec2f().x;
 		}
+		void OnDrop(InputSignal* signal)
+		{
+			m_dropQueued = true;
+		}
 
 	private:
 		Entity m_player;
@@ -384,6 +434,7 @@ namespace PhysicsPlaygroundImpl
 		bool m_spawnQueued = false;
 		bool m_despawnQueued = false;
 		bool m_toggleQueued = false;
+		bool m_dropQueued = false;
 	};
 }
 
@@ -393,10 +444,15 @@ inline void PhysicsPlayground()
 
 	Engine::Init();
 
+	//Playground shapes are ~8 units wide, so "1 meter" is ~8 units: scale
+	//gravity accordingly for a natural falling speed
+	Physics::SetGravity(Vec2f(0, -80));
+
 	auto map = Inputs::CreateInputMap("playground");
 	map->CreateButtonInput("Spawn")->BindMouse(Mouse::Button::Left);
 	map->CreateButtonInput("Despawn")->BindMouse(Mouse::Button::Right);
 	map->CreateButtonInput("ToggleShape")->BindKey(Key::Scancode::Space);
+	map->CreateButtonInput("Drop")->BindKey(Key::Scancode::D);
 
 	auto rotate = map->CreateDirectionalInput("Rotate");
 	std::vector<DirectionalButton> buttons;

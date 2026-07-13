@@ -338,6 +338,12 @@ namespace SandCastle
 		Time::fixedDelta = seconds;
 	}
 
+	float Systems::GetFixedUpdateAlpha()
+	{
+		float alpha = (float)Instance()->m_fixedUpdateAccumulator / (float)Time::fixedDelta;
+		return alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha);
+	}
+
 	Systems::SystemProfile& Systems::ProfileFor(const SystemIdPriority& system)
 	{
 		SystemProfile& p = m_profiles[system.typeId];
