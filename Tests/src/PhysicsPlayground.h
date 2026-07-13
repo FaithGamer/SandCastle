@@ -9,21 +9,24 @@ Interactive physics playground: visuals are built from simple tinted shapes
 (1px white square + white circle sprites) scaled to match the colliders
 exactly, so what you see is what the physics sees.
 
-- Move the mouse: the player shape follows it (KinematicBody synced from
-  Transform by the PhysicsSystem). Bodies it overlaps turn red, the player
-  turns orange (Body::OverlappingBodies against box, rotated box, circle,
-  concave polygon).
+- Move the mouse: the translucent player shape follows it (KinematicBody
+  synced from Transform by the PhysicsSystem). Bodies it overlaps turn red,
+  the player turns orange (Body::OverlappingBodies against box, rotated box,
+  circle, concave polygon).
+- The body directly under the cursor turns cyan (Physics::PointInside):
+  the highlight must flip exactly on the visual edge of every shape.
 - A ray is cast continuously from the emitter at the top toward the mouse
   (Physics::RaycastClosest). The beam sprite is stretched to the reported
   hit distance, so it must visually stop exactly on the surface it hits.
   The hit body turns yellow. The ray is masked to layer 1: it passes
   through the player (layer 2).
-- Left click: spawn a static box under the mouse.
-- Right click: remove the last spawned box.
+- Left click: place a static copy of the player's current shape, with its
+  current rotation.
+- Right click: remove the last placed shape.
 - Space: toggle the player collider between circle and box
   (ClearCollider + AddCollider at runtime).
 - Q / E: rotate the player (visible in box mode, rotation reaches the
-  collider through the PhysicsSystem sync).
+  collider through the PhysicsSystem sync and is applied to placed shapes).
 
 */
 
@@ -52,8 +55,9 @@ namespace PhysicsPlaygroundImpl
 		void Start() override
 		{
 			LOG_INFO("--Physics playground--");
-			LOG_INFO("Mouse: move the player | Left click: spawn a box | Right click: remove it");
-			LOG_INFO("Space: toggle player collider circle/box | Q/E: rotate the player");
+			LOG_INFO("Mouse: move the player | Left click: place current shape | Right click: remove last placed");
+			LOG_INFO("Space: toggle player shape circle/box | Q/E: rotate the player");
+			LOG_INFO("Red: overlaps the player | Cyan: under the cursor | Yellow: hit by the ray");
 
 			//Player (z=2) above the ray beam (z=1) above the scene (z=0)
 			Renderer2D::SetLayerSortZ(SpriteRender::defaultLayer, true);
@@ -89,7 +93,7 @@ namespace PhysicsPlaygroundImpl
 			if (m_spawnQueued)
 			{
 				m_spawnQueued = false;
-				SpawnBox(mouse);
+				SpawnShape(mouse, transform->GetRotation());
 			}
 			if (m_despawnQueued)
 			{
@@ -103,7 +107,7 @@ namespace PhysicsPlaygroundImpl
 					SetVisualsColor(body, body.baseColor);
 				});
 
-			//Bodies overlapping the player turn red, the player turns orange
+			//Bodies overlapping the player shape turn red, the player turns orange
 			auto* playerBody = m_player.Get<KinematicBody>();
 			std::vector<OverlapResult> overlaps;
 			playerBody->OverlappingBodies(overlaps);
@@ -112,9 +116,18 @@ namespace PhysicsPlaygroundImpl
 				TintBody(overlap.entityId, Color(235, 70, 70, 255));
 			}
 			m_player.Get<SpriteRender>()->color =
-				overlaps.empty() ? Color(240, 240, 240, 255) : Color(255, 160, 60, 255);
+				overlaps.empty() ? Color(240, 240, 240, 150) : Color(255, 160, 60, 150);
 
 			UpdateRay(mouse);
+
+			//The body directly under the cursor turns cyan (Physics::PointInside):
+			//the highlight must switch exactly when the cursor crosses the visual edge
+			std::vector<OverlapResult> underCursor;
+			Physics::PointInside(underCursor, Vec2f(mouse.x, mouse.y), Bitmask16(1));
+			for (auto& result : underCursor)
+			{
+				TintBody(result.entityId, Color(90, 220, 235, 255));
+			}
 		}
 
 		int GetUsedMethod() override
@@ -315,14 +328,23 @@ namespace PhysicsPlaygroundImpl
 			LOG_INFO("Player collider: {0}", m_playerIsBox ? "box" : "circle");
 		}
 
-		void SpawnBox(Vec3f position)
+		//Place a copy of the player's current shape and rotation
+		void SpawnShape(Vec3f position, float rotation)
 		{
 			static const Color palette[4] = {
 				Color(230, 200, 120, 255), Color(220, 140, 160, 255),
 				Color(150, 210, 210, 255), Color(200, 220, 140, 255) };
 			Color color = palette[m_spawned.size() % 4];
-			m_spawned.emplace_back(MakeBoxBody(Vec2f(position.x, position.y), 6.f, 6.f, 0.f, color));
-			LOG_INFO("Spawned box, body count: {0}", Physics::GetBodyCount());
+			Vec2f pos(position.x, position.y);
+			if (m_playerIsBox)
+			{
+				m_spawned.emplace_back(MakeBoxBody(pos, m_playerSize, m_playerSize, rotation, color));
+			}
+			else
+			{
+				m_spawned.emplace_back(MakeCircleBody(pos, m_playerSize * 0.5f, color));
+			}
+			LOG_INFO("Spawned {0}, body count: {1}", m_playerIsBox ? "box" : "circle", Physics::GetBodyCount());
 		}
 
 		void DespawnBox()
@@ -331,7 +353,7 @@ namespace PhysicsPlaygroundImpl
 				return;
 			m_spawned.back().Destroy();
 			m_spawned.pop_back();
-			LOG_INFO("Removed box, body count: {0}", Physics::GetBodyCount());
+			LOG_INFO("Removed shape, body count: {0}", Physics::GetBodyCount());
 		}
 
 		void OnSpawn(InputSignal* signal)

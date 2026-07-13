@@ -105,6 +105,20 @@ namespace SandCastle
 		b2World_CastRay(Instance()->m_world, start, translation, QueryAll(), RaycastAllCallback, &ctx);
 	}
 
+	//Overlap queries report bodies, but Box2D reports shapes: a multi-shape
+	//body (Polygon2D triangles, multiple colliders) would show up once per
+	//overlapping shape. Record each body the first time it is reported.
+	static bool AlreadyReported(std::vector<b2BodyId>& seen, b2BodyId body)
+	{
+		for (auto& id : seen)
+		{
+			if (B2_ID_EQUALS(id, body))
+				return true;
+		}
+		seen.emplace_back(body);
+		return false;
+	}
+
 	//
 	//
 	// Circle overlap
@@ -114,6 +128,7 @@ namespace SandCastle
 	struct CircleOverlapContext
 	{
 		std::vector<OverlapResult>* results;
+		std::vector<b2BodyId> seen;
 		Vec2f pos;
 		Bitmask16 mask;
 	};
@@ -130,6 +145,9 @@ namespace SandCastle
 		if (data == nullptr)
 			return true;
 
+		if (AlreadyReported(ctx->seen, b2Shape_GetBody(shapeId)))
+			return true;
+
 		//Distance between the circle center and the shape's body origin
 		Vec2f bodyPos = b2Body_GetPosition(b2Shape_GetBody(shapeId));
 		float distance = Vec::Distance(bodyPos, ctx->pos);
@@ -142,7 +160,7 @@ namespace SandCastle
 
 	void Physics::CircleOverlap(std::vector<OverlapResult>& results, Vec2f pos, float radius, Bitmask16 mask)
 	{
-		CircleOverlapContext ctx{ &results, pos, mask };
+		CircleOverlapContext ctx{ &results, {}, pos, mask };
 		b2Vec2 center = pos;
 		b2ShapeProxy proxy = b2MakeProxy(&center, 1, radius);
 		b2World_OverlapShape(Instance()->m_world, &proxy, QueryAll(), CircleOverlapCallback, &ctx);
@@ -157,6 +175,7 @@ namespace SandCastle
 	struct PointInsideContext
 	{
 		std::vector<OverlapResult>* results;
+		std::vector<b2BodyId> seen;
 		Vec2f point;
 		Bitmask16 mask;
 	};
@@ -170,11 +189,14 @@ namespace SandCastle
 			return true;
 
 		//The broad phase only matched AABBs, test the actual shape
-		if (!b2Shape_TestPoint(shapeId, ctx->point))
+		if (!ShapeOverlapsPoint(shapeId, ctx->point))
 			return true;
 
 		Collider::UserData* data = GetShapeUserData(shapeId);
 		if (data == nullptr)
+			return true;
+
+		if (AlreadyReported(ctx->seen, b2Shape_GetBody(shapeId)))
 			return true;
 
 		ctx->results->emplace_back(OverlapResult(data->entityId, 0, Bitmask16(layer)));
@@ -185,7 +207,7 @@ namespace SandCastle
 
 	void Physics::PointInside(std::vector<OverlapResult>& results, Vec2f pos, Bitmask16 mask)
 	{
-		PointInsideContext ctx{ &results, pos, mask };
+		PointInsideContext ctx{ &results, {}, pos, mask };
 		b2AABB aabb;
 		aabb.lowerBound = pos - 0.01f;
 		aabb.upperBound = pos + 0.01f;
@@ -201,6 +223,7 @@ namespace SandCastle
 	struct BodyOverlapContext
 	{
 		std::vector<OverlapResult>* results;
+		std::vector<b2BodyId> seen;
 		Body* body;
 		Bitmask16 mask;
 	};
@@ -239,6 +262,9 @@ namespace SandCastle
 		if (data == nullptr)
 			return true;
 
+		if (AlreadyReported(ctx->seen, candidate))
+			return true;
+
 		float distance = Vec::Distance((Vec2f)b2Body_GetPosition(self), (Vec2f)transform.p);
 		ctx->results->emplace_back(OverlapResult(data->entityId, distance, Bitmask16(layer)));
 
@@ -248,7 +274,7 @@ namespace SandCastle
 
 	void Physics::BodyOverlap(std::vector<OverlapResult>& results, Body* body, Bitmask16 mask)
 	{
-		BodyOverlapContext ctx{ &results, body, mask };
+		BodyOverlapContext ctx{ &results, {}, body, mask };
 		b2World_OverlapAABB(Instance()->m_world, body->GetAABB(), QueryAll(), BodyOverlapCallback, &ctx);
 	}
 

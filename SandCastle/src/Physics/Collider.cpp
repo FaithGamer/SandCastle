@@ -47,6 +47,24 @@ namespace SandCastle
 		}
 	}
 
+	bool ShapeOverlapsPoint(b2ShapeId shapeId, Vec2f point)
+	{
+		//b2Shape_TestPoint compares the GJK distance to exactly zero, which
+		//misses points sitting on edges (e.g. the internal seams of a
+		//triangulated Polygon2D). Use the same tolerance as overlap queries.
+		b2Vec2 center = point;
+		b2DistanceInput input;
+		input.proxyA = b2MakeProxy(&center, 1, 0);
+		input.proxyB = GetShapeProxy(shapeId);
+		input.transformA = b2Transform_identity;
+		input.transformB = b2Body_GetTransform(b2Shape_GetBody(shapeId));
+		input.useRadii = true;
+
+		b2SimplexCache cache = { 0 };
+		b2DistanceOutput output = b2ShapeDistance(&input, &cache, nullptr, 0);
+		return output.distance < overlapTolerance;
+	}
+
 	bool Collider::ProxyOverlap(const b2ShapeProxy& proxy, b2Transform proxyTransform)
 	{
 		for (auto& shape : m_shapes)
@@ -89,7 +107,7 @@ namespace SandCastle
 	{
 		for (auto& shape : m_shapes)
 		{
-			if (b2Shape_TestPoint(shape, point))
+			if (ShapeOverlapsPoint(shape, point))
 				return true;
 		}
 		return false;

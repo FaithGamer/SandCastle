@@ -46,6 +46,10 @@ namespace SandCastle
 	/// @brief For internal use: build a GJK proxy from any live Box2D shape (circle, capsule, segment or polygon).
 	b2ShapeProxy GetShapeProxy(b2ShapeId shapeId);
 
+	/// @brief For internal use: boundary-inclusive point test against a live Box2D shape
+	/// (same tolerance as overlap queries, unlike the exact-zero b2Shape_TestPoint).
+	bool ShapeOverlapsPoint(b2ShapeId shapeId, Vec2f point);
+
 	/// @brief Interface class for colliders, need to be added to a Body.
 	/// Concrete shapes: Box2D, Circle2D, Polygon2D. Geometry is fixed once
 	/// the collider has been added to a Body.

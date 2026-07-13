@@ -75,7 +75,7 @@ namespace SandCastle
 		/// @brief Get the list of overlapping bodies within the appropriate collision layer
 		/// @param results
 		void OverlappingBodies(std::vector<OverlapResult>& results);
-		/// @brief Teleport the body. Rotation in degrees, clockwise positive.
+		/// @brief Teleport the body. Rotation in degrees, counter-clockwise positive (matches the renderer).
 		void UpdateTransform(Vec3f position, float rotation);
 		/// @brief Set true for collision to happen in the X/Z plane
 		/// @param yIsZ

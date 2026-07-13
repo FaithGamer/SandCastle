@@ -148,8 +148,9 @@ namespace SandCastle
 			return;
 
 		m_rotation = rotation;
-		//box2D rotation is counter-clockwise
-		b2Body_SetTransform(m_bodyId, pos, b2MakeRot(Math::Radians(-rotation)));
+		//Engine rotations are counter-clockwise positive (renderer and
+		//Math::AngleToVec agree on this), exactly like Box2D
+		b2Body_SetTransform(m_bodyId, pos, b2MakeRot(Math::Radians(rotation)));
 	}
 
 	void Body::SetYisZ(bool yIsZ)
