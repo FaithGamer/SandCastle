@@ -7,9 +7,10 @@ namespace SandCastle
 {
 	class Ui;
 	/// @brief Three-sprite checkbox (unchecked / hovered / checked).
-	/// If a bool* is bound at creation, the engine reads it back every frame
-	/// so external code can drive the visual state. checkSignal fires whenever
-	/// the checked state flips.
+	/// A bound bool* is read ONCE at creation (to set the initial visual) and
+	/// written on every click; it is NOT polled each frame, so external changes
+	/// to the bool do not update the visual — call SetChecked() for those.
+	/// checkSignal fires whenever the checked state flips.
 	class UiCheckbox : public UiElem
 	{
 		struct Shown

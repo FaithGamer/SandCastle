@@ -15,7 +15,8 @@ namespace SandCastle
 	class UiCanvas : public UiElem
 	{
 	public:
-		/// @brief What is the point of origin for the movement of a canvas.
+		/// @brief Per-axis flags marking which axes are fixed-size (vs auto-sizing
+		/// to fit content). Used as a bitmask in `fixedSize`.
 		typedef enum : uint8_t
 		{
 			Horizontal = 1,
