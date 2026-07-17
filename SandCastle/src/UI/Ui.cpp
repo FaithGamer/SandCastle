@@ -361,8 +361,8 @@ namespace SandCastle
 	{
 		ppu = 1.f / ppu;
 		Instance()->m_ppu = ppu;
-		Instance()->m_defaultMaterial->SetFloat("uPPu", ppu * 2.f);
-		Instance()->m_context.material->SetFloat("uPPu", ppu * 2.f);
+		Instance()->m_defaultMaterial->SetFloat("uPpu", ppu * 2.f);
+		Instance()->m_context.material->SetFloat("uPpu", ppu * 2.f);
 	}
 
 	UiCanvas* Ui::Begin(Vec2f size, bool frame)
