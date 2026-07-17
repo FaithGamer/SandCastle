@@ -39,7 +39,7 @@ Implementation: [Core/Assets.h](../include/SandCastle/Core/Assets.h), [Core/Asse
 | Type | Get with | Backed by |
 |---|---|---|
 | `Texture` | `Assets::Get<Texture>("foo.png")` | image file via stb_image; settings from `.texture` sidecar |
-| `Sprite` | `Assets::Get<Sprite>("foo.png_<col>_<row>")` | auto-generated from spritesheet entries in the `.texture` file |
+| `Sprite` | `Assets::Get<Sprite>("foo.png_<row>_<col>")` | auto-generated from spritesheet entries in the `.texture` file; row 0 = top row, col 0 = left column |
 | `Shader` | `Assets::Get<Shader>("name.shader")` | `.vert` + `.frag` (+ optional `.geom`) compiled at boot |
 | `Animation` | `Assets::Get<Animation>("walk.anim")` | JSON keyframe list |
 | `Textual` | `Assets::Get<Textual>("key")` | localized string blob (the "key" is a JSON key inside one of the `.textual` files) |
@@ -55,7 +55,7 @@ Fields recognised:
 - `wrapping` — `Clamp` or `Repeat`.
 - `pixelPerUnit` — texels per world unit (drives sprite world dimensions).
 - `useMipmaps`, `keepData`, `lodMin`, `lodMax`.
-- A spritesheet block describing rect grid → `Sprite` ids `<file>_<col>_<row>`.
+- A spritesheet block describing rect grid → `Sprite` ids `<file>_<row>_<col>` (row 0 = top row).
 
 ## `.anim` files
 

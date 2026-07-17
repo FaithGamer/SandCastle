@@ -36,7 +36,7 @@ Source is mirrored: `include/SandCastle/Render/Texture.h` ↔ `src/Render/Textur
 - [docs/MODULES.md](docs/MODULES.md) — header → class → source map for every module
 - [docs/RENDERING.md](docs/RENDERING.md) — render thread, layers, materials, batching, render targets, PBO streaming
 - [docs/ASSETS.md](docs/ASSETS.md) — Assets singleton, asset folder layout, `.texture`/`.anim`/`.textual` files, hot reload, localization
-- [docs/UI.md](docs/UI.md) — `Ui::*` builder, contexts, frames, fonts, hover/click signals, coordinate spaces
+- [docs/UI.md](docs/UI.md) — **mandatory read before writing any UI code** — expert guide: coordinate space, anchor model, layout engine, z-order, frame timing, widgets, gamepad nav, landmines
 - [docs/PATTERNS.md](docs/PATTERNS.md) — singletons, ECS, Signal/Delegate, Worker threads, init/shutdown order
 - [docs/BUILD.md](docs/BUILD.md) — vendored deps, configurations, preprocessor defines, build artefacts
 
@@ -140,7 +140,7 @@ After client-side `Init()` returns, the engine pushes (in this order): `SpriteRe
 
 | File extension | Loaded as | Get with |
 |---|---|---|
-| `.png`/`.jpg`/etc. + `.texture` JSON | `Texture` + auto-`Sprite`s from spritesheet | `Assets::Get<Texture>("name.png")`, `Assets::Get<Sprite>("name.png_<col>_<row>")` |
+| `.png`/`.jpg`/etc. + `.texture` JSON | `Texture` + auto-`Sprite`s from spritesheet | `Assets::Get<Texture>("name.png")`, `Assets::Get<Sprite>("name.png_<row>_<col>")` (row 0 = top row) |
 | `.anim` (JSON) | `Animation` | `Assets::Get<Animation>("foo.anim")` |
 | `.vert` / `.frag` / `.geom` | `Shader` (compiled at boot) | `Assets::Get<Shader>("name.shader")` |
 | `.wav`/`.mp3`/`.ogg` | Audio file path registered with `Audio` | `Audio::MakeSound("file.wav", "Channel")` |
