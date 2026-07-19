@@ -426,7 +426,8 @@ namespace SandCastle
 	template<typename ...Ts>
 	inline UiTxt* Ui::TextLoc(const String& key, float width, Ts ...args)
 	{
-		UiTxt* text = Ui::Text(*Assets::Get<Textual>(key), width, args...);
+		auto loc = Assets::Get<Textual>(key);
+		UiTxt* text = Ui::Text(loc != nullptr ? *loc : key, width, args...);
 		text->keyLoc = key;
 		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
 		Assets::Instance()->langSignal.Listen<UiTxt>(&UiTxt::OnLang, text);

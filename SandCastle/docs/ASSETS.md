@@ -42,7 +42,7 @@ Implementation: [Core/Assets.h](../include/SandCastle/Core/Assets.h), [Core/Asse
 | `Sprite` | `Assets::Get<Sprite>("foo.png_<row>_<col>")` | auto-generated from spritesheet entries in the `.texture` file; row 0 = top row, col 0 = left column |
 | `Shader` | `Assets::Get<Shader>("name.shader")` | `.vert` + `.frag` (+ optional `.geom`) compiled at boot |
 | `Animation` | `Assets::Get<Animation>("walk.anim")` | JSON keyframe list |
-| `Textual` | `Assets::Get<Textual>("key")` | localized string blob (the "key" is a JSON key inside one of the `.textual` files) |
+| `Textual` | `Assets::Get<Textual>("key")` | localized string blob (the "key" is a JSON key inside one of the `.textual` files). Missing key: logs an error and returns `nullptr` — null-check the result. The `Ui::*Loc` builders fall back to displaying the raw key. |
 
 Anything else (audio files) is registered with the relevant subsystem (`Audio::MakeSound` etc.) — `Assets` just learns where the file lives.
 

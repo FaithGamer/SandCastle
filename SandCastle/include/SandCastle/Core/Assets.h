@@ -91,7 +91,9 @@ namespace SandCastle
 		static std::vector<String> GetAvailableLangs();
 		/// @brief Fetch a typed asset by its filename (e.g. "ship.png", "explosion.anim").
 		/// Specialized for Sprite, Texture, Shader, Animation, Textual; using any
-		/// other type triggers a runtime error.
+		/// other type triggers a runtime error. The Textual specialization logs an
+		/// error and returns nullptr when the key is missing (callers must null-check);
+		/// the other specializations assert.
 		template <class T>
 		inline static T* Get(const String& name)
 		{

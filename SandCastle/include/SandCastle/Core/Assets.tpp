@@ -35,7 +35,11 @@ namespace SandCastle
 	inline static Textual* Assets::Get(const String& name)
 	{
 		auto it = Instance()->m_textuals.find(name);
-		ASSERT_LOG_ERROR((it != Instance()->m_textuals.end()), "Textual {0}, doesn't exists.", name);
+		if (it == Instance()->m_textuals.end())
+		{
+			LOG_ERROR("Textual {0}, doesn't exists.", name);
+			return nullptr;
+		}
 		return &it->second;
 	}
 }

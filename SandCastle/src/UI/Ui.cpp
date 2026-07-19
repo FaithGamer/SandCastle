@@ -206,12 +206,14 @@ namespace SandCastle
 
 	void Ui::OnTxtLang(UiTxt* txt)
 	{
-		UpdateText(txt, *Assets::Get<Textual>(txt->keyLoc), true);
+		auto loc = Assets::Get<Textual>(txt->keyLoc);
+		UpdateText(txt, loc != nullptr ? *loc : txt->keyLoc, true);
 	}
 
 	void Ui::OnBtnLang(UiBtn* btn)
 	{
-		UpdateBtn(btn, *Assets::Get<Textual>(btn->keyLoc));
+		auto loc = Assets::Get<Textual>(btn->keyLoc);
+		UpdateBtn(btn, loc != nullptr ? *loc : btn->keyLoc);
 	}
 
 	void Ui::HoverableUpdate()
@@ -417,7 +419,8 @@ namespace SandCastle
 
 	UiTxt* Ui::TextLoc(const String& key, float width)
 	{
-		auto text = Text(*Assets::Get<Textual>(key), width);
+		auto loc = Assets::Get<Textual>(key);
+		auto text = Text(loc != nullptr ? *loc : key, width);
 		text->keyLoc = key;
 		text->langSignal.Listen(&Ui::OnTxtLang, Instance().get());
 		Assets::Instance()->langSignal.Listen(&UiTxt::OnLang, text);
@@ -570,7 +573,8 @@ namespace SandCastle
 
 	UiBtn* Ui::ButtonLoc(const String& key)
 	{
-		auto btn = Button(*Assets::Get<Textual>(key));
+		auto loc = Assets::Get<Textual>(key);
+		auto btn = Button(loc != nullptr ? *loc : key);
 		btn->keyLoc = key;
 		btn->langSignal.Listen(&Ui::OnBtnLang, Instance().get());
 		Assets::Instance()->langSignal.Listen(&UiBtn::OnLang, btn);
@@ -620,7 +624,8 @@ namespace SandCastle
 
 	UiAnimBtn* Ui::AnimButtonLoc(const String& key)
 	{
-		auto btn = AnimButton(*Assets::Get<Textual>(key));
+		auto loc = Assets::Get<Textual>(key);
+		auto btn = AnimButton(loc != nullptr ? *loc : key);
 		btn->keyLoc = key;
 		btn->langSignal.Listen(&Ui::OnBtnLang, Instance().get());
 		Assets::Instance()->langSignal.Listen(&UiBtn::OnLang, (UiBtn*)btn);
