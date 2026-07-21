@@ -56,6 +56,15 @@ namespace SandCastle
 		/// hotX/hotY are the cursor hotspot in pixels from the top-left of the image.
 		/// Pass an empty string to restore the default OS cursor.
 		static void SetCursor(const std::string& texturePath, int hotX = 0, int hotY = 0);
+		/// @brief Where the cursor hotspot sits, for the auto-hotspot SetCursor
+		/// overload. Center derives the hotspot from the loaded image each refresh
+		/// (native pixels), so the caller never needs the sprite dimensions and it
+		/// stays correct across resolution/DPI changes.
+		enum class CursorHotspot { TopLeft, Center };
+		/// @brief Set a custom cursor with an auto-computed hotspot. Same as the
+		/// explicit-hotspot overload but the engine derives hotX/hotY from the
+		/// image (TopLeft = 0,0; Center = w/2,h/2). Empty string restores default.
+		static void SetCursor(const std::string& texturePath, CursorHotspot hotspot);
 		static void SetRenderWhenMinimized(bool renderWhenMinimized);
 		static bool IsInitialized();
 		/// @brief Get the V sync mode
@@ -134,6 +143,9 @@ namespace SandCastle
 		std::string m_cursorPath;
 		int m_cursorHotX = 0;
 		int m_cursorHotY = 0;
+		// When set, RefreshCursor recomputes the hotspot from the loaded image
+		// (center) on every refresh, so it survives resolution/DPI rescales.
+		bool m_cursorCenter = false;
 		bool m_cursorVisible = true;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;

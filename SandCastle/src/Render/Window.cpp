@@ -196,6 +196,7 @@ namespace SandCastle
 		if (texturePath.empty())
 		{
 			instance->m_cursorPath.clear();
+			instance->m_cursorCenter = false;
 			instance->DestroyCursorTexture();
 			SDL_ShowCursor();
 			SDL_SetCursor(SDL_GetDefaultCursor());
@@ -203,10 +204,29 @@ namespace SandCastle
 		}
 
 		instance->m_cursorPath = texturePath;
+		instance->m_cursorCenter = false;
 		instance->m_cursorHotX = hotX;
 		instance->m_cursorHotY = hotY;
 		instance->RefreshCursor();
 		// Hide the OS cursor over the window: we draw our own each frame.
+		SDL_HideCursor();
+	}
+
+	void Window::SetCursor(const std::string& texturePath, CursorHotspot hotspot)
+	{
+		if (texturePath.empty())
+		{
+			// Explicit-hotspot overload already handles the restore path.
+			SetCursor(texturePath);
+			return;
+		}
+		auto instance = Instance();
+		instance->m_cursorPath = texturePath;
+		instance->m_cursorCenter = (hotspot == CursorHotspot::Center);
+		// TopLeft keeps 0,0; Center is filled in by RefreshCursor from the image.
+		instance->m_cursorHotX = 0;
+		instance->m_cursorHotY = 0;
+		instance->RefreshCursor();
 		SDL_HideCursor();
 	}
 
@@ -220,6 +240,14 @@ namespace SandCastle
 		{
 			LOG_ERROR("Window::SetCursor: failed to load '{0}': {1}", m_cursorPath, SDL_GetError());
 			return;
+		}
+
+		// Auto-center: derive the hotspot from the image (native pixels) so the
+		// caller never needs the sprite size and it tracks any art resize.
+		if (m_cursorCenter)
+		{
+			m_cursorHotX = surface->w / 2;
+			m_cursorHotY = surface->h / 2;
 		}
 
 		int h = GetSize().y;
