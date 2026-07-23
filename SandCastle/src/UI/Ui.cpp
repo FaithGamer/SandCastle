@@ -218,6 +218,23 @@ namespace SandCastle
 
 	void Ui::HoverableUpdate()
 	{
+		//In gamepad mode the mouse doesn't drive hover (cursor is hidden, the
+		//selector ring marks focus). Clear any lingering mouse-hover once and
+		//skip hit-testing, otherwise a cursor resting over a widget keeps
+		//forcing its Hover visual and masks gamepad-driven state changes
+		//(e.g. a checkbox tick). Mouse motion auto-flips back to mouse mode,
+		//so hover resumes the instant the player touches the mouse.
+		if (Inputs::IsGamepadMode())
+		{
+			if (!m_hovered.empty())
+			{
+				for (auto& kvp : m_hovered)
+					kvp.second->UnHover();
+				m_hovered.clear();
+			}
+			return;
+		}
+
 		//Unhover
 		for (auto it = m_hovered.begin(); it != m_hovered.end();)
 		{
