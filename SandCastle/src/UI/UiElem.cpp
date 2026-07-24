@@ -162,6 +162,30 @@ namespace SandCastle
 			clickReleasedSignal.Send(this);
 		}
 	}
+	void UiElem::Press()
+	{
+		if (disabled || pressed)
+			return;
+		state = State::Pressed;
+		pressed = true;
+		OnClickPressed();
+		clickPressSignal.Send(this);
+	}
+	void UiElem::Release()
+	{
+		if (!pressed)
+			return;
+		// A code-driven press has no cursor on the element, so it rests on Idle
+		// rather than Hovered like the mouse path (same as the select path).
+		state = State::Idle;
+		pressed = false;
+		// Disabled in between (the press triggered something that locked the UI):
+		// the held state is cleared but the action doesn't fire.
+		if (disabled)
+			return;
+		OnClickReleased();
+		clickReleasedSignal.Send(this);
+	}
 	void UiElem::AddNav(NavDir dir, UiElem* target)
 	{
 		navTargets[(int)dir] = target;

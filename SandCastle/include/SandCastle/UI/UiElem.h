@@ -104,6 +104,16 @@ namespace SandCastle
 			Ui::RegisterHoverable(this);
 		}
 
+		/// @brief Synthesize a press on this element from code, without the mouse or
+		/// the gamepad selector being on it (e.g. a dedicated gamepad shortcut bound
+		/// to a button that isn't the navigated one). Shows the pressed visual and
+		/// fires the ListenClickPressed listeners. No-op if disabled or already held.
+		void Press();
+		/// @brief Release a code-driven Press: restores the resting visual and fires
+		/// the ListenClickReleased listeners. No-op unless a Press is in flight; a
+		/// press cancelled by a Disable() in between only clears the held state.
+		void Release();
+
 		/// @brief Set the element to navigate to when `dir` is pressed while this one is selected.
 		/// Pass nullptr to clear the binding. Bindings are one-directional.
 		void AddNav(NavDir dir, UiElem* target);
