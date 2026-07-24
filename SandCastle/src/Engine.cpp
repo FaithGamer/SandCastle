@@ -22,6 +22,16 @@
 #include "SandCastle/Core/Versioning.h"
 #include "SandCastle/Core/Roaming.h"
 
+#ifdef _WIN32
+// Exported from the game's .exe (this object file is always pulled in via Engine::Init).
+// Hybrid-graphics drivers look these up to pick the discrete GPU over the integrated one.
+extern "C"
+{
+	__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 namespace SandCastle
 {
 	bool Engine::play = true;
