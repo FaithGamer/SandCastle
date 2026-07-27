@@ -31,6 +31,24 @@ namespace SandCastle
 		return Vec2u((unsigned int)Math::FloorToEven(size.x), (unsigned int)Math::FloorToEven(size.y));
 	}
 
+#ifndef SANDCASTLE_DISTRIB
+	//Quad-batch memory accounting. A batch is m_maxVertices * sizeof(QuadData)
+	//of GPU vertex buffer plus the same again of CPU staging, allocated once and
+	//never freed, so the running total IS the resident cost. The counters also
+	//record what the old eager scheme would have allocated, so a single run
+	//reports both the before and the after:
+	//    eager total = allocated + deferred + skipped
+	//and, since a batch is now only allocated on the first quad it receives,
+	//`allocated` is exactly the number of batches that ever draw anything.
+	static uint32_t s_batchAllocated = 0; //buffers exist; drew at least one quad
+	static uint32_t s_batchDeferred = 0;  //registered pair, still no quad ever
+	static uint32_t s_batchSkipped = 0;   //layer/post material, can never receive a quad
+	static size_t   s_batchBytes = 0;     //GPU + CPU bytes actually allocated
+	static bool     s_batchSummaryLogged = false;
+
+	static inline double BatchMB(size_t bytes) { return (double)bytes / (1024.0 * 1024.0); }
+#endif
+
 	Renderer2D::Renderer2D()
 	{
 
@@ -154,7 +172,9 @@ namespace SandCastle
 		//m_layerMax++;
 		m_lastLayerAdded = 1;
 
-		//Create all quad batches required (one for every layer * material)
+		//Register the quad batches for every layer * material. Registration is
+		//cheap (a vector slot + the material's uniform wiring); the vertex
+		//buffers are allocated later, on the first quad each pair receives.
 		for (auto& layer : m_layers)
 		{
 			for (auto& mat : m_materials)
@@ -376,10 +396,37 @@ namespace SandCastle
 		ins->m_layers[layer].target->SetSize(EvenSize(Vec2i(width, height)));
 	}
 
+	void Renderer2D::SetupMaterialThread(Material* material)
+	{
+		//Assign relevant texture unit to the sampler2D[] uniform uTextures
+		auto shader = material->GetShader();
+		SetShaderUniformSampler(shader, MAX_TEXTURE_INDEX);
+
+		//Bind shader to the scene uniform buffer
+		if (!material->IsLayer())
+			shader->BindUniformBlock("scene", m_sceneUniformBinding);
+	}
+
 	void Renderer2D::CreateQuadBatchThread(RenderLayer& layer, Material* material)
 	{
 		if (material == nullptr)
 			material = m_defaultBatchMaterial;
+
+		//A layer / post-process material composites a fullscreen quad from its
+		//OWN vertex array (GenerateLayerVertexArray for a layer, the screen
+		//layer's array for a post pass) and is never a QuadRenderData::materialID,
+		//so it can never receive a quad and must not be given a batch. It still
+		//needs its uTextures sampler array configured on the render thread —
+		//SetPostProcessMaterial documents this as the place that happens.
+		if (material->IsLayer())
+		{
+			SetupMaterialThread(material);
+#ifndef SANDCASTLE_DISTRIB
+			s_batchSkipped++;
+#endif
+			return;
+		}
+
 		LayerID layerId = layer.index;
 		MaterialID matId = material->GetID();
 		ASSERT_LOG_ERROR((layerId < MAX_LAYERS), "LayerId above max layer count!");
@@ -389,20 +436,15 @@ namespace SandCastle
 		}
 
 		auto& batch = m_batches[(size_t)layerId][(size_t)matId];
-		if (batch.allocated)
+		if (batch.registered)
 			return;
-		AllocateQuadBatch(batch);
 		batch.material = material;
 		batch.layer = layer;
-
-		//Assign relevant texture unit to the sampler2D[] uniform uTextures
-		auto shader = material->GetShader();
-		SetShaderUniformSampler(shader, MAX_TEXTURE_INDEX);
-
-		//Bind shader to the scene uniform buffer
-		if(!material->IsLayer())
-			shader->BindUniformBlock("scene", m_sceneUniformBinding);
-		batch.allocated = true;
+		SetupMaterialThread(material);
+		batch.registered = true;
+#ifndef SANDCASTLE_DISTRIB
+		s_batchDeferred++;
+#endif
 	}
 
 	void Renderer2D::AllocateQuadBatch(QuadBatch& batch)
@@ -430,6 +472,22 @@ namespace SandCastle
 
 		//White texture in slot 0
 		batch.textureSlots[0] = m_whiteTextureID;
+
+#ifndef SANDCASTLE_DISTRIB
+		//Only reached from DrawQuad, i.e. exactly once per (layer, material) pair,
+		//on the first quad it ever receives — so this line IS the list of batches
+		//that actually draw, and the running total IS the resident batch memory.
+		size_t perSide = (size_t)m_maxVertices * sizeof(QuadData);
+		s_batchBytes += perSide * 2;
+		s_batchAllocated++;
+		if (s_batchDeferred > 0)
+			s_batchDeferred--;
+		LOG_INFO("[quadbatch] alloc #{0}: layer {1} \"{2}\" x material {3} -- {4:.2f} MB GPU + {4:.2f} MB CPU"
+			" | resident {5:.1f} MB ({0} allocated, {6} registered-unused, {7} skipped)",
+			s_batchAllocated,
+			(uint32_t)batch.layer.index, batch.layer.name, (uint32_t)batch.material->GetID(),
+			BatchMB(perSide), BatchMB(s_batchBytes), s_batchDeferred, s_batchSkipped);
+#endif
 	}
 
 	void Renderer2D::ClearBatches()
@@ -652,6 +710,24 @@ namespace SandCastle
 	void Renderer2D::End()
 	{
 		FlushBatches();
+#ifndef SANDCASTLE_DISTRIB
+		if (!s_batchSummaryLogged)
+		{
+			s_batchSummaryLogged = true;
+			size_t perSide = (size_t)m_maxVertices * sizeof(QuadData);
+			size_t eager = (size_t)s_batchAllocated + s_batchDeferred + s_batchSkipped;
+			LOG_INFO("[quadbatch] {0} B/vertex x {1} vertices = {2:.2f} MB GPU + {2:.2f} MB CPU per batch",
+				(uint32_t)sizeof(QuadData), m_maxVertices, BatchMB(perSide));
+			LOG_INFO("[quadbatch] eager scheme: {0} batches ({1} layers x materials) = {2:.1f} MB",
+				eager, (uint32_t)m_layers.size(), BatchMB(eager * perSide * 2));
+			//Snapshot at the end of frame 1 only -- pairs used by later game states
+			//allocate later. The running total on each "[quadbatch] alloc #N" line
+			//is the live figure; the LAST such line of a session is the real peak.
+			LOG_INFO("[quadbatch] end of frame 1: {0} allocated = {1:.1f} MB"
+				" | {2} registered but not yet drawn, {3} skipped as layer/post materials",
+				s_batchAllocated, BatchMB(s_batchBytes), s_batchDeferred, s_batchSkipped);
+		}
+#endif
 		RenderGpuParticles();
 		RenderLayers();
 		if ((!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget)
@@ -837,21 +913,33 @@ namespace SandCastle
 		m_layers[batch.layer.index].active = true;
 	}
 
-	Material* Renderer2D::CreateMaterial(Shader* shader, bool layer)
+	Material* Renderer2D::CreateMaterial(Shader* shader, bool isLayer)
 	{
 		auto ins = Instance();
-		ins->m_materials.emplace_back(new Material(shader, (MaterialID)ins->m_materials.size(), layer));
+		Material* material = ins->m_materials.emplace_back(
+			new Material(shader, (MaterialID)ins->m_materials.size(), isLayer));
 
-		/*if (layer)
-			return ins->m_materials.back();*/
+		//A layer / post-process material composites its own fullscreen quad and can
+		//never be a QuadRenderData::materialID, so it gets no batch on any layer —
+		//only the render-thread uniform wiring it needs to be bound. Queueing a
+		//batch for it used to cost one full batch PER EXISTING LAYER for nothing.
+		if (isLayer)
+		{
+			ins->m_queue.thread.Queue(&Renderer2D::SetupMaterialThread, ins.get(), material);
+			ins->Wait();
+#ifndef SANDCASTLE_DISTRIB
+			s_batchSkipped += (uint32_t)ins->m_layers.size();
+#endif
+			return material;
+		}
 
-		//Create quad batch for every layers
+		//Register (not allocate) a quad batch on every layer
 		for (auto& layer : ins->m_layers)
 		{
-			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, ins->m_materials.back());
+			ins->m_queue.thread.Queue(&Renderer2D::CreateQuadBatchThread, ins.get(), layer, material);
 		}
 		ins->Wait();
-		return ins->m_materials.back();
+		return material;
 
 	}
 	Texture* Renderer2D::CreateSubTexture(const Texture* source, Rect region)
@@ -864,7 +952,37 @@ namespace SandCastle
 	}
 	void Renderer2D::DrawQuad(const QuadRenderData& quad)
 	{
+#ifndef SANDCASTLE_DISTRIB
+		//The pair must have been registered (CreateQuadBatchThread) or `batch`
+		//below is a filler slot with a null material — or past the end of the
+		//vector entirely. Both are UB in a distrib build; report it here instead.
+		//The only ways to get here are a layer/post-process material used as a
+		//quad material, or a hand-built QuadRenderData with a bogus id.
+		auto& layerBatches = m_batches[(size_t)quad.layerID];
+		if ((size_t)quad.materialID >= layerBatches.size()
+			|| !layerBatches[(size_t)quad.materialID].registered)
+		{
+			LOG_ERROR("Quad pushed on layer {0} with material {1}, which has no batch there."
+				" A layer/post-process material cannot draw quads. Quad dropped.",
+				(uint32_t)quad.layerID, (uint32_t)quad.materialID);
+			return;
+		}
+#endif
 		auto& batch = m_batches[(size_t)quad.layerID][(size_t)quad.materialID];
+
+		//Buffers are created on the first quad this pair ever receives, not when
+		//the material is created: a batch is m_maxVertices * sizeof(QuadData) on
+		//the GPU plus as much again on the CPU, and the large majority of
+		//(layer, material) pairs never pair up. One predictable branch per quad
+		//after the first frame. We are on the render thread, so the GL objects
+		//are created on the context that owns them.
+		if (!batch.allocated)
+		{
+			AllocateQuadBatch(batch);
+			StartBatch(batch);
+			batch.allocated = true;
+		}
+
 		float textureIndex = -1.0f;
 
 		//Check if we still have space in the batch for more indices

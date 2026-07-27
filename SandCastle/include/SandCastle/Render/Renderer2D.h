@@ -126,6 +126,16 @@ namespace SandCastle
 	};
 	struct QuadBatch
 	{
+		//Two distinct states, don't merge them:
+		//  registered = this (layer, material) pair exists and may receive quads,
+		//               so `material` and `layer` below are valid. Set when the
+		//               material is created (or the layer added).
+		//  allocated  = its vertex buffers actually exist. Only set on the FIRST
+		//               quad the pair ever receives (Renderer2D::DrawQuad), because
+		//               a batch costs m_maxVertices * sizeof(QuadData) on the GPU
+		//               plus the same again on the CPU and most pairs never draw.
+		//StartBatch / Flush skip anything not allocated.
+		bool registered = false;
 		bool allocated = false;
 		sptr<VertexArray> vertexArray;
 		sptr<VertexBuffer> quadBuffer;
@@ -314,6 +324,10 @@ namespace SandCastle
 		Vec2f Uv(const Vec2f& vert, int type, const Vec4f& uvOrColor) const;
 		void AllocateQuadBatch(QuadBatch& batch);
 		void CreateQuadBatchThread(RenderLayer& layer, Material* material);
+		//Sampler-array / uniform-block wiring a material needs before it can be
+		//bound. Split out of CreateQuadBatchThread so a layer or post-process
+		//material still gets it without being handed a quad batch it can't use.
+		void SetupMaterialThread(Material* material);
 		void RenderLayers();
 		void CompositeExcludedLayers();
 		void BindAuxLayerTextures();
