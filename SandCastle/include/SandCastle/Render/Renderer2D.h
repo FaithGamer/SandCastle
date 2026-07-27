@@ -36,6 +36,16 @@ namespace SandCastle
 		Vec2f uv = { 0, 0 };
 		Vec4f color = { 1, 1, 1, 1 };
 		float texIndex = 0;
+		//Top-left corner of the quad's atlas UV rect (QuadRenderData::uvs.xy),
+		//constant over the 4 corners. `uv` interpolates the origin away, so a
+		//fragment shader that needs FRAME-LOCAL coordinates (procedural detail
+		//welded to the same sprite pixels across animation frames) can only get
+		//it from here: px = (vTexCoords - iUvMin) * textureSize(...).
+		//Attribute location 4, declared last so 0-3 keep their meaning; a shader
+		//that doesn't declare it simply ignores it.
+		//MEANINGLESS FOR UNTEXTURED QUADS (QuadRenderData::type == 0): `uvs` is a
+		//colour there, so DrawQuad writes zero rather than a UV.
+		Vec2f uvMin = { 0, 0 };
 	};
 	struct RenderLayer
 	{

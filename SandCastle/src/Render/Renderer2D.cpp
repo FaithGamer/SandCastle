@@ -413,7 +413,11 @@ namespace SandCastle
 			{ShaderDataType::Vec3f, "iVertexPos"},
 			{ShaderDataType::Vec2f, "iUv"},
 			{ShaderDataType::Vec4f, "iColor"},
-			{ShaderDataType::Float, "iTexIndex"}
+			{ShaderDataType::Float, "iTexIndex"},
+			//Location 4. Appended AFTER iTexIndex so locations 0-3 keep their
+			//meaning and every existing .vert stays valid (an undeclared
+			//attribute is simply ignored). See QuadData::uvMin.
+			{ShaderDataType::Vec2f, "iUvMin"}
 			});
 
 		//Vertex Array
@@ -907,6 +911,9 @@ namespace SandCastle
 		};
 		Vec2f origin((float)quad.orgX, (float)quad.orgY);
 		QuadData* firstVertex = batch.quadPtr;
+		//Frame origin for iUvMin. Only meaningful for textured quads: for
+		//type == 0 `uvs` holds a colour, so feed zero instead of garbage.
+		Vec2f uvMin = quad.type == 0 ? Vec2f{ 0.f, 0.f } : Vec2f{ quad.uvs.x, quad.uvs.y };
 		for (int i = 0; i < 4; i++)
 		{
 			auto vertPos = (quadVertexPosition[i] - origin);// *m_sceneUniform.reduction;
@@ -914,6 +921,7 @@ namespace SandCastle
 			batch.quadPtr->uv = Uv(quadVertexPosition[i], quad.type, quad.uvs);
 			batch.quadPtr->color = quad.color;
 			batch.quadPtr->texIndex = textureIndex;
+			batch.quadPtr->uvMin = uvMin;
 
 			//Incrementing the pointed value of the quad vertex array
 			batch.quadPtr++;

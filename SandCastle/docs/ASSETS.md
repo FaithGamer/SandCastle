@@ -65,7 +65,7 @@ JSON with a frequency (1/fps) and a list of keyframes. Each keyframe references 
 
 Three sibling files define one shader: `name.vert`, `name.frag`, optional `name.geom`. They're compiled in `Assets::CompileShaders()` and addressable via `Assets::Get<Shader>("name.shader")` (yes, the suffix is `.shader` — synthetic).
 
-Quad shaders see a fixed vertex layout (location 0 vec3 pos, 1 vec2 uv, 2 vec4 color, 3 float texIndex) and a 16-slot sampler array. See [RENDERING.md#custom-shaders](RENDERING.md#custom-shaders).
+Quad shaders see a fixed vertex layout (location 0 vec3 pos, 1 vec2 uv, 2 vec4 color, 3 float texIndex, 4 vec2 uvMin) and a 16-slot sampler array. See [RENDERING.md#custom-shaders](RENDERING.md#custom-shaders).
 
 ## Hot reload
 

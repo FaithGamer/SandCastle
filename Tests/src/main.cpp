@@ -38,7 +38,7 @@ int main()
 	//WindowEvents();
 	//Serialization();
 	//Benchmark1();
-	//Benchmark2(); //~190 -> 210
+	Benchmark2(); //~190 -> 210
 	//Delegates();
 	//Signals();
 	//FontTest();
@@ -52,7 +52,7 @@ int main()
 	//RateTest();
 	//SoundTest();
 	//MaskTest();
-	PhysicsTest(); //headless assertions
+	//PhysicsTest(); //headless assertions
 	//PhysicsPlayground(); //interactive visual test
-	PhysicsBench(); //performance / limitations stress test
+	//PhysicsBench(); //performance / limitations stress test
 }

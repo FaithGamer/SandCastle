@@ -257,7 +257,10 @@ location 0 vec3 vertexPos
 location 1 vec2 uv
 location 2 vec4 color
 location 3 float texIndex
+location 4 vec2 uvMin
 ```
+
+`uvMin` is the top-left corner of the quad's atlas UV rect, constant over the four corners (locations 0-3 predate it, so declaring it is optional — a shader that omits it is unaffected). `uv` interpolates that origin away, so it is the only way to get **frame-local** coordinates: `vec2 px = floor((vUv - vUvMin) * vec2(textureSize(uTextures[idx], 0)))` is the texel offset inside the current frame — the same sprite pixel every animation frame. Use it for procedural detail that must stay welded to the body instead of crawling when the animation advances. Meaningless for untextured quads (`QuadRenderData::type == 0`, where `uvs` carries a colour): the renderer writes zero there.
 
 Sampler array is bound automatically (`uniform sampler2D u_textures[16]`) — the renderer assigns texture units; sample with `texture(u_textures[int(v_texIndex)], v_uv)`.
 
