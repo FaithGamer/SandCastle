@@ -55,15 +55,18 @@ namespace SandCastle
 		auto sprite = render->GetSprite();
 		auto texture = sprite->GetTexture();
 		auto uvs = sprite->GetUVs();
+		//One walk up the parent chain for all three values. Asking the three
+		//getters separately would climb it three times.
+		auto world = transform->GetWorld();
 
 		return QuadRenderData(
 			1,
-			transform->GetPosition(),
+			world.position,
 			sprite->orgX,
 			sprite->orgY,
 			uvs,
-			sprite->GetDimensions() * (Vec2f)transform->GetScale(),
-			transform->GetRotation(),
+			sprite->GetDimensions() * world.scale,
+			world.rotation,
 			texture->GetId(),
 			render->GetLayer(),
 			render->GetMaterialID(),

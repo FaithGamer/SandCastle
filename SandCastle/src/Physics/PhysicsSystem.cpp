@@ -30,7 +30,9 @@ namespace SandCastle
 		//UpdateTransform skips bodies that didn't move.
 		Entity::View<KinematicBody, Transform>().each([](KinematicBody& body, Transform& transform)
 			{
-				body.UpdateTransform(transform.GetPosition(), transform.GetRotation());
+				//One walk up the parent chain instead of one per value
+				auto world = transform.GetWorld();
+				body.UpdateTransform(world.position, world.rotation);
 			});
 
 		//Dynamic bodies drive their entity's transform. The simulation moves
@@ -46,16 +48,19 @@ namespace SandCastle
 				Vec2f position = Vec::Lerp(body.m_prevPosition, body.m_currPosition, alpha);
 				float rotation = LerpAngle(body.m_prevRotation, body.m_currRotation, alpha);
 
-				Vec3f local = transform.GetLocalPosition();
+				//Box2D works in world space, so the result has to go back in as
+				//world space. Writing it straight to the local slot would place a
+				//parented body at its parent's offset twice over.
+				Vec3f world = transform.GetPosition();
 				if (body.m_YisZ)
 				{
-					transform.SetPosition(position.x, local.y, position.y);
+					transform.SetWorldPosition(position.x, world.y, position.y);
 				}
 				else
 				{
-					transform.SetPosition(position.x, position.y, local.z);
+					transform.SetWorldPosition(position.x, position.y, world.z);
 				}
-				transform.SetRotation(rotation);
+				transform.SetWorldRotation(rotation);
 			});
 	}
 	void PhysicsSystem::FixedUpdate()

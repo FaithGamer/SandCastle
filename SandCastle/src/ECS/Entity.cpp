@@ -38,6 +38,11 @@ namespace SandCastle
 			return;
 		}
 
+		//The child's world transform is resolved through the parent's, so the
+		//parent needs one as well. Without it SetParent refuses the link and the
+		//child would silently stay a root.
+		Add<Transform>();
+
 		entity.Unparent();
 		entity.AddGet<Parent>()->parent = m_id;
 
@@ -153,8 +158,10 @@ namespace SandCastle
 		if (transform != nullptr)
 		{
 			transform->RemoveParent();
-			return;
 		}
+		//The Parent component has to go either way. Leaving it behind points the
+		//entity at a parent that no longer lists it as a child, and a later
+		//Unparent() would call JustRemoveChild on that stale, possibly dead id.
 		Remove<Parent>();
 	}
 
