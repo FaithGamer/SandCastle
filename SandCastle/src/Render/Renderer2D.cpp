@@ -31,24 +31,6 @@ namespace SandCastle
 		return Vec2u((unsigned int)Math::FloorToEven(size.x), (unsigned int)Math::FloorToEven(size.y));
 	}
 
-#ifndef SANDCASTLE_DISTRIB
-	//Quad-batch memory accounting. A batch is m_maxVertices * sizeof(QuadData)
-	//of GPU vertex buffer plus the same again of CPU staging, allocated once and
-	//never freed, so the running total IS the resident cost. The counters also
-	//record what the old eager scheme would have allocated, so a single run
-	//reports both the before and the after:
-	//    eager total = allocated + deferred + skipped
-	//and, since a batch is now only allocated on the first quad it receives,
-	//`allocated` is exactly the number of batches that ever draw anything.
-	static uint32_t s_batchAllocated = 0; //buffers exist; drew at least one quad
-	static uint32_t s_batchDeferred = 0;  //registered pair, still no quad ever
-	static uint32_t s_batchSkipped = 0;   //layer/post material, can never receive a quad
-	static size_t   s_batchBytes = 0;     //GPU + CPU bytes actually allocated
-	static bool     s_batchSummaryLogged = false;
-
-	static inline double BatchMB(size_t bytes) { return (double)bytes / (1024.0 * 1024.0); }
-#endif
-
 	Renderer2D::Renderer2D()
 	{
 
@@ -421,9 +403,6 @@ namespace SandCastle
 		if (material->IsLayer())
 		{
 			SetupMaterialThread(material);
-#ifndef SANDCASTLE_DISTRIB
-			s_batchSkipped++;
-#endif
 			return;
 		}
 
@@ -442,9 +421,6 @@ namespace SandCastle
 		batch.layer = layer;
 		SetupMaterialThread(material);
 		batch.registered = true;
-#ifndef SANDCASTLE_DISTRIB
-		s_batchDeferred++;
-#endif
 	}
 
 	void Renderer2D::AllocateQuadBatch(QuadBatch& batch)
@@ -472,22 +448,6 @@ namespace SandCastle
 
 		//White texture in slot 0
 		batch.textureSlots[0] = m_whiteTextureID;
-
-#ifndef SANDCASTLE_DISTRIB
-		//Only reached from DrawQuad, i.e. exactly once per (layer, material) pair,
-		//on the first quad it ever receives — so this line IS the list of batches
-		//that actually draw, and the running total IS the resident batch memory.
-		size_t perSide = (size_t)m_maxVertices * sizeof(QuadData);
-		s_batchBytes += perSide * 2;
-		s_batchAllocated++;
-		if (s_batchDeferred > 0)
-			s_batchDeferred--;
-		LOG_INFO("[quadbatch] alloc #{0}: layer {1} \"{2}\" x material {3} -- {4:.2f} MB GPU + {4:.2f} MB CPU"
-			" | resident {5:.1f} MB ({0} allocated, {6} registered-unused, {7} skipped)",
-			s_batchAllocated,
-			(uint32_t)batch.layer.index, batch.layer.name, (uint32_t)batch.material->GetID(),
-			BatchMB(perSide), BatchMB(s_batchBytes), s_batchDeferred, s_batchSkipped);
-#endif
 	}
 
 	void Renderer2D::ClearBatches()
@@ -710,24 +670,6 @@ namespace SandCastle
 	void Renderer2D::End()
 	{
 		FlushBatches();
-#ifndef SANDCASTLE_DISTRIB
-		if (!s_batchSummaryLogged)
-		{
-			s_batchSummaryLogged = true;
-			size_t perSide = (size_t)m_maxVertices * sizeof(QuadData);
-			size_t eager = (size_t)s_batchAllocated + s_batchDeferred + s_batchSkipped;
-			LOG_INFO("[quadbatch] {0} B/vertex x {1} vertices = {2:.2f} MB GPU + {2:.2f} MB CPU per batch",
-				(uint32_t)sizeof(QuadData), m_maxVertices, BatchMB(perSide));
-			LOG_INFO("[quadbatch] eager scheme: {0} batches ({1} layers x materials) = {2:.1f} MB",
-				eager, (uint32_t)m_layers.size(), BatchMB(eager * perSide * 2));
-			//Snapshot at the end of frame 1 only -- pairs used by later game states
-			//allocate later. The running total on each "[quadbatch] alloc #N" line
-			//is the live figure; the LAST such line of a session is the real peak.
-			LOG_INFO("[quadbatch] end of frame 1: {0} allocated = {1:.1f} MB"
-				" | {2} registered but not yet drawn, {3} skipped as layer/post materials",
-				s_batchAllocated, BatchMB(s_batchBytes), s_batchDeferred, s_batchSkipped);
-		}
-#endif
 		RenderGpuParticles();
 		RenderLayers();
 		if ((!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget)
@@ -927,9 +869,6 @@ namespace SandCastle
 		{
 			ins->m_queue.thread.Queue(&Renderer2D::SetupMaterialThread, ins.get(), material);
 			ins->Wait();
-#ifndef SANDCASTLE_DISTRIB
-			s_batchSkipped += (uint32_t)ins->m_layers.size();
-#endif
 			return material;
 		}
 
