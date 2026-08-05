@@ -155,6 +155,13 @@ namespace SandCastle
 		}
 
 		Signal<UiElem*> destroySignal;
+		/// @brief Multiplier on the gamepad selector ring's rectangle when this element
+		/// is the navigated one. 1 = hug the laid-out size (the default, and what every
+		/// element wants). Raise it when the element's ARTWORK is drawn bigger than its
+		/// layout box — a card whose sprite transform is scaled up on hover, say — since
+		/// the ring is sized from the layout and would otherwise end up underneath it.
+		/// Scales about the element's centre, so the ring stays concentric.
+		float selectorScale = 1.f;
 		/// @brief Use at your own risk
 		Entity root;
 	protected:

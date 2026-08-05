@@ -1427,16 +1427,25 @@ namespace SandCastle
 			return;
 		}
 
+		//Opt-in ring scale for elements whose artwork is drawn bigger than their
+		//layout box (see UiElem::selectorScale). Polled like pos/size so a ring that
+		//is being animated follows it frame by frame.
+		float scale = m_navigated->selectorScale;
+
 		bool needRebuild = !m_selectorEntity.Valid()
 			|| std::abs(pos.x - m_selectorLastPos.x) > 0.5f
 			|| std::abs(pos.y - m_selectorLastPos.y) > 0.5f
 			|| std::abs(pos.z - m_selectorLastPos.z) > 0.5f
 			|| std::abs(size.x - m_selectorLastSize.x) > 0.5f
-			|| std::abs(size.y - m_selectorLastSize.y) > 0.5f;
+			|| std::abs(size.y - m_selectorLastSize.y) > 0.5f
+			//Tighter threshold than the pixel ones above: this is a multiplier, and
+			//half a percent of a 100px card is already half a pixel of ring.
+			|| std::abs(scale - m_selectorLastScale) > 0.005f;
 		if (needRebuild)
 		{
 			m_selectorLastPos = pos;
 			m_selectorLastSize = size;
+			m_selectorLastScale = scale;
 			RebuildSelector();
 		}
 
@@ -1492,7 +1501,9 @@ namespace SandCastle
 		if (auto trRoot = m_selectorEntity.gtr())
 			trRoot->SetPosition(cx, cy, hz);
 
-		const Vec2f outer = size + m_selectorMargin * 2.f;
+		//Ring rectangle: the laid-out box grown by selectorScale about the centre
+		//computed above, then the margin on top. At scale 1 this is the old formula.
+		const Vec2f outer = size * m_selectorLastScale + m_selectorMargin * 2.f;
 		// Corner index order: 0 = TL, 1 = TR, 2 = BL, 3 = BR.
 		const Vec2f sign[4] = {
 			{ -1.f, +1.f },

@@ -396,7 +396,11 @@ namespace SandCastle
 		UiElem* m_navigated = nullptr;
 		Entity m_selectorEntity;
 		Vec3f m_selectorLastPos = Vec3f(0.f, 0.f, 0.f);
+		//The navigated element's LAID-OUT size, which is what the ring is centred on.
+		//UiElem::selectorScale is tracked beside it rather than folded in: it grows the
+		//ring about that centre, so folding it into the size would drag the centre.
 		Vec2f m_selectorLastSize = Vec2f(0.f, 0.f);
+		float m_selectorLastScale = 1.f;
 		float m_selectorBlinkElapsed = 0.f;
 		bool m_selectorTextureValid = false;
 		bool m_clickIsSelect = false;
