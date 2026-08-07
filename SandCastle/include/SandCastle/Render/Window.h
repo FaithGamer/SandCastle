@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
+#include <mutex>
 #include <glad/glad.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
@@ -128,9 +131,17 @@ namespace SandCastle
 		// Enable+set or disable the letterbox scissor per m_letterbox*. Called
 		// from Bind()/Clear() so scissor state always tracks the window target.
 		void ApplyScissor();
+		// Main thread. Decode the current cursor BMP (hotspot + resolution scale
+		// included) and queue it for the render thread. Does no GL work at all.
 		void RefreshCursor();
+		// Main thread. Queue the "back to the OS arrow" swap; the texture is
+		// destroyed by the render thread, which is the only owner of that name.
+		void QueueCursorClear();
 		void OnCursorResize(Vec2u size);
-		void UploadCursorTexture(SDL_Surface* rgbaSurface);
+		// Render thread. Consume a queued swap: upload the pixels and publish
+		// texture + size + hotspot + scale together, so no frame can ever draw
+		// the new image through the previous cursor's quad.
+		void ApplyPendingCursor();
 		void DestroyCursorTexture();
 		bool m_initialized = false;
 		bool m_renderWhenMiminized = false;
@@ -140,12 +151,16 @@ namespace SandCastle
 		SDL_Window* m_window = nullptr;
 		SDL_GLContext m_initContext = nullptr;
 		SDL_GLContext m_renderContext = nullptr;
+		// Cursor request, owned by the main thread (SetCursor / resize).
 		std::string m_cursorPath;
-		int m_cursorHotX = 0;
-		int m_cursorHotY = 0;
+		int m_cursorReqHotX = 0;
+		int m_cursorReqHotY = 0;
 		// When set, RefreshCursor recomputes the hotspot from the loaded image
 		// (center) on every refresh, so it survives resolution/DPI rescales.
 		bool m_cursorCenter = false;
+		// A custom cursor is requested (main-thread mirror of m_cursorTex != 0,
+		// which only the render thread may read).
+		bool m_cursorCustom = false;
 		bool m_cursorVisible = true;
 		Vec4f m_clearColor = { 0, 0, 0, 1 };
 		Vec2u m_pixelSize;
@@ -156,15 +171,34 @@ namespace SandCastle
 		int m_letterboxY = 0;
 		int m_letterboxW = 0;
 		int m_letterboxH = 0;
-		// Custom-cursor GL state. Texture uploaded from main thread; shader
-		// and VAO/VBO lazily created on the render thread on first draw.
+		// Custom-cursor GL state, OWNED BY THE RENDER THREAD: every field below
+		// is written only by ApplyPendingCursor and read only by
+		// RenderCursorOverlay, both of which run there. Nothing on the main
+		// thread may touch them — a swap that lands between the upload and the
+		// size/hotspot write draws the new image squeezed into the old quad.
 		GLuint m_cursorTex = 0;
 		int m_cursorTexWidth = 0;
 		int m_cursorTexHeight = 0;
+		int m_cursorHotX = 0;
+		int m_cursorHotY = 0;
 		int m_cursorScale = 1;
 		GLuint m_cursorShader = 0;
 		GLuint m_cursorVao = 0;
 		GLuint m_cursorVbo = 0;
 		GLint m_cursorUTransform = -1;
+		// A cursor swap decoded on the main thread and waiting for the render
+		// thread to upload it. `clear` restores the default OS cursor instead.
+		struct PendingCursor
+		{
+			std::vector<unsigned char> pixels; // tightly packed RGBA8
+			int width = 0;
+			int height = 0;
+			int hotX = 0;
+			int hotY = 0;
+			int scale = 1;
+			bool clear = false;
+		};
+		std::mutex m_cursorMutex;
+		std::unique_ptr<PendingCursor> m_pendingCursor;
 	};
 }

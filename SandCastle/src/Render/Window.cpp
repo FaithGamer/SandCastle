@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include <cstring>
+
 #include "SandCastle/Core/Log.h"
 #include "SandCastle/Render/Window.h"
 #include "SandCastle/Core/Math.h"
@@ -177,7 +179,7 @@ namespace SandCastle
 		// cursor stays hidden either way (showing it would draw the OS arrow on
 		// top of our overlay). Visibility is gated by m_cursorVisible, which the
 		// overlay honors.
-		if (instance->m_cursorTex != 0)
+		if (instance->m_cursorCustom)
 		{
 			SDL_HideCursor();
 			return;
@@ -197,7 +199,8 @@ namespace SandCastle
 		{
 			instance->m_cursorPath.clear();
 			instance->m_cursorCenter = false;
-			instance->DestroyCursorTexture();
+			instance->m_cursorCustom = false;
+			instance->QueueCursorClear();
 			SDL_ShowCursor();
 			SDL_SetCursor(SDL_GetDefaultCursor());
 			return;
@@ -205,8 +208,9 @@ namespace SandCastle
 
 		instance->m_cursorPath = texturePath;
 		instance->m_cursorCenter = false;
-		instance->m_cursorHotX = hotX;
-		instance->m_cursorHotY = hotY;
+		instance->m_cursorReqHotX = hotX;
+		instance->m_cursorReqHotY = hotY;
+		instance->m_cursorCustom = true;
 		instance->RefreshCursor();
 		// Hide the OS cursor over the window: we draw our own each frame.
 		SDL_HideCursor();
@@ -224,10 +228,19 @@ namespace SandCastle
 		instance->m_cursorPath = texturePath;
 		instance->m_cursorCenter = (hotspot == CursorHotspot::Center);
 		// TopLeft keeps 0,0; Center is filled in by RefreshCursor from the image.
-		instance->m_cursorHotX = 0;
-		instance->m_cursorHotY = 0;
+		instance->m_cursorReqHotX = 0;
+		instance->m_cursorReqHotY = 0;
+		instance->m_cursorCustom = true;
 		instance->RefreshCursor();
 		SDL_HideCursor();
+	}
+
+	void Window::QueueCursorClear()
+	{
+		auto pending = std::make_unique<PendingCursor>();
+		pending->clear = true;
+		std::lock_guard<std::mutex> lock(m_cursorMutex);
+		m_pendingCursor = std::move(pending);
 	}
 
 	void Window::RefreshCursor()
@@ -244,10 +257,12 @@ namespace SandCastle
 
 		// Auto-center: derive the hotspot from the image (native pixels) so the
 		// caller never needs the sprite size and it tracks any art resize.
+		int hotX = m_cursorReqHotX;
+		int hotY = m_cursorReqHotY;
 		if (m_cursorCenter)
 		{
-			m_cursorHotX = surface->w / 2;
-			m_cursorHotY = surface->h / 2;
+			hotX = surface->w / 2;
+			hotY = surface->h / 2;
 		}
 
 		int h = GetSize().y;
@@ -261,29 +276,77 @@ namespace SandCastle
 			return;
 		}
 
-		m_cursorScale = scale;
-		UploadCursorTexture(scaled);
-		SDL_DestroySurface(scaled);
-	}
-
-	void Window::UploadCursorTexture(SDL_Surface* surface)
-	{
-		if (!surface)
-			return;
-		// Normalize to RGBA8 so glTexImage2D upload is straightforward.
-		SDL_Surface* rgba = surface;
-		bool ownsRgba = false;
-		if (surface->format != SDL_PIXELFORMAT_RGBA32)
+		// Normalize to RGBA8 so the render thread's upload is a straight copy.
+		SDL_Surface* rgba = scaled;
+		if (scaled->format != SDL_PIXELFORMAT_RGBA32)
 		{
-			rgba = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+			rgba = SDL_ConvertSurface(scaled, SDL_PIXELFORMAT_RGBA32);
 			if (!rgba)
 			{
-				LOG_ERROR("Window::UploadCursorTexture: SDL_ConvertSurface failed: {0}", SDL_GetError());
+				LOG_ERROR("Window::SetCursor: SDL_ConvertSurface failed: {0}", SDL_GetError());
+				SDL_DestroySurface(scaled);
 				return;
 			}
-			ownsRgba = true;
 		}
 
+		auto pending = std::make_unique<PendingCursor>();
+		pending->width = rgba->w;
+		pending->height = rgba->h;
+		pending->hotX = hotX;
+		pending->hotY = hotY;
+		pending->scale = scale;
+		pending->pixels.resize((size_t)rgba->w * (size_t)rgba->h * 4);
+		// Rows can be padded (pitch > w * 4), so copy them into a tight buffer.
+		for (int y = 0; y < rgba->h; ++y)
+		{
+			std::memcpy(pending->pixels.data() + (size_t)y * (size_t)rgba->w * 4,
+				(const unsigned char*)rgba->pixels + (size_t)y * (size_t)rgba->pitch,
+				(size_t)rgba->w * 4);
+		}
+
+		if (rgba != scaled)
+			SDL_DestroySurface(rgba);
+		SDL_DestroySurface(scaled);
+
+		// Hand the whole cursor over as one unit. The render thread swaps
+		// texture, size, hotspot and scale together in ApplyPendingCursor, so a
+		// mid-swap frame is impossible; an unconsumed queue entry is simply
+		// replaced (last request wins).
+		std::lock_guard<std::mutex> lock(m_cursorMutex);
+		m_pendingCursor = std::move(pending);
+	}
+
+	void Window::ApplyPendingCursor()
+	{
+		std::unique_ptr<PendingCursor> pending;
+		{
+			std::lock_guard<std::mutex> lock(m_cursorMutex);
+			if (!m_pendingCursor)
+				return;
+			pending = std::move(m_pendingCursor);
+		}
+
+		if (pending->clear)
+		{
+			DestroyCursorTexture();
+			return;
+		}
+		if (pending->pixels.empty())
+			return;
+
+		// This runs inside the frame's render pass, so every piece of state the
+		// upload touches has to go back exactly as it was found.
+		GLint prevActiveTex = 0;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &prevActiveTex);
+		glActiveTexture(GL_TEXTURE0);
+		GLint prevTex0 = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex0);
+		GLint prevUnpackBuffer = 0;
+		glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &prevUnpackBuffer);
+		GLint prevAlignment = 4;
+		glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevAlignment);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		if (m_cursorTex == 0)
 			glGenTextures(1, &m_cursorTex);
 		glBindTexture(GL_TEXTURE_2D, m_cursorTex);
@@ -292,15 +355,19 @@ namespace SandCastle
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, rgba->w, rgba->h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, rgba->pixels);
-		// Make sure the render thread will see the upload.
-		glFinish();
-		m_cursorTexWidth = rgba->w;
-		m_cursorTexHeight = rgba->h;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pending->width, pending->height, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, pending->pixels.data());
 
-		if (ownsRgba)
-			SDL_DestroySurface(rgba);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, prevAlignment);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, (GLuint)prevUnpackBuffer);
+		glBindTexture(GL_TEXTURE_2D, (GLuint)prevTex0);
+		glActiveTexture((GLenum)prevActiveTex);
+
+		m_cursorTexWidth = pending->width;
+		m_cursorTexHeight = pending->height;
+		m_cursorHotX = pending->hotX;
+		m_cursorHotY = pending->hotY;
+		m_cursorScale = pending->scale;
 	}
 
 	void Window::DestroyCursorTexture()
@@ -321,6 +388,10 @@ namespace SandCastle
 
 	void Window::RenderCursorOverlay()
 	{
+		// Take any queued swap first: the texture and the quad metrics it is
+		// drawn with are published together, never across two frames.
+		ApplyPendingCursor();
+
 		if (m_cursorTex == 0)
 			return;
 		if (!m_cursorVisible)
