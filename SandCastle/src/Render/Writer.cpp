@@ -402,7 +402,7 @@ namespace SandCastle
 				}
 				return false;
 			};
-		auto CreateEntity = [&](const Glyph* g, float adv, float ppu)
+		auto CreateEntity = [&](const Glyph* g, float adv, float ppu, bool isIcon)
 			{
 				Vec3f pos(
 					pen.x + (g->bearingPx.x + 0.5f * g->sizePx.x) * ppu,
@@ -414,6 +414,7 @@ namespace SandCastle
 				e.Add<Transform>();
 				auto ch = e.AddGet<Character>();
 				ch->originalPosition = pos;
+				ch->isIcon = isIcon;
 				e.Add<SpriteRender>();
 				auto tr = e.Get<Transform>();
 				auto sr = e.Get<SpriteRender>();
@@ -449,7 +450,7 @@ namespace SandCastle
 						g = &font.fallbackGlyph;
 						float nextAdv = (float)g->advancePx * ppu;
 						CheckLineBounds(nextAdv);
-						CreateEntity(g, nextAdv, ppu);
+						CreateEntity(g, nextAdv, ppu, false);
 						prevGlyphIndex = 0;
 					}
 				};
@@ -540,10 +541,7 @@ namespace SandCastle
 			}
 			else
 			{
-				CreateEntity(g, nextAdv, ppu);
-				if (icon)
-				{
-				}
+				CreateEntity(g, nextAdv, ppu, icon);
 			}
 			maxPenX = pen.x > maxPenX ? pen.x : maxPenX;
 		}

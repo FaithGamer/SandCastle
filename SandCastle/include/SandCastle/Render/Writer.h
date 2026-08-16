@@ -66,6 +66,11 @@ namespace SandCastle
 	struct Character
 	{
 		Vec3f originalPosition{ 0,0,0 };
+		// Inline icon ("|id|") rather than a font glyph. Icons carry their own art
+		// colors, so Write never tints them and neither may any later recolor pass
+		// (UiBtn's enable/disable label color) — tinting one would flatten the sprite
+		// to that single color.
+		bool isIcon = false;
 	};
 
 	/// @brief Text rasterizer + atlas packer built on FreeType.

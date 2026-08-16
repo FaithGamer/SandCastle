@@ -502,7 +502,11 @@ namespace SandCastle
 		auto lang = Assets::GetLang();
 		auto font = i->m_writer->GetFont(button->context.fontName, lang);
 		button->label.root.Destroy();
-		button->label = i->m_writer->Write(utf8, font->id, button->context.textColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
+		// A rewritten label starts from the context color matching the button's CURRENT
+		// state: rebuilding a disabled button's text with the enabled color would leave
+		// it wrong until the next enable/disable toggled it back.
+		Color labelColor = button->disabled ? button->context.textColorDisabled : button->context.textColor;
+		button->label = i->m_writer->Write(utf8, font->id, labelColor, font->material, font->layer, 0.f, TextAlign::Center, 1.f);
 		// Label sits at z -4 to clear every frame layer (UpdateFrames places the
 		// frames at 0/-1/-2/-3); must match Ui::Button. -3 would be coplanar with
 		// the disabled frame and the glyphs would z-fight (flicker) when disabled.

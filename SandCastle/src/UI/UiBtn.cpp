@@ -3,6 +3,7 @@
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/UI/UiCanvas.h"
 #include "SandCastle/Core/Assets.h"
+#include "SandCastle/Render/Writer.h" // Character (icon glyph flag)
 
 namespace SandCastle
 {
@@ -90,10 +91,6 @@ namespace SandCastle
 	{
 		SetLabelColor(context.textColor);
 		ShowHideFrame();
-		for (auto& glyph : label.glyphEntities)
-		{
-			glyph.Get<SpriteRender>()->color = context.textColor;
-		}
 	}
 	void UiBtn::OnLang(LangSignal* signal)
 	{
@@ -142,6 +139,12 @@ namespace SandCastle
 	{
 		for (auto& glyph : label.glyphEntities)
 		{
+			// Inline icons ("|reroll|") keep their own art colors, exactly like
+			// Writer::Write leaves them untinted — recoloring one would flatten the
+			// sprite to the label color.
+			auto ch = glyph.Get<Character>();
+			if (ch != nullptr && ch->isIcon)
+				continue;
 			glyph.Get<SpriteRender>()->color = color;
 		}
 	}
