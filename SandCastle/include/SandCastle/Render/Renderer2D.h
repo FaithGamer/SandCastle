@@ -154,8 +154,9 @@ namespace SandCastle
 	/// @brief Threaded 2D batched renderer.
 	/// Quads are pushed via PushQuad (or by SpriteRenderSystem/LineRendererSystem),
 	/// sorted per-layer, batched per material/texture, and submitted from a
-	/// dedicated render thread. Supports up to MAX_LAYERS visible layers and
-	/// MAX_OFF_LAYERS offscreen layers (e.g. for normal maps or post-processing).
+	/// dedicated render thread. Visible and offscreen layers (e.g. for normal maps or
+	/// post-processing) share ONE budget of MAX_LAYERS and one index space, of which
+	/// offscreen ones may take at most MAX_OFF_LAYERS. Layer 0 is the window itself.
 	class Renderer2D : public Singleton<Renderer2D>
 	{
 	public:

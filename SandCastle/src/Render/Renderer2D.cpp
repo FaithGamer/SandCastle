@@ -207,7 +207,16 @@ namespace SandCastle
 	LayerID Renderer2D::AddLayer(std::string name, unsigned int height, Material* material)
 	{
 		auto ins = Instance();
-		ASSERT_LOG_ERROR((ins->m_layers.size() < (MAX_LAYERS / 2)), "{0} layer, is over the max layer count: {1}.", name, MAX_LAYERS / 2);
+		//MAX_LAYERS is the real ceiling and it is SHARED: m_layers holds visible and
+		//offscreen layers in one index space, and a LayerID indexes m_batches and
+		//RenderQueue::_queues, both sized MAX_LAYERS. This used to guard MAX_LAYERS / 2,
+		//splitting the budget in half so the offscreen side could never be crowded out
+		//by the visible one — but offscreen layers already have a cap of their own
+		//(MAX_OFF_LAYERS, checked in AddOffscreenLayerThread), so the split was refusing
+		//a 17th visible layer while reserving 15 offscreen slots a game using one had
+		//no use for. First come, first served against the one real limit instead; the
+		//matching total check now sits in AddOffscreenLayerThread.
+		ASSERT_LOG_ERROR((ins->m_layers.size() < MAX_LAYERS), "{0} layer, is over the max layer count: {1}.", name, MAX_LAYERS);
 		ins->m_queue.thread.Queue(&Renderer2D::AddLayerThread, ins.get(), name, height, material);
 		ins->Wait();
 		auto& layer = ins->m_layers[(size_t)ins->m_lastLayerAdded];
@@ -549,6 +558,10 @@ namespace SandCastle
 
 		ASSERT_LOG_ERROR(bool(sampler2DIndex > 0 && sampler2DIndex < 16), "sampler2DIndex must be comprised between 1 and 15");
 		ASSERT_LOG_ERROR(bool(m_offscreenLayers.size() < 15), "Number of Offscreen layers exceeded (max 15)");
+		//Shares the layer index space with the visible layers (see AddLayer), so the
+		//total is what has to stay under MAX_LAYERS. Free when the two caps above are
+		//the binding ones, which is every case that fitted under the old half-split.
+		ASSERT_LOG_ERROR(bool(m_layers.size() < MAX_LAYERS), "{0} offscreen layer, is over the max layer count: {1}.", name, MAX_LAYERS);
 
 		LayerID index = (LayerID)m_layers.size();
 		std::vector<Vec2f> screenSpace{ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } };

@@ -52,8 +52,14 @@ Defined in [Render/Renderer2D.h](../include/SandCastle/Render/Renderer2D.h). Eve
 
 Constants in [Renderer2D.h](../include/SandCastle/Render/Renderer2D.h):
 - `MAX_TEXTURE_INDEX = 16` — GL 3.3 multi-bind limit.
-- `MAX_LAYERS = 32`
-- `MAX_OFF_LAYERS = 15`
+- `MAX_LAYERS = 32` — visible **and** offscreen layers together, plus the window itself
+  at index 0. They live in one vector and one `LayerID` index space, and that id indexes
+  `m_batches[MAX_LAYERS]` and `RenderQueue::_queues[2][MAX_LAYERS]`, which is what makes
+  32 the hard ceiling.
+- `MAX_OFF_LAYERS = 15` — how many of those 32 may be offscreen.
+
+Both are `ASSERT_LOG_ERROR` checks, so overrunning them logs an error (and trips the
+assert in a debug build) but still adds the layer — a boot-time error, not a failure.
 
 ## Quad batching
 
