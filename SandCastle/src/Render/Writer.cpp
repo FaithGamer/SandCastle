@@ -397,7 +397,12 @@ namespace SandCastle
 						curLine.chars.emplace_back(ch);
 						curLine.totalAdv += ch.adv;
 					}
-					RestartCurrWord();
+					// The moved word stays the current word, now starting the line: if
+					// it keeps growing past the width (a run with no space, like CJK
+					// text), it breaks where it overflows. Restarting it here made its
+					// tail a new word, moved again at the next overflow, which left
+					// alternating full and near-empty lines.
+					currentWord.advStart = 0.f;
 					return true;
 				}
 				return false;
