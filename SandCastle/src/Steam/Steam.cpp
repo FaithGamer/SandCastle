@@ -205,8 +205,28 @@ namespace SandCastle
 
 	String Steam::GetLanguage()
 	{
+		const String lang = GetSteamLanguage();
+		if (lang.empty())
+			return "";
+		String code = ToLanguageCode(lang);
+		if (code.empty())
+		{
+			LOG_WARN("Steam language \"{0}\" can't be mapped to a short language code.", lang);
+		}
+		return code;
+	}
+
+	String Steam::GetSteamLanguage()
+	{
 		if (!steamEnabled)
 			return "";
+		ISteamUtils* utils = SteamUtils();
+		const char* lang = utils ? utils->GetSteamUILanguage() : nullptr;
+		return lang ? lang : "";
+	}
+
+	String Steam::ToLanguageCode(const String& steamLanguage)
+	{
 		static const std::unordered_map<String, String> langMap = {
 			{"arabic", "ar"},
 			{"bulgarian", "bg"},
@@ -240,19 +260,8 @@ namespace SandCastle
 			{"vietnamese", "vi"}
 		};
 
-		String lang = SteamUtils()->GetSteamUILanguage();
-		auto it = langMap.find(lang);
-		if (it != langMap.end())
-			return it->second;
-		LOG_WARN("Steam language \"{0}\" can't be mapped to a short language code.", lang);
-		return "";
-	}
-
-	String Steam::GetSteamLanguage()
-	{
-		if (!steamEnabled)
-			return "";
-		return SteamUtils()->GetSteamUILanguage();
+		auto it = langMap.find(steamLanguage);
+		return it != langMap.end() ? it->second : String();
 	}
 
 	bool Steam::IsDlcInstalled(uint32_t appId)

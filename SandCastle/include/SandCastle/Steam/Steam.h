@@ -77,10 +77,15 @@ namespace SandCastle
 
 		/// @brief Steam client UI language mapped to a short language code
 		/// ("english" gives "en", "brazilian" gives "pt-BR"...), matching the
-		/// folder names used by the engine localization. "" when unmapped or disabled.
+		/// folder names used by the engine localization. "" when unmapped, disabled,
+		/// or when Steam doesn't answer.
 		static String GetLanguage();
-		/// @brief Raw Steam language name ("english", "koreana"...), "" when disabled.
+		/// @brief Raw Steam client UI language ("english", "koreana"...), "" when
+		/// disabled or when Steam doesn't answer.
 		static String GetSteamLanguage();
+		/// @brief Short language code of a raw Steam language name, the mapping
+		/// GetLanguage applies. "" for a name it has no code for.
+		static String ToLanguageCode(const String& steamLanguage);
 
 		//Apps / DLC
 
