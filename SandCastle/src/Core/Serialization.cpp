@@ -41,7 +41,7 @@ namespace SandCastle
 			m_hadParseError = true;
 			String errorMsg = "Serialized error when parsing: " + path + "\n";
 			errorMsg += "json exception: " + std::to_string(exception.id) + ", ";
-			errorMsg += *exception.what() + "\n";
+			errorMsg += String(exception.what()) + "\n";
 
 			LOG_ERROR(errorMsg);
 		}
@@ -91,7 +91,7 @@ namespace SandCastle
 		{
 			String errorMsg = "Serialized error when writing: " + path + "\n";
 			errorMsg += "json exception: " + std::to_string(exception.id) + ", ";
-			errorMsg += *exception.what() + "\n";
+			errorMsg += String(exception.what()) + "\n";
 
 			LOG_ERROR(errorMsg);
 		}
