@@ -19,7 +19,7 @@ namespace SandCastle
 		m_variants.emplace_back(Audio::Path(filename));
 		m_timers.emplace_back(100.f);
 	}
-	void Sound::PlayPrivate(bool loop, float fadeIn, float pitch)
+	void Sound::PlayPrivate(bool loop, float fadeIn, float pitch, uint64_t startFrame)
 	{
 		//Avoid having same sound stacking upon itslef 
 		if (m_playedThisIteration)
@@ -45,7 +45,7 @@ namespace SandCastle
 		m_fadeOut = -1.f;
 		m_timeBetweenPlay = Random::Range(timeBetweenPlay.first, timeBetweenPlay.second);
 		m_timers[0] = 0.f;
-		m_instances.emplace_back(Audio::MakeHandle(m_variants[r], m_channel, true));
+		m_instances.emplace_back(Audio::MakeHandle(m_variants[r], m_channel, startFrame == 0));
 
 		m_instances.back().SetLoop(loop);
 		if (pitch <= 0.0001)
@@ -65,6 +65,9 @@ namespace SandCastle
 			m_instances.back().SetVolume(m_volume);
 		}
 
+		if (startFrame != 0)
+			m_instances.back().PlayAt(startFrame);
+
 		m_playedThisIteration = true;
 	}
 	void Sound::Play(float fadeIn, float pitch)
@@ -75,6 +78,19 @@ namespace SandCastle
 	void Sound::Loop(float fadeIn, float pitch)
 	{
 		PlayPrivate(true, fadeIn, pitch);
+	}
+
+	void Sound::PlayAt(uint64_t engineFrame, bool loop)
+	{
+		PlayPrivate(loop, 0.f, 1.f, engineFrame);
+	}
+
+	uint64_t Sound::GetLengthInFrames()
+	{
+		if (m_variants.empty())
+			return 0;
+		SoundHandle probe = Audio::MakeHandle(m_variants[0], false);
+		return probe.GetLengthInFrames();
 	}
 
 	void Sound::Stop(float fadeOut)

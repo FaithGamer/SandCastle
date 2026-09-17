@@ -67,6 +67,14 @@ namespace SandCastle
 			ma_sound_start(m_sound);
 	}
 
+	void SoundHandle::PlayAt(uint64_t engineFrame)
+	{
+		if (m_sound == nullptr)
+			return;
+		ma_sound_set_start_time_in_pcm_frames(m_sound, engineFrame);
+		ma_sound_start(m_sound);
+	}
+
 	void SoundHandle::Stop()
 	{
 		if (m_sound != nullptr)
@@ -93,8 +101,29 @@ namespace SandCastle
 
 	bool SoundHandle::IsPlaying()
 	{
-		if (m_sound != nullptr)
-			return ma_sound_is_playing(m_sound);
-		return false;
+		if (m_sound == nullptr)
+			return false;
+		if (ma_sound_is_playing(m_sound))
+			return true;
+		// Started with a start time still in the future: ma_sound_is_playing reports it
+		// stopped until that time comes, but it is live and must not be discarded.
+		return ma_node_get_state(m_sound) == ma_node_state_started
+			&& ma_node_get_state_time(m_sound, ma_node_state_started) > ma_engine_get_time_in_pcm_frames(ma_sound_get_engine(m_sound));
+	}
+
+	uint64_t SoundHandle::GetLengthInFrames()
+	{
+		if (m_sound == nullptr)
+			return 0;
+		ma_uint64 length = 0;
+		ma_uint32 rate = 0;
+		if (ma_sound_get_length_in_pcm_frames(m_sound, &length) != MA_SUCCESS
+			|| ma_sound_get_data_format(m_sound, NULL, NULL, &rate, NULL, 0) != MA_SUCCESS
+			|| rate == 0)
+			return 0;
+		const ma_uint32 engineRate = ma_engine_get_sample_rate(ma_sound_get_engine(m_sound));
+		if (rate == engineRate)
+			return length;
+		return (uint64_t)((double)length * engineRate / rate + 0.5);
 	}
 }

@@ -33,6 +33,11 @@ namespace SandCastle
 		/// @brief When enabled, the named channel is muted while the window is minimized
 		/// and restored to its previous volume when the window is un-minimized.
 		static void SetMuteWhenMinmized(const String& channel, bool mute = true);
+		/// @brief Current audio-clock time, in frames at GetSampleRate(). Advances as the
+		/// device consumes audio; the reference for Sound::PlayAt.
+		static uint64_t GetTime();
+		/// @brief Sample rate of the audio clock (the output device's).
+		static uint32_t GetSampleRate();
 		/// @brief Resolve a channel name to its underlying numeric id.
 		static unsigned int GetChannel(const String& channel);
 		//High level API

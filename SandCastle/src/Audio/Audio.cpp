@@ -110,6 +110,16 @@ namespace SandCastle
 		return f_it->second;
 	}
 
+	uint64_t Audio::GetTime()
+	{
+		return ma_engine_get_time_in_pcm_frames(Instance()->m_engine);
+	}
+
+	uint32_t Audio::GetSampleRate()
+	{
+		return ma_engine_get_sample_rate(Instance()->m_engine);
+	}
+
 	void Audio::SetChannelVolume(const String& channel, float volume)
 	{
 		auto i = Instance();

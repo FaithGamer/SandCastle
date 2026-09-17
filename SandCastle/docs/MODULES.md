@@ -170,8 +170,8 @@ miniaudio wrapper. Aggregate: [Audioheader.h](../include/SandCastle/Audioheader.
 
 | Header | Key types | Notes |
 |---|---|---|
-| [Audio.h](../include/SandCastle/Audio/Audio.h) | `Audio` (singleton) | `AddChannel(name, parent)`, `SetChannelVolume`, `MakeSound(file, channel)`, `MakeHighrateSound(...)`, `MakeHandle(...)`. Spike protection ducks output on runaway volume. |
-| [Sound.h](../include/SandCastle/Audio/Sound.h) | `Sound` | High-level. `AddVariant(file)` for random selection. `pitchVariation`, `timeBetweenPlay` rate-limit identical triggers. |
+| [Audio.h](../include/SandCastle/Audio/Audio.h) | `Audio` (singleton) | `AddChannel(name, parent)`, `SetChannelVolume`, `MakeSound(file, channel)`, `MakeHighrateSound(...)`, `MakeHandle(...)`, `GetTime()` / `GetSampleRate()` (the audio clock `Sound::PlayAt` schedules on). Spike protection ducks output on runaway volume. |
+| [Sound.h](../include/SandCastle/Audio/Sound.h) | `Sound` | High-level. `AddVariant(file)` for random selection. `pitchVariation`, `timeBetweenPlay` rate-limit identical triggers. `PlayAt(frame, loop)` + `GetLengthInFrames()` for sample-accurate scheduling (gapless intro -> loop chains). |
 | [HighrateSound.h](../include/SandCastle/Audio/HighrateSound.h) | `HighrateSound : Sound`, `HighrateSound::Range` | Crossfades layers as `Play()` rate climbs. Used for guns / engines / pours. |
 | [SoundHandle.h](../include/SandCastle/Audio/SoundHandle.h) | `SoundHandle` | Refcounted `ma_sound*` wrapper. Created by `Audio`, copy-safe. |
 

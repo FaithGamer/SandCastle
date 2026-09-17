@@ -20,19 +20,26 @@ namespace SandCastle
 		virtual void Play(float fadeIn = 0.f, float pitch = -1);
 		/// @brief Start playing in a loop.
 		virtual void Loop(float fadeIn = 0.f, float pitch = -1);
+		/// @brief Start at an absolute audio-clock time (Audio::GetTime), once or looping.
+		/// Sounds scheduled on the same clock start sample-accurately relative to each
+		/// other: schedule a loop at `t + intro->GetLengthInFrames()` to chain it
+		/// gaplessly after an intro started at `t`. No fade, pitch 1.
+		void PlayAt(uint64_t engineFrame, bool loop = false);
+		/// @brief Length of the first variant in audio-clock frames (0 if unknown).
+		uint64_t GetLengthInFrames();
 		/// @brief Stop active instances with optional fade-out (-1 = immediate).
 		virtual void Stop(float fadeOut = -1.f);
 		/// @brief Internal per-frame update (fade timers, instance cleanup).
 		virtual void Update();
 		/// @brief Override pitch for currently playing instances. Negative = unchanged.
 		virtual void SetPitch(float pitch);
-		/// @brief True if at least one instance is currently playing.
+		/// @brief True if at least one instance is currently playing (or scheduled with PlayAt).
 		virtual bool IsPlaying();
 		/// @brief Set per-sound linear volume (combined with channel volume).
 		void SetVolume(float volume);
 	protected:
 		friend Audio;
-		void PlayPrivate(bool loop = false, float fadeIn = 0.f, float pitch = -1);
+		void PlayPrivate(bool loop = false, float fadeIn = 0.f, float pitch = -1, uint64_t startFrame = 0);
 		Sound(unsigned int channel);
 	public:
 		/// @brief Random pitch jitter range (in semitones-equivalent) added to each Play.
