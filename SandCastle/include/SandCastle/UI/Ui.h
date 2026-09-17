@@ -304,6 +304,12 @@ namespace SandCastle
 		static void EnableOnlyGroup(int group);
 		/// @brief Enable all interaction group
 		static void EnableAllGroups();
+		/// @brief Restrict mouse hover/click to one canvas and its descendants
+		/// (z never shields, so this is how a popup blocks the UI under it).
+		/// nullptr lifts the restriction. Cleared automatically when the canvas is destroyed.
+		static void SetModal(UiCanvas* canvas);
+		/// @brief The canvas set by SetModal, or nullptr.
+		static UiCanvas* GetModal();
 		/// @brief Convert UI position to world position
 		static Vec3f UiToWorld(Vec2f uiPos);
 		/// @brief Convert world position to UI position
@@ -336,6 +342,7 @@ namespace SandCastle
 		/*---Helpers---*/
 		void OnDisable(int group);
 		void OnEnable(int group);
+		bool IsModalReachable(const UiElem* elem) const;
 		void DestroyHelper(UiElem* elem);
 		void SetFrame(UiFrame::Template** frame, String texture);
 		static void MakeBorderTex(String texture, std::vector<Texture*>& tex);
@@ -386,6 +393,7 @@ namespace SandCastle
 		static UiElem::ID m_nextId;
 		const float zStep = 1.f;
 		std::unordered_map<int, bool> m_interactionGroups;
+		UiCanvas* m_modal = nullptr;
 
 		//Signal
 		Signal<UiGroupSignal> uiGroupSignal;

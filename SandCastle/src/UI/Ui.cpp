@@ -193,6 +193,8 @@ namespace SandCastle
 		}
 		m_hovered.erase(id);
 		m_pressed.erase(id);
+		if (m_modal == elem)
+			m_modal = nullptr;
 
 		RemoveHelper(m_hoverables, id);
 		RemoveHelper(m_values, id);
@@ -239,7 +241,8 @@ namespace SandCastle
 		for (auto it = m_hovered.begin(); it != m_hovered.end();)
 		{
 			auto hovered = it->second;
-			if (!hovered->IsInside(MousePos()) || hovered->disabled && !hovered->hoverableWhenDisabled)
+			if (!hovered->IsInside(MousePos()) || hovered->disabled && !hovered->hoverableWhenDisabled
+				|| !IsModalReachable(hovered))
 			{
 				hovered->UnHover();
 				m_hovered.erase(it++);
@@ -257,6 +260,8 @@ namespace SandCastle
 			if (candidate->state == UiElem::State::Hovered || candidate->state == UiElem::State::Pressed)
 				continue; //cannot hover twice (if pressed, considering it's hovered)
 			if (candidate->disabled && !candidate->hoverableWhenDisabled)
+				continue;
+			if (!IsModalReachable(candidate))
 				continue;
 			if (candidate->IsInside(MousePos()))
 			{
@@ -300,11 +305,16 @@ namespace SandCastle
 			}
 		}
 
-		//Handling clickable UI
-		for (auto& hovered_kvp : m_hovered)
+		//Handling clickable UI. Iterate a copy: a click handler may open a modal
+		//(SetModal erases from m_hovered). Re-check membership so an element the
+		//modal just shielded doesn't still receive this click.
+		std::vector<std::pair<UiElem::ID, UiElem*>> hoveredNow(m_hovered.begin(), m_hovered.end());
+		for (auto& hovered_kvp : hoveredNow)
 		{
+			if (m_hovered.find(hovered_kvp.first) == m_hovered.end())
+				continue;
 			auto hovered = hovered_kvp.second;
-			if (hovered->clickable && !hovered->disabled)
+			if (hovered->clickable && !hovered->disabled && IsModalReachable(hovered))
 			{
 				if (pressed)
 				{
@@ -1099,6 +1109,52 @@ namespace SandCastle
 			}
 		}
 	}
+	void Ui::SetModal(UiCanvas* canvas)
+	{
+		auto i = Instance();
+		i->m_modal = canvas;
+		if (!canvas)
+			return;
+		//Drop hover/press on everything the modal now shields, so nothing
+		//under it can fire a release that was pressed before it opened.
+		for (auto it = i->m_hovered.begin(); it != i->m_hovered.end();)
+		{
+			if (!i->IsModalReachable(it->second))
+			{
+				it->second->UnHover();
+				it = i->m_hovered.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+		for (auto it = i->m_pressed.begin(); it != i->m_pressed.end();)
+		{
+			if (!i->IsModalReachable(it->second))
+				it = i->m_pressed.erase(it);
+			else
+				it++;
+		}
+	}
+
+	UiCanvas* Ui::GetModal()
+	{
+		return Instance()->m_modal;
+	}
+
+	bool Ui::IsModalReachable(const UiElem* elem) const
+	{
+		if (!m_modal)
+			return true;
+		for (const UiElem* e = elem; e; e = e->parent)
+		{
+			if (e == m_modal)
+				return true;
+		}
+		return false;
+	}
+
 	void Ui::EnableAllGroups()
 	{
 		auto i = Instance();
