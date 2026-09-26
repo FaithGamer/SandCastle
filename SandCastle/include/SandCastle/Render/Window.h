@@ -113,6 +113,7 @@ namespace SandCastle
 		void Clear() override;
 		void OnSDLPixelSizeChanged(SDL_Event& event);
 		void OnSDLWindowResized(SDL_Event& event);
+		void OnSDLWindowMoved(SDL_Event& event);
 		/// @brief Called once per frame on the render thread by Renderer2D,
 		/// right before SDL_GL_SwapWindow. Draws the custom cursor on top of
 		/// the final framebuffer if one was set via SetCursor.
@@ -128,6 +129,17 @@ namespace SandCastle
 		void Init(std::string name, Vec2u size);
 		// Apply m_fullscreen / m_compositedFullscreen to the SDL window.
 		void ApplyWindowMode();
+		// Real fullscreen only: re-apply it when the window no longer covers its
+		// display exactly. SDL keeps whatever rect Windows hands a fullscreen window,
+		// and Windows hands back a ghosted ("Not Responding") window at the GHOST's
+		// position: a mode switched while the main thread was not pumping messages
+		// (asset load, and the player clicked another window, e.g. on a second
+		// monitor) comes back screen-sized but stranded at the old windowed spot,
+		// its right and bottom off screen, until restart. Checked on every move,
+		// resize and focus gain; capped by m_fullscreenRepairs so a window manager
+		// that insists on its own rect is not fought forever.
+		void KeepFullscreenOverDisplay();
+		void OnFocusChanged(bool focused);
 		// Enable+set or disable the letterbox scissor per m_letterbox*. Called
 		// from Bind()/Clear() so scissor state always tracks the window target.
 		void ApplyScissor();
@@ -147,6 +159,7 @@ namespace SandCastle
 		bool m_renderWhenMiminized = false;
 		bool m_fullscreen = false;
 		bool m_compositedFullscreen = false;
+		int m_fullscreenRepairs = 0;
 		Vec2u m_windowedSize;
 		SDL_Window* m_window = nullptr;
 		SDL_GLContext m_initContext = nullptr;

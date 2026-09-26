@@ -186,6 +186,9 @@ namespace SandCastle
 		case SDL_EVENT_WINDOW_RESIZED:
 			Window::Instance()->OnSDLWindowResized(event);
 			break;
+		case SDL_EVENT_WINDOW_MOVED:
+			Window::Instance()->OnSDLWindowMoved(event);
+			break;
 		case SDL_EVENT_WINDOW_FOCUS_GAINED:
 			Window::Instance()->FocusSignal.Send(true);
 			break;

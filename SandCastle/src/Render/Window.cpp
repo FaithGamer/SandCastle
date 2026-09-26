@@ -51,6 +51,7 @@ namespace SandCastle
 		m_pixelSize = GetSize();
 		m_windowedSize = size;
 		ResizeSignal.Listen(&Window::OnCursorResize, this);
+		FocusSignal.Listen(&Window::OnFocusChanged, this);
 	}
 
 	void Window::SetSize(Vec2u size)
@@ -701,7 +702,45 @@ namespace SandCastle
 
 	void Window::OnSDLWindowResized(SDL_Event& event)
 	{
-		//Nothing for now, we only care about pixel size as far as I am aware of.
+		//Only the fullscreen check, we only care about pixel size as far as I am aware of.
+		KeepFullscreenOverDisplay();
+	}
+
+	void Window::OnSDLWindowMoved(SDL_Event& event)
+	{
+		KeepFullscreenOverDisplay();
+	}
+
+	void Window::OnFocusChanged(bool focused)
+	{
+		if (focused)
+			KeepFullscreenOverDisplay();
+	}
+
+	static constexpr int kMaxFullscreenRepairs = 8;
+
+	void Window::KeepFullscreenOverDisplay()
+	{
+		// The composited mode places the window off the display's exact rect on purpose.
+		if (!m_fullscreen || m_compositedFullscreen)
+			return;
+		if (SDL_GetWindowFlags(m_window) & (SDL_WINDOW_MINIMIZED | SDL_WINDOW_HIDDEN))
+			return;
+		SDL_Rect bounds{};
+		if (!SDL_GetDisplayBounds(SDL_GetDisplayForWindow(m_window), &bounds))
+			return;
+		int x = 0, y = 0, w = 0, h = 0;
+		SDL_GetWindowPosition(m_window, &x, &y);
+		SDL_GetWindowSize(m_window, &w, &h);
+		if (x == bounds.x && y == bounds.y && w == bounds.w && h == bounds.h)
+			return;
+		if (m_fullscreenRepairs >= kMaxFullscreenRepairs)
+			return;
+		m_fullscreenRepairs++;
+		LOG_WARN("Fullscreen window at ({0}, {1}) {2}x{3} does not cover its display ({4}, {5}) {6}x{7}, re-applying fullscreen ({8}/{9}).",
+			x, y, w, h, bounds.x, bounds.y, bounds.w, bounds.h, m_fullscreenRepairs, kMaxFullscreenRepairs);
+		if (!SDL_SetWindowFullscreen(m_window, true))
+			LOG_ERROR("Window fullscreen(true) repair failed: {0}", SDL_GetError());
 	}
 
 	void Window::Bind()
