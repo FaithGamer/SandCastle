@@ -8,6 +8,7 @@
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/LoadingScreen.h"
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Core/Assets.h"
 #include "SandCastle/Render/SpriteRenderSystem.h"
@@ -54,10 +55,12 @@ namespace SandCastle
 		Window::SetFullScreen(settings.fullscreen);
 		LOG_INFO("Initializing context...");
 		Renderer2D::Instance()->Init();
+		LoadingScreen::Begin(settings.loadingScreen);
 		LOG_INFO("Initializing audio...");
 		Audio::Instance()->Init();
 		LOG_INFO("Loading assets...");
 		Assets::Instance()->Init(settings.assetFolder, settings.defaultLang);
+		LoadingScreen::Complete();
 		Audio::Instance()->PostAssetInit();
 		LOG_INFO("Initializing renderer...");
 		Renderer2D::Instance()->PostAssetInit();

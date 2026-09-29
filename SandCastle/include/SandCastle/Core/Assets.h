@@ -149,6 +149,8 @@ namespace SandCastle
 		void InitFunctions();
 		void AddAsset(const String& path, bool localized, const String& lang);
 		void CompileShaders();
+		uint64_t LoadWeight(const String& path, uint64_t bytes) const;
+		void ReportLoad(uint64_t weight);
 
 		template<class T>
 		void InsertLocalizedAsset(const String& filename, const String& lang, sptr<Asset<T>> asset)
@@ -197,6 +199,11 @@ namespace SandCastle
 		std::unordered_map<int32_t, Delegate<void, Assets, sptr<OpaqueAsset>&, const String&>> m_changeLocaFunctions;
 		std::unordered_map<String, ShaderSources> m_shadersPath;
 		std::vector<std::pair<String, Serialized>> m_animSerialized;
+
+		//Pace of the startup loading bar (LoadingScreen): the load's whole weight,
+		//known once LoadAssets has walked the folder, and how much of it is done.
+		uint64_t m_loadTotal = 0;
+		uint64_t m_loadDone = 0;
 	};
 }
 

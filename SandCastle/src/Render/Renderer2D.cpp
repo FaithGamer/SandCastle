@@ -500,6 +500,47 @@ namespace SandCastle
 		m_queue.Clear();
 		STOP_PROFILING("cpu_render");
 	}
+	void Renderer2D::LoadingFrameThread(Vec2i windowSize, float progress, Vec4f background, Vec4f bar)
+	{
+		//The bar in art pixels: a 1px outline, a 1px gap, then the fill. An art pixel
+		//is as many whole window pixels as a 360px-tall screen scales into the window,
+		//fewer if the bar and a 4px margin on each side would overflow its width, so the
+		//bar has the crisp, blocky edges of a pixel-art game's own art.
+		constexpr int barWidth = 128;
+		constexpr int barHeight = 8;
+		constexpr int referenceHeight = 360;
+		constexpr int margin = 4;
+		if (windowSize.x <= 0 || windowSize.y <= 0)
+			return;
+		const int px = Math::Max(1, Math::Min(windowSize.y / referenceHeight, windowSize.x / (barWidth + 2 * margin)));
+		const int width = barWidth * px;
+		const int height = barHeight * px;
+		const int x = (windowSize.x - width) / 2;
+		const int y = (windowSize.y - height) / 2;
+		const int fill = (int)((barWidth - 4) * progress) * px;
+
+		//A clear writes its alpha into the window as is, so every colour goes out opaque.
+		auto rect = [](int left, int bottom, int w, int h, const Vec4f& color)
+			{
+				if (w <= 0 || h <= 0)
+					return;
+				glScissor(left, bottom, w, h);
+				glClearColor(color.r, color.g, color.b, 1.f);
+				glClear(GL_COLOR_BUFFER_BIT);
+			};
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_SCISSOR_TEST);
+		glClearColor(background.r, background.g, background.b, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_SCISSOR_TEST);
+		rect(x, y, width, height, bar);
+		rect(x + px, y + px, width - 2 * px, height - 2 * px, background);
+		rect(x + 2 * px, y + 2 * px, fill, height - 4 * px, bar);
+		//Must end off: CreateSubTextureThread's blit (UI frames make it during a game's
+		//init) is clipped by the scissor test and never sets it.
+		glDisable(GL_SCISSOR_TEST);
+		Window::RenderWindow();
+	}
 	void Renderer2D::OnWindowResizeThread()
 	{
 		auto windowSize = Window::GetSize();

@@ -7,7 +7,7 @@ The renderer is **threaded**: a dedicated render thread owns the OpenGL context.
 | Thread | Owns | Allowed to |
 |---|---|---|
 | Main / game | EnTT registry, game state | Push quads, create textures via `Renderer2D::CreateSubTexture`, change camera, change layers. **Never** issues raw GL. |
-| Render | OpenGL context | Run all GL. Driven by `Renderer2D::Process()` called once per frame from `Systems`. |
+| Render | OpenGL context | Run all GL. Driven by `Renderer2D::Process()` called once per frame from `Systems` (and by the [startup loading bar](#startup-loading-bar) during boot). |
 | Worker (`WorkerThread`) | One queue at a time | Generic background tasks (e.g. queued in `RenderQueue::thread`). |
 
 Synchronisation:
@@ -20,18 +20,31 @@ Synchronisation:
 `Engine::Init` (in [src/Engine.cpp](../src/Engine.cpp)) does:
 
 1. `Window::Init` — create SDL window + GL contexts.
-2. `Renderer2D::Init` — boot render thread, create batch buffers, default shaders, white texture, scene UBO.
-3. `Audio::Init`.
-4. `Assets::Init` — scan asset folder, compile shaders, load textures/sprites/animations/textuals.
-5. `Audio::PostAssetInit`.
-6. `Renderer2D::PostAssetInit` — pick up the default batch and layer materials from the now-loaded shaders.
-7. `Renderer2D::AddLayer("DebugLayer")` — engine-owned debug layer.
-8. `Physics::Instance()`, `Inputs::Instance()`, `Ui::Instance()`.
-9. `Systems::Init`.
-10. `ImGuiLoader::LoadImGui` (when `SC_IMGUI`).
-11. Push default ECS systems: `SpriteRenderSystem`, `LineRendererSystem`, `WireRenderSystem`, `AnimationSystem`, `PhysicsSystem`, `ParticleSystem`.
+2. `Renderer2D::Init` — boot the render thread, make its GL context current, load the GL functions. Nothing to draw with yet: the quad index buffer, scene UBO, white texture, default materials and window layer come with `PostAssetInit`.
+3. `LoadingScreen::Begin` — lock the window's size, first frame of the [startup loading bar](#startup-loading-bar).
+4. `Audio::Init`.
+5. `Assets::Init` — scan asset folder, compile shaders, load textures/sprites/animations/textuals, reporting its progress to the loading bar.
+6. `LoadingScreen::Complete` — full bar on screen, window size unlocked.
+7. `Audio::PostAssetInit`.
+8. `Renderer2D::PostAssetInit` — create the quad index buffer, scene UBO and white texture, pick up the default batch and layer materials from the now-loaded shaders, create the window layer and register its batches (their vertex buffers are allocated on the first quad each receives).
+9. `Renderer2D::AddLayer("DebugLayer")` — engine-owned debug layer.
+10. `Physics::Instance()`, `Inputs::Instance()`, `Ui::Instance()`.
+11. `Systems::Init`.
+12. `ImGuiLoader::LoadImGui` (when `SC_IMGUI`).
+13. Push default ECS systems: `SpriteRenderSystem`, `LineRendererSystem`, `WireRenderSystem`, `AnimationSystem`, `PhysicsSystem`, `ParticleSystem`, `States`.
 
 Client `Systems::Push<T>()` calls **before** `Engine::Init` are scheduled before these defaults; calls after are scheduled after.
+
+## Startup loading bar
+
+`LoadingScreen` ([Render/LoadingScreen.h](../include/SandCastle/Render/LoadingScreen.h)) keeps the window alive while `Engine::Init` loads the assets, instead of leaving it blank and unresponsive until the first frame (and flagged "Not Responding" by the OS once the load passes ~5 s). It is entirely engine-driven and on by default; the game only sets it through `EngineSettings::loadingScreen` (`enabled`, `backgroundColor`, `barColor`, both colours drawn opaque).
+
+- **Lifetime**: opened by `Engine::Init` right after `Renderer2D::Init`, completed (full bar) right after `Assets::Init`, and closed by the first `Systems::Update`, once `IntegratePending` has started the systems pushed during init and before that frame polls its events. The full bar stays on screen through the rest of the boot and the game's own init until that frame replaces it.
+- **Progress**: `Assets::Init` reports it. `LoadAssets` walks the whole folder before loading anything, so the total is known up front. Each file weighs its size plus a fixed per-file cost (an `.mp3` 4× its size), and each shader program a compile. The constants sit at the top of [src/Core/Assets.cpp](../src/Core/Assets.cpp); only their proportions matter.
+- **Pumping**: a report at least 16 ms after the last frame pumps the SDL events (main thread), which is what keeps the window responsive, and queues a frame unless one is still in flight or the window is minimized. Any other report only records the progress. So nothing is pumped between two reports (one long file, such as a big sound decoded whole, holds the bar still), nor from the full bar to the first frame: the rest of the boot, the game's own init and its systems' start run unpumped, and should stay well under the OS's ~5 s. `Complete` waits for the full bar with a loop that keeps pumping, never a plain `Wait`, so a swap stalled on a message to the window can't deadlock the boot.
+- **Window**: not resizable from `Begin` to `Complete`, since a window maximized during the load stays maximized through a game locking its size in its own init; its resizing is given back before that init runs. Holding the title bar pauses the load while it's held (Windows runs its move loop inside the pump).
+- **Drawing**: `Renderer2D::LoadingFrameThread` on the render thread. It uses scissored `glClear`s straight into the window's framebuffer, since the renderer has no layer, material or buffer before `PostAssetInit`, and leaves the scissor test off. The layout is in art pixels (a 128×8 bar: 1px outline, 1px gap, fill), each as many window pixels as a 360px-tall screen scales into the window's height (fewer if the bar and a 4px margin wouldn't fit its width), and centred.
+- **Input**: when the bar closes, the queued key, text, mouse motion/button/wheel and gamepad button/axis events are dropped, and a key still held is skipped (`LoadingScreen::HoldsBack`, in the poll loop) until it's released: the engine reads no `key.repeat`, so its auto-repeat would arrive as fresh presses. A mouse or gamepad button still held only sends its release, which clicks nothing (a UI element clicks on a release that follows its own press). Window, quit and device events (e.g. `SDL_EVENT_GAMEPAD_ADDED`) are kept, so a close request made while loading is honoured on the first frame, once the systems have started.
 
 ## Layers
 

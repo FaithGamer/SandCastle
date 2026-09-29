@@ -63,6 +63,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | `Engine::Init`, default systems pushed by engine, shutdown order | [src/Engine.cpp](src/Engine.cpp) |
 | `EngineSettings` JSON keys (`app_name`, `resolution`, `fullscreen`, `fixed_time_step`, `texture_import`, `default_lang`, `asset_folder`) | [src/EngineSettings.cpp](src/EngineSettings.cpp) |
 | Main loop `Systems::Update()` | [src/ECS/Systems.cpp](src/ECS/Systems.cpp) |
+| Startup loading bar (`LoadingScreen`, set by `EngineSettings::loadingScreen`; opened and completed by `Engine::Init`, closed by the first `Systems::Update`) | [src/Render/LoadingScreen.cpp](src/Render/LoadingScreen.cpp), see [docs/RENDERING.md](docs/RENDERING.md#startup-loading-bar) |
 | `pch.h` (engine PCH, distinct from client PCH) | [src/pch.h](src/pch.h) |
 | Boot sequence diagram | [docs/PATTERNS.md](docs/PATTERNS.md#init-order) |
 
@@ -86,7 +87,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | Module | Aggregate header | What's inside |
 |---|---|---|
 | Core | [Core.h](include/SandCastle/Core.h) | Assets, Container, Delegate, Easing, Files, Log, Math, Noise, Random, Serialization, Signal, Task/Worker, Time, TypeId, Vec, Bitmask, Profiling, Versioning, Roaming, Rate, Int128, Geometry, Hardware, Fancy, std_macros |
-| Render | [Render.h](include/SandCastle/Render.h) | Renderer2D, Camera, Shader, Material, RenderOptions, Texture, Sprite, Animation/Animator, SpriteRender, LineRenderer, WireRender, Particle/ParticleEmitter, ParticleSystem, Writer (text), Window, RenderTarget/RenderTexture, VertexBuffer/IndexBuffer/UniformBuffer/VertexArray, Rect, Color, Layer, Beziers |
+| Render | [Render.h](include/SandCastle/Render.h) | Renderer2D, Camera, Shader, Material, RenderOptions, Texture, Sprite, Animation/Animator, SpriteRender, LineRenderer, WireRender, Particle/ParticleEmitter, ParticleSystem, Writer (text), Window, LoadingScreen (startup bar), RenderTarget/RenderTexture, VertexBuffer/IndexBuffer/UniformBuffer/VertexArray, Rect, Color, Layer, Beziers |
 | ECS | [ECS.h](include/SandCastle/ECS.h) | `Entity`, `EntityId`, `System`, `Systems`, `PointableComponent` macro, `StateMachine<T>`, `States`, `GameSys<D, A>` |
 | Input | [Input.h](include/SandCastle/Input.h) | `Inputs`, `InputMap`, `Input`/`ButtonInput`/`DirectionalInput`/`TextualInput`, `Bindings`, `Key`/`Mouse`/`Gamepad` namespaces |
 | Physics | [PhysicsEngine.h](include/SandCastle/PhysicsEngine.h) | `Physics`, `Body` (+ Static/Kinematic/Dynamic), `Collider` (`Box2D`/`Circle2D`/`Polygon2D`), raycast/overlap queries, gravity + fixed-timestep stepping, `PhysicsSystem`, `ColliderRenderDebugSystem` — wraps Box2D v3 (id-based C API) |

@@ -6,6 +6,7 @@
 #include "SandCastle/Internal/ImGuiLoader.h"
 #include "SandCastle/Engine.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/LoadingScreen.h"
 #include "SandCastle/Render/Camera.h"
 #include "SandCastle/Input/Mouse.h"
 #include "SandCastle/Core/Profiling.h"
@@ -80,10 +81,15 @@ namespace SandCastle
 
 		IntegratePending();
 		RemovePending();
+		//First frame: the systems pushed during init have just started and built their
+		//UI, so the startup loading bar closes here, before the frame reads any input.
+		LoadingScreen::End();
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event) != 0)
 		{
+			if (LoadingScreen::HoldsBack(event))
+				continue;
 			WindowEvents(event);
 			bool imGuiEventHandled = false;
 #ifdef SC_IMGUI

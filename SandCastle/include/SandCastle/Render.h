@@ -14,6 +14,7 @@
 #include "SandCastle/Render/Transform.h"
 #include "SandCastle/Render/VertexArray.h"
 #include "SandCastle/Render/Window.h"
+#include "SandCastle/Render/LoadingScreen.h"
 #include "SandCastle/Render/Rect.h"
 #include "SandCastle/Render/IndexBuffer.h"
 #include "SandCastle/Render/SpriteRender.h"

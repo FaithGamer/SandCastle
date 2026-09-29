@@ -417,6 +417,7 @@
     <ClCompile Include="src\Render\Camera.cpp" />
     <ClCompile Include="src\Render\IndexBuffer.cpp" />
     <ClCompile Include="src\Render\LineRenderer.cpp" />
+    <ClCompile Include="src\Render\LoadingScreen.cpp" />
     <ClCompile Include="src\Render\Rect.cpp" />
     <ClCompile Include="src\Render\Renderer2D.cpp" />
     <ClCompile Include="src\Render\RenderOptions.cpp" />
@@ -537,6 +538,7 @@
     <ClInclude Include="include\SandCastle\Render\Writer.h" />
     <ClInclude Include="include\SandCastle\Render\IndexBuffer.h" />
     <ClInclude Include="include\SandCastle\Render\LineRenderer.h" />
+    <ClInclude Include="include\SandCastle\Render\LoadingScreen.h" />
     <ClInclude Include="include\SandCastle\Render\Material.h" />
     <ClInclude Include="include\SandCastle\Render\Rect.h" />
     <ClInclude Include="include\SandCastle\Render\Renderer2D.h" />

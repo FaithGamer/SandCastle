@@ -9,9 +9,13 @@ Conventions and runtime patterns common across the engine. Read once before exte
 ```
 Log
 └─ Window (SDL3 window + GL contexts)
-   └─ Renderer2D::Init        ← spawns the render thread, builds default batch buffers
+   └─ Renderer2D::Init        ← spawns the render thread, makes its GL context current
+      ├─ LoadingScreen::Begin ← locks the window's size, first frame of the startup loading bar
       └─ Audio::Init
-         └─ Assets::Init      ← scans asset folder, compiles shaders, loads textures/anims/textuals
+         └─ Assets::Init      ← scans asset folder, compiles shaders, loads textures/anims/textuals;
+            │                   reports progress to the loading bar (at most every 16 ms, a report
+            │                   pumps the window's events and draws a frame)
+            ├─ LoadingScreen::Complete  ← full bar on screen, window size unlocked
             ├─ Audio::PostAssetInit
             ├─ Renderer2D::PostAssetInit  ← picks up default shaders/materials
             ├─ Renderer2D::AddLayer("DebugLayer")
@@ -25,7 +29,7 @@ Log
                AnimationSystem, PhysicsSystem, ParticleSystem, States
 ```
 
-Then `Engine::Launch()` runs `Systems::Update()` until `Engine::Stop()`. Shutdown order:
+Then `Engine::Launch()` runs `Systems::Update()` until `Engine::Stop()`. The first `Update` closes the loading bar right after `IntegratePending` has started the systems pushed during init, before it polls any event (`LoadingScreen::End`, which drops the input given while loading and holds back the keys still held). Shutdown order:
 
 ```
 Renderer2D::Wait()      ← drain the render thread

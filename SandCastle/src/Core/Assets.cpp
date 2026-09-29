@@ -10,9 +10,21 @@
 #include "SandCastle/Render/AnimationSystem.h"
 #include "SandCastle/Audio/Audio.h"
 #include "SandCastle/Render/Renderer2D.h"
+#include "SandCastle/Render/LoadingScreen.h"
 
 namespace SandCastle
 {
+	namespace
+	{
+		//Rough cost of the load, only used to pace the startup loading bar, so only
+		//the proportions matter: a file weighs its size plus a fixed cost (open,
+		//parse, upload), an .mp3 a few times its size since it is decoded whole at
+		//load, and a shader program its compile.
+		constexpr uint64_t fileWeight = 64 * 1024;
+		constexpr uint64_t compressedAudioFactor = 4;
+		constexpr uint64_t shaderProgramWeight = 512 * 1024;
+	}
+
 	void Assets::CreateAnimations()
 	{
 		for (int i = 0; i < m_animSerialized.size(); i++)
@@ -344,7 +356,9 @@ namespace SandCastle
 
 	void Assets::LoadAssets()
 	{
-		//Iterate every subfolders in assets and load every file into the asset map
+		//Iterate every subfolders in assets, then load every file found into the asset
+		//map, in the order found. Walking first is what lets the startup loading bar
+		//know the whole load before it starts.
 		String root = m_folder;
 		String localized = root + "localized/";
 
@@ -354,7 +368,15 @@ namespace SandCastle
 			String lang = "";
 			std::filesystem::path path;
 		};
+		struct File
+		{
+			String path;
+			bool localized = false;
+			String lang;
+			uint64_t weight = 0;
+		};
 		std::list<Folder> folders;
+		std::vector<File> files;
 		ASSERT_LOG_ERROR(std::filesystem::exists(root), "The following asset folder doesn't exists: {0}", root);
 		folders.push_front(Folder(false, "", root));
 
@@ -372,7 +394,9 @@ namespace SandCastle
 						folder_it++;
 						continue;
 					}
-					AddAsset(path, folder.localized, folder.lang);
+					std::error_code sizeError;
+					uint64_t bytes = folder_it->file_size(sizeError);
+					files.push_back({ path, folder.localized, folder.lang, LoadWeight(path, sizeError ? 0 : bytes) });
 				}
 				else
 				{
@@ -399,6 +423,50 @@ namespace SandCastle
 			}
 			folders.pop_front();
 		}
+
+		//The whole load: every file, then one compile per .vert found, which CompileShaders
+		//reports program by program. A program it skips (no fragment shader) or two .vert
+		//sharing a name leave the reports short of the total, never over it: the bar stops
+		//just short of full instead of filling before the load is done, and
+		//LoadingScreen::Complete fills it once Assets::Init returns.
+		m_loadDone = 0;
+		m_loadTotal = 0;
+		for (auto& file : files)
+		{
+			m_loadTotal += file.weight;
+			if (file.path.ends_with(".vert"))
+				m_loadTotal += shaderProgramWeight;
+		}
+		for (auto& file : files)
+		{
+			AddAsset(file.path, file.localized, file.lang);
+			ReportLoad(file.weight);
+		}
+	}
+
+	uint64_t Assets::LoadWeight(const String& path, uint64_t bytes) const
+	{
+		//Mirrors AddAsset at boot (a hot reload loads less, but the bar ignores it by
+		//then): a file it skips weighs nothing, and a shader source only registers its
+		//path (the compile is weighed per program).
+		size_t i = path.find_last_of(".");
+		if (i >= path.size())
+			return 0;
+		String extension = path.substr(i, path.size() - i);
+		if (m_addAssetFunctions.find(extension) == m_addAssetFunctions.end())
+			return 0;
+		if (extension == ".vert" || extension == ".frag" || extension == ".geom")
+			return 0;
+		if (extension == ".mp3")
+			bytes *= compressedAudioFactor;
+		return bytes + fileWeight;
+	}
+
+	void Assets::ReportLoad(uint64_t weight)
+	{
+		m_loadDone += weight;
+		if (m_loadTotal > 0)
+			LoadingScreen::Report((float)((double)m_loadDone / (double)m_loadTotal));
 	}
 
 	void Assets::CompileShaders()
@@ -434,7 +502,7 @@ namespace SandCastle
 			{
 				m_shaders.insert(std::make_pair(assetName, Shader(vertSrc, geomSrc, fragSrc, assetName)));
 			}
-
+			ReportLoad(shaderProgramWeight);
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include "SandCastle/Core/Time.h"
 #include "SandCastle/Core/Serialization.h"
 #include "SandCastle/Render/TextureSettings.h"
+#include "SandCastle/Render/LoadingScreen.h"
 
 namespace SandCastle
 {
@@ -12,8 +13,9 @@ namespace SandCastle
 	/// @brief Parameters consumed by Engine::Init() to bootstrap the runtime.
 	/// Holds the application identity (used for the window title and the
 	/// roaming/save folder), where assets live on disk, the startup window
-	/// resolution and fullscreen mode, the FixedUpdate cadence, and the
-	/// default texture import options applied to every loaded texture.
+	/// resolution and fullscreen mode, the FixedUpdate cadence, the
+	/// default texture import options applied to every loaded texture, and
+	/// the settings of the startup loading bar.
 	struct EngineSettings : public Serializable
 	{
 		EngineSettings();
@@ -30,5 +32,8 @@ namespace SandCastle
 		String defaultLang;
 		/// Max frames per second. 0 = unlimited.
 		int frameCap = 0;
+		/// Startup loading bar, up from right after Renderer2D::Init to the first frame.
+		/// Not read from the JSON settings.
+		LoadingScreenSettings loadingScreen;
 	};
 }

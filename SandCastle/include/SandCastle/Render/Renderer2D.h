@@ -302,12 +302,17 @@ namespace SandCastle
 	private:
 		friend Engine;
 		friend Singleton<Renderer2D>;
+		friend class LoadingScreen;
 		Renderer2D();
 
 
 		void InitThread();
 		void PostAssetInitThread();
 		void RenderThread();
+		//Startup loading bar (LoadingScreen): clear the window, draw the bar, swap.
+		//Runs before PostAssetInit, while the renderer has no layer, material or buffer
+		//yet, so it only uses scissored clears.
+		void LoadingFrameThread(Vec2i windowSize, float progress, Vec4f background, Vec4f bar);
 		void OnWindowResizeThread();
 		void AddLayerThread(std::string name, unsigned int height, Material* material = nullptr);
 		void AddOffscreenLayerThread(std::string name, uint32_t sampler2DIndex, Material* material = nullptr);

@@ -92,6 +92,8 @@ The `Textual` typedef ([Core/Textual.h](../include/SandCastle/Core/Textual.h)) i
 
 Conclusion: do not reference `Assets::Get<Shader>` from `Renderer2D::Init`-time code; do it in `PostAssetInit` or later.
 
+`LoadAssets` walks the whole folder first, then loads the files in the order found (breadth-first by folder, directory order within one). Knowing the list up front lets `Assets::Init` report its progress to the startup loading bar ([RENDERING.md#startup-loading-bar](RENDERING.md#startup-loading-bar)). Each file is weighed by `LoadWeight`: its size plus a fixed per-file cost, an `.mp3` 4× its size, and zero for shader sources (each program's compile is weighed on its own) and for anything `AddAsset` skips. Every sound is decoded whole at load (`MA_SOUND_FLAG_DECODE`), so the audio folder can dominate the startup time: a large unused file there still costs its full decode, and its decoded size in memory.
+
 ## Persistent / save folder
 
 Call `Roaming(subPath)` to resolve an absolute path under the platform's roaming/save folder for this app (e.g. `%LOCALAPPDATA%Low/<appName>/<subPath>` on Windows). The app name is captured from `EngineSettings::appName` at `Engine::Init`.
