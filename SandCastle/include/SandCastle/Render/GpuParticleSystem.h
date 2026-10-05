@@ -93,6 +93,12 @@ namespace SandCastle
 	/// and no global particle cap. Purely cosmetic: no CPU readback, no per-particle
 	/// destroy callbacks.
 	///
+	/// Both passes cover the whole capacity, so a pool only costs while it holds a
+	/// live particle: it keeps the time its longest-lived spawn dies, and once that
+	/// time is past (plus a little grace) it is neither updated nor drawn until the
+	/// next spawn. A frame where no time passes (dt 0, the game paused) skips the
+	/// update pass, which would only copy every slot.
+	///
 	/// Created and owned by Renderer2D. Every GL method runs on the render thread;
 	/// Emit()/SwapSpawns() are the only main-thread entry points and use a
 	/// double-buffered spawn queue drained on the render thread (same pattern as the
@@ -127,6 +133,7 @@ namespace SandCastle
 		void InitGL();                                                 // allocate buffers/VAOs (zeroed => all slots dead)
 		void ApplySpawns();                                            // upload drained spawns into the current state buffer
 		void Update(const GpuParticleShaders& shaders, float dt);      // transform-feedback simulation step
+		bool HasLiveParticles() const;                                 // false once every particle spawned so far is dead
 		void Render(const GpuParticleShaders& shaders, sptr<RenderTarget> target); // draw into the layer's framebuffer
 		void DestroyGL();
 
@@ -158,6 +165,8 @@ namespace SandCastle
 		int m_front = 0;        // index of the buffer holding the current state
 		uint32_t m_cursor = 0;  // ring write head for spawns
 		bool m_glReady = false;
+		double m_clock = 0.;      // seconds simulated so far (the sum of every Update's dt)
+		double m_lastDeath = -1.; // m_clock at which the longest-lived particle spawned so far dies
 
 		// Double-buffered spawn queue: Emit() writes the back buffer, the render
 		// thread drains the front in ApplySpawns(), SwapSpawns() flips them.

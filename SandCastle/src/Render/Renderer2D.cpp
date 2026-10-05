@@ -393,6 +393,7 @@ namespace SandCastle
 		auto windowSize = Window::GetSize();
 		unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
 		ins->m_layers[layer].target->SetSize(EvenSize(Vec2i(width, height)));
+		ins->m_layers[layer].cleared = false;
 	}
 
 	void Renderer2D::SetupMaterialThread(Material* material)
@@ -576,6 +577,8 @@ namespace SandCastle
 				unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)layer.height);
 				layer.target->SetSize(EvenSize(Vec2i(width, layer.height)));
 			}
+			//Reallocated: its content is undefined until the next clear.
+			layer.cleared = false;
 		}
 		if (m_postTarget)
 			m_postTarget->SetSize(EvenSize(windowSize));
@@ -651,11 +654,13 @@ namespace SandCastle
 		auto camera = Camera::main;
 		m_rendering = true;
 
+		//Only the window is cleared every frame (nothing ever draws its letterbox bars).
+		//A layer is cleared on its first draw of the frame (TouchLayer): most layers are
+		//empty most frames, and an empty layer is neither composited nor sampled.
 		for (auto& layer : m_layers)
-		{
-			layer.target->Clear();
 			layer.active = false;
-		}
+		m_layers[0].target->Clear();
+		m_layers[0].cleared = true;
 
 		if (!m_postScene.empty() || !m_postOverlay.empty())
 		{
@@ -749,17 +754,30 @@ namespace SandCastle
 
 	sptr<RenderTexture> Renderer2D::RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow)
 	{
-		//Each pass covers the full screen and fully replaces its target
-		//(GL_ONE, GL_ZERO), so no per-target clear is needed. GL_BLEND stays
-		//enabled with a replace func; Begin() resets the func next frame so normal
-		//layer rendering is unaffected.
-		glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+		//A pass at zero uIntensity is skipped: at zero a post pass leaves the image as it
+		//is, so running it would only copy the frame. With every pass skipped the frame
+		//still has to reach the window, and the default layer material copies it there.
+		m_runPasses.clear();
+		for (Material* pass : chain)
+			if (pass->GetFloat("uIntensity", 1.f) != 0.f)
+				m_runPasses.push_back(pass);
+		if (m_runPasses.empty())
+		{
+			if (!endOnWindow)
+				return src;
+			m_runPasses.push_back(m_defaultLayerMaterial);
+		}
+
+		//Each pass covers the full screen and fully replaces its target, so no
+		//per-target clear is needed, and blending is off: there is nothing under a
+		//pass to blend with. It goes back on for the layer composites that follow.
+		glDisable(GL_BLEND);
 
 		//Reuse the screen layer's fullscreen NDC quad to drive every pass.
 		auto& screenLayer = m_layers[0];
 		GLuint indicesCount = screenLayer.vertexArray->GetIndexBuffer()->GetCount();
 
-		size_t count = chain.size();
+		size_t count = m_runPasses.size();
 		sptr<RenderTexture> cur = src;
 
 		for (size_t i = 0; i < count; i++)
@@ -782,14 +800,15 @@ namespace SandCastle
 
 			cur->BindTexture(0);
 			screenLayer.vertexArray->Bind();
-			chain[i]->Bind();
+			m_runPasses[i]->Bind();
 			glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
-			GPU_PROFILE(Stamp("post", chain[i]->GetShader()->GetName()));
+			GPU_PROFILE(Stamp("post", m_runPasses[i]->GetShader()->GetName()));
 
 			if (!toWindow)
 				cur = dst;
 		}
 
+		glEnable(GL_BLEND);
 		return endOnWindow ? nullptr : cur;
 	}
 
@@ -854,8 +873,37 @@ namespace SandCastle
 		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
 	}
 
+	void Renderer2D::TouchLayer(RenderLayer& layer)
+	{
+		if (layer.active)
+			return;
+		layer.active = true;
+		if (!layer.cleared)
+			layer.target->Clear();
+		layer.cleared = false;
+	}
+
+	void Renderer2D::ClearUnusedSampledLayers()
+	{
+		auto clearUnused = [](RenderLayer& layer)
+			{
+				if (layer.active || layer.cleared)
+					return;
+				layer.target->Clear();
+				layer.cleared = true;
+			};
+		for (auto& offscreenLayer : m_offscreenLayers)
+			clearUnused(m_layers[offscreenLayer.index]);
+		for (auto& depthBind : m_layerDepthBindings)
+		{
+			if (depthBind.layer < (LayerID)m_layers.size())
+				clearUnused(m_layers[depthBind.layer]);
+		}
+	}
+
 	void Renderer2D::RenderLayers()
 	{
+		ClearUnusedSampledLayers();
 		//Premultiplied alpha for nice blending between layers
 		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
 			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -918,6 +966,7 @@ namespace SandCastle
 		}
 
 		//Issue the draw call after binding adequat context
+		TouchLayer(m_layers[batch.layer.index]);
 		batch.layer.target->Bind();
 		batch.vertexArray->Bind();
 		batch.material->Bind();
@@ -925,7 +974,6 @@ namespace SandCastle
 		glDrawElements(GL_TRIANGLES, batch.indexCount, GL_UNSIGNED_INT, 0);
 
 		m_stats.drawCalls++;
-		m_layers[batch.layer.index].active = true;
 	}
 
 	Material* Renderer2D::CreateMaterial(Shader* shader, bool isLayer)
@@ -1158,8 +1206,8 @@ namespace SandCastle
 	{
 		if (line.GetPointCount() < 2)
 			return;
+		TouchLayer(m_layers[layer]);
 		m_layers[layer].target->Bind();
-		m_layers[layer].active = true;
 		/*m_defaultLineShader->SetUniform("aTransform", transform.GetTransformMatrix());
 		m_defaultLineShader->SetUniform("uIndexCount", (float)line.GetPointCount());
 		m_defaultLineShader->SetUniform("uEndCapVertices", line.GetEndCapVertices());
@@ -1176,8 +1224,8 @@ namespace SandCastle
 	{
 		if (wire.GetPointCount() < 2)
 			return;
+		TouchLayer(m_layers[layer]);
 		m_layers[layer].target->Bind();
-		m_layers[layer].active = true;
 		/*	m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
 			m_defaultWireShader->SetUniform("uColor", wire.GetColor());
 			m_defaultWireShader->BindUniformBlock("camera", 0);*/
@@ -1410,13 +1458,21 @@ namespace SandCastle
 		if (!m_gpuShaders.ready)
 			return;
 
+		//Every pool drains its spawn queue each frame. A pool whose particles have all
+		//died is then left out entirely: no simulation, no draw, and its layer isn't
+		//touched for it (an empty layer isn't composited). The layers are touched here,
+		//before the depth writes go off below, so a clear reaches their depth too.
 		bool any = false;
-		for (auto& s : m_gpuSystems)
-			if (s)
-			{
-				any = true;
-				break;
-			}
+		for (auto& sys : m_gpuSystems)
+		{
+			if (!sys || sys->GetLayer() >= (LayerID)m_layers.size())
+				continue;
+			sys->ApplySpawns();
+			if (!sys->HasLiveParticles())
+				continue;
+			TouchLayer(m_layers[sys->GetLayer()]);
+			any = true;
+		}
 		if (!any)
 			return;
 
@@ -1430,15 +1486,11 @@ namespace SandCastle
 
 		for (auto& sys : m_gpuSystems)
 		{
-			if (!sys)
+			if (!sys || sys->GetLayer() >= (LayerID)m_layers.size() || !sys->HasLiveParticles())
 				continue;
 			LayerID lid = sys->GetLayer();
-			if (lid >= (LayerID)m_layers.size())
-				continue;
-			sys->ApplySpawns();                              // upload pending spawns
 			sys->Update(m_gpuShaders, m_gpuFrameDelta);      // transform-feedback sim
 			sys->Render(m_gpuShaders, m_layers[lid].target); // draw into the layer FBO
-			m_layers[lid].active = true;                     // so RenderLayers composites it
 			GPU_PROFILE(Stamp("particles", m_layers[lid].name));
 		}
 

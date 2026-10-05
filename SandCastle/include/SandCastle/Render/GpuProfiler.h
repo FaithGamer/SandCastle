@@ -8,7 +8,7 @@
 namespace SandCastle
 {
 	/// @brief Where the GPU spends a frame, measured with GL timestamp queries.
-	/// Renderer2D stamps the end of each phase of its render thread frame (the target
+	/// Renderer2D stamps the end of each phase of its render thread frame (the frame's
 	/// clears, the sprite batches, each GPU particle pool, each layer composite, each
 	/// post-process pass...), and a section is the GPU time between two stamps.
 	/// Results are read back a few frames late and never waited on (a frame whose

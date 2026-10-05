@@ -63,6 +63,8 @@ Defined in [Render/Renderer2D.h](../include/SandCastle/Render/Renderer2D.h). Eve
 
 **Layer order is push order.** Layers cannot be removed once added.
 
+Each layer draws into its own target. A target is cleared on the layer's first draw of the frame (quad batch, GPU particle pool, line or wire), not every frame, and a layer nothing drew into isn't composited. Offscreen layers and bound depths (`BindLayerDepth`) are sampled by every composite, drawn this frame or not, so one still holding an older frame is cleared right before the composites. Only the window is cleared every frame.
+
 Constants in [Renderer2D.h](../include/SandCastle/Render/Renderer2D.h):
 - `MAX_TEXTURE_INDEX = 16` — GL 3.3 multi-bind limit.
 - `MAX_LAYERS = 32` — visible **and** offscreen layers together, plus the window itself
@@ -73,6 +75,10 @@ Constants in [Renderer2D.h](../include/SandCastle/Render/Renderer2D.h):
 
 Both are `ASSERT_LOG_ERROR` checks, so overrunning them logs an error (and trips the
 assert in a debug build) but still adds the layer — a boot-time error, not a failure.
+
+## Post-processing
+
+`Renderer2D::AddPostProcessMaterial(material, stage)` appends a full-screen pass (see the header for the Scene / Frame stages around the UI). Passes run in order with blending off: each one replaces its target. A pass whose material has a float `uIntensity` at exactly 0 is skipped for the frame, so at zero intensity a pass must leave the image unchanged. When every pass of the chain that ends on the window is skipped, the default layer material copies the frame there.
 
 ## Quad batching
 
@@ -247,6 +253,10 @@ Systems::Get<ParticleSystem>()->Make(tip, back,
 
 For bursty effects, raise `SetLimit` once at startup rather than per-spawn — silently dropped particles are the most common surprise.
 
+### GPU particle pools
+
+`Renderer2D::CreateGpuParticleSystem` makes a GPU-resident pool ([GpuParticleSystem.h](../include/SandCastle/Render/GpuParticleSystem.h)), separate from the `ParticleSystem` above: no entities, simulated by transform feedback. Its update and draw both cover the whole capacity, so a pool is skipped (no update, no draw, its layer left alone) once every particle it spawned has died, until its next spawn, and a frame where no time passes skips the update.
+
 ## Text
 
 `Writer` (accessible through `Ui::GetWriter()`) bakes glyphs lazily into atlas pages built from a configurable max size (default 4096). Inline icons: `writer->AddIcon(id, sprite, offset)` then write `\|id\|` in any string passed to `Write()`.
@@ -265,7 +275,7 @@ For bursty effects, raise `SetLimit` once at startup rather than per-spawn — s
 
 `Renderer2D::GetStats()` → `{ drawCalls, quadCount }` from the previous frame. Wire it to a debug overlay.
 
-`Renderer2D::GetGpuProfile()` → where the GPU spends a frame ([GpuProfiler.h](../include/SandCastle/Render/GpuProfiler.h)). The render thread puts a GL timestamp at the end of each phase of its frame: `clear` (every target), `wait batching`, `sprites` (all quad batches), `particles <layer>` (each GPU pool), `composite <layer>` (each layer composite), `post <shader>` (each post pass), `wait imgui`, `imgui`, `cursor`. A section is the GPU time between two stamps; same-label stamps in one frame are summed. Results are read back a few frames late without waiting (a frame not in yet is dropped) and averaged every half second, with `frameMs` (first stamp to last) and `intervalMs` (frame start to frame start). Render thread only: read it from `System::OnImGui`. Distrib builds don't stamp, so the profile stays empty there. Timestamps follow the GPU timeline, so a section also holds any time the GPU spent waiting for the render thread: the two `wait` sections isolate its long CPU stretches (building the sprite batches, building the dev UI) and read about 0 when the GPU is the bottleneck, so `(frameMs - wait) / intervalMs` is how busy the GPU is.
+`Renderer2D::GetGpuProfile()` → where the GPU spends a frame ([GpuProfiler.h](../include/SandCastle/Render/GpuProfiler.h)). The render thread puts a GL timestamp at the end of each phase of its frame: `clear` (the window and the post target; a layer is cleared in the section of its first draw), `wait batching`, `sprites` (all quad batches), `particles <layer>` (each GPU pool), `composite <layer>` (each layer composite), `post <shader>` (each post pass), `wait imgui`, `imgui`, `cursor`. A section is the GPU time between two stamps; same-label stamps in one frame are summed. Results are read back a few frames late without waiting (a frame not in yet is dropped) and averaged every half second, with `frameMs` (first stamp to last) and `intervalMs` (frame start to frame start). Render thread only: read it from `System::OnImGui`. Distrib builds don't stamp, so the profile stays empty there. Timestamps follow the GPU timeline, so a section also holds any time the GPU spent waiting for the render thread: the two `wait` sections isolate its long CPU stretches (building the sprite batches, building the dev UI) and read about 0 when the GPU is the bottleneck, so `(frameMs - wait) / intervalMs` is how busy the GPU is.
 
 ## Custom shaders
 

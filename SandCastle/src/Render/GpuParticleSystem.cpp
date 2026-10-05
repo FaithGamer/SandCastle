@@ -343,12 +343,22 @@ void main()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		m_cursor = (start + n) % m_capacity;
+
+		//A spawn's age reaches its life once the clock has run `life` past now.
+		float longest = 0.f;
+		for (uint32_t i = 0; i < n; i++)
+			longest = std::max(longest, spawns[i].velLifeSize.z);
+		m_lastDeath = std::max(m_lastDeath, m_clock + (double)longest);
 		spawns.clear();
 	}
 
 	void GpuParticleSystem::Update(const GpuParticleShaders& shaders, float dt)
 	{
 		if (!m_glReady)
+			return;
+		m_clock += dt;
+		//No time passing changes nothing: the pass would copy every slot as it is.
+		if (dt == 0.f)
 			return;
 
 		int back = m_front ^ 1;
@@ -369,6 +379,14 @@ void main()
 		glDisable(GL_RASTERIZER_DISCARD);
 
 		m_front = back; // freshly-updated state is now the front buffer
+	}
+
+	bool GpuParticleSystem::HasLiveParticles() const
+	{
+		//The GPU sums each particle's age in floats, the clock in doubles: the grace
+		//covers the rounding between the two (and then some).
+		constexpr double kGrace = 0.1;
+		return m_clock < m_lastDeath + kGrace;
 	}
 
 	void GpuParticleSystem::Render(const GpuParticleShaders& shaders, sptr<RenderTarget> target)

@@ -56,7 +56,11 @@ namespace SandCastle
 		Material* material = nullptr;
 		sptr<VertexArray> vertexArray;
 		unsigned int height = 0;
+		//Something was drawn into the layer this frame (it gets composited).
 		bool active = false;
+		//The target holds nothing: cleared and not drawn into since. Layers are cleared
+		//on their first draw of the frame (Renderer2D::TouchLayer), not every frame.
+		bool cleared = false;
 		bool offscreen = false;
 		//When a post-process chain is active, layers flagged here are NOT fed
 		//through it: they composite straight onto the window after the chain, so
@@ -264,6 +268,8 @@ namespace SandCastle
 		///
 		/// Set replaces the WHOLE chain with a single material (nullptr clears it);
 		/// Add appends one pass to the given stage; Clear empties both stages.
+		/// A pass whose material has a float uIntensity uniform at exactly 0 is skipped
+		/// for the frame, so at zero intensity a pass must leave the image unchanged.
 		static void SetPostProcessMaterial(Material* material, PostStage stage = PostStage::Scene);
 		static void AddPostProcessMaterial(Material* material, PostStage stage = PostStage::Scene);
 		static void ClearPostProcessMaterials();
@@ -339,6 +345,12 @@ namespace SandCastle
 		//bound. Split out of CreateQuadBatchThread so a layer or post-process
 		//material still gets it without being handed a quad batch it can't use.
 		void SetupMaterialThread(Material* material);
+		//Mark a layer drawn into this frame, clearing its target first if it still holds
+		//an older frame. Called before every draw into a layer.
+		void TouchLayer(RenderLayer& layer);
+		//Clear the offscreen layers and bound depths nothing drew into this frame but
+		//still hold an older one: every composite samples them.
+		void ClearUnusedSampledLayers();
 		void RenderLayers();
 		void CompositeExcludedLayers();
 		void BindAuxLayerTextures();
@@ -349,14 +361,15 @@ namespace SandCastle
 		void EnsureGpuParticleShaders();                            // lazy-compile the shared programs
 		void CreateGpuParticleSystemThread(sptr<GpuParticleSystem> system);
 		void DestroyGpuParticleSystemThread(sptr<GpuParticleSystem> system);
-		//Simulate + draw every live GPU pool into its layer's framebuffer. No-op
-		//(touches zero GL state) when no pool exists, so legacy frames are unchanged.
+		//Simulate + draw every GPU pool that still has a live particle into its layer's
+		//framebuffer. No-op (touches zero GL state) when none does.
 		void RenderGpuParticles();
-		//Run a ping-pong fullscreen-pass chain. `src` is sampled by the first pass
-		//(bound to slot 0); passes alternate between m_postTarget/m_postTargetB.
-		//If `endOnWindow` the last pass targets the window, else it targets the
-		//buffer that isn't `src` and that buffer is returned. Returns the texture
-		//holding the final result (nullptr when endOnWindow).
+		//Run a ping-pong fullscreen-pass chain, skipping the passes at zero uIntensity.
+		//`src` is sampled by the first pass (bound to slot 0); passes alternate between
+		//m_postTarget/m_postTargetB. If `endOnWindow` the last pass targets the window
+		//(a plain copy when every pass was skipped), else it targets the buffer that
+		//isn't `src` and that buffer is returned (`src` itself when every pass was
+		//skipped). Returns the texture holding the final result (nullptr when endOnWindow).
 		sptr<RenderTexture> RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow);
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace, LayerID layer);
@@ -402,6 +415,8 @@ namespace SandCastle
 		//passes ping-pong between m_postTarget and m_postTargetB.
 		std::vector<Material*> m_postScene;
 		std::vector<Material*> m_postOverlay;
+		//The passes of the chain RunEffectChain is running that aren't skipped.
+		std::vector<Material*> m_runPasses;
 		sptr<RenderTexture> m_postTarget = nullptr;
 		sptr<RenderTexture> m_postTargetB = nullptr;
 		std::vector<RenderLayer> m_layers;
