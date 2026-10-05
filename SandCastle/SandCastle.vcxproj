@@ -404,6 +404,7 @@
     <ClCompile Include="src\Input\TextualInput.cpp" />
     <ClCompile Include="src\Internal\ImGuiLoader.cpp" />
     <ClCompile Include="src\Tools\SpriteExport.cpp" />
+    <ClCompile Include="src\Tools\TextureHotReload.cpp" />
     <ClCompile Include="src\Physics\Bitmask.cpp" />
     <ClCompile Include="src\Physics\Body.cpp" />
     <ClCompile Include="src\Physics\Collider.cpp" />
@@ -519,6 +520,7 @@
     <ClInclude Include="include\SandCastle\Internal\PlatformDetection.h" />
     <ClInclude Include="include\SandCastle\Internal\Singleton.h" />
     <ClInclude Include="include\SandCastle\Tools\SpriteExport.h" />
+    <ClInclude Include="include\SandCastle\Tools\TextureHotReload.h" />
     <ClInclude Include="include\SandCastle\PhysicsEngine.h" />
     <ClInclude Include="include\SandCastle\Steam\Steam.h" />
     <ClInclude Include="include\SandCastle\Core\Bitmask.h" />

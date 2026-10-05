@@ -193,6 +193,7 @@ Optional Steamworks integration. Opt-in at runtime: call `Steam::Init(SteamSetti
 | Header | Key types | Notes |
 |---|---|---|
 | [SpriteExport.h](../include/SandCastle/Tools/SpriteExport.h) | `SpriteExportConfig`, `ShowSpriteExport()` | Inline ImGui widget that drives the Aseprite CLI to export `.png` + `.texture` + per-tag `.anim`. |
+| [TextureHotReload.h](../include/SandCastle/Tools/TextureHotReload.h) | `TextureHotReload` | Press F5 to call `Assets::HotReload()`. Fed by the `Systems::Update` event loop before ImGui/Ui/Inputs; never consumes the event. Compiled out in Distrib. |
 
 ---
 

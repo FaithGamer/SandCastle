@@ -69,7 +69,7 @@ Quad shaders see a fixed vertex layout (location 0 vec3 pos, 1 vec2 uv, 2 vec4 c
 
 ## Hot reload
 
-`Assets::HotReload()` re-walks the folder and refreshes changed assets in place. Texture pointers and Sprite atlas slices are re-uploaded, so existing references stay valid. Use it from a debug tool (e.g. `DevSys::OnImGui`).
+`Assets::HotReload()` re-walks the folder and refreshes changed assets in place. Texture pointers and Sprite atlas slices are re-uploaded, so existing references stay valid. Only `.png` textures are reloaded; other asset types are skipped. In non-Distrib builds, pressing **F5** triggers it ([Tools/TextureHotReload.h](../include/SandCastle/Tools/TextureHotReload.h)); it can also be called from a debug tool (e.g. `DevSys::OnImGui`).
 
 ## Localization
 

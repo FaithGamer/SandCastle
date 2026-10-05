@@ -13,6 +13,7 @@
 #include "SandCastle/UI/Ui.h"
 #include "SandCastle/Input/Inputs.h"
 #include "SandCastle/Audio/Audio.h"
+#include "SandCastle/Tools/TextureHotReload.h"
 #include <typeinfo>
 
 namespace SandCastle
@@ -91,6 +92,9 @@ namespace SandCastle
 			if (LoadingScreen::HoldsBack(event))
 				continue;
 			WindowEvents(event);
+#ifndef SANDCASTLE_DISTRIB
+			TextureHotReload::OnEvent(event);
+#endif
 			bool imGuiEventHandled = false;
 #ifdef SC_IMGUI
 			ImGuiLoader::Events(event);

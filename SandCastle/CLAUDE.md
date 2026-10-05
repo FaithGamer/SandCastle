@@ -94,7 +94,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | UI | [UIheader.h](include/SandCastle/UIheader.h) | `Ui` builder + `UiCanvas`/`UiTxt`/`UiBtn`/`UiAnimBtn`/`UiImg`/`UiCheckbox`/`UiLoadBar`/`UiFrame` widgets, `UiContext` |
 | Audio | [Audioheader.h](include/SandCastle/Audioheader.h) | `Audio`, `Sound`, `HighrateSound`, `SoundHandle` |
 | Steam | [Steam/Steam.h](include/SandCastle/Steam/Steam.h) | `Steam` static class + `SteamSettings` — optional Steamworks (achievements, stats, player id/name, language, DLC, overlay, Steam Deck). Opt-in via `Steam::Init` before `Engine::Launch`; every call safe no-op when disabled. `steam_api64.lib` is merged into `SandCastle.lib`; games using it only ship `vendor/steam_api64.dll`. |
-| Tools | [Tools/SpriteExport.h](include/SandCastle/Tools/SpriteExport.h) | `ShowSpriteExport()` ImGui widget (Aseprite → spritesheet) |
+| Tools | [Tools/SpriteExport.h](include/SandCastle/Tools/SpriteExport.h), [Tools/TextureHotReload.h](include/SandCastle/Tools/TextureHotReload.h) | `ShowSpriteExport()` ImGui widget (Aseprite → spritesheet); F5 texture hot reload (non-Distrib) |
 | Internal | `Internal/` | `Singleton<T>` CRTP, `ImGuiLoader`, `PersistentDataPath`, `PlatformDetection` |
 
 ### Cross-cutting concepts
@@ -118,7 +118,7 @@ Real-world client: `C:/dev/meat` (idle clicker). Use it for usage examples — i
 | Perlin noise | [Core/Noise.h](include/SandCastle/Core/Noise.h) |
 | JSON serialization wrapper | [Core/Serialization.h](include/SandCastle/Core/Serialization.h) — `Serialized`, `Serializable` |
 | Type-id hash for templated dispatch | [Core/TypeId.h](include/SandCastle/Core/TypeId.h) |
-| Hot-reloadable assets (textures, sprites, shaders, animations, textuals) | `Assets::HotReload()` |
+| Hot-reload textures (only `.png` is reloaded; F5 in non-Distrib) | `Assets::HotReload()`, [Tools/TextureHotReload.h](include/SandCastle/Tools/TextureHotReload.h) |
 | Steam Deck detection | [Core/Hardware.h](include/SandCastle/Core/Hardware.h) `Hardware::IsSteamDeck()` |
 | Versioning stack (push per release for save migration) | [Core/Versioning.h](include/SandCastle/Core/Versioning.h) |
 | Roaming/save folder paths | [Core/Roaming.h](include/SandCastle/Core/Roaming.h) |
