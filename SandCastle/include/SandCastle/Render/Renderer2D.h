@@ -18,6 +18,7 @@
 #include "SandCastle/Core/Worker.h"
 #include "SandCastle/Render/Layer.h"
 #include "SandCastle/Render/GpuParticleSystem.h"
+#include "SandCastle/Render/GpuProfiler.h"
 
 #define MAX_TEXTURE_INDEX 16 //gl 3.3 can't batch more than 16 textures in one draw call
 #define MAX_LAYERS 32
@@ -289,6 +290,10 @@ namespace SandCastle
 		static Material* GetDefaultLayerMaterial();
 		/// @brief Give you some stats about the current rendering batch.
 		static Statistics GetStats();
+		/// @brief Where the GPU spends a frame: GPU time per render phase, averaged over
+		/// the last half second (see GpuProfiler). Render thread only, so read it from
+		/// System::OnImGui. Stays empty in distrib builds, which never measure.
+		static const GpuProfiler::Profile& GetGpuProfile();
 
 		/// @brief Internal: forwarded by Window when its pixel size changes.
 		void OnWindowResize(Vec2u size);
@@ -433,6 +438,7 @@ namespace SandCastle
 		Texture* m_createdTexture = nullptr;
 		bool m_rendering;
 		Statistics m_stats;
+		GpuProfiler m_gpuProfiler;
 		float m_aspectRatio;
 		bool m_init = false;
 	};

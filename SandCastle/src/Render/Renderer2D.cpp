@@ -20,6 +20,14 @@
 #include "SandCastle/Core/Time.h"
 #include "SandCastle/Internal/ImGuiLoader.h"
 
+//GPU timestamp at the end of each phase of the frame (see GpuProfiler). Distrib
+//builds don't measure.
+#ifndef SANDCASTLE_DISTRIB
+#define GPU_PROFILE(call) m_gpuProfiler.call
+#else
+#define GPU_PROFILE(call)
+#endif
+
 namespace SandCastle
 {
 	//FBO sizes are floored to even so the texture matches the even-floored
@@ -467,7 +475,9 @@ namespace SandCastle
 	void Renderer2D::RenderThread()
 	{
 		START_PROFILING("cpu_render");
+		GPU_PROFILE(BeginFrame());
 		Begin();
+		GPU_PROFILE(Stamp("clear"));
 		m_queue.Sort();
 		for (int i = m_layers.size() - 1; i >= 0; i--)
 		{
@@ -477,6 +487,7 @@ namespace SandCastle
 				DrawQuad(queue[j]);
 			}
 		}
+		GPU_PROFILE(Stamp("wait", "batching"));
 		End();
 
 		// The letterbox scissor is a game-scene clip; the dev ImGui overlay and
@@ -488,7 +499,9 @@ namespace SandCastle
 		{
 			ImGuiLoader::BeginImGui();
 			Systems::Instance()->ImGuiUpdates();
+			GPU_PROFILE(Stamp("wait", "imgui"));
 			ImGuiLoader::EndImGui(Window::GetSize());
+			GPU_PROFILE(Stamp("imgui"));
 		}
 
 #endif
@@ -496,6 +509,8 @@ namespace SandCastle
 		// Software cursor overlay (used when capture software is detected — see
 		// Window::SetCursor docstring). No-op in the common case.
 		Window::Instance()->RenderCursorOverlay();
+		GPU_PROFILE(Stamp("cursor"));
+		GPU_PROFILE(EndFrame());
 		Window::RenderWindow();
 		m_queue.Clear();
 		STOP_PROFILING("cpu_render");
@@ -724,6 +739,7 @@ namespace SandCastle
 	void Renderer2D::End()
 	{
 		FlushBatches();
+		GPU_PROFILE(Stamp("sprites"));
 		RenderGpuParticles();
 		RenderLayers();
 		if ((!m_postScene.empty() || !m_postOverlay.empty()) && m_postTarget)
@@ -768,6 +784,7 @@ namespace SandCastle
 			screenLayer.vertexArray->Bind();
 			chain[i]->Bind();
 			glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
+			GPU_PROFILE(Stamp("post", chain[i]->GetShader()->GetName()));
 
 			if (!toWindow)
 				cur = dst;
@@ -860,6 +877,7 @@ namespace SandCastle
 				continue;
 
 			CompositeLayer(*layer);
+			GPU_PROFILE(Stamp("composite", layer->name));
 		}
 	}
 
@@ -881,6 +899,7 @@ namespace SandCastle
 				continue;
 
 			CompositeLayer(*layer);
+			GPU_PROFILE(Stamp("composite", layer->name));
 		}
 	}
 
@@ -1179,6 +1198,11 @@ namespace SandCastle
 		return Instance()->m_stats;
 	}
 
+	const GpuProfiler::Profile& Renderer2D::GetGpuProfile()
+	{
+		return Instance()->m_gpuProfiler.GetProfile();
+	}
+
 	void Renderer2D::StartBatch(QuadBatch& batch)
 	{
 		//Reset vertex array data
@@ -1415,6 +1439,7 @@ namespace SandCastle
 			sys->Update(m_gpuShaders, m_gpuFrameDelta);      // transform-feedback sim
 			sys->Render(m_gpuShaders, m_layers[lid].target); // draw into the layer FBO
 			m_layers[lid].active = true;                     // so RenderLayers composites it
+			GPU_PROFILE(Stamp("particles", m_layers[lid].name));
 		}
 
 		if (depthTest)

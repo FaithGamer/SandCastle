@@ -265,6 +265,8 @@ For bursty effects, raise `SetLimit` once at startup rather than per-spawn — s
 
 `Renderer2D::GetStats()` → `{ drawCalls, quadCount }` from the previous frame. Wire it to a debug overlay.
 
+`Renderer2D::GetGpuProfile()` → where the GPU spends a frame ([GpuProfiler.h](../include/SandCastle/Render/GpuProfiler.h)). The render thread puts a GL timestamp at the end of each phase of its frame: `clear` (every target), `wait batching`, `sprites` (all quad batches), `particles <layer>` (each GPU pool), `composite <layer>` (each layer composite), `post <shader>` (each post pass), `wait imgui`, `imgui`, `cursor`. A section is the GPU time between two stamps; same-label stamps in one frame are summed. Results are read back a few frames late without waiting (a frame not in yet is dropped) and averaged every half second, with `frameMs` (first stamp to last) and `intervalMs` (frame start to frame start). Render thread only: read it from `System::OnImGui`. Distrib builds don't stamp, so the profile stays empty there. Timestamps follow the GPU timeline, so a section also holds any time the GPU spent waiting for the render thread: the two `wait` sections isolate its long CPU stretches (building the sprite batches, building the dev UI) and read about 0 when the GPU is the bottleneck, so `(frameMs - wait) / intervalMs` is how busy the GPU is.
+
 ## Custom shaders
 
 Drop a `.vert` / `.frag` (and optional `.geom`) into the asset folder. Assets compiles them at startup. Reference by name through `Assets::Get<Shader>("name.shader")`.
