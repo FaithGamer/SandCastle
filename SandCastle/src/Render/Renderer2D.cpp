@@ -154,11 +154,11 @@ namespace SandCastle
 
 		//Screen layer
 		std::vector<Vec2f> screenSpace{ {-1, -1}, { 1, -1 }, { 1, 1 }, { -1, 1 } };
-		m_layers.push_back(RenderLayer("Window",
-			0,
-			window,
-			m_defaultLayerMaterial,
-			GenerateLayerVertexArray(screenSpace, 0)));
+		m_layers.push_back(RenderLayer{ .name = "Window",
+			.index = 0,
+			.target = window,
+			.material = m_defaultLayerMaterial,
+			.vertexArray = GenerateLayerVertexArray(screenSpace, 0) });
 		//m_layerMax++;
 		m_lastLayerAdded = 1;
 
@@ -605,7 +605,8 @@ namespace SandCastle
 			unsigned int width = (unsigned int)round((float)windowSize.x / (float)windowSize.y * (float)height);
 			layer = makesptr<RenderTexture>(EvenSize(Vec2i(width, height)));
 		}
-		m_layers.push_back(RenderLayer(name, index, layer, material, layerVertexArray, height, false, false));
+		m_layers.push_back(RenderLayer{ .name = name, .index = index, .target = layer, .material = material,
+			.vertexArray = layerVertexArray, .height = height });
 		m_renderLayers.push_back(&m_layers.back());
 
 		m_lastLayerAdded = index;
@@ -637,7 +638,8 @@ namespace SandCastle
 			layer = makesptr<RenderTexture>(Vec2u(width, height));
 		}*/
 
-		m_layers.push_back(RenderLayer(name, index, layer, material, layerVertexArray, 0, false, true));
+		m_layers.push_back(RenderLayer{ .name = name, .index = index, .target = layer, .material = material,
+			.vertexArray = layerVertexArray, .offscreen = true });
 		m_offscreenLayers.push_back(OffscreenRenderLayer(layer, sampler2DIndex, index));
 
 		m_lastLayerAdded = index;
@@ -654,9 +656,10 @@ namespace SandCastle
 		auto camera = Camera::main;
 		m_rendering = true;
 
-		//Only the window is cleared every frame (nothing ever draws its letterbox bars).
-		//A layer is cleared on its first draw of the frame (TouchLayer): most layers are
-		//empty most frames, and an empty layer is neither composited nor sampled.
+		//Of the layers, only the window is cleared every frame. Any other layer is
+		//cleared on its first draw of the frame (BindLayerTarget): most layers are
+		//empty most frames, and one nothing drew into isn't composited. The ones every
+		//composite samples are cleared before the composites (ClearUnusedSampledLayers).
 		for (auto& layer : m_layers)
 			layer.active = false;
 		m_layers[0].target->Clear();
@@ -754,18 +757,19 @@ namespace SandCastle
 
 	sptr<RenderTexture> Renderer2D::RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow)
 	{
-		//A pass at zero uIntensity is skipped: at zero a post pass leaves the image as it
-		//is, so running it would only copy the frame. With every pass skipped the frame
-		//still has to reach the window, and the default layer material copies it there.
+		//A pass at zero uIntensity is skipped: a post pass must leave the image as it is
+		//at zero (AddPostProcessMaterial), so running it would only copy the frame. When
+		//every pass is at zero but the frame must reach the window, the chain's last
+		//pass still runs, as that copy.
 		m_runPasses.clear();
 		for (Material* pass : chain)
 			if (pass->GetFloat("uIntensity", 1.f) != 0.f)
 				m_runPasses.push_back(pass);
 		if (m_runPasses.empty())
 		{
-			if (!endOnWindow)
+			if (!endOnWindow || chain.empty())
 				return src;
-			m_runPasses.push_back(m_defaultLayerMaterial);
+			m_runPasses.push_back(chain.back());
 		}
 
 		//Each pass covers the full screen and fully replaces its target, so no
@@ -852,6 +856,7 @@ namespace SandCastle
 		}
 
 		//Expose registered layer depth attachments to additional sampler units.
+		m_liveDepthMask = 0;
 		for (auto& depthBind : m_layerDepthBindings)
 		{
 			if (depthBind.layer >= (LayerID)m_layers.size())
@@ -861,6 +866,8 @@ namespace SandCastle
 			if (!rt)
 				continue;
 			rt->BindDepthTexture(depthBind.samplerIndex);
+			if (src.active)
+				m_liveDepthMask |= 1 << depthBind.samplerIndex;
 		}
 	}
 
@@ -869,18 +876,23 @@ namespace SandCastle
 		std::static_pointer_cast<RenderTexture>(layer.target)->BindTexture(0);
 		layer.vertexArray->Bind();
 		layer.material->Bind();
+		if (layer.material->m_liveDepthLocation >= 0)
+			layer.material->GetShader()->SetUniform(layer.material->m_liveDepthLocation, m_liveDepthMask);
 		GLuint indicesCount = layer.vertexArray->GetIndexBuffer()->GetCount();
 		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
 	}
 
-	void Renderer2D::TouchLayer(RenderLayer& layer)
+	void Renderer2D::BindLayerTarget(LayerID id)
 	{
-		if (layer.active)
-			return;
-		layer.active = true;
-		if (!layer.cleared)
-			layer.target->Clear();
-		layer.cleared = false;
+		RenderLayer& layer = m_layers[id];
+		if (!layer.active)
+		{
+			layer.active = true;
+			if (!layer.cleared)
+				layer.target->Clear();
+			layer.cleared = false;
+		}
+		layer.target->Bind();
 	}
 
 	void Renderer2D::ClearUnusedSampledLayers()
@@ -904,6 +916,7 @@ namespace SandCastle
 	void Renderer2D::RenderLayers()
 	{
 		ClearUnusedSampledLayers();
+		GPU_PROFILE(Stamp("clear"));
 		//Premultiplied alpha for nice blending between layers
 		glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
 			GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -966,8 +979,7 @@ namespace SandCastle
 		}
 
 		//Issue the draw call after binding adequat context
-		TouchLayer(m_layers[batch.layer.index]);
-		batch.layer.target->Bind();
+		BindLayerTarget(batch.layer.index);
 		batch.vertexArray->Bind();
 		batch.material->Bind();
 
@@ -1045,10 +1057,14 @@ namespace SandCastle
 
 		float textureIndex = -1.0f;
 
-		//Check if we still have space in the batch for more indices
+		//Check if we still have space in the batch for more indices. A batch full before
+		//the end of the frame draws everything batched so far, stamped as "sprites" so
+		//"wait batching" stays the render thread's own time.
 		if (batch.indexCount >= m_maxIndices)
 		{
+			GPU_PROFILE(Stamp("wait", "batching"));
 			FlushBatches();
+			GPU_PROFILE(Stamp("sprites"));
 			StartBatches();
 		}
 
@@ -1064,10 +1080,12 @@ namespace SandCastle
 
 		if (textureIndex < 0.0f)
 		{
-			//Check if there is still space for a texture
+			//Check if there is still space for a texture (stamped like the full batch above)
 			if (batch.textureSlotIndex >= MAX_TEXTURE_INDEX)
 			{
+				GPU_PROFILE(Stamp("wait", "batching"));
 				FlushBatches();
+				GPU_PROFILE(Stamp("sprites"));
 				StartBatches();
 			}
 
@@ -1206,8 +1224,7 @@ namespace SandCastle
 	{
 		if (line.GetPointCount() < 2)
 			return;
-		TouchLayer(m_layers[layer]);
-		m_layers[layer].target->Bind();
+		BindLayerTarget(layer);
 		/*m_defaultLineShader->SetUniform("aTransform", transform.GetTransformMatrix());
 		m_defaultLineShader->SetUniform("uIndexCount", (float)line.GetPointCount());
 		m_defaultLineShader->SetUniform("uEndCapVertices", line.GetEndCapVertices());
@@ -1224,8 +1241,7 @@ namespace SandCastle
 	{
 		if (wire.GetPointCount() < 2)
 			return;
-		TouchLayer(m_layers[layer]);
-		m_layers[layer].target->Bind();
+		BindLayerTarget(layer);
 		/*	m_defaultWireShader->SetUniform("aTransform", transform.GetTransformMatrix());
 			m_defaultWireShader->SetUniform("uColor", wire.GetColor());
 			m_defaultWireShader->BindUniformBlock("camera", 0);*/
@@ -1460,9 +1476,9 @@ namespace SandCastle
 
 		//Every pool drains its spawn queue each frame. A pool whose particles have all
 		//died is then left out entirely: no simulation, no draw, and its layer isn't
-		//touched for it (an empty layer isn't composited). The layers are touched here,
-		//before the depth writes go off below, so a clear reaches their depth too.
-		bool any = false;
+		//bound for it (an empty layer isn't composited).
+		bool depthSaved = false;
+		GLboolean depthTest = GL_FALSE;
 		for (auto& sys : m_gpuSystems)
 		{
 			if (!sys || sys->GetLayer() >= (LayerID)m_layers.size())
@@ -1470,34 +1486,21 @@ namespace SandCastle
 			sys->ApplySpawns();
 			if (!sys->HasLiveParticles())
 				continue;
-			TouchLayer(m_layers[sys->GetLayer()]);
-			any = true;
-		}
-		if (!any)
-			return;
-
-		//Particles are painter's-ordered 2D: no depth test/write. Save & restore so
-		//the surrounding pipeline state is left exactly as we found it.
-		GLboolean depthTest = glIsEnabled(GL_DEPTH_TEST);
-		GLboolean depthMask = GL_TRUE;
-		glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
-
-		for (auto& sys : m_gpuSystems)
-		{
-			if (!sys || sys->GetLayer() >= (LayerID)m_layers.size() || !sys->HasLiveParticles())
-				continue;
+			if (!depthSaved)
+			{
+				//Particles are painter's-ordered 2D: no depth test, which also leaves the
+				//depth buffer unwritten. Restored below, as we found it.
+				depthTest = glIsEnabled(GL_DEPTH_TEST);
+				glDisable(GL_DEPTH_TEST);
+				depthSaved = true;
+			}
 			LayerID lid = sys->GetLayer();
-			sys->Update(m_gpuShaders, m_gpuFrameDelta);      // transform-feedback sim
-			sys->Render(m_gpuShaders, m_layers[lid].target); // draw into the layer FBO
+			BindLayerTarget(lid);
+			sys->Update(m_gpuShaders, m_gpuFrameDelta); // transform-feedback sim
+			sys->Render(m_gpuShaders);                  // draw into the bound layer
 			GPU_PROFILE(Stamp("particles", m_layers[lid].name));
 		}
-
-		if (depthTest)
+		if (depthSaved && depthTest)
 			glEnable(GL_DEPTH_TEST);
-		else
-			glDisable(GL_DEPTH_TEST);
-		glDepthMask(depthMask);
 	}
 }

@@ -19,10 +19,10 @@ namespace SandCastle
 	/// Timestamps follow the GPU timeline, so a section also counts any time the GPU
 	/// sat waiting for the render thread to submit the next commands. Renderer2D puts
 	/// the render thread's two long CPU stretches in sections of their own, both in the
-	/// "wait" group: "wait batching" (building the sprite batches, plus any batch that
-	/// filled up early and was drawn on the way) and "wait imgui" (building the dev UI).
-	/// They read about 0 when the GPU is the bottleneck. A slow render thread (a Debug
-	/// build) can still inflate the other sections a little.
+	/// "wait" group: "wait batching" (building the sprite batches; a batch that fills up
+	/// early is drawn in a "sprites" section of its own) and "wait imgui" (building the
+	/// dev UI). They read about 0 when the GPU is the bottleneck. A slow render thread
+	/// (a Debug build) can still inflate the other sections a little.
 	class GpuProfiler
 	{
 	public:
@@ -63,7 +63,7 @@ namespace SandCastle
 
 	private:
 		static constexpr int kFrames = 6;  //frames in flight before a frame's queries are reused
-		static constexpr int kStamps = 64; //stamps per frame, the extra ones are ignored
+		static constexpr int kStamps = 128; //stamps per frame, the extra ones are ignored
 		struct Frame
 		{
 			GLuint queries[kStamps] = {};

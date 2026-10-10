@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <algorithm>
+#include <cfloat>
 #include <cstring>
 #include "SandCastle/Render/GpuParticleSystem.h"
 #include "SandCastle/Render/Shader.h"
@@ -344,10 +345,17 @@ void main()
 
 		m_cursor = (start + n) % m_capacity;
 
-		//A spawn's age reaches its life once the clock has run `life` past now.
+		//A spawn's age reaches its life once the clock has run `life` past now. The
+		//rounding margin (HasLiveParticles) counts from the moment the pool went live.
+		if (!HasLiveParticles())
+		{
+			m_steps = 0;
+			m_longestLife = 0.f;
+		}
 		float longest = 0.f;
 		for (uint32_t i = 0; i < n; i++)
 			longest = std::max(longest, spawns[i].velLifeSize.z);
+		m_longestLife = std::max(m_longestLife, longest);
 		m_lastDeath = std::max(m_lastDeath, m_clock + (double)longest);
 		spawns.clear();
 	}
@@ -360,6 +368,7 @@ void main()
 		//No time passing changes nothing: the pass would copy every slot as it is.
 		if (dt == 0.f)
 			return;
+		m_steps++;
 
 		int back = m_front ^ 1;
 
@@ -383,21 +392,24 @@ void main()
 
 	bool GpuParticleSystem::HasLiveParticles() const
 	{
-		//The GPU sums each particle's age in floats, the clock in doubles: the grace
-		//covers the rounding between the two (and then some).
+		//The GPU sums each particle's age in floats, one add per step, the clock in
+		//doubles. While a particle lives its age stays under its life, so an add rounds
+		//it by at most half a float epsilon of that life: after n steps an age trails
+		//the clock by at most n * life * epsilon / 2. The pool goes idle once even that
+		//has passed, plus a fixed grace.
 		constexpr double kGrace = 0.1;
-		return m_clock < m_lastDeath + kGrace;
+		const double rounding = (double)m_steps * (double)m_longestLife * (double)FLT_EPSILON * 0.5;
+		return m_clock < m_lastDeath + kGrace + rounding;
 	}
 
-	void GpuParticleSystem::Render(const GpuParticleShaders& shaders, sptr<RenderTarget> target)
+	void GpuParticleSystem::Render(const GpuParticleShaders& shaders)
 	{
 		if (!m_glReady)
 			return;
 
-		target->Bind();
-
-		// Blend into the layer FBO. The fragment colour is straight (texture*tint),
-		// not premultiplied, so the source-colour factors below behave as expected.
+		// Blend into the layer FBO (bound by Renderer2D). The fragment colour is
+		// straight (texture*tint), not premultiplied, so the source-colour factors
+		// below behave as expected.
 		switch (m_blend)
 		{
 		case GpuParticleBlend::Additive:

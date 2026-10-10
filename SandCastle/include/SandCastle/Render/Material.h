@@ -77,6 +77,9 @@ namespace SandCastle
 		std::unordered_map<String, MaterialProperty> m_properties;
 		std::unordered_map<String, MaterialPropertyArray> m_arrayProperties;
 		Shader* m_shader = nullptr;
+		//Location of uLiveDepth, a uniform the renderer writes on every layer composite
+		//(see Renderer2D::BindLayerDepth): not a property, -1 when the shader lacks it.
+		GLint m_liveDepthLocation = -1;
 		RenderOptions* m_renderOptions = nullptr;
 		MaterialID m_id = 0;
 		bool m_isLayer = false;

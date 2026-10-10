@@ -59,7 +59,7 @@ namespace SandCastle
 		//Something was drawn into the layer this frame (it gets composited).
 		bool active = false;
 		//The target holds nothing: cleared and not drawn into since. Layers are cleared
-		//on their first draw of the frame (Renderer2D::TouchLayer), not every frame.
+		//on their first draw of the frame (Renderer2D::BindLayerTarget), not every frame.
 		bool cleared = false;
 		bool offscreen = false;
 		//When a post-process chain is active, layers flagged here are NOT fed
@@ -241,6 +241,10 @@ namespace SandCastle
 		/// @brief Bind a layer's depth attachment to a sampler unit during the composite pass of every layer.
 		/// Lets layer compositors read another layer's (or their own) per-pixel depth for occlusion.
 		/// Sampling returns the depth value in [0,1] in the .r channel.
+		/// A layer nothing drew into this frame reads 1.0 everywhere. A compositor that
+		/// declares `uniform int uLiveDepth;` gets, on every composite, a bitmask with bit
+		/// `sampler2DIndex` set for each bound depth whose layer WAS drawn into, so it can
+		/// skip sampling the empty ones.
 		/// @param layer LayerID whose depth texture should be exposed.
 		/// @param sampler2DIndex Texture unit (1..15) the depth texture will be bound to.
 		static void BindLayerDepth(LayerID layer, uint32_t sampler2DIndex);
@@ -345,9 +349,10 @@ namespace SandCastle
 		//bound. Split out of CreateQuadBatchThread so a layer or post-process
 		//material still gets it without being handed a quad batch it can't use.
 		void SetupMaterialThread(Material* material);
-		//Mark a layer drawn into this frame, clearing its target first if it still holds
-		//an older frame. Called before every draw into a layer.
-		void TouchLayer(RenderLayer& layer);
+		//Bind a layer's target to draw into it. Every draw into a layer binds it through
+		//here: the first bind of the frame clears the target (unless it holds nothing)
+		//and marks the layer drawn, so it gets composited.
+		void BindLayerTarget(LayerID layer);
 		//Clear the offscreen layers and bound depths nothing drew into this frame but
 		//still hold an older one: every composite samples them.
 		void ClearUnusedSampledLayers();
@@ -367,9 +372,10 @@ namespace SandCastle
 		//Run a ping-pong fullscreen-pass chain, skipping the passes at zero uIntensity.
 		//`src` is sampled by the first pass (bound to slot 0); passes alternate between
 		//m_postTarget/m_postTargetB. If `endOnWindow` the last pass targets the window
-		//(a plain copy when every pass was skipped), else it targets the buffer that
-		//isn't `src` and that buffer is returned (`src` itself when every pass was
-		//skipped). Returns the texture holding the final result (nullptr when endOnWindow).
+		//(when every pass is at zero the chain's last one still runs: at zero it copies),
+		//else it targets the buffer that isn't `src` and that buffer is returned (`src`
+		//itself when every pass was skipped). Returns the texture holding the final
+		//result (nullptr when endOnWindow).
 		sptr<RenderTexture> RunEffectChain(const std::vector<Material*>& chain, sptr<RenderTexture> src, bool endOnWindow);
 		void SetShaderUniformSampler(Shader* shader, uint32_t count);
 		sptr<VertexArray> GenerateLayerVertexArray(const std::vector<Vec2f>& screenSpace, LayerID layer);
@@ -424,6 +430,9 @@ namespace SandCastle
 		std::vector<RenderLayer*> m_renderLayers;
 		struct LayerDepthBinding { LayerID layer; uint32_t samplerIndex; };
 		std::vector<LayerDepthBinding> m_layerDepthBindings;
+		//Bit samplerIndex set for each bound depth whose layer was drawn into this frame,
+		//handed to every compositor declaring uLiveDepth. Built by BindAuxLayerTextures.
+		int m_liveDepthMask = 0;
 		Material* m_defaultLayerMaterial;
 		//LayerID m_layerMax = 0;
 

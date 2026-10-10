@@ -63,7 +63,9 @@ Defined in [Render/Renderer2D.h](../include/SandCastle/Render/Renderer2D.h). Eve
 
 **Layer order is push order.** Layers cannot be removed once added.
 
-Each layer draws into its own target. A target is cleared on the layer's first draw of the frame (quad batch, GPU particle pool, line or wire), not every frame, and a layer nothing drew into isn't composited. Offscreen layers and bound depths (`BindLayerDepth`) are sampled by every composite, drawn this frame or not, so one still holding an older frame is cleared right before the composites. Only the window is cleared every frame.
+Each layer draws into its own target. A target is cleared on the layer's first draw of the frame (quad batch, GPU particle pool, line or wire), not every frame, and a layer nothing drew into isn't composited. Offscreen layers and bound depths (`BindLayerDepth`) are sampled by every composite, drawn this frame or not, so one still holding an older frame is cleared right before the composites. Of the layers, only the window is cleared every frame.
+
+A bound depth whose layer nothing drew into reads 1.0 everywhere. A layer compositor that declares `uniform int uLiveDepth;` is handed, on every composite, a bitmask with bit `sampler2DIndex` set for each bound depth whose layer was drawn into this frame, so it can skip sampling the empty ones (`(uLiveDepth & (1 << slot)) != 0`). The renderer owns that uniform: it is never a material property.
 
 Constants in [Renderer2D.h](../include/SandCastle/Render/Renderer2D.h):
 - `MAX_TEXTURE_INDEX = 16` — GL 3.3 multi-bind limit.
@@ -78,7 +80,7 @@ assert in a debug build) but still adds the layer — a boot-time error, not a f
 
 ## Post-processing
 
-`Renderer2D::AddPostProcessMaterial(material, stage)` appends a full-screen pass (see the header for the Scene / Frame stages around the UI). Passes run in order with blending off: each one replaces its target. A pass whose material has a float `uIntensity` at exactly 0 is skipped for the frame, so at zero intensity a pass must leave the image unchanged. When every pass of the chain that ends on the window is skipped, the default layer material copies the frame there.
+`Renderer2D::AddPostProcessMaterial(material, stage)` appends a full-screen pass (see the header for the Scene / Frame stages around the UI). Passes run in order with blending off: each one replaces its target. A pass whose material has a float `uIntensity` at exactly 0 is skipped for the frame, so at zero intensity a pass must leave the image unchanged. When every pass of the chain that ends on the window is at zero, its last pass still runs, as the copy that takes the frame there.
 
 ## Quad batching
 
@@ -275,7 +277,7 @@ For bursty effects, raise `SetLimit` once at startup rather than per-spawn — s
 
 `Renderer2D::GetStats()` → `{ drawCalls, quadCount }` from the previous frame. Wire it to a debug overlay.
 
-`Renderer2D::GetGpuProfile()` → where the GPU spends a frame ([GpuProfiler.h](../include/SandCastle/Render/GpuProfiler.h)). The render thread puts a GL timestamp at the end of each phase of its frame: `clear` (the window and the post target; a layer is cleared in the section of its first draw), `wait batching`, `sprites` (all quad batches), `particles <layer>` (each GPU pool), `composite <layer>` (each layer composite), `post <shader>` (each post pass), `wait imgui`, `imgui`, `cursor`. A section is the GPU time between two stamps; same-label stamps in one frame are summed. Results are read back a few frames late without waiting (a frame not in yet is dropped) and averaged every half second, with `frameMs` (first stamp to last) and `intervalMs` (frame start to frame start). Render thread only: read it from `System::OnImGui`. Distrib builds don't stamp, so the profile stays empty there. Timestamps follow the GPU timeline, so a section also holds any time the GPU spent waiting for the render thread: the two `wait` sections isolate its long CPU stretches (building the sprite batches, building the dev UI) and read about 0 when the GPU is the bottleneck, so `(frameMs - wait) / intervalMs` is how busy the GPU is.
+`Renderer2D::GetGpuProfile()` → where the GPU spends a frame ([GpuProfiler.h](../include/SandCastle/Render/GpuProfiler.h)). The render thread puts a GL timestamp at the end of each phase of its frame: `clear` (the window, the post target, and the sampled layers nothing drew; any other layer is cleared in the section of its first draw), `wait batching`, `sprites` (all quad batches, including a batch drawn early because it filled up), `particles <layer>` (each GPU pool), `composite <layer>` (each layer composite), `post <shader>` (each post pass), `wait imgui`, `imgui`, `cursor`. A section is the GPU time between two stamps; same-label stamps in one frame are summed. Results are read back a few frames late without waiting (a frame not in yet is dropped) and averaged every half second, with `frameMs` (first stamp to last) and `intervalMs` (frame start to frame start). Render thread only: read it from `System::OnImGui`. Distrib builds don't stamp, so the profile stays empty there. Timestamps follow the GPU timeline, so a section also holds any time the GPU spent waiting for the render thread: the two `wait` sections isolate its long CPU stretches (building the sprite batches, building the dev UI) and read about 0 when the GPU is the bottleneck, so `(frameMs - wait) / intervalMs` is how busy the GPU is.
 
 ## Custom shaders
 
@@ -296,3 +298,5 @@ location 4 vec2 uvMin
 Sampler array is bound automatically (`uniform sampler2D u_textures[16]`) — the renderer assigns texture units; sample with `texture(u_textures[int(v_texIndex)], v_uv)`.
 
 For a layer compositing material, the input is the layer's offscreen texture; bind it with `Shader::BindUniformBlock("Scene", ...)` to access the shared scene UBO.
+
+A post-process pass (`AddPostProcessMaterial`) with a float `uIntensity` uniform must leave the image unchanged at `uIntensity` 0: Renderer2D skips it there (see [Post-processing](#post-processing)).

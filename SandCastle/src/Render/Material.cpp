@@ -98,6 +98,11 @@ namespace SandCastle
 			if (location == -1)
 				continue;
 
+			if (name == "uLiveDepth")
+			{
+				m_liveDepthLocation = location;
+				continue;
+			}
 
 			if (size > 1)
 				AddPropertyArray(type, name, location, size);

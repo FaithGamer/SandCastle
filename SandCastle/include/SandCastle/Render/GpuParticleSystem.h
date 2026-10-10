@@ -94,10 +94,11 @@ namespace SandCastle
 	/// destroy callbacks.
 	///
 	/// Both passes cover the whole capacity, so a pool only costs while it holds a
-	/// live particle: it keeps the time its longest-lived spawn dies, and once that
-	/// time is past (plus a little grace) it is neither updated nor drawn until the
-	/// next spawn. A frame where no time passes (dt 0, the game paused) skips the
-	/// update pass, which would only copy every slot.
+	/// live particle: it keeps the latest time one of its particles dies, and once
+	/// that time is past (plus a margin covering the rounding of the GPU's float
+	/// ages) it is neither updated nor drawn until the next spawn. A frame where no
+	/// time passes (dt 0, the game paused) skips the update pass, which would only
+	/// copy every slot.
 	///
 	/// Created and owned by Renderer2D. Every GL method runs on the render thread;
 	/// Emit()/SwapSpawns() are the only main-thread entry points and use a
@@ -134,7 +135,7 @@ namespace SandCastle
 		void ApplySpawns();                                            // upload drained spawns into the current state buffer
 		void Update(const GpuParticleShaders& shaders, float dt);      // transform-feedback simulation step
 		bool HasLiveParticles() const;                                 // false once every particle spawned so far is dead
-		void Render(const GpuParticleShaders& shaders, sptr<RenderTarget> target); // draw into the layer's framebuffer
+		void Render(const GpuParticleShaders& shaders);                // draw into the bound framebuffer (Renderer2D binds the layer)
 		void DestroyGL();
 
 	private:
@@ -165,8 +166,10 @@ namespace SandCastle
 		int m_front = 0;        // index of the buffer holding the current state
 		uint32_t m_cursor = 0;  // ring write head for spawns
 		bool m_glReady = false;
-		double m_clock = 0.;      // seconds simulated so far (the sum of every Update's dt)
-		double m_lastDeath = -1.; // m_clock at which the longest-lived particle spawned so far dies
+		double m_clock = 0.;       // seconds simulated so far (the sum of every Update's dt)
+		double m_lastDeath = -1.;  // latest m_clock at which a particle spawned so far dies
+		uint64_t m_steps = 0;      // simulation steps since the pool was last idle
+		float m_longestLife = 0.f; // longest life spawned since the pool was last idle
 
 		// Double-buffered spawn queue: Emit() writes the back buffer, the render
 		// thread drains the front in ApplySpawns(), SwapSpawns() flips them.
