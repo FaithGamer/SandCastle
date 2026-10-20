@@ -13,6 +13,7 @@ The renderer is **threaded**: a dedicated render thread owns the OpenGL context.
 Synchronisation:
 - `Renderer2D::Wait()` — block calling thread until the render thread is idle. Engine calls this during shutdown.
 - Functions named `*Thread` (e.g. `InitThread`, `RenderThread`, `OnWindowResizeThread`) are private and run on the render thread.
+- A frame `Process()` doesn't draw (window minimized, unless `Window::SetRenderWhenMinimized(true)`, or no `Camera::main`) drops the quads and GPU particle spawns pushed for it, so code that pushes them every frame needn't check for a minimized window.
 - `System::OnImGui()` is called **on the render thread** — every other System hook runs on the main thread. Don't touch ECS state from `OnImGui` without external sync; only do ImGui calls.
 
 ## Boot sequence (rendering bits)

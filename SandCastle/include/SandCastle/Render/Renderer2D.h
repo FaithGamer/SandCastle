@@ -92,6 +92,15 @@ namespace SandCastle
 				_queues[_current][layer].clear();
 			}
 		}
+		//Empty the side Push writes, for a frame Process won't draw. Safe while the render
+		//thread draws the last frame: it only ever reads the other side.
+		inline void DropPending()
+		{
+			for (LayerID layer = 0; layer < (LayerID)MAX_LAYERS; layer++)
+			{
+				_queues[!_current][layer].clear();
+			}
+		}
 		inline void Sort()
 		{
 			auto& queues = _queues[_current];
@@ -186,6 +195,7 @@ namespace SandCastle
 		static Texture* CreateSubTexture(const Texture* source, Rect region);
 
 		/// @brief Push a quad to be rendered at the next Process(). Thread-safe.
+		/// Dropped if that frame isn't drawn (minimized window, no camera).
 		inline void PushQuad(QuadRenderData&& quad)
 		{
 			m_queue.Push(std::move(quad));
@@ -198,6 +208,7 @@ namespace SandCastle
 		/// renders onto desc.layer (use a real layer >= 1); see GpuParticleSystem.h.
 		static GpuParticleSystemId CreateGpuParticleSystem(const GpuParticleSystemDesc& desc);
 		/// @brief Queue one particle into a GPU pool for the next frame. Cheap; main-thread only.
+		/// Dropped if that frame isn't drawn (minimized window, no camera).
 		static void EmitGpuParticle(GpuParticleSystemId id, const GpuParticleSpawn& spawn);
 		/// @brief Free a GPU particle pool. Blocks until the render thread releases its GL objects.
 		static void DestroyGpuParticleSystem(GpuParticleSystemId id);
@@ -296,6 +307,8 @@ namespace SandCastle
 		/// @brief Get Every layers id
 		static std::vector<uint32_t> GetLayers();
 		static Material* GetMaterial(MaterialID id);
+		/// @brief The material a layer is composited with (its AddLayer / SetLayerMaterial one).
+		static Material* GetLayerMaterial(LayerID layer);
 		static Material* GetDefaultQuadMaterial();
 		static Material* GetDefaultLayerMaterial();
 		/// @brief Give you some stats about the current rendering batch.

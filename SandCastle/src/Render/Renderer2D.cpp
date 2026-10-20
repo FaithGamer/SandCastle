@@ -333,6 +333,14 @@ namespace SandCastle
 		return Instance()->m_materials[(size_t)id];
 	}
 
+	Material* Renderer2D::GetLayerMaterial(LayerID layer)
+	{
+		auto ins = Instance();
+		if (layer >= (LayerID)ins->m_layers.size())
+			return nullptr;
+		return ins->m_layers[layer].material;
+	}
+
 	Material* Renderer2D::GetDefaultQuadMaterial()
 	{
 		return Instance()->m_defaultBatchMaterial;
@@ -1317,10 +1325,19 @@ namespace SandCastle
 
 	void Renderer2D::Process()
 	{
-		if (!Window::GetRenderWhenMinimized() && Window::GetMinimized())
+		if ((!Window::GetRenderWhenMinimized() && Window::GetMinimized()) || Camera::main == nullptr)
+		{
+			//No frame this time, but whatever pushes quads or GPU spawns itself (only the
+			//sprite pass checks for a minimized window) pushed them anyway. Drop them: they
+			//would pile up for as long as frames are skipped, and the first frame drawn
+			//after would draw every one of them. No wait: the render thread only reads the
+			//other side of both double buffers.
+			m_queue.DropPending();
+			for (auto& sys : m_gpuSystems)
+				if (sys)
+					sys->DropSpawns();
 			return;
-		if (Camera::main == nullptr)
-			return;
+		}
 		Wait();
 		m_queue.Swap();
 		//Flip every GPU pool's spawn queue while the render thread is idle, and

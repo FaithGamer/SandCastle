@@ -281,6 +281,11 @@ void main()
 		m_spawnCurrent.store(m_spawnCurrent.load() ^ 1);
 	}
 
+	void GpuParticleSystem::DropSpawns()
+	{
+		m_spawns[m_spawnCurrent.load() ^ 1].clear();
+	}
+
 	void GpuParticleSystem::InitGL()
 	{
 		// The interleaved attribute layout is load-bearing: 5 tightly-packed vec4.

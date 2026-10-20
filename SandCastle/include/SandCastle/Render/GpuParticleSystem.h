@@ -101,7 +101,7 @@ namespace SandCastle
 	/// copy every slot.
 	///
 	/// Created and owned by Renderer2D. Every GL method runs on the render thread;
-	/// Emit()/SwapSpawns() are the only main-thread entry points and use a
+	/// Emit()/SwapSpawns()/DropSpawns() are the only main-thread entry points and use a
 	/// double-buffered spawn queue drained on the render thread (same pattern as the
 	/// quad RenderQueue), so no locking is needed.
 	class GpuParticleSystem
@@ -118,6 +118,8 @@ namespace SandCastle
 		void Emit(const GpuParticleSpawn& spawn);
 		/// @brief Flip the double-buffered spawn queue. Called by Renderer2D::Process while the render thread is idle.
 		void SwapSpawns();
+		/// @brief Discard the spawns queued since the last flip. Called by Renderer2D::Process for a frame it doesn't draw.
+		void DropSpawns();
 		LayerID GetLayer() const { return m_layer; }
 		uint32_t GetCapacity() const { return m_capacity; }
 
@@ -172,7 +174,8 @@ namespace SandCastle
 		float m_longestLife = 0.f; // longest life spawned since the pool was last idle
 
 		// Double-buffered spawn queue: Emit() writes the back buffer, the render
-		// thread drains the front in ApplySpawns(), SwapSpawns() flips them.
+		// thread drains the front in ApplySpawns(), SwapSpawns() flips them, and
+		// DropSpawns() empties the back for a frame that isn't drawn.
 		std::vector<GpuParticle> m_spawns[2];
 		std::atomic<int> m_spawnCurrent{ 0 };
 	};
