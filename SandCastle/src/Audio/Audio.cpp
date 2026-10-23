@@ -218,6 +218,11 @@ namespace SandCastle
 
 	void Audio::OnMinimized(bool minimized)
 	{
+		// SDL sends "restored" on un-maximize too, with no minimize before it:
+		// only give back volumes this saved, never the unset defaults (0).
+		if (minimized == m_minimizeMuted)
+			return;
+		m_minimizeMuted = minimized;
 		for (size_t ch = 0; ch < m_channels.size(); ch++)
 		{
 			if (!m_muteWhenMinimized[ch])

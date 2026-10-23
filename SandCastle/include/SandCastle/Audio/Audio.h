@@ -86,6 +86,7 @@ namespace SandCastle
 		std::vector<String> m_channelNames;
 		std::vector<bool> m_muteWhenMinimized;
 		std::vector<float> m_preMinimizeVolumes;
+		bool m_minimizeMuted = false;
 		std::vector<Sound> m_sounds;
 		std::vector<HighrateSound> m_hrSounds;
 	

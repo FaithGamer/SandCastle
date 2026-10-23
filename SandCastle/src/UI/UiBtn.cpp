@@ -141,10 +141,13 @@ namespace SandCastle
 		{
 			// Inline icons ("|reroll|") keep their own art colors, exactly like
 			// Writer::Write leaves them untinted — recoloring one would flatten the
-			// sprite to the label color.
+			// sprite to the label color. They do take the label's alpha, as there.
 			auto ch = glyph.Get<Character>();
 			if (ch != nullptr && ch->isIcon)
+			{
+				glyph.Get<SpriteRender>()->color.a = color.a;
 				continue;
+			}
 			glyph.Get<SpriteRender>()->color = color;
 		}
 	}

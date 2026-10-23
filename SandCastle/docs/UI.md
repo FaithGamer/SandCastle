@@ -177,7 +177,7 @@ Click-released only fires if the press started on the same element (`pressed` fl
     - Works with the localized overload too: `Ui::TextLoc("hud_wave", -1.f, &shown, &total)`.
     - `txt->SetCompact(true)` renders numeric args through `Math::FormatCompact` ("1.5k"). It is number formatting, nothing to do with spacing.
     - Float compare uses a relative 1e-6 epsilon — a per-frame animated float re-renders (and possibly relayouts) every frame; quantize the bound value (round it, or bind an int) for counters you tween.
-- `Ui::UpdateText(txt, s, replaceUtf8)` swaps content in place, keeping the original wrap width; `replaceUtf8=false` keeps the stored format template (use with bound text). `txt->SetColor(c)` re-renders glyphs in a new color.
+- `Ui::UpdateText(txt, s, replaceUtf8)` swaps content in place, keeping the original wrap width; `replaceUtf8=false` keeps the stored format template (use with bound text). `txt->SetColor(c)` re-renders glyphs in a new color. Inline icons (`|id|`) keep their own art colors but take the text's alpha, so a text faded out fades its icons with it (same for `UiBtn::SetLabelColor`).
 - Localized text re-renders automatically on `Assets::SetLang`. `TextLoc` requires the `Textual` asset to exist for the current language.
 
 ### Button — `Ui::Button(utf8)` / `Ui::ButtonLoc(key)`

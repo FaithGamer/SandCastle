@@ -429,8 +429,12 @@ namespace SandCastle
 				sr->SetMaterial(material->GetID());
 				sr->SetSprite(g->sprite.get());
 				sr->SetLayer(layer);
+				// An inline icon keeps its own art colors but fades with its sentence:
+				// a text drawn transparent must not leave its icons standing.
 				if (g->codepoint != (uint32_t)0)
 					sr->color = color;
+				else
+					sr->color.a = color.a;
 				sent.root.AddChild(e);
 				sent.glyphEntities.push_back(e);
 				currentWord.totalAdv += adv;
