@@ -1238,11 +1238,14 @@ namespace SandCastle
 			LOG_ERROR("Ui::SetFrame, the frame template {0}, doesn't exists.", frame);
 			return;
 		}
+		// The new template wears the old frame's tint (UiCanvas::SetFrameColor).
+		const Color tint = canvas->frame ? canvas->frame->GetColor() : Color::White;
 		if (canvas->frame && canvas->frame->root.Valid())
 		{
 			canvas->frame->root.Destroy();
 		}
 		canvas->frame = UiFrame(&it->second, i->m_context.material, i->m_context.layer);
+		canvas->frame->SetColor(tint);
 		canvas->MustUpdate();
 	}
 	Writer* Ui::GetWriter()

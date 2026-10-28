@@ -106,26 +106,28 @@ namespace SandCastle
 	{
 	}
 
-	void UiFrame::SetColor(Color color)
+	void UiFrame::SetColor(Color tint)
 	{
-		auto children = root.Get<Children>();
-		for (auto child : children->children)
-		{
-			auto spr = Entity(child).Get<SpriteRender>();
-			spr->color.r = color.r;
-			spr->color.g = color.g;
-			spr->color.b = color.b;
-		}
+		// Kept, so the slices Update rebuilds on every resize wear it too.
+		color.r = tint.r;
+		color.g = tint.g;
+		color.b = tint.b;
+		ApplyColor();
 	}
 
 	void UiFrame::SetAlpha(unsigned int alpha)
 	{
+		color.a = (unsigned char)alpha;
+		ApplyColor();
+	}
+
+	void UiFrame::ApplyColor()
+	{
+		if (!root.Valid())
+			return;
 		auto children = root.Get<Children>();
 		for (auto& child : children->children)
-		{
-			auto spr = Entity(child).Get<SpriteRender>();
-			spr->color.a = alpha;
-		}
+			Entity(child).Get<SpriteRender>()->color = color;
 	}
 
 	void UiFrame::MakeTemplate(Template& templ, const std::string& texture, bool fixedStep)
@@ -269,6 +271,7 @@ namespace SandCastle
 			}
 			root.AddChild(e);
 		}
+		ApplyColor();
 
 		elem->root.AddChild(root);
 		return size;

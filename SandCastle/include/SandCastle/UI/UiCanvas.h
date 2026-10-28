@@ -43,7 +43,10 @@ namespace SandCastle
 		/// @brief Set the canvas size. A positive component fixes that axis to
 		/// the given size; a component <= 0 lets that axis stretch to fit content.
 		void SetSize(Vec2f size);
-		
+		/// @brief Tint the canvas frame (rgb, multiplied into its art). Kept across resizes
+		/// and Ui::ChangeFrame. No-op on a canvas built without a frame.
+		void SetFrameColor(Color color);
+
 	public:
 		Signal<UiCanvas*> mustUpdateSignal;
 	private:

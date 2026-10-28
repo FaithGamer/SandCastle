@@ -72,16 +72,21 @@ namespace SandCastle
 
 		/// @brief Build a Template from a 3x3 spritesheet on disk. fixedStep clamps growth to multiples of the border textures.
 		static void MakeTemplate(Template& templ, const std::string& texture, bool fixedStep);
-		/// @brief Tint every slice with `color`.
-		void SetColor(Color color);
-		/// @brief Set the alpha channel only.
+		/// @brief Tint every slice with `tint` (rgb only). Kept: the slices Update rebuilds wear it too.
+		void SetColor(Color tint);
+		/// @brief Set the alpha channel only. Kept like the tint.
 		void SetAlpha(unsigned int alpha);
+		/// @brief The tint and alpha the slices wear (opaque white by default).
+		inline Color GetColor() const { return color; }
 		/// @brief Recompute the frame geometry to fit `elem` at depth z.
 		Vec2f Update(UiElem* elem, float z);
 	public:
 		Entity root;
 	private:
+		void ApplyColor();
+	private:
 		friend Ui;
+		Color color;
 		Vec2f size;
 		UiFrame::Template* templ = nullptr;
 		Material* material = nullptr;

@@ -136,6 +136,7 @@ render
 - Fixed-size shell canvas holds a grid slot while its inner content is destroyed/swapped — siblings never reflow.
 - Fixed-width invisible column sub-canvases (`Begin({W*0.35f, 0}, false)`) make table rows align across rows — the standard "two-column key/value" idiom in every game.
 - Toggle highlight by `Ui::ChangeFrame(canvas, "other_frame.png")` between two templates **with identical border geometry** — swapping never reflows.
+- Tint a canvas's frame with `canvas->SetFrameColor(color)` (rgb, multiplied into the art: darker = a grey tint). The tint is kept on the `UiFrame`, so it survives every resize (Update rebuilds the slices) and a `Ui::ChangeFrame` (the new template wears it). Button tints (`UiBtn::SetColor`) are kept the same way.
 - Give text an explicit `width` (or put it in a fixed-width canvas) to get word-wrap; otherwise a long line stretches the whole panel.
 
 ---

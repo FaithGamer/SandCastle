@@ -453,6 +453,11 @@ namespace SandCastle
 		margin = Margin;
 		SetPosition(position);
 	}
+	void UiCanvas::SetFrameColor(Color color)
+	{
+		if (frame)
+			frame->SetColor(color);
+	}
 	void UiCanvas::SetSize(Vec2f Size)
 	{
 		if (Size.x > 0.f)
